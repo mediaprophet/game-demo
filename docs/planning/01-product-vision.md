@@ -7,9 +7,11 @@ capabilities of QualiaDB visible through play. It is a peaceful simulation of
 starting or rebuilding a life while participating in the growth of resilient,
 connected communities.
 
-The game is inspired by the *systems* of life-management and vehicle-restoration
-games, not their protected setting, writing, characters, art, or rules. It does
-not reproduce *Jones in the Fast Lane* or *Street Rod*.
+The game draws on elements of games its author played decades ago: the
+life-development aspects of *Jones in the Fast Lane*, and the game-like repair
+of vehicles—campers, caravans, and related equipment—reminiscent of features in
+*Street Rod*. Those influences inform broad interaction goals only. Rolling
+Commons has its own setting, writing, characters, art, and rules.
 
 ## Player promise
 
