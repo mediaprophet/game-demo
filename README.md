@@ -4,7 +4,9 @@ A browser-first WASM game built alongside [dev.civics.au](https://dev.civics.au)
 and QualiaDB. It uses the local-first,
 semantic, spatial, collaborative technology developed for QualiaDB to make the
 civics concepts and practical considerations explored by dev.civics.au tangible
-through play.
+through computer-game-based gamification. This is deliberately distinct from
+real-world gamification: the game explores fictional, bounded scenarios and
+does not score, rank, incentivise, or govern real people or communities.
 
 ## What the game is about
 
