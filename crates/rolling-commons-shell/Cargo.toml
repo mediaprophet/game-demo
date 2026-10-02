@@ -1,0 +1,21 @@
+[package]
+name = "rolling-commons-shell"
+version = "0.0.1"
+edition = "2021"
+publish = false
+description = "Rolling Commons WASM game shell — thin bindings over the pinned QualiaDB browser profile"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = { workspace = true }
+serde = { workspace = true }
+serde-wasm-bindgen = { workspace = true }
+serde_json = { workspace = true }
+qualia-core-db = { workspace = true, features = ["wasm-webcivics"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys = { workspace = true }
+wasm-bindgen-futures = "0.4.75"
+web-sys = { workspace = true, features = ["console", "Window", "Navigator", "Performance"] }
