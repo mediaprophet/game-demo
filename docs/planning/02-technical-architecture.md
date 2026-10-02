@@ -2,8 +2,8 @@
 
 ## Architectural position
 
-Rolling Commons is a WASM-first application. Rust owns deterministic simulation
-and all authoritative state transitions. QualiaDB provides the semantic graph,
+Rolling Commons is a WASM-first QualiaDB application. QualiaDB's Rust/WASM
+simulation capability owns deterministic state transitions and provides the semantic graph,
 query, logical validation, Q42 persistence, local inference surfaces, geometry
 and rendering integration. The browser UI presents an attractive game, a 3D
 world, and optional inspection tools.
@@ -11,6 +11,17 @@ world, and optional inspection tools.
 The exact QualiaDB feature profile must be verified in an early browser spike.
 QualiaDB is pre-1.0; APIs and binary formats must be pinned to a tested release
 or commit for every game build.
+
+All game-facing technical capabilities must be provided by the QualiaDB/Webizen
+ecosystem. Game content and presentation composition call published, versioned
+QualiaDB interfaces; they do not duplicate a missing renderer, geometry tool,
+graph/rule engine, storage layer, or inference gateway. The
+[development contract](13-qualiadb-only-development-contract.md) defines the
+upstream-first workflow and its capability ledger.
+The [upstream format/tooling tasks](14-qualiadb-format-and-tooling-upstream-tasks.md)
+track the distinct Q42, `.10d`, HCF/HMC, VibeScript, and P64 handoffs. Do not
+assume an animation payload or HMC integrity/streaming feature from draft prose
+without a producer/reader and browser proof.
 
 ## Authority boundary
 
@@ -34,9 +45,9 @@ gateway or invoke the reducer directly.
 
 | Component | Responsibility | Authority |
 |---|---|---|
-| Web UI shell | Menus, HUD, activity selection, explanation and evidence panels | Presentation only |
+| Webizen/QualiaDB UI surface | Menus, HUD, activity selection, explanation and evidence panels | Presentation only |
 | `webizen-render` integration | 3D world, camera, selection, animation, lighting, overlays | Presentation only |
-| Rust/WASM game core | Turn/tick loop, resources, travel, projects, event reduction, replay | Authoritative |
+| QualiaDB Rust/WASM simulation surface | Turn/tick loop, resources, travel, projects, event reduction, replay | Authoritative |
 | Qualia graph | World facts, relationships, requirements, provenance, query results | Authoritative facts |
 | N3Logic + SHACL | Rules, permissions, validation, explanations | Authoritative validation |
 | Q42 volumes | Versioned local world, content, and event persistence | Durable state |
@@ -67,9 +78,10 @@ every selectable object/action must resolve to the same semantic ID and command
 schema across profiles. Save files persist gameplay state and selected-profile
 preference separately so a save remains portable.
 
-The first profile should use the renderer path verified in Phase 0. The
-illustrated-adventure view is a valuable low-spec and accessibility fallback; it
-can use semantic hotspots and artwork without requiring 3D GPU features.
+The first profile should use the renderer path verified in Phase 0. An
+illustrated-adventure view is a possible low-spec and accessibility presentation
+through a verified Webizen surface; it can use semantic hotspots and artwork
+without requiring 3D GPU features.
 
 ## Semantic model
 
@@ -82,6 +94,7 @@ only when an implemented rule requires it.
 | Life situation | Household/party, relationship, dependant/care arrangement, travel group | memberOf, travelsWith, caresFor, sharesResourceWith |
 | Community participation | Community, participant, interest, project idea, contribution, endorsement | participatesIn, isResidentOf, proposes, endorses, helpsWith |
 | Structural context | Housing transition, tenure obligation, recurring cost, local tie, infrastructure gap | hasObligation, createsPressure, hasLocalTie, hasInfrastructureGap |
+| Rights conditions and remedy | Rights condition, tenure/security arrangement, harm/barrier, safeguard, remedy pathway, review | protects, createsBarrier, maySeekRemedy, requiresResponse, resolves, remainsUnresolved |
 | Mobile home | Shelter, vehicle, subsystem, upgrade, condition | installedOn, requires, improves, unsafeWhen |
 | Place | Town, ground network, node/site, facility, zone, route | locatedAt, hasNode, serves, contains, connectedTo |
 | Resource | Natural resource, land, water, shade, solar exposure, material, ecosystem asset | availableAt, hasCondition, isRenewable, requiresStewardship |
@@ -100,6 +113,43 @@ specialise it as a heritage dwelling/project within a château, castle, farmstea
 or other shared estate. UI labels, upgrade trees, asset types, rules, climate
 assumptions, tenure models, and local policy belong to a declared region profile
 and content pack, not to global Rust enums or hard-coded strings.
+
+### Rights conditions, remedies, and living with peace
+
+The simulation models the conditions that allow a person or party to live with
+peace as explicit, separate state—not as a global peace score or a trait of the
+person. `RightsCondition` records a pack-defined, inspectable condition such as
+secure-enough tenure, access to a necessity, fair treatment under an agreement,
+safe participation, or an available remedy pathway. It has scope, affected
+party, provider/accountable entity, evidence/assumptions, duration, and a
+player-visible status. It may be supported, threatened, unavailable, under
+review, or restored.
+
+`HarmOrBarrier` records a fictional or player-confirmed scenario obstacle and
+its concrete effect on access, time, resources, safety, or participation.
+`Safeguard` and `RemedyPath` model the pack-defined mechanisms available to
+address it: a review, accountable response, repair, alternate arrangement,
+restorative action, or a supported exit. Each pathway declares eligibility
+facts, required consent/evidence, expected game delay/capacity, accountable
+role, and possible outcomes. These are game-world mechanisms; they do not make
+claims about a real person's legal rights, determine legal liability, or replace
+real legal, emergency, health, or support services.
+
+The reducer accepts typed scenario commands to raise a concern, request a
+review, offer a repair/alternative arrangement, accept or decline a remedy path,
+and record a response. It validates scope, consent, capacity, agreement, and
+the pack's stated process before committing an event. A player cannot compel
+another person, erase harm, or manufacture a favourable decision. When a
+pathway is unavailable, delayed, refused by the scenario rules, or inadequate,
+the result remains visible with its reasons and any valid alternatives.
+
+`LivingWithPeaceProjection` is a dimensional explanation view, not an
+optimisation score. It reports the current scenario evidence for tenure,
+necessities, safety/participation, fair agreements, accountability, and remedy
+access, along with unresolved barriers and available actions. Scenario success
+criteria may require improvement in declared dimensions for one or more people
+or the community, but must never rank people by hardship, demand control over
+others, or require a player to tolerate harm to progress.
 
 Australian packs include demountable/container-style homes as a `Dwelling`
 specialisation, distinct from both mobile vehicles and permanent buildings. A
@@ -374,6 +424,35 @@ the reducer applies a result. Engineering/economic modules never bypass the
 command gateway and do not claim real-world approval or advice. See
 [Engineering and community economics](07-engineering-and-economics.md).
 
+### Public-data statistical scenario analysis
+
+QualiaDB's algebra, scientific-computing, and deterministic logic facilities
+may evaluate pack-bundled public aggregate datasets to produce a
+`ScenarioAnalysisModel`. Deterministic and probabilistic analysis are both
+first-class methods: a model may derive a bounded game parameter, satisfy or
+reject a constraint, trace a dependency, calculate a deterministic consequence,
+or calculate a probability distribution. Models may also combine these methods
+where a deterministic relationship has stochastic inputs. Examples include an
+availability band, route/service constraint, resource-demand range, maintenance
+dependency, or a pack-defined barrier distribution. It is never an assessment,
+prediction, or risk score for a real person, household, address, or community.
+
+Each model records source snapshot, licence, geography/aggregation level,
+population/suppression threshold, transformation, variables, analysis method
+(deterministic, probabilistic, or hybrid), model version, uncertainty interval,
+random-seed derivation for stochastic calculation, and applicable scenario
+scope. The reducer records the calculated result and any sampled distribution in
+the event ledger, so every save/replay is deterministic. Missing, stale,
+incompatible, or out-of-scope data produces an explicit unavailable/held result
+rather than a fabricated estimate.
+
+A player-made or community-implemented project can declare the game mechanisms
+it changes—capacity, travel time, maintenance burden, access, tenure security,
+or a safeguard/remedy pathway. The model may then calculate and compare a
+baseline and post-implementation scenario distribution, with the causal
+assumptions shown. This describes a simulated counterfactual, not proof that a
+real project will cause an outcome or a recommendation to undertake one.
+
 ## Renderer and spatial assets
 
 The first map is a stylised 3D/isometric neighbourhood, not a photorealistic
@@ -381,21 +460,23 @@ digital twin. Rendered objects need stable semantic IDs. Picking a vehicle,
 building, solar canopy, or data container must resolve to its semantic manifest
 and relevant world facts.
 
-Asset pipeline:
+Asset pipeline (implemented or exposed through QualiaDB):
 
 ```text
-licensed source / original art
-  → optimise and validate mesh/materials
-  → package dense `.10d` asset
+licensed source / original agent-authored geometry recipe or art
+  → QualiaDB geometry/mesh generation and validation
+  → QualiaDB `.10d` compilation
   → create Q42 manifest and content hash
   → map semantic entity to renderer instance
   → validate asset provenance and bounds in CI
 ```
 
 An early spike must confirm browser support and practical bundle/memory budgets
-for the selected `webizen-render` profile, `.10d` loading, picking, and fallback
-rendering. A simple geometry/canvas fallback remains acceptable for development;
-the core game must not depend on an unverified browser GPU feature.
+for the selected `webizen-render` profile, `.10d` loading, picking, and an
+ecosystem-owned low-spec presentation path. Any simple geometry/canvas
+development view must use a supported QualiaDB/Webizen surface. If that surface
+is insufficient, it is extended upstream before the game depends on it. The
+core game must not depend on an unverified browser GPU feature.
 
 Maker output uses semantic design/provenance records linked to original or
 parameterised game visual assets. It does not turn arbitrary player geometry into
@@ -408,6 +489,15 @@ typography, animation language, audio, dialogue, and interaction conventions.
 Named games can inform high-level design discussion, but their protected assets,
 characters, text, plots, UI layouts, and distinctive visual expression are never
 used as implementation targets.
+
+A coding agent can author original geometry and procedural recipes without
+Blender or Maya. Generated models are not trusted merely because their files
+parse: QualiaDB must check topology, bounds, units, semantic IDs, provenance,
+renderability, and, where applicable, rig/animation contracts. Complex character
+rigging is a separate ecosystem capability to verify or build. The supplied
+“LLMs in 3D Game Architecture” note informs this split between asset authoring
+and runtime agent behaviour; its proposed external engines, geometry libraries,
+and generative services are not game dependencies.
 
 ## Regionalisation and localisation
 
@@ -468,8 +558,9 @@ agent behaviour. It calls an explicit game capability surface such as
 It does not receive raw storage access, arbitrary browser APIs, arbitrary
 networking, or direct reducer access.
 
-Rust implements core mechanics and deterministic, performance-critical loops.
-Vibe scripts express content and orchestration. The project will benchmark the
+QualiaDB Rust components implement core mechanics and deterministic,
+performance-critical loops. Vibe scripts express game content and orchestration.
+The project will benchmark the
 actual selected WASM host path before making performance claims relative to
 JavaScript or V8.
 

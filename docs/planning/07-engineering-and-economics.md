@@ -21,6 +21,17 @@ scenario assumption, model version, applicable range, confidence/uncertainty,
 and provenance receipt. The system rejects incompatible units and surfaces
 missing evidence rather than silently guessing.
 
+Where a game model uses public aggregate data, its deterministic derived facts,
+constraints, probability distributions, and statistical ranges are typed,
+versioned inputs. QualiaDB may use algebra and scientific computing for
+deterministic, probabilistic, and hybrid calculations, and its logic systems for
+inference, validation, dependencies, temporal conditions, and permitted game
+effects. Every model declares its method; stochastic samples are seeded and
+persisted for replay, while deterministic results are recorded directly. These
+models inform only the fictional scenario; they never score, predict, or
+determine a real person's or community's circumstances, rights, behaviour, or
+eligibility.
+
 ```text
 Q42 facts + typed quantities + scenario assumptions
   → validated QualiaDB computation / rule evaluation
@@ -29,6 +40,13 @@ Q42 facts + typed quantities + scenario assumptions
   → command gateway + reducer commit
   → explainable energy/resource/economic change
 ```
+
+For a project comparison, the computation evaluates both baseline and declared
+post-implementation assumptions. The result presents distributions/ranges,
+uncertainty, and the mechanisms credited to the project—not a single promised
+benefit. A project can shift a simulated outcome only through a declared,
+validated change to capacity, access, cost, maintenance, travel, tenure security,
+or a safeguard/remedy pathway.
 
 ## Energy and resource systems
 

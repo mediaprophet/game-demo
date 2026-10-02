@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Community grounds are a peaceful, voluntary pathway for people and households to
-build or maintain viable mobile/demountable living, practical skills, mutual aid,
-and shared infrastructure. They respond to material conditions—rent escalation,
+Community grounds are a voluntary, dignity-supporting pathway for people and
+households to build or maintain viable mobile/demountable living, practical
+skills, mutual aid, and shared infrastructure. They respond to material conditions—rent escalation,
 shared mortgages or debt, deposits and contracts, recurring service costs,
 relationship or disaster transitions, local ties, and places with little basic
 infrastructure. They are intentionally designed as an alternative to dangerous

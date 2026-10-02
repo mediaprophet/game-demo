@@ -3,9 +3,23 @@
 ## Purpose
 
 **Rolling Commons** is an original, browser-first WASM game that makes the
-capabilities of QualiaDB visible through play. It is a peaceful simulation of
-starting or rebuilding a life while participating in the growth of resilient,
-connected communities.
+capabilities of QualiaDB visible through play. It is about the pursuit of making
+human rights meaningful: whether people have the dignity, fairness, tenure,
+material means, and lawful remedies needed to live with peace amid harms,
+violence, material pressures, institutional barriers, and the daily challenges
+to human-rights principles. This is distinct from seeking “peace” or world peace
+by controlling others. It is not a shooting game and does not make violence an
+entertaining player power; it instead explores how people participate in the
+growth of resilient, connected communities.
+
+The game represents societies and communities as arrangements that either do or
+do not provide the mechanics needed for someone to live with peace: secure enough
+tenure, access to necessities and shared capacity, fair agreements, accountable
+governance, and pathways to remedy harmful acts. Those arrangements reveal
+values and preferences, shape scenario success, and affect play without ranking
+people by their starting circumstances. A player may begin with very little,
+including a tent, or with other resources and ties; neither is a measure of
+human worth.
 
 The game draws on elements of games its author played decades ago: the
 life-development aspects of *Jones in the Fast Lane*, and the game-like repair
@@ -84,7 +98,16 @@ one already.
    shame, violence, coercion, or a claim that people are reducible to a score.
 3. **The graph decides; the LLM describes.** Rules and simulation state are
    authoritative. Generated language may explain or propose; it never changes
-the world by itself.
+   the world by itself.
+4. **A place is evidence-bearing.** Real-place content is aggregated,
+   provenance-bearing, licensed, and inspectable. No real person becomes a game
+   entity.
+5. **Cooperation is a primary mechanic.** Shared projects are not decoration;
+   they create meaningful capability that improves individual and network play.
+6. **Inspectable complexity.** A player can open an explanation panel to see
+   the facts, requirements, rule result, and event history behind an outcome.
+7. **Local-first by default.** A complete core scenario runs offline in the
+   browser once installed. Networked and LLM features are optional enhancements.
 
 ## Regional focus and portable design
 
@@ -105,15 +128,6 @@ locally meaningful forms of dwelling and common space.
 Every regional pack must be original, respectful of local context, and authored
 with appropriate historical, cultural, legal, accessibility, and community
 review. The game must not reduce a continent or culture to a single aesthetic.
-4. **A place is evidence-bearing.** Real-place content is aggregated,
-   provenance-bearing, licensed, and inspectable. No real person becomes a game
-   entity.
-5. **Cooperation is a primary mechanic.** Shared projects are not decoration;
-   they create meaningful capability that improves individual and network play.
-6. **Inspectable complexity.** A player can open an explanation panel to see
-   the facts, requirements, rule result, and event history behind an outcome.
-7. **Local-first by default.** A complete core scenario runs offline in the
-   browser once installed. Networked and LLM features are optional enhancements.
 
 ## Game pillars
 
@@ -267,6 +281,12 @@ certification, and secure a viable work/contribution pathway. It also proves one
 shared build: extend the solar and battery system so the workshop gains useful
 new capability.
 
+These goals describe the current vision, not yet a fixed win condition or
+session-length target. The [first-playable spec](12-first-playable-spec-and-open-questions.md)
+provides an example journey and identifies the choices still needed to make the
+opening session testable. The player must be able to defer a goal, recover from
+a blocked action, and understand what changed without consulting developer docs.
+
 ## Visible QualiaDB demonstration moments
 
 - Selecting a building displays its `.10d` visual asset and Q42-linked purpose,
@@ -294,6 +314,8 @@ new capability.
 
 The project succeeds when a player can enjoy the vertical slice offline and a
 technical evaluator can independently observe that the game uses a WASM
-simulation, semantic graph/query/logic, Q42 persistence, 3D asset semantics,
-bounded agent inference, VibeScript, and place-data provenance in meaningful
-gameplay rather than as passive integrations.
+simulation, semantic graph/query/logic, Q42 persistence, semantic visual assets,
+a bounded NPC proposal path, VibeScript, and content provenance in meaningful
+gameplay rather than as passive integrations. Local model inference and public
+place-data evidence join that demonstration only after their capability,
+privacy, and licence gates pass.

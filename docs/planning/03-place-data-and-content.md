@@ -16,12 +16,22 @@ town-pack/
   graph/rules.q42 or rules.n3   validated local rules and constraints
   assets/*.10d                  terrain, buildings, facilities, visual props
   data/metadata.json            source, date, transformation, uncertainty
+  data/models/*                 reviewed deterministic/statistical analysis inputs/methods
   scenario/*.vibe               bounded scenario scripts
   presentation/*                text, icons, audio, accessible labels
 ```
 
-The final package layout will follow verified QualiaDB packaging conventions;
-this structure is an implementation target, not a new platform format.
+This directory layout is an **authoring view**. The distributable pack should
+use a verified QualiaDB HMC profile with intact Q42, `.10d`, HCF/Vibe, and
+other relevant entries. The final manifest and archive layout follow the
+canonical HMC producer/reader chosen in QG-01; this sketch is not a new format.
+All acquisition, spatial transformation, geometry generation, `.10d` packaging,
+and pack validation must use QualiaDB ecosystem capabilities. Missing adapters
+or browser surfaces are upstream work under the
+[development contract](13-qualiadb-only-development-contract.md), not private
+game-specific importers or mesh generators.
+See the [upstream task register](14-qualiadb-format-and-tooling-upstream-tasks.md)
+for the pack, asset, save, and terrain integration gates.
 
 ## Australia first, world-ready packs
 
@@ -69,6 +79,30 @@ local historical/cultural review before publication.
 - Do not ingest or infer individual rents, debt, contracts, platform charges,
   tenancy status, benefit status, or housing eligibility. These remain fictional
   player-selected scenario facts, never public-data conclusions.
+
+## Statistical scenario models
+
+An approved pack may transform eligible aggregate public data into a bounded
+`ScenarioAnalysisModel` used by QualiaDB computation. Deterministic logic,
+algebra, constraints, and other scientific calculations, alongside probability
+and statistical analysis, derive scenario conditions. Every model declares
+whether it is deterministic, probabilistic, or hybrid and why that method fits
+its game question. Modelled conditions can include demand, availability, travel
+delay, resource capacity, dependencies, or a pack-defined barrier. The model
+must not profile, rank, predict, or infer an individual, household, address, or
+real community's need, behaviour, rights, safety, or eligibility.
+
+The pack stores the input snapshot/digest, source and licence, geography and
+aggregation level, suppression threshold, variables, transformation,
+deterministic rules/calculation method, uncertainty where applicable,
+applicability scope, and model version. It also declares which game parameters
+it can affect and the causal assumptions required to compare a baseline with a
+project-implemented scenario. Browser play uses this reviewed, offline model and
+records its deterministic result or seed/sample in the event ledger; it never
+queries a live feed or silently refreshes model inputs.
+
+Further content boundaries:
+
 - Keep real town data separate from fictional characters and narrative events.
 - Clearly label every public-data scenario as a game interpretation, not advice
   or an official model of a community.
@@ -110,6 +144,13 @@ repair, design, and build **game assets and improvements** over a scenario map.
 Their proposals stay in the game world graph with separate player/project
 provenance; they never overwrite source GIS records or imply approval to alter a
 real location.
+
+The supplied 3D/LLM architecture note suggests HTTP geodata converted to meshes
+on demand in WASM. Treat this as a later QualiaDB capability investigation, not
+the v0.1 ingestion plan. Before considering it, prove upstream source policy,
+snapshot/replay semantics, coordinate and topology handling, tile seams,
+bounded WASM/GPU memory, and offline behaviour. The first game scenes remain
+reviewed, versioned, offline pack products.
 
 ## Player-made improvements
 

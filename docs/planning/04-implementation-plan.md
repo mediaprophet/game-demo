@@ -6,6 +6,33 @@ Build a playable, verifiable vertical slice before broad content, networking, or
 advanced agent work. Each phase has an exit gate; later phases do not hide an
 unproven core dependency.
 
+The [first-playable spec](12-first-playable-spec-and-open-questions.md) defines
+the proposed player journey and the unresolved gameplay decisions. The phase
+lists below include foundation fixtures, future-facing contracts, and research
+spikes; they are not all promises of player-visible v0.1 content. Before Phase 1
+expands, resolve D-029–D-034 and label each fixture **player-visible**,
+**demonstration-only**, or **deferred** in a release matrix. This keeps the
+first-playable loop small enough to test while preserving the longer plan.
+
+The [QualiaDB-only development contract](13-qualiadb-only-development-contract.md)
+is a dependency gate for every phase. If a required surface is missing from the
+selected QualiaDB browser profile, add and verify it in QualiaDB before using
+it here. A prototype or release cannot satisfy a gate with a private game-side
+replacement.
+This check repeats whenever implementation or playtesting reveals a new need;
+the [capability ledger](15-living-qualiadb-capability-ledger.md) stays open, and
+a blocked game task resumes after its QualiaDB fix is pinned and tested.
+
+The [upstream task register](14-qualiadb-format-and-tooling-upstream-tasks.md)
+names the format and host work needed for `.10d`, HMC/HCF, VibeScript, Q42, and
+P64 integration. Its QG identifiers are dependencies, not parallel substitutes.
+
+| Gate | Minimum evidence | Decision enabled |
+|---|---|---|
+| Interaction prototype | A player can inspect, choose between two routes, encounter an explained block, recover, improve one asset, and contribute to one shared project. | Whether the core loop is worth building out. |
+| Technical vertical slice | The same journey runs offline through the validated WASM/graph/reducer path, persists, and replays; semantic selection and one bounded authored-content example work. | Whether the architecture supports the game as designed. |
+| Public v0.1 demonstration | The selected presentation is readable and accessible on the declared baseline; required pack/data, privacy, licence, performance, and save gates pass. | Whether the slice is ready to share beyond the team. |
+
 ## Phase 0 — Repository and capability baseline
 
 **Goal:** establish a reproducible project and prove the target browser/WASM
@@ -13,7 +40,20 @@ integration surface.
 
 Tasks:
 
-- Select the Rust web application shell and pin the QualiaDB revision/release.
+- Select the Webizen/QualiaDB application surface and pin the QualiaDB revision/release.
+- Create a capability ledger for every required game surface: owning QualiaDB
+  crate/API, target profile, pinned commit, verification test, status, and
+  dependent game feature. Upstream partial/missing capabilities before use.
+- Resolve QG-01's canonical HMC producer/reader and format version. Inspect the
+  existing core bundle and semantic-library ZIP implementations and the HCF
+  draft divergence; do not claim interchange without round-trip tests.
+- Scope QG-03's `.10d`/Q42/Vibe/Webizen animation contract before committing to
+  character animation or rigged asset production.
+- Verify QG-04's VibeScript REPL/game host capabilities against the live catalog
+  and QG-05's pack/save compatibility path.
+- Prove one agent-authored original prop can travel through QualiaDB geometry,
+  validation, `.10d` packaging, semantic manifest, browser rendering, and
+  picking without an external modelling suite.
 - Define supported browser baseline and development toolchain.
 - Define a versioned presentation-profile contract and a presentation-neutral
   world-projection API before building the first UI.
@@ -48,11 +88,17 @@ Tasks:
   N3/SHACL/deontic fixture format.
 - Define typed-quantity, unit-validation, model-version, assumption, uncertainty,
   and provenance contracts for engineering and economic scenario calculations.
+- Define `ScenarioAnalysisModel` contracts for approved aggregate public-data
+  inputs, privacy/aggregation thresholds, deterministic, probabilistic, and
+  hybrid methods, result or seed/sample recording, uncertainty, and declared
+  game effects.
 
-**Exit gate:** a browser page loads a small WASM game shell, reads/writes one
-test world, evaluates a graph rule, renders/selects a test object, and reloads
-offline. Unsupported QualiaDB features have a documented fallback or are removed
-from the first slice.
+**Exit gate:** a browser page loads a small QualiaDB-backed WASM game shell,
+reads/writes one test world, evaluates a graph rule, renders/selects a test
+object, and reloads offline. The capability ledger links each demonstrated
+function to a pinned, tested QualiaDB surface. Missing capabilities are added
+upstream. A blocked required feature stays open until its capability is
+integrated; Phase 0 does not close later discovery of gaps.
 
 ## Phase 1 — Authoritative semantic simulation
 
@@ -90,10 +136,15 @@ Tasks:
 - Implement one player-selected housing/household transition with continuing
   obligations and local ties, plus a ground capability gap that can be reduced
   by a shared infrastructure project.
+- Implement `RightsCondition`, `HarmOrBarrier`, `Safeguard`, and `RemedyPath`
+  fixtures. Cover secure-enough tenure, access to a necessity, a fair-agreement
+  dispute, an accountable response, and an alternate/support arrangement;
+  persist their evidence, consent, capacity, timing, and event provenance.
 - Keep universal dwelling, mobility, stewardship, and facility concepts distinct
   from Australian vehicle/camping specialisations.
 - Implement typed commands: inspect, travel, repair, learn, use facility,
-  propose an idea/project, endorse or offer help, contribute, and end turn.
+  propose an idea/project, endorse or offer help, contribute, raise a concern,
+  request review, offer/accept/decline a remedy path, and end turn.
 - Implement validation order: schema → permissions → SHACL → N3Logic → reducer.
 - Implement curated rules for vehicle safety, workshop access, mentoring, and a
   shared-solar project, each with positive/negative/edge fixtures and a
@@ -115,8 +166,16 @@ Tasks:
 - Persist events/checkpoints and implement replay from a fixed seed.
 - Build the first **Why?** explanation payload and tests for accepted/rejected
   actions.
+- Build a dimensional living-with-peace projection for tenure, necessities,
+  safety/participation, fair agreements, accountability, and remedy access.
+  It must show evidence, unresolved barriers, and available actions without a
+  composite score, hardship ranking, or claim about real-world legal status.
 - Prove a task can be completed through learning, mentorship, a qualified
   service, or a consenting party/community member without identity-based gating.
+- Prove the same material starting point has different transparent outcomes
+  when a scenario does or does not provide a stated safeguard/remedy mechanism;
+  prove an unavailable or inadequate remedy remains visible and does not force
+  harm, consent, or control of another person to progress.
 
 **Exit gate:** a scripted scenario replays to the same graph/event result on two
 fresh runs; invalid actions are rejected with an understandable evidence chain.
@@ -149,14 +208,17 @@ Tasks:
 - Show a structural-economics explanation view for the transition fixture:
   continuing obligations, material constraints, ground capability, project
   contribution, assumptions, and no household ranking.
+- Show the living-with-peace projection beside project and community views, with
+  a clear distinction between fictional scenario mechanisms and real-world
+  rights, legal remedies, or service advice.
 - Build accessible keyboard-first navigation and responsive layouts.
 - Implement the profile selector/persistence boundary and a minimal illustrated
-  semantic-hotspot fallback for the same seed scenario.
+  semantic-hotspot view for the same seed scenario using a Webizen surface.
 - Author the initial three-goal journey and tutorial-free contextual guidance.
 - Provide save slots, export/import only where safe, reset, and replay controls.
 - Add offline/no-model status indicators and a developer evidence mode.
 
-**Exit gate:** a new player can complete the first week and shared-solar project
+**Exit gate:** a new player can complete the agreed opening journey and shared-solar project
 without reading developer documentation; core controls and explanations meet an
 accessibility review.
 
@@ -173,6 +235,8 @@ Tasks:
   v0.1 presentation direction; references guide only broad mood and interaction
   goals, never imitation.
 - Establish `.10d` asset ingestion/validation plus Q42 semantic manifests.
+- Load those assets from the selected HMC profile and verify Q42 identity/digest
+  links. Add an animated asset only after QG-03 passes its upstream/browser gate.
 - Render staged construction and completed variants for the first player-made
   repair and community improvement, linked to their project provenance.
 - Render EV-charging availability and its relationship to the community energy
@@ -180,7 +244,7 @@ Tasks:
 - Link renderer picking to semantic entities and inspection panels.
 - Visualise conditions: open/closed, capacity, maintenance, energy state,
   project progress, and accessible/blocked routes.
-- Add animation, camera, and low-spec renderer fallback.
+- Add animation, camera, and a verified Webizen low-spec presentation path.
 - Set performance budgets and test on the selected browser baseline.
 
 **Exit gate:** every interactive 3D object resolves to a semantic ID and its
@@ -194,13 +258,19 @@ full first scene meets documented frame, memory, and load budgets.
 Tasks:
 
 - Choose one openly licensed, small, aggregate-safe Australian data source set.
-- Implement an explicit online-acquisition record (source, licence, retrieval
-  date, checksum/version, transformation) that compiles to an offline pack.
+- Use or extend QualiaDB's acquisition and pack tooling to record source,
+  licence, retrieval date, checksum/version, and transformation before compiling
+  an offline pack.
 - Implement source ledger, licence gate, CRS/geometry validation, and import
   transforms.
 - Build a town-pack compiler producing the manifest, Q42 graph, metadata, and
   visual layer assets.
 - Add spatial queries to three meaningful gameplay decisions.
+- Implement one reviewed aggregate-public-data scenario analysis model and a
+  baseline-versus-project comparison. Include deterministic and probabilistic
+  analysis where each is appropriate to the stated question; show method,
+  uncertainty, result or seed/sample, causal assumptions, and the validated game
+  mechanisms responsible for every simulated shift.
 - Model collection and distribution routes between food-scrap sources,
   vermiculture capacity, and garden/partner nodes.
 - Connect scenario irradiance/site exposure assumptions to the solar/battery
@@ -280,12 +350,12 @@ documented, explicit capability agreements and passes compatibility tests.
 
 | Workstream | Main outputs | Depends on |
 |---|---|---|
-| Game core | Commands, reducer, events, replay, tests | Phase 0 |
-| Semantic/rules | Ontology, Q42 seeds, SHACL/N3, explanations | Game core |
+| QualiaDB simulation | Published commands, reducer, events, replay, tests in the ecosystem; game-specific schemas and fixtures here | Phase 0 capability ledger |
+| Semantic/rules | Ontology, Q42 seeds, SHACL/N3, explanations | QualiaDB simulation surface |
 | Rule authoring | Predicate vocabulary, rule packages, fixtures, inspector | Semantic model + gateway |
-| Web UI | Player flow, accessibility, evidence view | Game core API |
-| Render/assets | Scene, `.10d`, picking, fallback | Phase 0 spike |
-| Presentation | Profile contract, world projections, visual art bible, alternate view | Game core API |
+| Webizen UI | Player flow, accessibility, evidence view | QualiaDB projection/input API |
+| Render/assets | Scene, `.10d`, picking, low-spec presentation | Phase 0 spike |
+| Presentation | Profile contract, world projections, visual art bible, alternate view | QualiaDB projection/input API |
 | Place data | Importer, packs, provenance/privacy gates | Semantic model |
 | Engineering/economics | Typed models, units, energy/resource results, ledgers | Semantic model + gateway |
 | Vibe | Capability manifest, host, authored scenarios | Gateway |
@@ -302,9 +372,19 @@ documented, explicit capability agreements and passes compatibility tests.
   explanations, and provenance.
 - **Rules:** vocabulary/scope validation, positive/negative/edge cases, bounded
   execution, rule-version replay, and no identity-based proxy predicates.
+- **Rights conditions/remedy:** supported/threatened/unavailable/restored state
+  transitions; consent, evidence, response, delay, capacity, and accountable-
+  role checks; visible unresolved-barrier paths; no composite peace/hardship
+  score; and rejection of real-rights/legal-status claims or coercive progress
+  conditions.
 - **Engineering/economics:** unit compatibility, deterministic calculations,
   model/assumption provenance, uncertainty display, energy-balance and
   ledger-invariant fixtures, and circular-resource flow/capacity/route fixtures.
+- **Scenario analysis models:** source/licence/digest, aggregation and
+  suppression thresholds, deterministic/probabilistic/hybrid method/version,
+  unit/scope validation, replayable calculated results and seeded sampling,
+  uncertainty display, baseline/post-project comparison, and rejection of
+  individual profiling, live-data refresh, or unsupported causal claims.
 - **Condition/maintenance:** scheduled maintenance, known/unknown condition,
   fault observations, constrained operation, repair/defer/replace pathways, and
   deterministic provenance-bearing failure fixtures.
@@ -351,18 +431,23 @@ The first public demonstration is ready only when it has:
 - Q42-backed state/events, graph queries, and validated rules exposed through
   player-readable explanations;
 - an interactive 3D ground with semantically linked visual assets;
-- one licensed, aggregate-safe, provenance-visible place-data pack or a clearly
-  labelled fictional-only pack if the data gate is not complete;
+- a provenance-visible fictional pack; an aggregate public-data pack joins the
+  demonstration only after its licence, privacy, and transformation gates pass;
 - one safe Vibe-authored scenario; and
-- an optional, graph-bounded NPC demonstration with deterministic no-LLM
-  fallback.
+- deterministic NPC dialogue and a validated proposal path, with local LLM
+  inference only if the Phase 0 browser capability and privacy gates pass.
+
+The release matrix records which supporting fixtures are visible in the public
+journey. A technical evaluator may use evidence mode to inspect additional
+fixtures, but a player should not need them to finish the session.
 
 ## Key risks and responses
 
 | Risk | Response |
 |---|---|
-| Browser Qualia profile is too large or incomplete | Prove it in Phase 0; trim to a verified capability profile and defer optional modules |
-| Renderer or `.10d` browser path is impractical | Keep stable semantic IDs and a simple renderer fallback; do not block core simulation |
+| Browser Qualia profile is too large or incomplete | Reproduce the limit, improve the QualiaDB profile or underlying capability, and remeasure; keep the dependent game task blocked until it passes |
+| Renderer or `.10d` browser path is impractical | Fix and verify the QualiaDB/Webizen path; keep dependent visuals blocked until the ecosystem proof passes |
+| Game feature lacks a QualiaDB capability at any phase | Record the block and upstream owner in the living ledger; implement/test the public surface in QualiaDB, pin it, then resume game integration |
 | LLM claims exceed grounded facts | Enforce fixed action schema, visible evidence, gateway validation, and template fallback |
 | Public data creates privacy/licence harm | Use the data policy, versioned snapshots, aggregate thresholds, and manual review gate |
 | Identity becomes a hidden penalty or stereotype | Separate identity from capability; test task rules and explanations for explicit skill/authority requirements only |
@@ -388,10 +473,11 @@ The first public demonstration is ready only when it has:
 
 ## Immediate next actions
 
-1. Decide the UI/application shell and exact QualiaDB revision to pin.
-2. Create the Phase 0 browser spike project and measurement log.
-3. Write the first ontology/seed-content fixture and deterministic replay test.
-4. Sketch the first community-ground scene and create an original placeholder
-   asset list.
-5. Select the fictional core town before choosing a public-data demonstration
-   locality.
+1. Inventory QualiaDB/Webizen game-capable surfaces and open the Phase 0
+   capability ledger; pin the candidate revision.
+2. Select its UI/application surface and build the browser spike with a
+   measurement log. Upstream any gap blocking the test journey.
+3. Prove the QualiaDB-only original-prop → `.10d` → browser-selection path.
+4. Write the first ontology/seed-content fixture and deterministic replay test.
+5. Sketch the first community-ground scene, list original asset needs, and
+   select the fictional core town before a public-data locality.

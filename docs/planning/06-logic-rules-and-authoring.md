@@ -38,6 +38,7 @@ Every rule is built from a documented vocabulary. Initial examples include:
 | Support and boundaries | `hasSupportScenario`, `hasSupportPath`, `hasBoundary`, `hasTrustedContactOption`, `hasPrivateScope`, `hasAlternativePath` |
 | Participation/service scope | `hasGroundCapabilityMatch`, `requiresMobilityResponsibility`, `hasExceptionPath`, `requiresDifferentConfiguration`, `hasServiceBoundary` |
 | Structural economics/infrastructure | `hasTenureObligation`, `hasRecurringCost`, `hasLocalTie`, `createsAffordabilityPressure`, `hasInfrastructureGap`, `canContributeToCapability`, `hasSDGAlignedOutcome` |
+| Rights conditions and remedy | `hasRightsCondition`, `hasTenureSecurity`, `hasAccessToNecessity`, `createsBarrier`, `maySeekRemedy`, `requiresResponse`, `hasAccountableRole`, `hasSafeguard`, `hasRemedyPath`, `remainsUnresolved` |
 | Economic custody | `hasWallet`, `hasTreasury`, `ownedBy`, `controlledBy`, `hasCommitteeRole`, `requiresApproval`, `approvesSpend`, `earmarkedFor`, `debits`, `credits` |
 | Circular food/resource loops | `producesScrap`, `acceptsFeedstock`, `hasFeedstockQuality`, `producesAmendment`, `mayDistributeTo`, `improvesResourceCondition` |
 | Food provenance and claims | `hasIngredient`, `grownAt`, `preparedAt`, `hasEvidenceSource`, `hasClaimScope`, `hasReviewStatus` |
@@ -61,6 +62,15 @@ ground access, committee membership, project ownership, voting rights, or
 treasury authority from community participation or a contribution. A proposal
 only gains operational effect after the normal project, agreement, and resource
 validation path succeeds.
+
+Rights-condition rules derive only scenario-state results. They can identify a
+threatened or supported condition, open a declared remedy pathway, hold a
+request that lacks consent/evidence/capacity, require an accountable response,
+and explain an unresolved barrier. They cannot declare a real legal entitlement,
+liability, service eligibility, safety assessment, or outcome. They must not
+make a person endure harm, surrender consent, or control another person as a
+precondition for progress; no composite “peace”, worthiness, or hardship score
+is permitted.
 
 ## Rule types
 
