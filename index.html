@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rolling Commons — Phase 0 WASM spike</title>
+<style>
+  body { font-family: ui-monospace, Consolas, monospace; margin: 2rem; background:#10141a; color:#dfe7ef; }
+  h1 { font-size: 1.1rem; } #log { white-space: pre-wrap; }
+  .pass { color:#7ee787; } .fail { color:#ff7b72; }
+</style>
+</head>
+<body>
+<h1>Rolling Commons — Phase 0 browser spike</h1>
+<pre id="log">loading wasm…</pre>
+<script type="module">
+const logEl = document.getElementById('log');
+const log = (s) => { logEl.textContent += s + "\n"; };
+const ok = (b) => b ? "PASS" : "FAIL";
+const results = [];
+const record = (name, pass, detail="") => {
+  results.push({name, pass});
+  log(`[${ok(pass)}] ${name}${detail ? " — " + detail : ""}`);
+  // Mirror results to the dev-server request log for headless verification.
+  fetch(`/r?name=${encodeURIComponent(name)}&pass=${pass}&detail=${encodeURIComponent(detail.slice(0,120))}`).catch(()=>{});
+};
+
+const tInit0 = performance.now();
+let m;
+try {
+  m = await import('./pkg/rolling_commons_shell.js');
+  await m.default();
+} catch (e) {
+  log("FAIL: module load — " + e);
+  throw e;
+}
+const initMs = performance.now() - tInit0;
+record("spike1: wasm module loads", true, `${initMs.toFixed(1)} ms`);
+log(`pinned qualiaDB revision: ${m.pinned_qualiadb_revision()}`);
+
+// --- small authored world (N3/N-Triples) ---
+// Turtle parser (rio/oxttl) needs declared prefixes / full IRIs.
+const worldOk = `@prefix rc: <https://game.example/rc#> .
+rc:player a rc:Person .
+rc:workshop a rc:Facility ; rc:powerWatts 200 .
+`;
+// The SHACL/N3 token path (build_graph) keeps raw prefixed tokens — shapes
+// match by lexical form.
+const worldShaclOk = `rc:player a rc:Person .
+rc:workshop a rc:Facility ; rc:powerWatts 200 .
+`;
+const worldBad = `rc:shed a rc:Facility .
+`;
+
+// Spike 2 (part): create/query world
+try {
+  const t = performance.now();
+  const parsed = m.world_load_turtle(worldOk);
+  record("spike2: world parse", parsed !== null && parsed !== undefined,
+         `${JSON.stringify(parsed).slice(0,160)} (${(performance.now()-t).toFixed(1)} ms)`);
+} catch (e) { record("spike2: world parse", false, String(e)); }
+
+// Spike 3: SHACL validation + explanation payload
+const shapes = JSON.stringify([{
+  targetClass: "rc:Facility",
+  path: "rc:powerWatts",
+  constraints: [{kind: "minCount", num: 1}]
+}]);
+// serde_wasm_bindgen returns Maps for structs — unwrap recursively.
+const toObj = (v) => {
+  if (v instanceof Map) return Object.fromEntries([...v].map(([k, x]) => [k, toObj(x)]));
+  if (Array.isArray(v)) return v.map(toObj);
+  return v;
+};
+try {
+  const t = performance.now();
+  const okReport = toObj(m.action_validate_shacl(worldShaclOk, shapes));
+  record("spike3: conforming graph validates", okReport.conforms === true,
+         `${JSON.stringify(okReport).slice(0,160)} (${(performance.now()-t).toFixed(1)} ms)`);
+  const badReport = toObj(m.action_validate_shacl(worldBad, shapes));
+  record("spike3: violating graph explains itself",
+         badReport.conforms === false && (badReport.results || []).length > 0,
+         JSON.stringify(badReport).slice(0,160));
+} catch (e) { record("spike3: shacl validation", false, String(e)); }
+
+// Spike 2 (part): OPFS persist + reload
+try {
+  const data = new TextEncoder().encode(worldOk);
+  const t = performance.now();
+  await m.world_save("rc-spike-world.n3", data);
+  const back = await m.world_load("rc-spike-world.n3");
+  const same = back && new TextDecoder().decode(back) === worldOk;
+  record("spike2: OPFS save + reload", same === true,
+         `${(performance.now()-t).toFixed(1)} ms`);
+} catch (e) { record("spike2: OPFS save + reload", false, String(e)); }
+
+// Spike 7: measurements
+try {
+  const resp = await fetch('./pkg/rolling_commons_shell_bg.wasm');
+  const buf = await resp.arrayBuffer();
+  log(`wasm size: ${(buf.byteLength/1024/1024).toFixed(2)} MiB`);
+  if (performance.memory) {
+    log(`js heap: ${(performance.memory.usedJSHeapSize/1024/1024).toFixed(1)} MiB`);
+  }
+} catch (e) { log("measurements: " + e); }
+
+const failures = results.filter(r => !r.pass).length;
+log(`\n${results.length - failures}/${results.length} spike checks passed`);
+fetch(`/r?name=SUMMARY&pass=${failures===0}&detail=${results.length - failures}/${results.length}`).catch(()=>{});
+</script>
+</body>
+</html>
