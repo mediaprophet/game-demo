@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rolling Commons — Kestrel Flats (slice)</title>
+<style>
+  body { font-family: Georgia, serif; background:#f6f1e7; color:#2c2418; margin:0; }
+  header { padding:10px 16px; border-bottom:2px solid #c9b98f; }
+  main { display:flex; gap:16px; padding:14px; }
+  .panel { background:#fffdf6; border:1px solid #c9b98f; border-radius:8px; padding:12px; }
+  #scene { width:420px; height:300px; background:#e8e0cc; border-radius:8px; }
+  button { font:inherit; margin:3px 4px 3px 0; padding:6px 10px; border:1px solid #a08c5a;
+           background:#efe6cd; border-radius:6px; cursor:pointer; }
+  button:hover { background:#e3d5b0; }
+  #why { border-left:4px solid #b3543e; background:#fbeee8; }
+  #log div { font-family:monospace; font-size:12px; }
+  .muted { color:#7a6c50; font-size:12px; }
+  dl { margin:4px 0; } dt { font-weight:bold; display:inline } dd { display:inline; margin:0 8px 0 4px }
+</style>
+</head>
+<body>
+<header>
+  <b>Rolling Commons</b> — Kestrel Flats · <span id="pin" class="muted"></span>
+</header>
+<main>
+  <div>
+    <canvas id="scene" width="420" height="300"></canvas>
+    <div class="muted">Click the scene to inspect a place.</div>
+    <div id="inspector" class="panel" style="margin-top:10px"></div>
+  </div>
+  <div style="flex:1">
+    <div id="actions" class="panel"><b>What do you do?</b><br></div>
+    <div id="why" class="panel" style="display:none;margin-top:10px"></div>
+    <div class="panel" style="margin-top:10px">
+      <button id="save">Save (OPFS)</button><button id="load">Load</button>
+      <button id="replay">Replay tape</button>
+      <span id="persist" class="muted"></span>
+    </div>
+    <div class="panel" style="margin-top:10px"><b>Journal</b><div id="log"></div></div>
+  </div>
+</main>
+<script type="module">
+window.onerror = (msg, src, line) =>
+  fetch(`/r?name=JSERROR&pass=false&detail=${encodeURIComponent(`${msg} @${line}`).slice(0,200)}`).catch(()=>{});
+const $ = (id) => document.getElementById(id);
+const jlog = (s) => { const d=document.createElement('div'); d.textContent=s; $('log').prepend(d); };
+const note = (s) => { jlog(s); fetch(`/r?name=${encodeURIComponent(s)}&pass=true&detail=`).catch(()=>{}); };
+const toObj = (v) => {
+  if (v instanceof Map) return Object.fromEntries([...v].map(([k,x])=>[k,toObj(x)]));
+  if (Array.isArray(v)) return v.map(toObj);
+  if (v && typeof v === 'object' && v.constructor === Object)
+    return Object.fromEntries(Object.entries(v).map(([k,x])=>[k,toObj(x)]));
+  return v;
+};
+
+const m = await import('./pkg/rolling_commons_shell.js');
+await m.default();
+$('pin').textContent = 'qualiaDB ' + m.pinned_qualiadb_revision();
+
+const [SEED, ACTIONS] = await Promise.all(
+  ['fixtures/seed.ttl', 'fixtures/actions.json'].map(async u => (await fetch(u)).text()));
+let session = new m.GameSession(SEED, ACTIONS);
+const catalog = JSON.parse(ACTIONS).actions;
+
+// --- presentation helpers (display only; authoritative truth is the doc) ---
+const triples = () => session.world().split('\n')
+  .map(l => l.trim().split(/\s+/)).filter(p => p.length >= 3)
+  .map(p => ({ s:p[0], p:p[1], o:p[2].replace(/\.$/,'') }));
+const values = (s,p) => triples().filter(t => t.s===s && t.p===p).map(t => t.o);
+const short = (t) => t.replace(/^rc:/,'').replace(/^ev:/,'ev:');
+
+function refresh() {
+  const coins = values('rc:player','rc:coin').length;
+  const labour = values('rc:player','rc:labourToken').length;
+  const held = values('rc:player','rc:holdsPart').map(short).join(', ') || 'nothing';
+  const parts = values('rc:solarProject','rc:partInstalled').map(short).join(', ') || 'none yet';
+  const approved = values('rc:solarProject','rc:approvedBy').length > 0;
+  const power = values('rc:workshop','rc:status')[0] || 'offline';
+  const ups = values('rc:swag','rc:upgrade').length;
+  $('inspector').innerHTML =
+    `<b>You</b> — ${coins} coins · labour: ${labour?'yes':'spent'} · holding ${held}<br>
+     <b>Shelter</b> (your swag) — ${ups} upgrade(s)<br>
+     <b>Solar project</b> — parts installed: ${parts} · ${approved?'endorsed by committee':'awaiting committee'}<br>
+     <b>Workshop</b> — ${power}`;
+  const box = $('actions'); box.querySelectorAll('button').forEach(b=>b.remove());
+  for (const a of catalog) {
+    const b = document.createElement('button');
+    b.textContent = a.label; b.onclick = () => tryAction(a.id);
+    box.appendChild(b);
+  }
+}
+
+function tryAction(id) {
+  const r = toObj(session.propose(id));
+  if (r.ok) { $('why').style.display='none'; note(`event ${r.seq}: ${id}`); refresh(); return; }
+  // Blocked → the "Why?" view: engine violation report + the action's own
+  // explanation + the other routes that exist in the catalogue.
+  const rows = (r.report?.results || []).map(v =>
+    `<li>${short(String(v.focus_node))} needs <b>${short(String(v.result_path))}</b>: ${v.message}</li>`).join('');
+  const routes = catalog.filter(c => c.id !== id)
+    .map(c => `<li>${c.label}</li>`).join('');
+  $('why').style.display='block';
+  $('why').innerHTML = `<b>Why can't I?</b> <span class="muted">${r.explain||''}</span>
+    <ul>${rows}</ul><b>Other ways forward:</b><ul>${routes}</ul>`;
+  note(`BLOCKED ${id}: ${rows.replace(/<[^>]+>/g,'').slice(0,120)}`);
+}
+
+// --- scene: tensor nodes are the pickable semantic layer over the props ---
+const canvas = $('scene');
+const portal = new m.GamePortal(canvas);
+// nodes [q,v,w, x,y,z, t,alpha,mu,sigma] — one per place, origin node centre
+const N = new Float32Array([
+  0,0,4, -0.6, 0.0,0, 0,1,0.7,0.2,   // camp
+  0,0,4,  0.6,-0.2,0, 0,1,0.7,0.5,  // scrapyard
+  0,0,4, -0.2,-0.7,0, 0,1,0.7,0.7,  // market
+  0,0,4,  0.2, 0.6,0, 0,1,0.7,0.9,  // workshop
+]);
+const PLACES = ['rc:camp','rc:scrapyard','rc:market','rc:workshop'];
+portal.upload_tensor(m.tensor_buffer_build(N));
+portal.tick(canvas, 16);
+canvas.addEventListener('click', (e) => {
+  const r = canvas.getBoundingClientRect();
+  portal.queue_pick(e.clientX-r.left, e.clientY-r.top, canvas.width, canvas.height);
+  portal.tick(canvas, 16);
+  const i = portal.poll_pick();
+  if (i >= 0) {
+    const s = PLACES[i];
+    $('why').style.display='block';
+    $('why').innerHTML = `<b>${short(s)}</b><dl>` +
+      triples().filter(t=>t.s===s).map(t=>`<dt>${short(t.p)}</dt><dd>${short(t.o)}</dd>`).join('') +
+      `</dl>`;
+  }
+});
+
+$('save').onclick = async () => {
+  await m.world_save('rc-save.n3', new TextEncoder().encode(session.world()));
+  $('persist').textContent = 'saved';
+};
+$('load').onclick = async () => {
+  const b = await m.world_load('rc-save.n3');
+  session = new m.GameSession(new TextDecoder().decode(b), ACTIONS);
+  refresh(); $('persist').textContent = 'loaded';
+};
+$('replay').onclick = () => {
+  const ids = toObj(session.events());
+  const r = toObj(m.session_replay(SEED, ACTIONS, ids));
+  const same = r.diverged_at === null && r.world === session.world();
+  note(`replay ${same ? 'reproduced world byte-for-byte' : 'DIVERGED at '+r.diverged_at}`);
+};
+
+refresh();
+note('slice ready');
+
+// Scripted acceptance playthrough for headless verification (?selftest).
+if (new URLSearchParams(location.search).has('selftest')) {
+  const expect = (name, id, wantOk) => {
+    const r = toObj(session.propose(id));
+    note(`TEST ${name}: ${id} ${r.ok===wantOk?'PASS':'FAIL'}`);
+    if (r.ok !== wantOk)
+      note(`TEST ${name} detail: ${JSON.stringify(r).slice(0,200)}`);
+    return r.ok;
+  };
+  expect('blocked action', 'switchPowerOn', false);       // Why? — no parts, no endorsement
+  expect('route A: buy', 'buyInverter', true);            // 12-7 = 5 coins left
+  expect('route B: salvage', 'salvagePanel', true);       // labour spent
+  expect('rest after labour', 'endTurn', true);           // regain labour token
+  expect('rest while rested', 'endTurn', false);          // blocked: labour still held
+  expect('contribute 1', 'contributeInverter', true);
+  expect('contribute 2', 'contributePanel', true);
+  expect('committee endorses', 'requestApproval', true);  // parts>=1 → endorsement
+  expect('improve shelter', 'improveShelterCoins', true); // 5 >= 3 coins
+  expect('goal', 'switchPowerOn', true);
+  const ids = toObj(session.events());
+  const rep = toObj(m.session_replay(SEED, ACTIONS, ids));
+  note(`TEST replay: ${rep.diverged_at===null && rep.world===session.world() ? 'PASS' : 'FAIL'}`);
+  note('SUMMARY done');
+}
+</script>
+</body>
+</html>

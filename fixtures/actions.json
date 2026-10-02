@@ -1,0 +1,115 @@
+{
+  "actions": [
+    {
+      "id": "buyPanel",
+      "label": "Buy a solar panel at the market (4 coins)",
+      "explain": "The market route: fast, but spends coins.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:coin",
+                "constraints": [{"kind": "minCount", "num": 4}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 4}],
+      "add": ["rc:player rc:holdsPart rc:partPanel ."]
+    },
+    {
+      "id": "buyInverter",
+      "label": "Buy an inverter at the market (7 coins)",
+      "explain": "The market route: fast, but spends coins.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:coin",
+                "constraints": [{"kind": "minCount", "num": 7}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 7}],
+      "add": ["rc:player rc:holdsPart rc:partInverter ."]
+    },
+    {
+      "id": "salvagePanel",
+      "label": "Salvage a panel from the scrapyard (1 labour)",
+      "explain": "The labour route: keeps coins, spends a turn's work.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
+                "constraints": [{"kind": "minCount", "num": 1}]}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:player rc:holdsPart rc:partPanel .",
+              "rc:player rc:salvagedAt rc:scrapyard ."]
+    },
+    {
+      "id": "salvageInverter",
+      "label": "Salvage an inverter from the scrapyard (1 labour)",
+      "explain": "The labour route: keeps coins, spends a turn's work.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
+                "constraints": [{"kind": "minCount", "num": 1}]}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:player rc:holdsPart rc:partInverter .",
+              "rc:player rc:salvagedAt rc:scrapyard ."]
+    },
+    {
+      "id": "contributePanel",
+      "label": "Install the panel into the solar project",
+      "explain": "Shared work: your part becomes community infrastructure.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:holdsPart",
+                "constraints": [{"kind": "hasValue", "text": "rc:partPanel"}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:holdsPart", "o": "rc:partPanel", "n": 1}],
+      "add": ["rc:solarProject rc:partInstalled rc:partPanel .",
+              "rc:solarProject rc:contributedBy rc:player ."]
+    },
+    {
+      "id": "contributeInverter",
+      "label": "Install the inverter into the solar project",
+      "explain": "Shared work: your part becomes community infrastructure.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:holdsPart",
+                "constraints": [{"kind": "hasValue", "text": "rc:partInverter"}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:holdsPart", "o": "rc:partInverter", "n": 1}],
+      "add": ["rc:solarProject rc:partInstalled rc:partInverter .",
+              "rc:solarProject rc:contributedBy rc:player ."]
+    },
+    {
+      "id": "requestApproval",
+      "label": "Present the project at the committee meeting",
+      "explain": "The committee endorses a project once real parts are installed.",
+      "gate": [{"targetClass": "rc:CommunityProject", "path": "rc:partInstalled",
+                "constraints": [{"kind": "minCount", "num": 1}]}],
+      "add": ["rc:solarProject rc:approvedBy rc:committee ."]
+    },
+    {
+      "id": "switchPowerOn",
+      "label": "Switch on the workshop solar system",
+      "explain": "Needs both parts installed AND committee endorsement.",
+      "gate": [
+        {"targetClass": "rc:CommunityProject", "path": "rc:partInstalled",
+         "constraints": [{"kind": "minCount", "num": 2}]},
+        {"targetClass": "rc:CommunityProject", "path": "rc:approvedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]}
+      ],
+      "removeAll": [{"s": "rc:workshop", "p": "rc:status"},
+                    {"s": "rc:workshop", "p": "rc:powerWatts"}],
+      "add": ["rc:workshop rc:status \"online\" .",
+              "rc:workshop rc:powerWatts 400 .",
+              "rc:solarProject rc:completedIn rc:e{seq} ."]
+    },
+    {
+      "id": "improveShelterCoins",
+      "label": "Improve the shelter with bought materials (3 coins)",
+      "explain": "Personal asset improvement via the market route.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:coin",
+                "constraints": [{"kind": "minCount", "num": 3}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 3}],
+      "add": ["rc:swag rc:upgrade rc:u{seq} .",
+              "rc:swag rc:improvedWith rc:materials ."]
+    },
+    {
+      "id": "improveShelterLabour",
+      "label": "Patch the shelter yourself (1 labour)",
+      "explain": "Personal asset improvement via the labour route.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
+                "constraints": [{"kind": "minCount", "num": 1}]}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:swag rc:upgrade rc:u{seq} .",
+              "rc:swag rc:repairedBy rc:player ."]
+    },
+    {
+      "id": "endTurn",
+      "label": "Rest for the evening (regain labour)",
+      "explain": "Only useful once you've spent your labour.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
+                "constraints": [{"kind": "maxCount", "num": 0}]}],
+      "add": ["rc:player rc:labourToken rc:l{seq} .",
+              "rc:player rc:turn rc:t{seq} ."]
+    }
+  ]
+}
