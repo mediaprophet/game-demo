@@ -1,6 +1,10 @@
 # ADR 0001: Application surface, WASM profile, and pinned QualiaDB revision
 
-Status: Proposed (spike evidence partial)
+Status: Accepted — spikes 1–5 verified in Chrome headless (2026-10-02) at
+pinned revision `27d1644a`: semantic/rules/OPFS + `.10d` compile→ingest→
+semantic pick + Vibe eval/denied-capability, 10/10 checks. Remaining open
+proofs: real-GPU tier-2 path, HMC pack, animation contract, save/replay
+versioning, frame-time budgets.
 Date: 2026-10-02
 
 ## Context
@@ -20,18 +24,28 @@ recorded before production build (D-022).
 | `webizen-render` | PGA/N-dimensional renderer, `RenderQuin.semantic_id` picking, wgpu | Presentation surface for the 3D profile; WASM build under verification. |
 | `vibe-wasm` | VibeScript parse/check/eval/compile + `capability_invoke` | Bounded authoring host for QG-04; integrated in Phase 5 spike. |
 
-## Decision (proposed)
+## Decision
 
 - Game shell crate `rolling-commons-shell` depends on `qualia-core-db` by path
-  with `default-features = false, features = ["wasm-webcivics"]` for the
-  authoritative state/rules/persistence surface.
-- The **storybook-3D presentation profile leads** (user decision, D-032), served
-  by `webizen-render`/`.10d` once its browser spike (D-019) passes; an
-  illustrated/2D profile remains the required low-spec fallback (D-036).
-- Pin QualiaDB commit `6356bb5a` (branch `0.0.40.5`) as the Phase 0 candidate;
-  every ledger row references this commit until a later verified pin replaces it.
+  with `features = ["portal", "wasm-webcivics"]` plus `vibe-wasm`: the portal
+  feature supplies the `.10d`/render/pick surface the storybook-3D lead needs,
+  while `wasm-webcivics` keeps the semantic/rules/storage surface. The
+  standalone `webizen-render` crate is **not** used — the portal-internal
+  `PortalGpu` path is the renderer.
+- The **storybook-3D presentation profile leads** (user decision, D-032),
+  verified at spike level: authored prop → `compile_mesh_to_10d_with_nodes` →
+  `QualiaPortal::load_10d` → tensor-buffer semantic pick. An illustrated/2D
+  profile remains the required low-spec fallback (D-036); the portal's tier-1
+  CPU path already functions without a WebGPU device.
+- Pin QualiaDB commit **`27d1644a`** (branch `0.0.40.5`, fast-forwarded onto
+  `rolling-commons/phase0`), replacing `6356bb5a` after the DNS work landed;
+  every ledger row references this commit until a later verified pin replaces
+  it.
 - Upstream capability work happens on a dedicated branch in
   `C:/github/qualiaDB`, pinned back here once verified (QualiaDB-only contract).
+- Picking is tensor-node oriented: `.10d` mesh organs are display geometry;
+  semantic pick targets must be authored as `Tensor10D` nodes (embedded via
+  `compile_mesh_to_10d_with_nodes` and uploaded via `upload_tensor_buffer`).
 
 ## Consequences
 

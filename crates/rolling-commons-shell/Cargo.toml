@@ -8,14 +8,18 @@ description = "Rolling Commons WASM game shell — thin bindings over the pinned
 [lib]
 crate-type = ["cdylib", "rlib"]
 
-[dependencies]
+# wasm32-only crate: the whole lib.rs is cfg'd to wasm32, matching the
+# webizen-web pattern. Authoritative state/rules/persistence and the portal
+# render profile come from the pinned QualiaDB surface.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+qualia-core-db = { workspace = true, features = ["portal", "wasm-webcivics"] }
+vibe-wasm = { path = "../../../qualiaDB/crates/vibe-wasm" }
 wasm-bindgen = { workspace = true }
 serde = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 serde_json = { workspace = true }
-qualia-core-db = { workspace = true, features = ["wasm-webcivics"] }
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
 js-sys = { workspace = true }
 wasm-bindgen-futures = "0.4.75"
-web-sys = { workspace = true, features = ["console", "Window", "Navigator", "Performance"] }
+web-sys = { workspace = true, features = [
+    "console", "Window", "Navigator", "Performance", "HtmlCanvasElement",
+] }
