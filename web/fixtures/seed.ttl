@@ -1,0 +1,53 @@
+# Rolling Commons — first-playable seed world.
+# Kestrel Flats: a fictional town. One triple per line (token form); the
+# session strips @prefix/comments — gates match on raw lexical tokens.
+@prefix rc: <https://game.example/rc#> .
+@prefix ev: <https://game.example/ev#> .
+
+rc:player a rc:Resident .
+rc:player rc:atPlace rc:camp .
+rc:player rc:coin rc:c01 .
+rc:player rc:coin rc:c02 .
+rc:player rc:coin rc:c03 .
+rc:player rc:coin rc:c04 .
+rc:player rc:coin rc:c05 .
+rc:player rc:coin rc:c06 .
+rc:player rc:coin rc:c07 .
+rc:player rc:coin rc:c08 .
+rc:player rc:coin rc:c09 .
+rc:player rc:coin rc:c10 .
+rc:player rc:coin rc:c11 .
+rc:player rc:coin rc:c12 .
+rc:player rc:labourToken rc:l0 .
+
+rc:camp a rc:Place .
+rc:camp rc:name "Kestrel Flats camp" .
+rc:swag a rc:Shelter .
+rc:swag rc:atPlace rc:camp .
+rc:swag rc:owner rc:player .
+
+rc:workshop a rc:Workshop .
+rc:workshop rc:name "Community workshop" .
+rc:workshop rc:status "offline" .
+rc:workshop rc:powerWatts 0 .
+
+rc:solarProject a rc:CommunityProject .
+rc:solarProject rc:name "Workshop solar upgrade" .
+rc:solarProject rc:forFacility rc:workshop .
+rc:solarProject rc:targetWatts 400 .
+
+rc:market a rc:Market .
+rc:market rc:sells rc:partPanel .
+rc:market rc:sells rc:partInverter .
+rc:partPanel a rc:Part .
+rc:partPanel rc:coinCost 4 .
+rc:partInverter a rc:Part .
+rc:partInverter rc:coinCost 7 .
+
+rc:scrapyard a rc:Place .
+rc:scrapyard rc:name "Old railway scrapyard" .
+rc:scrapyard rc:mayYield rc:partPanel .
+rc:scrapyard rc:mayYield rc:partInverter .
+
+rc:committee a rc:Committee .
+rc:committee rc:governs rc:solarProject .

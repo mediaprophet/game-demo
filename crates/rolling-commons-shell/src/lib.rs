@@ -233,6 +233,228 @@ impl GamePortal {
     }
 }
 
+// --- Session: deterministic world document + event log ---
+//
+// The session holds the world as an N3 document (one triple per line) and an
+// ordered event log. It owns no rules: every action's gate is a SHACL
+// ShapeSpec list evaluated by the engine, and every effect is the declared
+// add/remove triple set from the action catalogue (countable token triples,
+// so no arithmetic lives here). Rejected actions spend nothing.
+
+#[derive(serde::Deserialize, Clone)]
+struct ActionDef {
+    id: String,
+    #[serde(default)]
+    label: String,
+    #[serde(default)]
+    gate: serde_json::Value, // ShapeSpec list, passed verbatim to the engine
+    #[serde(rename = "removeN", default)]
+    remove_n: Vec<RemoveSpec>,
+    #[serde(rename = "removeAll", default)]
+    remove_all: Vec<RemoveSpec>,
+    #[serde(default)]
+    add: Vec<String>,
+    #[serde(default)]
+    explain: String,
+}
+
+#[derive(serde::Deserialize, Clone)]
+struct RemoveSpec {
+    s: String,
+    p: String,
+    #[serde(default)]
+    o: Option<String>,
+    #[serde(default)]
+    n: usize,
+}
+
+#[wasm_bindgen]
+pub struct GameSession {
+    /// World document, one `s p o .` triple per line (token form).
+    lines: Vec<String>,
+    actions: Vec<ActionDef>,
+    /// Accepted action ids in order — the replay tape.
+    events: Vec<String>,
+    seq: u32,
+}
+
+#[wasm_bindgen]
+impl GameSession {
+    #[wasm_bindgen(constructor)]
+    pub fn new(seed_n3: &str, actions_json: &str) -> Result<GameSession, JsValue> {
+        let catalog: serde_json::Value = serde_json::from_str(actions_json)
+            .map_err(|e| JsValue::from_str(&format!("actions json: {e}")))?;
+        let actions: Vec<ActionDef> =
+            serde_json::from_value(catalog.get("actions").cloned().unwrap_or_default())
+                .map_err(|e| JsValue::from_str(&format!("actions list: {e}")))?;
+        let lines: Vec<String> = seed_n3
+            .lines()
+            .map(|l| l.trim().to_string())
+            .filter(|l| !l.is_empty() && !l.starts_with('#') && !l.starts_with("@prefix"))
+            .collect();
+        // A document loaded from a save already carries `ev:` lines — recover
+        // the tape and the sequence counter so new events continue, not collide.
+        let seq = lines.iter().filter(|l| l.ends_with("a ev:Event .")).count() as u32;
+        let mut events: Vec<(u32, String)> = Vec::new();
+        for l in &lines {
+            // line form: `ev:eN ev:action "id" .`
+            let parts: Vec<&str> = l.split_whitespace().collect();
+            if parts.len() >= 3 && parts[1] == "ev:action" {
+                let n = parts[0]
+                    .trim_start_matches("ev:e")
+                    .parse::<u32>()
+                    .unwrap_or(0);
+                let id = parts[2].trim_matches('"').trim_end_matches('.').trim_matches('"');
+                events.push((n, id.to_string()));
+            }
+        }
+        events.sort_by_key(|(n, _)| *n);
+        Ok(GameSession {
+            lines,
+            actions,
+            events: events.into_iter().map(|(_, id)| id).collect(),
+            seq,
+        })
+    }
+
+    /// Current world document as N3 text (includes `ev:` event lines).
+    pub fn world(&self) -> String {
+        self.lines.join("\n") + "\n"
+    }
+
+    /// Accepted action ids — the replay tape.
+    pub fn events(&self) -> JsValue {
+        serde_wasm_bindgen::to_value(&self.events).unwrap_or(JsValue::NULL)
+    }
+
+    /// Propose an action by catalogue id. The engine validates the gate
+    /// against the current world; on `conforms` the declared triple edits are
+    /// applied and an `ev:` event line is appended (event-sourced, so a
+    /// replay of the tape must reproduce this exact world text).
+    pub fn propose(&mut self, action_id: &str) -> JsValue {
+        let Some(action) = self.actions.iter().find(|a| a.id == action_id).cloned() else {
+            return err_obj("unknown action", action_id);
+        };
+        let gate_json = serde_json::to_string(&action.gate).unwrap_or_else(|_| "[]".into());
+        let report = match qualia_core_db::wasm_bridge::validate_shacl_json_wasm(
+            &self.world(),
+            &gate_json,
+        ) {
+            Ok(r) => r,
+            Err(e) => return err_obj("validation error", &js_err(&e)),
+        };
+        let conforms = js_get(&report, "conforms")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+        if !conforms {
+            let mut o = js_sys::Object::new();
+            set(&mut o, "ok", JsValue::FALSE);
+            set(&mut o, "action", JsValue::from_str(&action.id));
+            set(&mut o, "explain", JsValue::from_str(&action.explain));
+            set(&mut o, "report", report);
+            return o.into();
+        }
+        for spec in &action.remove_all {
+            self.remove_matching(spec, usize::MAX);
+        }
+        for spec in &action.remove_n {
+            self.remove_matching(spec, spec.n.max(1));
+        }
+        self.seq += 1;
+        let seq = self.seq;
+        for add in &action.add {
+            self.lines.push(add.replace("{seq}", &seq.to_string()));
+        }
+        self.lines.push(format!("ev:e{seq} a ev:Event ."));
+        self.lines.push(format!("ev:e{seq} ev:action \"{action_id}\" ."));
+        self.lines.push(format!("ev:e{seq} ev:seq {seq} ."));
+        self.events.push(action.id.clone());
+        let mut o = js_sys::Object::new();
+        set(&mut o, "ok", JsValue::TRUE);
+        set(&mut o, "action", JsValue::from_str(&action.id));
+        set(&mut o, "seq", JsValue::from_f64(seq as f64));
+        o.into()
+    }
+
+    fn remove_matching(&mut self, spec: &RemoveSpec, limit: usize) {
+        let mut removed = 0usize;
+        self.lines.retain(|line| {
+            if removed >= limit {
+                return true;
+            }
+            let hit = line_matches(line, spec);
+            if hit {
+                removed += 1;
+            }
+            !hit
+        });
+    }
+}
+
+fn line_matches(line: &str, spec: &RemoveSpec) -> bool {
+    let mut it = line.split_whitespace();
+    if it.next() != Some(spec.s.as_str()) || it.next() != Some(spec.p.as_str()) {
+        return false;
+    }
+    match &spec.o {
+        Some(o) => it.next().map(|t| t.trim_end_matches('.')) == Some(o.as_str()),
+        None => true,
+    }
+}
+
+fn js_get(v: &JsValue, key: &str) -> Option<JsValue> {
+    let k = JsValue::from_str(key);
+    // serde_wasm_bindgen returns engine reports as JS Maps — property access
+    // via Reflect is undefined on those; use Map.get.
+    if v.is_instance_of::<js_sys::Map>() {
+        let r = v.unchecked_ref::<js_sys::Map>().get(&k);
+        if r.is_undefined() { None } else { Some(r) }
+    } else {
+        js_sys::Reflect::get(v, &k).ok()
+    }
+}
+
+fn js_err(e: &JsValue) -> String {
+    e.as_string().unwrap_or_else(|| format!("{e:?}"))
+}
+
+fn set(o: &mut js_sys::Object, k: &str, v: JsValue) {
+    let _ = js_sys::Reflect::set(o, &JsValue::from_str(k), &v);
+}
+
+fn err_obj(kind: &str, detail: &str) -> JsValue {
+    let mut o = js_sys::Object::new();
+    set(&mut o, "ok", JsValue::FALSE);
+    set(&mut o, "error", JsValue::from_str(&format!("{kind}: {detail}")));
+    o.into()
+}
+
+/// Replay a tape of accepted action ids against the seed and return the
+/// resulting world text — the caller compares it to the live world to prove
+/// determinism. Any rejected proposal marks the divergence point.
+#[wasm_bindgen]
+pub fn session_replay(
+    seed_n3: &str,
+    actions_json: &str,
+    event_ids: JsValue,
+) -> Result<JsValue, JsValue> {
+    let ids: Vec<String> = serde_wasm_bindgen::from_value(event_ids)
+        .map_err(|e| JsValue::from_str(&format!("event ids: {e}")))?;
+    let mut s = GameSession::new(seed_n3, actions_json)?;
+    let mut diverged_at = JsValue::NULL;
+    for (i, id) in ids.iter().enumerate() {
+        let r = s.propose(id);
+        if js_get(&r, "ok").and_then(|v| v.as_bool()) != Some(true) {
+            diverged_at = JsValue::from_f64(i as f64);
+            break;
+        }
+    }
+    let mut o = js_sys::Object::new();
+    set(&mut o, "world", JsValue::from_str(&s.world()));
+    set(&mut o, "diverged_at", diverged_at);
+    Ok(o.into())
+}
+
 // --- VibeScript: bounded authored content ---
 
 /// Evaluate a VibeScript cell through the pinned host. Scripts propose and
