@@ -19,10 +19,10 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-/// Tag `v0.0.40.11` peels to this commit on branch `0.0.40.6` (QG-12
-/// black-viewport fix). A scene receipt is not paint; canvas soft-rise waits
-/// on visual confirm.
-pub const QUALIADB_PINNED_REVISION: &str = "19e2abe";
+/// `f101983e` is `fix/qg12-town-frame-firstpaint` on top of tag `v0.0.40.11`
+/// (`19e2abe`). Town uploads can keep authored coordinates. A scene receipt
+/// is not paint; canvas soft-rise waits on visual confirm.
+pub const QUALIADB_PINNED_REVISION: &str = "f101983e";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
@@ -281,6 +281,16 @@ pub fn scene_build(
         for (key, value) in ["r", "g", "b", "a"].iter().zip(recipe.color) {
             js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
         }
+        // Authored town-frame centre. The portal ignores these; the page aims
+        // the camera here when the upload keeps town coordinates.
+        let center = [
+            (mesh.min[0] + mesh.max[0]) * 0.5,
+            (mesh.min[1] + mesh.max[1]) * 0.5,
+            (mesh.min[2] + mesh.max[2]) * 0.5,
+        ];
+        for (key, value) in ["cx", "cy", "cz"].iter().zip(center) {
+            js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
+        }
         Ok((mesh, obj.into()))
     }
 
@@ -441,6 +451,12 @@ impl GamePortal {
 
     pub fn set_sky_preset(&mut self, preset: u32) {
         self.inner.set_sky_preset(preset);
+    }
+
+    /// Leave the next scene upload in authored town coordinates instead of
+    /// the portal orbit frame. One camera then aims at that mesh.
+    pub fn set_preserve_authored_frame(&mut self, on: bool) {
+        self.inner.set_preserve_authored_frame(on);
     }
 }
 

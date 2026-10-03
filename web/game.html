@@ -318,10 +318,16 @@ $('sky-preset').onclick = () => {
 };
 $('tier').textContent = 'render tier ' + portal.tier();
 
-let camYaw=0.6, camPitch=0.42, camZoom=1.8;
+let camYaw=0.6, camPitch=0.42, camZoom=FIRST_PAINT?4:1.8;
 let territory='kestrel', tileCenters={};
+// Town-frame centre of the one loaded organ. Not a portal_point tile.
+let tankAim=null;
 function applyCam(){
   try {
+    if (FIRST_PAINT && tankAim) {
+      portal.set_camera_target(camYaw, camPitch, camZoom, tankAim.x, tankAim.y, tankAim.z);
+      return;
+    }
     const p=tileCenters[territory];
     if (p) portal.set_camera_target(camYaw, camPitch, camZoom, p.x, p.y, p.z);
     else portal.set_camera(camYaw, camPitch, camZoom);
@@ -343,22 +349,32 @@ function rebuild() {
     ? [...scene.organs].filter(o => o.id==='rc:asset/water-tank').slice(0,1)
     : [...scene.organs];
   const chosen = organs.length ? organs : [...scene.organs].slice(0,1);
+  // One scene: the tank stays in town coordinates, then the camera aims at it.
+  if (FIRST_PAINT) portal.set_preserve_authored_frame(true);
   const receipt = toObj(portal.load_scene(chosen));
   sceneMeshes = receipt.organs_loaded;
   if (sceneMeshes !== chosen.length)
     throw new Error(`QualiaDB refused ${chosen.length-sceneMeshes} scene meshes`);
-  portal.upload_tensor(scene.tensor);
+  if (FIRST_PAINT) {
+    const o = chosen[0];
+    tankAim = {x:o.cx, y:o.cy, z:o.cz};
+  } else {
+    portal.upload_tensor(scene.tensor);
+  }
   applyCam();
   return st;
 }
 
-// rAF render loop — tick drives GPU pick readback too
+// rAF starts after the first load_scene (see below). A tick before the mesh
+// exists used to miss the WebGPU body and fall through to a 2d context.
 let last=performance.now(), tickErrorShown=false;
-(function loop(t){
-  try { portal.tick(canvas, Math.min(50, t-last)); }
-  catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
-  last=t; requestAnimationFrame(loop);
-})(last);
+function startRenderLoop(){
+  (function loop(t){
+    try { portal.tick(canvas, Math.min(50, t-last)); }
+    catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
+    last=t; requestAnimationFrame(loop);
+  })(last);
+}
 
 // orbit + pick
 let drag=null;
@@ -636,8 +652,9 @@ $('vibe-preview').onclick = () => {
 };
 
 refresh();
+startRenderLoop();
 note(FIRST_PAINT
-  ? 'first-paint path armed — one water-tank organ, daylight sky, camera target set'
+  ? 'first-paint path armed — water tank in town frame, camera on that mesh'
   : 'slice ready — tier ' + portal.tier());
 
 // Scripted acceptance playthrough for headless verification (?selftest).
