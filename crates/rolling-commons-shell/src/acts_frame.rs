@@ -23,14 +23,17 @@ const VILLAIN_ACTS: &[&str] = &[
     "act.theft_with_force",
     "act.harm",
     "act.illegal_drug_supply",
+    "act.trafficking",
 ];
 
 /// Short allowlist. A cell follows one of these, and only for a human.
-/// Drug supply is an act on the supplier. It is never inferred from no housing.
+/// Drug supply and trafficking are acts. They are never a who-kind and
+/// never inferred from no housing.
 const CUSTODY_ACTS: &[&str] = &[
     "act.violence_against_person",
     "act.theft_with_force",
     "act.illegal_drug_supply",
+    "act.trafficking",
 ];
 
 /// The only claim that counts as a drug act. Conditions never map onto it.

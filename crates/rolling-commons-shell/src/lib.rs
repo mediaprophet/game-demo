@@ -19,10 +19,11 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-/// `231e3e94` presents the lit mesh (shade + depth + shell colour) when
-/// WebGPU answers. If the adapter hangs or the present fails, the canvas is
-/// replaced and the tick is a solid proof fill — not occlusion, not the look.
-pub const QUALIADB_PINNED_REVISION: &str = "231e3e94";
+/// `36248f4c` presents the lit mesh (shade + depth + shell colour) when
+/// WebGPU answers. If that present does not arrive, WebGL2 draws the same
+/// mesh with the same sun and a depth buffer. Flat proof triangles are not
+/// the phone picture.
+pub const QUALIADB_PINNED_REVISION: &str = "36248f4c";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
@@ -211,6 +212,8 @@ pub fn scene_build(
     orchard_active: bool,
     vibe_scene: &str,
     party: &str,
+    active_place: &str,
+    place_time: f32,
 ) -> Result<JsValue, JsValue> {
     use qualia_core_db::container_10d::provenance_section::ProvenanceSidecar;
     use qualia_core_db::render::assets::Mesh;
@@ -222,8 +225,14 @@ pub fn scene_build(
         Cancellation, GeometryWorkspace,
     };
 
-    fn organ(recipe: &asset_catalog::AssetRecipe) -> Result<(Mesh, JsValue), JsValue> {
-        let (mesh, source, mime) = if let Some(spec) = &recipe.parametric {
+    fn organ(
+        recipe: &asset_catalog::AssetRecipe,
+        shift_x: f32,
+        place_name: &str,
+        place_source: &str,
+        place_time: f32,
+    ) -> Result<(Mesh, JsValue), JsValue> {
+        let (mut mesh, mesh_source, mime) = if let Some(spec) = &recipe.parametric {
             let mesh = spec
                 .compile()
                 .map_err(|e| JsValue::from_str(&format!("parametric geometry: {e}")))?;
@@ -273,10 +282,17 @@ pub fn scene_build(
             };
             (mesh, source, mime)
         };
+        if shift_x != 0.0 {
+            for p in &mut mesh.positions {
+                p[0] += shift_x;
+            }
+            mesh.min[0] += shift_x;
+            mesh.max[0] += shift_x;
+        }
         // The scene is original authored data with no external reuse grant.
         // This records that status; it does not alter the QualiaDB licence.
         let provenance =
-            ProvenanceSidecar::new(source, mime, "All rights reserved (licence not assigned)");
+            ProvenanceSidecar::new(mesh_source, mime, "All rights reserved (licence not assigned)");
         let bytes = compile_mesh_to_10d_with_provenance(&mesh, Some(&provenance))
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
         let obj = js_sys::Object::new();
@@ -308,17 +324,10 @@ pub fn scene_build(
         for (key, value) in ["cx", "cy", "cz"].iter().zip(center) {
             js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
         }
-        // Place is where the part sits, not a camera preset. The crossing
-        // is the corridor between the two grounds. Saltwind stays a different
-        // place until a participant walks onto it.
-        let place = if center[0] > 10.5 {
-            "saltwind"
-        } else if center[0] > 6.5 {
-            "corridor"
-        } else {
-            "kestrel"
-        };
-        js_sys::Reflect::set(&obj, &"place".into(), &JsValue::from_str(place))?;
+        // Place is the loaded source, not an x offset inside one box.
+        js_sys::Reflect::set(&obj, &"place".into(), &JsValue::from_str(place_name))?;
+        js_sys::Reflect::set(&obj, &"source".into(), &JsValue::from_str(place_source))?;
+        js_sys::Reflect::set(&obj, &"time".into(), &JsValue::from_f64(place_time as f64))?;
         Ok((mesh, obj.into()))
     }
 
@@ -344,8 +353,29 @@ pub fn scene_build(
         recipes.push(vibe_scene_recipe(vibe_scene).map_err(|e| JsValue::from_str(&e))?);
     }
     recipes.extend(asset_catalog::participant_markers(party));
+    let active = if active_place == "saltwind" { "saltwind" } else { "kestrel" };
+    let source = if active == "saltwind" { "place:saltwind" } else { "place:kestrel" };
     for recipe in recipes {
-        let (mesh, obj) = organ(&recipe)?;
+        let anchor = asset_catalog::recipe_anchor_x(&recipe);
+        let person = recipe.id.starts_with("rc:participant/");
+        let salt_geom = !person && anchor > 10.5;
+        if active == "saltwind" && !person && !salt_geom {
+            continue;
+        }
+        if active == "kestrel" && salt_geom {
+            continue;
+        }
+        let shift = if salt_geom && active == "saltwind" { -16.0 } else { 0.0 };
+        let place = if person {
+            active
+        } else if salt_geom {
+            "saltwind"
+        } else if anchor > 6.5 {
+            "corridor"
+        } else {
+            "kestrel"
+        };
+        let (mesh, obj) = organ(&recipe, shift, place, source, place_time)?;
         for axis in 0..3 {
             min[axis] = min[axis].min(mesh.min[axis]);
             max[axis] = max[axis].max(mesh.max[axis]);
@@ -379,17 +409,52 @@ pub fn scene_build(
         &js_sys::Uint8Array::from(tensor.as_slice()),
     )?;
     let tiles = js_sys::Array::new();
-    for (id, center) in [("kestrel", [0.0_f32, 0.0, 0.0]), ("saltwind", [16.0, 0.0, 0.0])] {
-        let tile = js_sys::Object::new();
-        js_sys::Reflect::set(&tile, &"id".into(), &JsValue::from_str(id))?;
-        for (key, value) in ["x", "y", "z"].iter().zip(center) {
-            js_sys::Reflect::set(&tile, &(*key).into(), &JsValue::from_f64(value as f64))?;
-        }
-        tiles.push(&tile);
+    let tile = js_sys::Object::new();
+    js_sys::Reflect::set(&tile, &"id".into(), &JsValue::from_str(active))?;
+    for (key, value) in ["x", "y", "z"].iter().zip([0.0_f32, 0.0, 0.0]) {
+        js_sys::Reflect::set(&tile, &(*key).into(), &JsValue::from_f64(value as f64))?;
     }
+    tiles.push(&tile);
     js_sys::Reflect::set(&result, &"tiles".into(), &tiles)?;
+    js_sys::Reflect::set(&result, &"source".into(), &JsValue::from_str(source))?;
+    js_sys::Reflect::set(&result, &"time".into(), &JsValue::from_f64(place_time as f64))?;
     let _bounds = (min, max);
     Ok(result.into())
+}
+
+/// Posed figure vertices for the participants in `party`, same order and
+/// topology as the `.10d` just sealed. The page writes these every frame
+/// so a walk is the part changing, not a scene reload.
+#[wasm_bindgen]
+pub fn participant_poses(party: &str) -> Vec<f32> {
+    let mut out = Vec::new();
+    for recipe in asset_catalog::participant_markers(party) {
+        if let Some(spec) = &recipe.parametric {
+            if let Ok(mesh) = spec.compile() {
+                for p in mesh.positions {
+                    out.extend_from_slice(&p);
+                }
+            }
+        }
+    }
+    out
+}
+
+/// Triangle count and silhouette span for the two cuts that must read apart.
+#[wasm_bindgen]
+pub fn figure_audit() -> String {
+    let a = asset_catalog::participant_markers("0,0,0.8,0.4,0.2,0,0,0,0,0");
+    let b = asset_catalog::participant_markers("0,0,0.3,0.4,0.6,1,0,1.2,0,1");
+    let ma = a[0].parametric.as_ref().unwrap().compile().unwrap();
+    let mb = b[0].parametric.as_ref().unwrap().compile().unwrap();
+    format!(
+        "tris {} height {:.2} width {:.2} vs width {:.2} box-parts {}",
+        ma.triangle_count(),
+        ma.max[1] - ma.min[1],
+        ma.max[0] - ma.min[0],
+        mb.max[0] - mb.min[0],
+        a[0].parts.len()
+    )
 }
 
 // --- Portal: WebGPU scene ingest, frame, semantic pick ---
@@ -406,9 +471,10 @@ pub struct GamePortal {
 
 /// Arm the WebGPU path. Await once before constructing the portal.
 /// `true` means a device is stashed and the next tick can present the lit
-/// mesh (shade + depth). `false` means no present — use the proof tick.
-/// If [`webgpu_canvas_claimed`] is true, replace the canvas first; a 2d
-/// context cannot be created on an element WebGPU already took.
+/// mesh (shade + depth). `false` means WebGPU did not answer — the page
+/// should arm WebGL2 on a fresh canvas. That path uses the same mesh, the
+/// same sun, and a depth buffer. It is not the flat proof picture.
+/// If [`webgpu_canvas_claimed`] is true, replace the canvas first.
 #[wasm_bindgen]
 pub async fn init_webgpu(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
     qualia_core_db::render::portal::portal_init_webgpu(canvas).await
@@ -419,6 +485,13 @@ pub async fn init_webgpu(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
 #[wasm_bindgen]
 pub fn abort_webgpu_init() {
     qualia_core_db::render::portal::portal_abort_webgpu();
+}
+
+/// Lit present when WebGPU does not answer. Same mesh, same sun, depth test.
+/// Call on a canvas that does not already have a context, before `GamePortal::new`.
+#[wasm_bindgen]
+pub fn init_webgl2(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
+    qualia_core_db::render::portal::portal_init_webgl2(canvas)
 }
 
 /// True when init took the canvas's WebGPU context. The proof tick needs a
@@ -504,6 +577,12 @@ impl GamePortal {
     /// the portal orbit frame. One camera then aims at that mesh.
     pub fn set_preserve_authored_frame(&mut self, on: bool) {
         self.inner.set_preserve_authored_frame(on);
+    }
+
+    /// Overwrite one figure's vertices in the resident mesh. Same topology
+    /// as the sealed `.10d`. Does not reload the town.
+    pub fn write_part_vertices(&mut self, start: u32, xyz: &[f32]) {
+        self.inner.write_part_vertices(start, xyz);
     }
 }
 

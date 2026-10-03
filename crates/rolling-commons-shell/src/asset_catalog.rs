@@ -33,6 +33,25 @@ pub enum ParametricRecipe {
         profile: &'static [[f32; 2]],
         segments: usize,
     },
+    /// Figure sealed as one mesh. Head, shoulders, and stance are geometry,
+    /// not a box and not a who-kind. `light` 0 none, 1 hard act-light, 2 halo.
+    Figure {
+        center: [f32; 3],
+        kind: u32,
+        phase: f32,
+        marked: bool,
+        yaw: f32,
+        light: u32,
+        /// 0 nothing in the hands. 1 a carried bundle. Not a wrecked body.
+        carry: u32,
+    },
+    /// Compound model on the geometry path (lathe, sphere, cylinder, torus).
+    /// Not a box. `kind` picks the silhouette; nothing here borrows the tank.
+    Rig {
+        center: [f32; 3],
+        kind: u32,
+        span: f32,
+    },
 }
 
 impl ParametricRecipe {
@@ -71,6 +90,20 @@ impl ParametricRecipe {
                 authoring::torus(*major, *minor, *segments, *tube_segments)
                     .map_err(|e| e.to_string())?,
             ),
+            Self::Figure {
+                center,
+                kind,
+                phase,
+                marked,
+                yaw,
+                light,
+                carry,
+            } => {
+                return compile_figure(*center, *kind, *phase, *marked, *yaw, *light, *carry);
+            }
+            Self::Rig { center, kind, span } => {
+                return compile_rig(*center, *kind, *span);
+            }
             Self::Revolve {
                 center,
                 profile,
@@ -190,18 +223,262 @@ pub fn hdpe_shell_colour() -> [f32; 4] {
 }
 
 
-/// Fictional participants. Not likenesses and not a chatbot.
-/// `party` records are `x,z,r,g,b,shape,mark` separated by `;`, at most four.
-/// Shapes differ. `mark` is a quiet foot pad on the one person being directed.
+
+fn mesh_bounds(positions: &[[f32; 3]]) -> ([f32; 3], [f32; 3]) {
+    let mut min = [f32::INFINITY; 3];
+    let mut max = [f32::NEG_INFINITY; 3];
+    for p in positions {
+        for a in 0..3 {
+            min[a] = min[a].min(p[a]);
+            max[a] = max[a].max(p[a]);
+        }
+    }
+    (min, max)
+}
+
+fn append_mesh(dst: &mut Mesh, src: &Mesh) {
+    let base = dst.positions.len() as u32;
+    dst.positions.extend_from_slice(&src.positions);
+    for t in &src.triangles {
+        dst.triangles.push([t[0] + base, t[1] + base, t[2] + base]);
+    }
+}
+
+fn empty_mesh() -> Mesh {
+    Mesh {
+        positions: Vec::new(),
+        triangles: Vec::new(),
+        min: [0.0; 3],
+        max: [0.0; 3],
+    }
+}
+
+/// Limb from the geometry library. Pivot is the hip or shoulder; swing is
+/// motion on the part, not a rigid pop of a box.
+fn limb(radius: f32, length: f32, segments: u32, pivot: [f32; 3], rx: f64, rz: f64) -> Result<Mesh, String> {
+    let cyl = authoring::cylinder(radius, length, segments).map_err(|e| e.to_string())?;
+    let hy = f64::from(length) * 0.5;
+    let spun = authoring::mat_mul(
+        &authoring::rotation_z(rz),
+        &authoring::mat_mul(
+            &authoring::rotation_x(rx),
+            &authoring::translation(0.0, -hy, 0.0),
+        ),
+    );
+    let world = authoring::mat_mul(
+        &authoring::translation(f64::from(pivot[0]), f64::from(pivot[1]), f64::from(pivot[2])),
+        &spun,
+    );
+    Ok(authoring::transform_mesh(&cyl, &world))
+}
+
+fn ring_at(major: f32, minor: f32, at: [f32; 3]) -> Result<Mesh, String> {
+    let major = major.max(minor + 0.01);
+    let torus = authoring::torus(major, minor, 16, 6).map_err(|e| e.to_string())?;
+    Ok(authoring::transform_mesh(
+        &torus,
+        &authoring::translation(f64::from(at[0]), f64::from(at[1]), f64::from(at[2])),
+    ))
+}
+
+struct Cut {
+    torso_h: f32,
+    hip: f32,
+    waist: f32,
+    chest: f32,
+    shoulder: f32,
+    neck: f32,
+    leg: f32,
+    leg_r: f32,
+    stance: f32,
+    head: f32,
+    arm: f32,
+    hat: f32,
+}
+
+fn cut_of(kind: u32) -> Cut {
+    match kind % 6 {
+        1 => Cut { torso_h: 0.50, hip: 0.16, waist: 0.17, chest: 0.24, shoulder: 0.36, neck: 0.07, leg: 0.46, leg_r: 0.075, stance: 0.24, head: 0.15, arm: 0.34, hat: 0.0 },
+        2 => Cut { torso_h: 0.78, hip: 0.22, waist: 0.14, chest: 0.16, shoulder: 0.22, neck: 0.05, leg: 0.55, leg_r: 0.05, stance: 0.30, head: 0.11, arm: 0.40, hat: 0.0 },
+        3 => Cut { torso_h: 0.58, hip: 0.11, waist: 0.10, chest: 0.14, shoulder: 0.19, neck: 0.05, leg: 0.74, leg_r: 0.05, stance: 0.15, head: 0.12, arm: 0.46, hat: 0.22 },
+        4 => Cut { torso_h: 0.42, hip: 0.18, waist: 0.20, chest: 0.22, shoulder: 0.28, neck: 0.07, leg: 0.34, leg_r: 0.085, stance: 0.22, head: 0.16, arm: 0.26, hat: 0.0 },
+        5 => Cut { torso_h: 0.92, hip: 0.15, waist: 0.12, chest: 0.15, shoulder: 0.21, neck: 0.05, leg: 0.70, leg_r: 0.045, stance: 0.22, head: 0.11, arm: 0.48, hat: 0.0 },
+        _ => Cut { torso_h: 0.64, hip: 0.10, waist: 0.09, chest: 0.13, shoulder: 0.20, neck: 0.055, leg: 0.84, leg_r: 0.05, stance: 0.14, head: 0.12, arm: 0.50, hat: 0.0 },
+    }
+}
+
+/// One figure. Same computational-geometry path as the tank: a spun torso,
+/// a sphere head, cylindrical limbs. The `.10d` holds this mesh, not a box.
+fn compile_figure(
+    center: [f32; 3],
+    kind: u32,
+    phase: f32,
+    marked: bool,
+    yaw: f32,
+    light: u32,
+    carry: u32,
+) -> Result<Mesh, String> {
+    let c = cut_of(kind);
+    let swing = phase.sin();
+    let bob = swing.abs() * 0.03;
+    // Poses differ by cut so two figures are not one walk cycle in duplicate.
+    // 0 stride, 1 weight on one leg with an arm out, others a quieter step.
+    let (leg_l, leg_r, arm_l, arm_r) = if carry > 0 {
+        // Carrying: arms in, short step. Not the walking stride and not a broken body.
+        (f64::from(swing) * 0.22, f64::from(-swing) * 0.18, -1.15, -0.8)
+    } else {
+        match kind % 6 {
+            1 => (0.12_f64, -0.42, 0.55, -1.15),
+            _ => (
+                f64::from(swing) * 0.8,
+                f64::from(-swing) * 0.8,
+                f64::from(-swing) * 0.5,
+                f64::from(swing) * 0.5,
+            ),
+        }
+    };
+    let profile_pts = [
+        Point3::new(f64::from(c.hip), 0.0, 0.0),
+        Point3::new(f64::from(c.waist), f64::from(c.torso_h * 0.32), 0.0),
+        Point3::new(f64::from(c.chest), f64::from(c.torso_h * 0.58), 0.0),
+        Point3::new(f64::from(c.shoulder), f64::from(c.torso_h * 0.80), 0.0),
+        Point3::new(f64::from(c.neck), f64::from(c.torso_h * 0.94), 0.0),
+        Point3::new(0.0, f64::from(c.torso_h), 0.0),
+    ];
+    let segments = 32usize;
+    let mut vertices = vec![Point3::new(0.0, 0.0, 0.0); profile_pts.len() * segments];
+    let mut triangles = vec![[0u32; 3]; (profile_pts.len() - 1) * segments * 2];
+    let (nv, nt) = parametric_cad::revolve_profile(&profile_pts, segments, &mut vertices, &mut triangles)
+        .map_err(|e| format!("torso: {e:?}"))?;
+    let positions: Vec<[f32; 3]> = vertices[..nv].iter().map(|p| [p.x as f32, p.y as f32, p.z as f32]).collect();
+    let (min, max) = mesh_bounds(&positions);
+    let torso_local = Mesh { positions, triangles: triangles[..nt].to_vec(), min, max };
+    let torso = authoring::transform_mesh(&torso_local, &authoring::translation(0.0, f64::from(c.leg), 0.0));
+    let head_y = c.leg + c.torso_h + c.head * 0.72;
+    let head = authoring::transform_mesh(
+        &authoring::uv_sphere(c.head, 12, 18).map_err(|e| e.to_string())?,
+        &authoring::translation(0.0, f64::from(head_y), 0.0),
+    );
+    let hip_y = c.leg * 0.98;
+    let left_leg = limb(c.leg_r, c.leg, 16, [-c.stance, hip_y, 0.0], leg_l, 0.06)?;
+    let right_leg = limb(c.leg_r, c.leg, 16, [c.stance, hip_y, 0.0], leg_r, -0.06)?;
+    let shoulder_y = c.leg + c.torso_h * 0.78;
+    let left_arm = limb(c.leg_r * 0.7, c.arm, 14, [-(c.shoulder + 0.02), shoulder_y, 0.0], arm_l, 0.4)?;
+    let right_arm = limb(c.leg_r * 0.7, c.arm, 14, [c.shoulder + 0.02, shoulder_y, 0.0], arm_r, -0.28)?;
+    // What they carry. A whole person holding a bundle, never a broken body.
+    // Buried in the torso when their hands are empty so every figure stays one topology.
+    const BUNDLE: &[[f32; 2]] = &[
+        [0.0, -0.16],
+        [0.14, -0.12],
+        [0.16, 0.02],
+        [0.08, 0.14],
+        [0.0, 0.16],
+    ];
+    let sack = ParametricRecipe::Revolve {
+        center: [0.0, 0.0, 0.0],
+        profile: BUNDLE,
+        segments: 18,
+    }
+    .compile()?;
+    let bundle = if carry > 0 {
+        authoring::transform_mesh(
+            &sack,
+            &authoring::translation(
+                f64::from(c.shoulder * 0.15),
+                f64::from(c.leg + c.torso_h * 0.42),
+                0.22,
+            ),
+        )
+    } else {
+        authoring::transform_mesh(
+            &sack,
+            &authoring::mat_mul(
+                &authoring::translation(0.0, f64::from(c.leg + c.torso_h * 0.5), 0.0),
+                &authoring::scale(0.15, 0.15, 0.15),
+            ),
+        )
+    };
+    // Quiet direct-mark. Buried when not directing. Never a foot pad.
+    let mark = if marked {
+        ring_at(c.head * 0.95, 0.018, [0.0, head_y + c.head + 0.06, 0.0])?
+    } else {
+        ring_at(0.05, 0.012, [0.0, c.leg + c.torso_h * 0.5, 0.0])?
+    };
+    // Hat brim or a buried ring so every cut has the same part count.
+    let brim = if c.hat > 0.05 {
+        ring_at(c.hat, 0.02, [0.0, head_y + c.head * 0.35, 0.0])?
+    } else {
+        ring_at(0.05, 0.012, [0.0, head_y, 0.0])?
+    };
+    // Hard light only for a villain act. A condition such as nowhere to go
+    // keeps this ring inside the torso so it does not read as guilt.
+    let act_ring = match light {
+        1 => ring_at((c.shoulder + 0.05).max(0.16), 0.022, [0.0, c.leg + c.torso_h * 0.72, 0.0])?,
+        2 => ring_at(c.head * 1.7, 0.016, [0.0, head_y + c.head + 0.02, 0.0])?,
+        _ => ring_at(0.05, 0.012, [0.0, c.leg + c.torso_h * 0.45, 0.0])?,
+    };
+    let mut mesh = empty_mesh();
+    for part in [&torso, &head, &left_leg, &right_leg, &left_arm, &right_arm, &bundle, &mark, &brim, &act_ring] {
+        append_mesh(&mut mesh, part);
+    }
+    let placed = authoring::transform_mesh(
+        &mesh,
+        &authoring::translation(f64::from(center[0]), f64::from(center[1] + bob), f64::from(center[2])),
+    );
+    let yawed = authoring::transform_mesh(
+        &placed,
+        &authoring::mat_mul(
+            &authoring::translation(f64::from(center[0]), 0.0, f64::from(center[2])),
+            &authoring::mat_mul(
+                &authoring::rotation_y(f64::from(yaw)),
+                &authoring::translation(-f64::from(center[0]), 0.0, -f64::from(center[2])),
+            ),
+        ),
+    );
+    let (min, max) = mesh_bounds(&yawed.positions);
+    Ok(Mesh {
+        positions: yawed.positions,
+        triangles: yawed.triangles,
+        min,
+        max,
+    })
+}
+
+/// Anchor used to keep Saltwind geometry out of the Kestrel place.
+pub fn recipe_anchor_x(recipe: &AssetRecipe) -> f32 {
+    if let Some(spec) = &recipe.parametric {
+        return match spec {
+            ParametricRecipe::Cylinder { center, .. }
+            | ParametricRecipe::Sphere { center, .. }
+            | ParametricRecipe::Torus { center, .. }
+            | ParametricRecipe::Revolve { center, .. }
+            | ParametricRecipe::Figure { center, .. }
+            | ParametricRecipe::Rig { center, .. } => center[0],
+        };
+    }
+    recipe
+        .parts
+        .first()
+        .map(|p| match p {
+            Primitive::Box { center, .. } | Primitive::Roof { center, .. } => center[0],
+        })
+        .unwrap_or(0.0)
+}
+
+/// Fictional participants. Not likenesses, not a chatbot, not a who-kind.
+/// `party` records are `x,z,r,g,b,shape,mark,phase,yaw,light` separated by `;`.
+/// Soft roster 24. The mesh is a figure, sealed as `.10d`, not a box.
 pub fn participant_markers(party: &str) -> Vec<AssetRecipe> {
-    const IDS: [&str; 4] = [
-        "rc:participant/0",
-        "rc:participant/1",
-        "rc:participant/2",
-        "rc:participant/3",
+    const IDS: [&str; 24] = [
+        "rc:participant/0", "rc:participant/1", "rc:participant/2", "rc:participant/3",
+        "rc:participant/4", "rc:participant/5", "rc:participant/6", "rc:participant/7",
+        "rc:participant/8", "rc:participant/9", "rc:participant/10", "rc:participant/11",
+        "rc:participant/12", "rc:participant/13", "rc:participant/14", "rc:participant/15",
+        "rc:participant/16", "rc:participant/17", "rc:participant/18", "rc:participant/19",
+        "rc:participant/20", "rc:participant/21", "rc:participant/22", "rc:participant/23",
     ];
     let mut out = Vec::new();
-    for (n, rec) in party.split(';').take(4).enumerate() {
+    for (n, rec) in party.split(';').take(IDS.len()).enumerate() {
         if rec.trim().is_empty() {
             continue;
         }
@@ -209,27 +486,31 @@ pub fn participant_markers(party: &str) -> Vec<AssetRecipe> {
         if nums.len() < 6 {
             continue;
         }
-        let (x, z) = (nums[0], nums[1]);
         let color = [nums[2].clamp(0.0, 1.0), nums[3].clamp(0.0, 1.0), nums[4].clamp(0.0, 1.0), 1.0];
-        let mut parts = match nums[5] as u32 {
-            1 => vec![block([x, 0.62, z], [0.9, 1.15, 0.5])],
-            2 => vec![
-                block([x, 0.62, z], [0.38, 1.25, 0.34]),
-                block([x, 1.4, z], [0.72, 0.18, 0.62]),
-            ],
-            _ => vec![block([x, 0.85, z], [0.36, 1.7, 0.32])],
-        };
-        if nums.get(6).copied().unwrap_or(0.0) > 0.5 {
-            parts.push(block([x, 0.03, z], [0.5, 0.05, 0.5]));
-        }
         out.push(AssetRecipe {
             id: IDS[n],
-            parts,
-            parametric: None,
+            parts: Vec::new(),
+            parametric: Some(ParametricRecipe::Figure {
+                center: [nums[0], 0.0, nums[1]],
+                kind: nums[5] as u32,
+                phase: nums.get(7).copied().unwrap_or(0.0),
+                marked: nums.get(6).copied().unwrap_or(0.0) > 0.5,
+                yaw: nums.get(8).copied().unwrap_or(0.0),
+                light: nums.get(9).copied().unwrap_or(0.0) as u32,
+                carry: nums.get(10).copied().unwrap_or(0.0) as u32,
+            }),
             color,
-            vibe_source: None,
-            shell_signature: None,
-            spectrum_reading: None,
+            vibe_source: Some(part_record(
+                IDS[n],
+                "did:webizen:game:participant-figure-v1",
+                "Fictional participant figure",
+                color[0],
+                0.22,
+                1.46,
+                0.35,
+            )),
+            shell_signature: Some("did:webizen:game:participant-figure-v1"),
+            spectrum_reading: Some("colour"),
         });
     }
     out
@@ -267,16 +548,14 @@ pub fn kestrel_flats(
             block([1.6, 0.012, -1.8], [1.1, 0.04, 5.5]),
         ],
     ));
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/camp-shelter",
         [0.96, 0.53, 0.35, 1.0],
-        vec![
-            roof(
-                [-3.0, 0.0, 2.6],
-                [1.6 + upgrades.min(20) as f32 * 0.25, 0.9, 1.2],
-            ),
-            block([-3.0, 0.02, 3.6], [1.8, 0.06, 0.5]),
-        ],
+        ParametricRecipe::Rig {
+            center: [-3.0, 0.0, 2.6],
+            kind: 10,
+            span: 1.15 + upgrades.min(8) as f32 * 0.06,
+        },
     ));
     scene.push(asset(
         "rc:asset/camp-platform",
@@ -1048,19 +1327,239 @@ fn signed(
     recipe
 }
 
+
+fn lathe(
+    profile: &'static [[f32; 2]],
+    segments: usize,
+    scale: [f32; 3],
+    at: [f32; 3],
+) -> Result<Mesh, String> {
+    let spun = ParametricRecipe::Revolve {
+        center: [0.0, 0.0, 0.0],
+        profile,
+        segments,
+    }
+    .compile()?;
+    Ok(authoring::transform_mesh(
+        &spun,
+        &authoring::mat_mul(
+            &authoring::translation(f64::from(at[0]), f64::from(at[1]), f64::from(at[2])),
+            &authoring::scale(f64::from(scale[0]), f64::from(scale[1]), f64::from(scale[2])),
+        ),
+    ))
+}
+
+fn wheel(radius: f32, tube: f32, at: [f32; 3]) -> Result<Mesh, String> {
+    let ring = authoring::torus(radius, tube, 20, 8).map_err(|e| e.to_string())?;
+    Ok(authoring::transform_mesh(
+        &ring,
+        &authoring::mat_mul(
+            &authoring::translation(f64::from(at[0]), f64::from(at[1]), f64::from(at[2])),
+            &authoring::rotation_x(std::f64::consts::FRAC_PI_2),
+        ),
+    ))
+}
+
+fn ball(radius: f32, at: [f32; 3]) -> Result<Mesh, String> {
+    let sphere = authoring::uv_sphere(radius, 10, 14).map_err(|e| e.to_string())?;
+    Ok(authoring::transform_mesh(
+        &sphere,
+        &authoring::translation(f64::from(at[0]), f64::from(at[1]), f64::from(at[2])),
+    ))
+}
+
+fn tube(radius: f32, height: f32, at: [f32; 3], rot_z: f64) -> Result<Mesh, String> {
+    let cyl = authoring::cylinder(radius, height, 16).map_err(|e| e.to_string())?;
+    Ok(authoring::transform_mesh(
+        &cyl,
+        &authoring::mat_mul(
+            &authoring::translation(f64::from(at[0]), f64::from(at[1]), f64::from(at[2])),
+            &authoring::rotation_z(rot_z),
+        ),
+    ))
+}
+
+fn merge_at(parts: &[Mesh], center: [f32; 3]) -> Mesh {
+    let mut mesh = empty_mesh();
+    for part in parts {
+        append_mesh(&mut mesh, part);
+    }
+    let placed = authoring::transform_mesh(
+        &mesh,
+        &authoring::translation(f64::from(center[0]), f64::from(center[1]), f64::from(center[2])),
+    );
+    let (min, max) = mesh_bounds(&placed.positions);
+    Mesh {
+        positions: placed.positions,
+        triangles: placed.triangles,
+        min,
+        max,
+    }
+}
+
+/// Models that have to read apart with no label. Each is a lathe, a wheel,
+/// a sphere, or a cylinder. None of them is a box and none borrows the tank.
+fn compile_rig(center: [f32; 3], kind: u32, span: f32) -> Result<Mesh, String> {
+    const LOW: &[[f32; 2]] = &[
+        [0.0, -0.22],
+        [0.58, -0.24],
+        [0.62, 0.02],
+        [0.22, 0.2],
+        [0.0, 0.24],
+    ];
+    const CAB: &[[f32; 2]] = &[
+        [0.0, -0.12],
+        [0.46, -0.08],
+        [0.5, 0.16],
+        [0.18, 0.28],
+        [0.0, 0.3],
+    ];
+    const TALL: &[[f32; 2]] = &[
+        [0.0, -0.42],
+        [0.5, -0.44],
+        [0.52, 0.28],
+        [0.4, 0.46],
+        [0.0, 0.48],
+    ];
+    const LONG: &[[f32; 2]] = &[
+        [0.0, -0.4],
+        [0.48, -0.42],
+        [0.5, 0.32],
+        [0.46, 0.4],
+        [0.0, 0.42],
+    ];
+    const ROUND: &[[f32; 2]] = &[
+        [0.0, -0.36],
+        [0.42, -0.3],
+        [0.5, 0.0],
+        [0.4, 0.32],
+        [0.0, 0.38],
+    ];
+    const BELL: &[[f32; 2]] = &[
+        [0.0, 0.72],
+        [0.18, 0.55],
+        [0.55, 0.22],
+        [0.92, 0.02],
+        [1.05, -0.08],
+    ];
+    let span = span.max(0.6);
+    let parts: Vec<Mesh> = match kind {
+        // Low car: short cabin, four small wheels.
+        0 => vec![
+            lathe(LOW, 28, [1.7, 0.55, 0.72], [0.0, 0.28, 0.0])?,
+            lathe(CAB, 24, [0.72, 0.42, 0.6], [-0.05, 0.48, 0.0])?,
+            wheel(0.2, 0.055, [0.55, 0.2, 0.34])?,
+            wheel(0.2, 0.055, [0.55, 0.2, -0.34])?,
+            wheel(0.2, 0.055, [-0.55, 0.2, 0.34])?,
+            wheel(0.2, 0.055, [-0.55, 0.2, -0.34])?,
+        ],
+        // Four-wheel drive: higher body, bigger wheels, spare on the back.
+        1 => vec![
+            lathe(LOW, 28, [1.65, 0.7, 0.82], [0.0, 0.48, 0.0])?,
+            lathe(CAB, 24, [0.7, 0.48, 0.72], [-0.08, 0.78, 0.0])?,
+            wheel(0.3, 0.08, [0.52, 0.3, 0.42])?,
+            wheel(0.3, 0.08, [0.52, 0.3, -0.42])?,
+            wheel(0.3, 0.08, [-0.5, 0.3, 0.42])?,
+            wheel(0.3, 0.08, [-0.5, 0.3, -0.42])?,
+            wheel(0.22, 0.05, [-0.85, 0.7, 0.0])?,
+        ],
+        // Van: tall cabin the whole length, not a car with a hat.
+        2 => vec![
+            lathe(TALL, 28, [2.15, 1.25, 0.95], [0.0, 0.72, 0.0])?,
+            wheel(0.24, 0.06, [0.72, 0.24, 0.46])?,
+            wheel(0.24, 0.06, [0.72, 0.24, -0.46])?,
+            wheel(0.24, 0.06, [-0.72, 0.24, 0.46])?,
+            wheel(0.24, 0.06, [-0.72, 0.24, -0.46])?,
+        ],
+        // Bus: longer and taller than the van, three axles, a row of windows.
+        3 => {
+            let mut v = vec![
+                lathe(LONG, 32, [3.4, 1.5, 1.05], [0.0, 0.85, 0.0])?,
+                wheel(0.28, 0.07, [1.15, 0.28, 0.52])?,
+                wheel(0.28, 0.07, [1.15, 0.28, -0.52])?,
+                wheel(0.28, 0.07, [-0.15, 0.28, 0.52])?,
+                wheel(0.28, 0.07, [-0.15, 0.28, -0.52])?,
+                wheel(0.28, 0.07, [-1.2, 0.28, 0.52])?,
+                wheel(0.28, 0.07, [-1.2, 0.28, -0.52])?,
+            ];
+            for i in 0..5 {
+                let x = -1.3 + i as f32 * 0.55;
+                v.push(ball(0.1, [x, 1.15, 0.5])?);
+            }
+            v
+        }
+        // Camper van: van height plus a pod on the roof. Not the passenger van.
+        4 => vec![
+            lathe(TALL, 28, [2.25, 1.15, 0.98], [0.0, 0.7, 0.0])?,
+            lathe(CAB, 20, [1.1, 0.28, 0.7], [-0.15, 1.35, 0.0])?,
+            wheel(0.24, 0.06, [0.7, 0.24, 0.48])?,
+            wheel(0.24, 0.06, [0.7, 0.24, -0.48])?,
+            wheel(0.24, 0.06, [-0.75, 0.24, 0.48])?,
+            wheel(0.24, 0.06, [-0.75, 0.24, -0.48])?,
+        ],
+        // Trailer: low shell, a hitch, two wheels. No cab.
+        5 => vec![
+            lathe(LOW, 24, [1.9, 0.5, 0.85], [0.15, 0.42, 0.0])?,
+            tube(0.04, 0.7, [-0.95, 0.32, 0.0], std::f64::consts::FRAC_PI_2)?,
+            wheel(0.2, 0.05, [0.35, 0.2, 0.4])?,
+            wheel(0.2, 0.05, [0.35, 0.2, -0.4])?,
+        ],
+        // Caravan: taller rounded shell than the trailer, a door ring, no engine.
+        6 => vec![
+            lathe(ROUND, 28, [2.5, 1.15, 1.0], [0.1, 0.7, 0.0])?,
+            tube(0.035, 0.45, [-1.25, 0.4, 0.0], std::f64::consts::FRAC_PI_2)?,
+            wheel(0.22, 0.055, [0.45, 0.22, 0.48])?,
+            wheel(0.22, 0.055, [0.45, 0.22, -0.48])?,
+            wheel(0.22, 0.055, [-0.35, 0.22, 0.48])?,
+            wheel(0.22, 0.055, [-0.35, 0.22, -0.48])?,
+            authoring::transform_mesh(
+                &authoring::torus(0.28, 0.04, 16, 8).map_err(|e| e.to_string())?,
+                &authoring::mat_mul(
+                    &authoring::translation(0.15, 0.55, 0.48),
+                    &authoring::rotation_x(std::f64::consts::FRAC_PI_2),
+                ),
+            ),
+        ],
+        // Solar: a tilted cell on a post. A part on the rig, not a vehicle.
+        7 => vec![
+            tube(0.03, 0.55, [0.0, 0.28, 0.0], 0.0)?,
+            authoring::transform_mesh(
+                &authoring::cylinder(0.42, 0.03, 20).map_err(|e| e.to_string())?,
+                &authoring::mat_mul(
+                    &authoring::translation(0.0, 0.62, 0.0),
+                    &authoring::mat_mul(
+                        &authoring::rotation_x(0.7),
+                        &authoring::scale(1.15, 1.0, 0.7),
+                    ),
+                ),
+            ),
+        ],
+        // Battery: a squat can and two posts. Not a panel and not a van.
+        8 => vec![
+            tube(0.16, 0.28, [0.0, 0.16, 0.0], 0.0)?,
+            tube(0.03, 0.08, [-0.06, 0.34, 0.0], 0.0)?,
+            tube(0.03, 0.08, [0.06, 0.34, 0.0], 0.0)?,
+        ],
+        // Inverter: a low finned housing, shorter than the battery is tall.
+        9 => vec![
+            lathe(LOW, 20, [0.42, 0.16, 0.22], [0.0, 0.1, 0.0])?,
+            tube(0.015, 0.18, [0.0, 0.16, 0.0], std::f64::consts::FRAC_PI_2)?,
+        ],
+        // Shelter: a cover you can walk under, with two posts marking the way in.
+        _ => vec![
+            lathe(BELL, 32, [span, span, span], [0.0, 0.0, 0.0])?,
+            tube(0.04, 0.7, [0.55 * span, 0.35, 0.72 * span], 0.0)?,
+            tube(0.04, 0.7, [-0.55 * span, 0.35, 0.72 * span], 0.0)?,
+        ],
+    };
+    Ok(merge_at(&parts, center))
+}
+
 /// First authored batch. Each part has its own silhouette, signature, colour
 /// reading, sound reading, and a two-pose motion. Shower blocks, roads, and
 /// living things stay out until a source names them.
 fn authored_camp() -> Vec<AssetRecipe> {
     const TENT_PROFILE: &[[f32; 2]] = &[[0.0, -0.35], [0.62, -0.35], [0.04, 0.62]];
-    const PERSON_PROFILE: &[[f32; 2]] = &[
-        [0.0, -0.7],
-        [0.16, -0.7],
-        [0.2, 0.05],
-        [0.1, 0.28],
-        [0.14, 0.48],
-        [0.0, 0.62],
-    ];
     let z = 6.15_f32;
     let mut out = Vec::with_capacity(16);
     out.push(signed(
@@ -1081,113 +1580,32 @@ fn authored_camp() -> Vec<AssetRecipe> {
         0.40,
     ));
     out.push(signed(
-        asset(
-            "rc:asset/car",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![
-                block([-4.3, 0.32, z], [1.55, 0.38, 0.72]),
-                block([-4.15, 0.62, z], [0.7, 0.32, 0.66]),
-            ],
-        ),
-        "did:webizen:game:car-body-v1",
-        "Car body",
-        0.22,
-        0.35,
-        1.52,
-        0.08,
+        parametric("rc:asset/car", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-4.3, 0.0, z], kind: 0, span: 1.0 }),
+        "did:webizen:game:car-body-v1", "Car body", 0.22, 0.35, 1.52, 0.08,
     ));
     out.push(signed(
-        asset(
-            "rc:asset/four-wd",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![
-                block([-2.3, 0.48, z], [1.55, 0.62, 0.82]),
-                block([-2.15, 0.95, z], [0.72, 0.38, 0.76]),
-            ],
-        ),
-        "did:webizen:game:four-wd-body-v1",
-        "Four-wheel-drive body",
-        0.28,
-        0.30,
-        1.52,
-        0.09,
+        parametric("rc:asset/four-wd", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-2.3, 0.0, z], kind: 1, span: 1.0 }),
+        "did:webizen:game:four-wd-body-v1", "Four-wheel-drive body", 0.28, 0.30, 1.52, 0.09,
     ));
     out.push(signed(
-        asset(
-            "rc:asset/passenger-van",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![block([-0.15, 0.72, z], [2.15, 1.15, 0.95])],
-        ),
-        "did:webizen:game:van-body-v1",
-        "Van body",
-        0.33,
-        0.28,
-        1.50,
-        0.10,
+        parametric("rc:asset/passenger-van", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-0.15, 0.0, z], kind: 2, span: 1.0 }),
+        "did:webizen:game:van-body-v1", "Van body", 0.33, 0.28, 1.50, 0.10,
     ));
     out.push(signed(
-        asset(
-            "rc:asset/bus",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![
-                block([2.7, 0.85, z], [3.2, 1.4, 1.1]),
-                block([1.35, 0.95, z], [0.35, 0.7, 1.05]),
-            ],
-        ),
-        "did:webizen:game:bus-body-v1",
-        "Bus body",
-        0.50,
-        0.18,
-        1.50,
-        0.11,
+        parametric("rc:asset/bus", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [2.7, 0.0, z], kind: 3, span: 1.0 }),
+        "did:webizen:game:bus-body-v1", "Bus body", 0.50, 0.18, 1.50, 0.11,
     ));
     out.push(signed(
-        asset(
-            "rc:asset/camper-van",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![
-                block([-5.5, 0.7, z - 1.7], [2.3, 1.05, 0.98]),
-                block([-6.25, 0.95, z - 1.7], [0.7, 0.55, 0.9]),
-            ],
-        ),
-        "did:webizen:game:camper-van-shell-v1",
-        "Camper van shell",
-        0.42,
-        0.25,
-        1.50,
-        0.12,
+        parametric("rc:asset/camper-van", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-5.5, 0.0, z - 1.7], kind: 4, span: 1.0 }),
+        "did:webizen:game:camper-van-shell-v1", "Camper van shell", 0.42, 0.25, 1.50, 0.12,
     ));
     out.push(signed(
-        asset(
-            "rc:asset/camper-trailer",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![
-                block([-2.6, 0.48, z - 1.7], [2.0, 0.55, 0.9]),
-                block([-3.7, 0.28, z - 1.7], [0.35, 0.12, 0.12]),
-            ],
-        ),
-        "did:webizen:game:camper-trailer-shell-v1",
-        "Camper trailer shell",
-        0.38,
-        0.22,
-        1.48,
-        0.14,
+        parametric("rc:asset/camper-trailer", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-2.6, 0.0, z - 1.7], kind: 5, span: 1.0 }),
+        "did:webizen:game:camper-trailer-shell-v1", "Camper trailer shell", 0.38, 0.22, 1.48, 0.14,
     ));
     out.push(signed(
-        asset(
-            "rc:asset/caravan",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![
-                block([0.4, 0.75, z - 1.7], [2.5, 1.15, 1.05]),
-                block([-1.0, 0.32, z - 1.7], [0.4, 0.1, 0.1]),
-            ],
-        ),
-        "did:webizen:game:caravan-shell-v1",
-        "Caravan shell",
-        0.48,
-        0.20,
-        1.50,
-        0.13,
+        parametric("rc:asset/caravan", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [0.4, 0.0, z - 1.7], kind: 6, span: 1.0 }),
+        "did:webizen:game:caravan-shell-v1", "Caravan shell", 0.48, 0.20, 1.50, 0.13,
     ));
     out.push(signed(
         parametric(
@@ -1226,55 +1644,32 @@ fn authored_camp() -> Vec<AssetRecipe> {
         1.55,
         0.20,
     ));
-    // Parts on the rig, not the rig.
+    // Parts on the rig, not the rig. No wheels.
     out.push(signed(
-        asset(
-            "rc:asset/solar-panel",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![block([-5.5, 1.35, z - 1.7], [0.9, 0.04, 0.5])],
-        ),
-        "did:webizen:game:solar-cell-v1",
-        "Solar panel cell",
-        0.08,
-        0.70,
-        1.90,
-        0.02,
+        parametric("rc:asset/solar-panel", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-5.5, 0.0, z - 1.7], kind: 7, span: 1.0 }),
+        "did:webizen:game:solar-cell-v1", "Solar panel cell", 0.08, 0.70, 1.90, 0.02,
     ));
     out.push(signed(
-        asset(
-            "rc:asset/battery",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![block([-4.55, 0.2, z - 1.7], [0.36, 0.28, 0.22])],
-        ),
-        "did:webizen:game:battery-pack-v1",
-        "Battery pack housing",
-        0.15,
-        0.40,
-        1.45,
-        0.06,
+        parametric("rc:asset/battery", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-4.55, 0.0, z - 1.7], kind: 8, span: 1.0 }),
+        "did:webizen:game:battery-pack-v1", "Battery pack housing", 0.15, 0.40, 1.45, 0.06,
     ));
     out.push(signed(
-        asset(
-            "rc:asset/inverter",
-            [1.0, 1.0, 1.0, 1.0],
-            vec![block([-4.1, 0.12, z - 1.7], [0.28, 0.1, 0.18])],
-        ),
-        "did:webizen:game:inverter-housing-v1",
-        "Inverter housing",
-        0.18,
-        0.35,
-        1.50,
-        0.07,
+        parametric("rc:asset/inverter", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-4.1, 0.0, z - 1.7], kind: 9, span: 1.0 }),
+        "did:webizen:game:inverter-housing-v1", "Inverter housing", 0.18, 0.35, 1.50, 0.07,
     ));
     // Fictional participant. No face, no data likeness.
     out.push(signed(
         parametric(
             "rc:asset/participant",
             [1.0, 1.0, 1.0, 1.0],
-            ParametricRecipe::Revolve {
-                center: [5.5, 0.75, z - 1.7],
-                profile: PERSON_PROFILE,
-                segments: 20,
+            ParametricRecipe::Figure {
+                center: [5.5, 0.0, z - 1.7],
+                kind: 2,
+                phase: 0.6,
+                marked: false,
+                yaw: 0.4,
+                light: 0,
+                carry: 0,
             },
         ),
         "did:webizen:game:participant-cloth-v1",
@@ -1610,5 +2005,42 @@ mod tests {
         assert!(scene.iter().all(|a| {
             !a.id.contains("shower") && !a.id.contains("flora") && !a.id.contains("fauna") && !a.id.contains("funga")
         }));
+        for id in ["rc:asset/car", "rc:asset/passenger-van", "rc:asset/bus", "rc:asset/caravan", "rc:asset/solar-panel", "rc:asset/battery"] {
+            let part = scene.iter().find(|a| a.id == id).unwrap();
+            assert!(part.parts.is_empty(), "{id} still a box record");
+            let mesh = part.parametric.as_ref().unwrap().compile().unwrap();
+            assert!(mesh.triangle_count() > 80, "{id} tris {}", mesh.triangle_count());
+        }
+        let car = scene.iter().find(|a| a.id == "rc:asset/car").unwrap().parametric.as_ref().unwrap().compile().unwrap();
+        let van = scene.iter().find(|a| a.id == "rc:asset/passenger-van").unwrap().parametric.as_ref().unwrap().compile().unwrap();
+        let bus = scene.iter().find(|a| a.id == "rc:asset/bus").unwrap().parametric.as_ref().unwrap().compile().unwrap();
+        let van_h = van.max[1] - van.min[1];
+        let car_h = car.max[1] - car.min[1];
+        let bus_l = bus.max[0] - bus.min[0];
+        let van_l = van.max[0] - van.min[0];
+        assert!(van_h > car_h + 0.25, "van taller than car {van_h} {car_h}");
+        assert!(bus_l > van_l + 0.6, "bus longer than van {bus_l} {van_l}");
+        let solar = scene.iter().find(|a| a.id == "rc:asset/solar-panel").unwrap().parametric.as_ref().unwrap().compile().unwrap();
+        assert!(solar.max[1] - solar.min[1] < 1.2, "panel is not a vehicle");
+    }
+
+    #[test]
+    fn figure_sealed_mesh_is_a_person_not_a_box() {
+        let party = "0,0,0.8,0.4,0.2,0,0,0,0,0;1.5,0.2,0.3,0.45,0.7,1,0,1.1,0.4,1";
+        let figs = participant_markers(party);
+        assert_eq!(figs.len(), 2);
+        let a = figs[0].parametric.as_ref().unwrap().compile().unwrap();
+        let b = figs[1].parametric.as_ref().unwrap().compile().unwrap();
+        assert!(a.triangle_count() > 200, "not a 12-tri box {}", a.triangle_count());
+        assert_eq!(a.positions.len(), b.positions.len(), "pose keeps one topology");
+        let tall = a.max[1] - a.min[1];
+        let wide_a = a.max[0] - a.min[0];
+        let wide_b = b.max[0] - b.min[0];
+        assert!(tall > 1.4, "upright {tall}");
+        assert!(tall > wide_a, "not a crate");
+        assert!((wide_a - wide_b).abs() > 0.15, "silhouettes differ {wide_a} {wide_b}");
+        let moved = a.positions.iter().zip(b.positions.iter()).filter(|(p, q)| (p[2] - q[2]).abs() > 0.08).count();
+        assert!(moved > 20, "phase moves limbs, not a rigid box");
+        assert!(figs[0].parts.is_empty(), "no box parts");
     }
 }
