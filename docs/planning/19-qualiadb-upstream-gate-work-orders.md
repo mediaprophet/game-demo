@@ -281,8 +281,12 @@ scene demonstrates geometry and per-organ colour, while the full Portal path
 has no game-verified material, texture, light, shadow or sky authoring
 contract yet. Browser inspection of the earlier full Portal path showed a black clear
 and pale, ghostlike surfaces despite opaque authored RGBA. The current
-`32ef0175` source / rebuilt game package reports a more severe browser regression:
-the canvas remains entirely black despite a successful WebGPU scene receipt.
+`32ef0175` source / rebuilt game package reported a more severe browser regression:
+the canvas remained entirely black despite a successful WebGPU scene receipt.
+The game pin has since moved **forward** to tag `v0.0.40.11` (commit
+`19e2abe` on branch `0.0.40.6`), the upstream black-viewport fix — not back
+to pages `d153c153` / `0.0.40.1-dev`. That tag is a receipt of the fix, not
+paint. Canvas soft-rise waits until a visual confirm shows non-black pixels.
 Inspect the HDR
 mesh target's additive blend (`render/gpu/bloom.rs`), tone mapping and depth
 composition with a solid-colour occlusion fixture; determine the root cause

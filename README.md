@@ -56,11 +56,14 @@ provenance. These are detailed composition blockouts; finished materials,
 animation and HMC packs remain upstream gates.
 
 The current two-territory build loads 115 Qualia `.10d` meshes and passes both
-campaign endings and replay self-tests. Browser visual acceptance is **blocked**: the full
-Qualia WebGPU canvas remains black even with one accepted mesh. The exact
-reproduction and generic Qualia renderer fix are recorded in
+campaign endings and replay self-tests. The Qualia pin is tag `v0.0.40.11`
+(commit `19e2abe`, branch `0.0.40.6`), the QG-12 black-viewport fix, moved
+forward from `32ef0175` — not back to the pages branch. Browser visual
+acceptance stays **unconfirmed** until a frame is actually seen: a scene
+receipt is not paint, and canvas soft-rise waits on that confirm. The exact
+reproduction and the upstream fix are recorded in
 [QG-12](docs/planning/19-qualiadb-upstream-gate-work-orders.md); this repository
-keeps using the full Qualia engine and treats QualiaDB as read-only.
+keeps using the full Qualia engine and does not add a second renderer.
 
 Build with `wasm-pack build crates/rolling-commons-shell --target web --out-dir ../../web/pkg --release`,
 serve `web/` with a local HTTP server, and open its root URL. `web/game.html?selftest`
@@ -140,6 +143,7 @@ The planning set is the current source of truth:
 - [Asset production catalog](docs/planning/18-asset-production-catalog.md)
 - [QualiaDB upstream gate work orders](docs/planning/19-qualiadb-upstream-gate-work-orders.md)
 - [Current game build and QualiaDB needs](docs/planning/20-current-game-build-and-qualiadb-needs.md)
+- [Fauna traits and the drive/tow scaffold](docs/planning/21-fauna-trait-and-drive-tow.md)
 - QualiaDB platform completion brief (sibling repository:
   `docs/work-in-progress/qualia-capability-demonstration-program.md`)
 - [Technical architecture](docs/planning/02-technical-architecture.md)

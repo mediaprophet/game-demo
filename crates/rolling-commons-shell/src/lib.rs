@@ -18,7 +18,10 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-pub const QUALIADB_PINNED_REVISION: &str = "32ef0175";
+/// Tag `v0.0.40.11` peels to this commit on branch `0.0.40.6` (QG-12
+/// black-viewport fix). A scene receipt is not paint; canvas soft-rise waits
+/// on visual confirm.
+pub const QUALIADB_PINNED_REVISION: &str = "19e2abe";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {

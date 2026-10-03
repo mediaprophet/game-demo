@@ -23,10 +23,13 @@ define the current work packets. This table starts from repository inspection
 on **2026-10-02**. QualiaDB base revision: **`726f95d7`** (branch
 `0.0.40.5` / upstream work branch `rolling-commons/phase0`). This is the **base revision**;
 local QualiaDB scene geometry changes are not yet a reproducible pin. The
-current two-territory integration uses clean QualiaDB commit `32ef0175` with
-camera target, sky presets and a repaired WASM HMC bridge export. Its Cargo
+current two-territory integration pins QualiaDB tag `v0.0.40.11`
+(commit `19e2abe448bf6f5d9e87067ffe51ef889910bb6d` on branch `0.0.40.6`),
+the QG-12 black-viewport fix, moved forward from observation `32ef0175`
+(camera target, sky presets, repaired WASM HMC bridge export). Its Cargo
 dependency is still a sibling path, so each tested checkout must be recorded.
-The release/browser receipt for this revision is tracked in
+A successful scene receipt is not paint; canvas soft-rise waits on visual
+confirm. The release/browser receipt for this revision is tracked in
 `20-current-game-build-and-qualiadb-needs.md`.
 The
 historical browser receipts below are from a Chrome headless (swiftshader)
