@@ -125,6 +125,10 @@ pub struct AssetRecipe {
     pub parametric: Option<ParametricRecipe>,
     pub color: [f32; 4],
     pub vibe_source: Option<String>,
+    /// Material signature on the part, when the colour is a spectrum reading.
+    pub shell_signature: Option<&'static str>,
+    /// `colour` or `sound`. Not a baked texture id.
+    pub spectrum_reading: Option<&'static str>,
 }
 
 fn block(center: [f32; 3], size: [f32; 3]) -> Primitive {
@@ -142,6 +146,8 @@ fn asset(id: &'static str, color: [f32; 4], parts: Vec<Primitive>) -> AssetRecip
         parametric: None,
         color,
         vibe_source: None,
+        shell_signature: None,
+        spectrum_reading: None,
     }
 }
 
@@ -152,7 +158,35 @@ fn parametric(id: &'static str, color: [f32; 4], recipe: ParametricRecipe) -> As
         parametric: Some(recipe),
         color,
         vibe_source: None,
+        shell_signature: None,
+        spectrum_reading: None,
     }
+}
+
+/// Display colour of the water-tank **shell** from the HDPE optical spectrum
+/// reading. Water state does not swap this. Sucrose (albedo 0.85) is not it.
+/// Alpha stays opaque so the silhouette stays readable at both zooms.
+pub fn hdpe_shell_colour() -> [f32; 4] {
+    let sig = vibe::physics::MaterialSignature::lookup("hdpe_tank_shell")
+        .expect("hdpe tank shell is on the physics stack");
+    assert_ne!(sig.name, "Sucrose Cube", "shell must not read as sugar");
+    let optical = sig
+        .optical
+        .as_ref()
+        .expect("colour is the optical reading of the one spectrum axis");
+    let albedo = optical.albedo as f32;
+    let absorb = optical.absorption as f32;
+    // The reading itself: diffuse reflectance after absorption. Not a texture
+    // id and not the old cyan/grey water-online swap. Sucrose albedo is 0.85;
+    // this shell stays at or below its own 0.18 albedo.
+    let shade = (albedo * (1.0 - absorb)).clamp(0.0, albedo);
+    let ior_cool = ((optical.ior as f32) - 1.50).clamp(0.0, 0.08);
+    [
+        shade,
+        (shade + ior_cool * albedo).min(albedo),
+        (shade + ior_cool * albedo * 0.5).min(albedo),
+        1.0,
+    ]
 }
 
 /// First-pass blockout kit. Keep IDs stable when replacing geometry with
@@ -277,19 +311,32 @@ pub fn kestrel_flats(
             block([0.25, 1.85, -0.6], [0.5, 0.3, 0.05]),
         ],
     ));
-    scene.push(parametric(
+    // Shell colour is the HDPE spectrum reading. Water online does not swap it.
+    // The van stays a later asset. Licence stays in .10d provenance, not on the mesh.
+    let _ = water_online;
+    let mut tank = parametric(
         "rc:asset/water-tank",
-        if water_online {
-            [0.26, 0.70, 0.78, 1.0]
-        } else {
-            [0.48, 0.57, 0.57, 1.0]
-        },
+        hdpe_shell_colour(),
         ParametricRecipe::Revolve {
             center: [-5.0, 1.02, -0.5],
             profile: TANK_PROFILE,
-            segments: 20,
+            // Dense enough that the rim reads up close and the belly reads zoomed out.
+            segments: 48,
         },
+    );
+    tank.shell_signature = Some("did:q42:material:hdpe-tank-shell-v1");
+    tank.spectrum_reading = Some("colour");
+    tank.vibe_source = Some(part_record(
+        "rc:asset/water-tank",
+        "did:q42:material:hdpe-tank-shell-v1",
+        "HDPE water-tank shell",
+        0.18,
+        0.40,
+        1.54,
+        0.08,
     ));
+    scene.push(tank);
+    scene.extend(authored_camp());
     scene.push(asset(
         "rc:asset/tank-stand",
         [0.31, 0.30, 0.27, 1.0],
@@ -903,6 +950,297 @@ pub fn kestrel_flats(
     scene
 }
 
+
+fn ink_colour(albedo: f32, absorb: f32, ior: f32) -> [f32; 4] {
+    let shade = (albedo * (1.0 - absorb)).clamp(0.02, albedo);
+    let cool = ((ior - 1.50) * albedo).clamp(0.0, 0.08);
+    [
+        shade,
+        (shade + cool).min(albedo.max(shade)),
+        (shade + cool * 0.5).min(albedo.max(shade)),
+        1.0,
+    ]
+}
+
+/// Qualia-shaped part record. Lives in the game repo. Not a baked clip.
+fn part_record(
+    part: &str,
+    signature: &str,
+    name: &str,
+    albedo: f32,
+    absorb: f32,
+    ior: f32,
+    sound: f32,
+) -> String {
+    format!(
+        "part {part}\nsignature {signature}\nsignature_name \"{name}\"\nfacet optical\nreading colour\nspectrum_axis emf\nalbedo {albedo}\nabsorption {absorb}\nior {ior}\nsound_absorption {sound}\nmotion t=0 pos=0,0,0; t=1 pos=0.4,0,0\nbaked_clip false\nbaked_frame false\nconstruct editable\nwrites_spatial false\n"
+    )
+}
+
+fn signed(
+    recipe: AssetRecipe,
+    signature: &'static str,
+    name: &str,
+    albedo: f32,
+    absorb: f32,
+    ior: f32,
+    sound: f32,
+) -> AssetRecipe {
+    let mut recipe = recipe;
+    recipe.color = ink_colour(albedo, absorb, ior);
+    recipe.shell_signature = Some(signature);
+    recipe.spectrum_reading = Some("colour");
+    recipe.vibe_source = Some(part_record(
+        recipe.id,
+        signature,
+        name,
+        albedo,
+        absorb,
+        ior,
+        sound,
+    ));
+    recipe
+}
+
+/// First authored batch. Each part has its own silhouette, signature, colour
+/// reading, sound reading, and a two-pose motion. Shower blocks, roads, and
+/// living things stay out until a source names them.
+fn authored_camp() -> Vec<AssetRecipe> {
+    const TENT_PROFILE: &[[f32; 2]] = &[[0.0, -0.35], [0.62, -0.35], [0.04, 0.62]];
+    const PERSON_PROFILE: &[[f32; 2]] = &[
+        [0.0, -0.7],
+        [0.16, -0.7],
+        [0.2, 0.05],
+        [0.1, 0.28],
+        [0.14, 0.48],
+        [0.0, 0.62],
+    ];
+    let z = 6.15_f32;
+    let mut out = Vec::with_capacity(16);
+    out.push(signed(
+        parametric(
+            "rc:asset/tent",
+            [1.0, 1.0, 1.0, 1.0],
+            ParametricRecipe::Revolve {
+                center: [-6.2, 0.55, z],
+                profile: TENT_PROFILE,
+                segments: 28,
+            },
+        ),
+        "did:webizen:game:canvas-tent-v1",
+        "Canvas tent fly",
+        0.55,
+        0.15,
+        1.45,
+        0.40,
+    ));
+    out.push(signed(
+        asset(
+            "rc:asset/car",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![
+                block([-4.3, 0.32, z], [1.55, 0.38, 0.72]),
+                block([-4.15, 0.62, z], [0.7, 0.32, 0.66]),
+            ],
+        ),
+        "did:webizen:game:car-body-v1",
+        "Car body",
+        0.22,
+        0.35,
+        1.52,
+        0.08,
+    ));
+    out.push(signed(
+        asset(
+            "rc:asset/four-wd",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![
+                block([-2.3, 0.48, z], [1.55, 0.62, 0.82]),
+                block([-2.15, 0.95, z], [0.72, 0.38, 0.76]),
+            ],
+        ),
+        "did:webizen:game:four-wd-body-v1",
+        "Four-wheel-drive body",
+        0.28,
+        0.30,
+        1.52,
+        0.09,
+    ));
+    out.push(signed(
+        asset(
+            "rc:asset/passenger-van",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![block([-0.15, 0.72, z], [2.15, 1.15, 0.95])],
+        ),
+        "did:webizen:game:van-body-v1",
+        "Van body",
+        0.33,
+        0.28,
+        1.50,
+        0.10,
+    ));
+    out.push(signed(
+        asset(
+            "rc:asset/bus",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![
+                block([2.7, 0.85, z], [3.2, 1.4, 1.1]),
+                block([1.35, 0.95, z], [0.35, 0.7, 1.05]),
+            ],
+        ),
+        "did:webizen:game:bus-body-v1",
+        "Bus body",
+        0.50,
+        0.18,
+        1.50,
+        0.11,
+    ));
+    out.push(signed(
+        asset(
+            "rc:asset/camper-van",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![
+                block([-5.5, 0.7, z - 1.7], [2.3, 1.05, 0.98]),
+                block([-6.25, 0.95, z - 1.7], [0.7, 0.55, 0.9]),
+            ],
+        ),
+        "did:webizen:game:camper-van-shell-v1",
+        "Camper van shell",
+        0.42,
+        0.25,
+        1.50,
+        0.12,
+    ));
+    out.push(signed(
+        asset(
+            "rc:asset/camper-trailer",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![
+                block([-2.6, 0.48, z - 1.7], [2.0, 0.55, 0.9]),
+                block([-3.7, 0.28, z - 1.7], [0.35, 0.12, 0.12]),
+            ],
+        ),
+        "did:webizen:game:camper-trailer-shell-v1",
+        "Camper trailer shell",
+        0.38,
+        0.22,
+        1.48,
+        0.14,
+    ));
+    out.push(signed(
+        asset(
+            "rc:asset/caravan",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![
+                block([0.4, 0.75, z - 1.7], [2.5, 1.15, 1.05]),
+                block([-1.0, 0.32, z - 1.7], [0.4, 0.1, 0.1]),
+            ],
+        ),
+        "did:webizen:game:caravan-shell-v1",
+        "Caravan shell",
+        0.48,
+        0.20,
+        1.50,
+        0.13,
+    ));
+    out.push(signed(
+        parametric(
+            "rc:asset/stove",
+            [1.0, 1.0, 1.0, 1.0],
+            ParametricRecipe::Cylinder {
+                center: [3.3, 0.22, z - 1.7],
+                radius: 0.16,
+                height: 0.36,
+                segments: 24,
+            },
+        ),
+        "did:webizen:game:stove-body-v1",
+        "Contained stove body",
+        0.12,
+        0.55,
+        1.60,
+        0.05,
+    ));
+    out.push(signed(
+        parametric(
+            "rc:asset/fire-pit",
+            [1.0, 1.0, 1.0, 1.0],
+            ParametricRecipe::Torus {
+                center: [4.3, 0.12, z - 1.7],
+                major: 0.38,
+                minor: 0.08,
+                segments: 24,
+                tube_segments: 12,
+            },
+        ),
+        "did:webizen:game:fire-pit-rim-v1",
+        "Open fire-pit rim",
+        0.20,
+        0.45,
+        1.55,
+        0.20,
+    ));
+    // Parts on the rig, not the rig.
+    out.push(signed(
+        asset(
+            "rc:asset/solar-panel",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![block([-5.5, 1.35, z - 1.7], [0.9, 0.04, 0.5])],
+        ),
+        "did:webizen:game:solar-cell-v1",
+        "Solar panel cell",
+        0.08,
+        0.70,
+        1.90,
+        0.02,
+    ));
+    out.push(signed(
+        asset(
+            "rc:asset/battery",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![block([-4.55, 0.2, z - 1.7], [0.36, 0.28, 0.22])],
+        ),
+        "did:webizen:game:battery-pack-v1",
+        "Battery pack housing",
+        0.15,
+        0.40,
+        1.45,
+        0.06,
+    ));
+    out.push(signed(
+        asset(
+            "rc:asset/inverter",
+            [1.0, 1.0, 1.0, 1.0],
+            vec![block([-4.1, 0.12, z - 1.7], [0.28, 0.1, 0.18])],
+        ),
+        "did:webizen:game:inverter-housing-v1",
+        "Inverter housing",
+        0.18,
+        0.35,
+        1.50,
+        0.07,
+    ));
+    // Fictional participant. No face, no data likeness.
+    out.push(signed(
+        parametric(
+            "rc:asset/participant",
+            [1.0, 1.0, 1.0, 1.0],
+            ParametricRecipe::Revolve {
+                center: [5.5, 0.75, z - 1.7],
+                profile: PERSON_PROFILE,
+                segments: 20,
+            },
+        ),
+        "did:webizen:game:participant-cloth-v1",
+        "Fictional participant cloth",
+        0.40,
+        0.25,
+        1.40,
+        0.50,
+    ));
+    out
+}
+
 /// Saltwind Reach is a second authored territory sharing the same scene
 /// coordinates, event world and QualiaPortal viewport as Kestrel Flats.
 /// The water crossing is a visual state of the rule-gated bridge project.
@@ -1154,4 +1492,77 @@ pub fn saltwind_reach(
         ));
     }
     scene
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn water_tank_colour_is_hdpe_reading_not_sugar() {
+        let colour = hdpe_shell_colour();
+        assert_eq!(colour[3], 1.0, "opaque so both zooms keep a silhouette");
+        let sugar = vibe::physics::MaterialSignature::lookup("sugar_cube").unwrap();
+        let sugar_albedo = sugar.optical.unwrap().albedo as f32;
+        assert!(colour[0] < sugar_albedo);
+        assert!(colour[1] < sugar_albedo);
+        assert!(colour[2] < sugar_albedo);
+        // Old water-online cyan swap.
+        assert!(colour[1] < 0.5, "not the baked cyan {colour:?}");
+        let tank = kestrel_flats(0, 0, false, false, false, false)
+            .into_iter()
+            .find(|a| a.id == "rc:asset/water-tank")
+            .expect("tank");
+        assert_eq!(tank.color, colour);
+        assert_eq!(
+            tank.shell_signature,
+            Some("did:q42:material:hdpe-tank-shell-v1")
+        );
+        assert_eq!(tank.spectrum_reading, Some("colour"));
+        let mesh = tank.parametric.unwrap().compile().unwrap();
+        assert!(mesh.triangle_count() > 64, "rim must hold at close zoom");
+        let span_y = mesh.max[1] - mesh.min[1];
+        let span_x = mesh.max[0] - mesh.min[0];
+        assert!(span_y > 1.0 && span_x > 0.8, "belly reads zoomed out {span_x} {span_y}");
+        let rec = tank.vibe_source.unwrap();
+        assert!(rec.contains("baked_clip false"));
+        assert!(rec.contains("motion t=0"));
+    }
+
+    #[test]
+    fn authored_camp_parts_are_distinct_records_and_empty_kinds_stay_out() {
+        let scene = kestrel_flats(0, 0, false, false, false, false);
+        let want = [
+            "rc:asset/tent",
+            "rc:asset/car",
+            "rc:asset/four-wd",
+            "rc:asset/passenger-van",
+            "rc:asset/bus",
+            "rc:asset/camper-van",
+            "rc:asset/camper-trailer",
+            "rc:asset/caravan",
+            "rc:asset/stove",
+            "rc:asset/fire-pit",
+            "rc:asset/solar-panel",
+            "rc:asset/battery",
+            "rc:asset/inverter",
+            "rc:asset/participant",
+        ];
+        for id in want {
+            let part = scene.iter().find(|a| a.id == id).unwrap_or_else(|| panic!("missing {id}"));
+            assert!(part.shell_signature.is_some(), "{id}");
+            assert_eq!(part.spectrum_reading, Some("colour"));
+            let rec = part.vibe_source.as_deref().unwrap_or("");
+            assert!(rec.contains("baked_clip false"), "{id}");
+            assert!(rec.contains("sound_absorption"), "{id}");
+            assert!(rec.contains("construct editable"), "{id}");
+            assert!(!rec.contains("sucrose"), "{id}");
+        }
+        let stove = scene.iter().find(|a| a.id == "rc:asset/stove").unwrap();
+        let pit = scene.iter().find(|a| a.id == "rc:asset/fire-pit").unwrap();
+        assert_ne!(stove.color, pit.color);
+        assert!(scene.iter().all(|a| {
+            !a.id.contains("shower") && !a.id.contains("flora") && !a.id.contains("fauna") && !a.id.contains("funga")
+        }));
+    }
 }

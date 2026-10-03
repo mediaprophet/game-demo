@@ -170,6 +170,7 @@
       <button id="save">Save (OPFS)</button><button id="load">Load</button>
       <button id="replay">Replay tape</button><button id="new-game">New campaign</button>
       <span id="persist" class="muted"></span>
+      <span class="muted">Original meshes. Licence not assigned — in the .10d record, not on the mesh.</span>
     </div>
     <details class="panel">
       <summary>VibeScript workbench</summary>
@@ -307,7 +308,20 @@ const PLACES = [
 // ---------- portal ----------
 const FIRST_PAINT = new URLSearchParams(location.search).has('firstpaint');
 const canvas = $('scene');
-try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
+// Default tick draws on the canvas fallback so a missing or stuck WebGPU
+// adapter cannot take the canvas and leave it black. ?webgpu=1 opts into
+// the GPU path on a machine whose adapter actually presents.
+const WANT_GPU = new URLSearchParams(location.search).has('webgpu');
+let gpuOk = false;
+if (WANT_GPU) {
+  try {
+    gpuOk = await Promise.race([
+      m.init_webgpu(canvas),
+      new Promise(resolve => setTimeout(() => resolve(false), 3000)),
+    ]);
+  } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
+}
+
 const portal = new m.GamePortal(canvas);
 let skyPreset=1;
 portal.set_sky_preset(skyPreset);

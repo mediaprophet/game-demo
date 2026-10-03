@@ -19,11 +19,10 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-/// `774e5d8a` is `fix/qg12-town-frame-firstpaint` on top of tag `v0.0.40.11`
-/// (`19e2abe`). Portal uploads can keep authored coordinates. Wasm uniform
-/// upload no longer maps a buffer at creation. A scene receipt is not paint;
-/// canvas soft-rise waits on visual confirm.
-pub const QUALIADB_PINNED_REVISION: &str = "774e5d8a";
+/// `1e5ca0ed` draws the loaded mesh on the canvas tick when WebGPU does not
+/// present, and an omitted material does not become sugar. Authored
+/// coordinates still hold. A receipt is not paint; the tick is.
+pub const QUALIADB_PINNED_REVISION: &str = "1e5ca0ed";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
@@ -257,14 +256,21 @@ pub fn scene_build(
                 min: receipt.min,
                 max: receipt.max,
             };
-            let mut source = vec![0u8; 6 + parts.len() * 25];
-            recipe_write(parts, &mut source)
-                .map_err(|e| JsValue::from_str(&format!("scene recipe: {e:?}")))?;
-            (
-                mesh,
-                source,
-                "application/vnd.qualia.scene-primitives;version=1",
-            )
+            let (source, mime) = if let Some(src) = &recipe.vibe_source {
+                (
+                    src.as_bytes().to_vec(),
+                    "application/vnd.qualia.part-record;version=1",
+                )
+            } else {
+                let mut source = vec![0u8; 6 + parts.len() * 25];
+                recipe_write(parts, &mut source)
+                    .map_err(|e| JsValue::from_str(&format!("scene recipe: {e:?}")))?;
+                (
+                    source,
+                    "application/vnd.qualia.scene-primitives;version=1",
+                )
+            };
+            (mesh, source, mime)
         };
         // The scene is original authored data with no external reuse grant.
         // This records that status; it does not alter the QualiaDB licence.
@@ -282,6 +288,15 @@ pub fn scene_build(
         for (key, value) in ["r", "g", "b", "a"].iter().zip(recipe.color) {
             js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
         }
+        // Colour is a spectrum reading on the part, not a baked texture swap.
+        js_sys::Reflect::set(&obj, &"baked_texture".into(), &JsValue::from_bool(false))?;
+        if let Some(sig) = recipe.shell_signature {
+            js_sys::Reflect::set(&obj, &"signature".into(), &JsValue::from_str(sig))?;
+        }
+        if let Some(reading) = recipe.spectrum_reading {
+            js_sys::Reflect::set(&obj, &"reading".into(), &JsValue::from_str(reading))?;
+        }
+        js_sys::Reflect::set(&obj, &"baked_clip".into(), &JsValue::from_bool(false))?;
         // Authored town-frame centre. The portal ignores these; the page aims
         // the camera here when the upload keeps town coordinates.
         let center = [
@@ -913,6 +928,8 @@ fn vibe_scene_recipe(src: &str) -> Result<asset_catalog::AssetRecipe, String> {
         parametric: Some(shape),
         color,
         vibe_source: Some(src.to_string()),
+        shell_signature: None,
+        spectrum_reading: None,
     })
 }
 
