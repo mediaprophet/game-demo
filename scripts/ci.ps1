@@ -1,4 +1,4 @@
-# Rolling Commons — Phase 0 CI commands (Windows host).
+# Maslows Challenge — Phase 0 CI commands (Windows host).
 # Usage: scripts\ci.ps1 [-Step all|fmt|check|test|wasm|assets]
 param([string]$Step = "all")
 
@@ -7,11 +7,11 @@ $root = Split-Path -Parent $PSScriptRoot
 Push-Location $root
 
 function Fmt {
-    cargo fmt --all -- --check
+    cargo fmt -p rolling-commons-shell -- --check
 }
 
 function Check {
-    # Authoritative profile check for wasm32 (no GPU/LLM surface).
+    # Full QualiaDB WASM profile, including render and inference compilation.
     cargo check --workspace --target wasm32-unknown-unknown
 }
 

@@ -1,4 +1,4 @@
-# Rolling Commons: First-Playable Decision Proposals (draft)
+# Maslows Challenge: First-Playable Decision Proposals (draft)
 
 Status: **draft proposals for review** — none of these are accepted decisions
 until moved into the [decision register](00-decision-register.md). Prepared to

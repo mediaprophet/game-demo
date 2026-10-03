@@ -1,4 +1,4 @@
-# Rolling Commons: QualiaDB Format and Tooling Upstream Tasks
+# Maslows Challenge: QualiaDB Format and Tooling Upstream Tasks
 
 ## Purpose and status
 
@@ -49,7 +49,7 @@ tested before shipping; an extension alone does not establish interchange.
 
 ## Upstream subtasks
 
-| ID | Priority / dependency | QualiaDB work and evidence | Acceptance for Rolling Commons |
+| ID | Priority / dependency | QualiaDB work and evidence | Acceptance for Maslows Challenge |
 |---|---|---|---|
 | QG-01 | Gate for all packs | Decide the canonical game-pack `.hmc` producer/reader and version. Reconcile core `bundle/` with the semantic-library ZIP variant and update stale HCF/Bao and `.d10` prose or implement a versioned migration. | One `.hmc` built by the chosen producer opens in native and selected browser profile; its manifest, digests, rights, and entry kinds are verified; incompatible variants fail clearly. |
 | QG-02 | Gate for first 3D scene | Expose QualiaDB asset authoring from geometry recipe/mesh input through validation, `.10d` compilation, Q42 manifest, and HMC packaging. | Two distinct original props build reproducibly; malformed topology/units/digest fail; browser loading and semantic picking reach the matching Q42 IDs. |
@@ -61,6 +61,17 @@ tested before shipping; an extension alone does not establish interchange.
 | QG-08 | Later, only if on-demand place streaming is chosen | Design QualiaDB-owned range fetch, source policy, cache, geometry repair, tile seams, budgeted WASM/GPU lifecycle, and deterministic snapshot/replay for HTTP geography. | Same saved snapshot replays offline; bounded traversal releases old tiles; missing or malformed source fails visibly. No direct game-side HTTP/mesh stack. |
 
 ## Work order and completion rule
+
+The RTS uplift adds QG-09 through QG-18 for deterministic multi-agent ticks,
+RTS controls, pathfinding, large-scene rendering, animation, game packs,
+mutable Q42 state, Vibe authoring, terrain tooling, and browser input/audio.
+Their requirements and acceptance fixtures are specified in the
+[RTS uplift blueprint](17-rts-aaa-uplift-blueprint.md#8-required-qualiadb-upgrade-work).
+The [upstream gate work orders](19-qualiadb-upstream-gate-work-orders.md)
+give the concrete Qualia entry points, implementation sequence, failure
+fixtures, and browser completion receipts for QG-01–QG-18.
+Treat them as continuous upstream dependencies alongside QG-01–QG-08;
+implementation evidence and status belong in the living ledger.
 
 Start with **QG-01, QG-02, QG-04, and QG-05** as Phase 0/1 integration
 contracts. QG-03 is required before promising animated 3D characters, even if

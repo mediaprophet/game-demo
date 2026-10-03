@@ -3,17 +3,18 @@ name = "rolling-commons-shell"
 version = "0.0.1"
 edition = "2021"
 publish = false
-description = "Rolling Commons WASM game shell — thin bindings over the pinned QualiaDB browser profile"
+description = "Maslows Challenge WASM game shell — thin bindings over the full QualiaDB engine"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 # wasm32-only crate: the whole lib.rs is cfg'd to wasm32, matching the
-# webizen-web pattern. Authoritative state/rules/persistence and the portal
-# render profile come from the pinned QualiaDB surface.
+# webizen-web pattern. The full QualiaDB WASM engine supplies the renderer,
+# geometry, graph/logic, storage, and optional inference capabilities.
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-qualia-core-db = { workspace = true, features = ["portal", "wasm-webcivics"] }
+qualia-core-db = { workspace = true, features = ["wasm-full"] }
 vibe-wasm = { path = "../../../qualiaDB/crates/vibe-wasm" }
+vibe = { path = "../../../qualiaDB/crates/vibe" }
 wasm-bindgen = { workspace = true }
 serde = { workspace = true }
 serde-wasm-bindgen = { workspace = true }

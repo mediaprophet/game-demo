@@ -1,4 +1,4 @@
-# Rolling Commons
+# Maslows Challenge, an SDGs game
 
 A browser-first WASM game built alongside [dev.civics.au](https://dev.civics.au)
 and QualiaDB. It uses the local-first,
@@ -12,10 +12,71 @@ Development is constrained to the **QualiaDB/Webizen ecosystem**. Missing game
 capabilities are added to QualiaDB and verified there before this project uses
 them; the game does not introduce a separate engine or substitute technical
 stack. See the [QualiaDB-only development contract](docs/planning/13-qualiadb-only-development-contract.md).
+The playable browser shell builds `qualia-core-db` with `wasm-full` and uses
+`QualiaPortal` for 3D rendering. WebCivics is a separate profile; it is not
+the game's engine or its licence.
+
+## The game now
+
+Maslows Challenge opens with a practical choice: spend the town's twelve coins
+to move quickly, or spend workdays salvaging and repairing so cash remains
+for later. Rest restores one day's labour. Powering the workshop unlocks one
+paid repair order, so the player can recover funds for the final project.
+Kestrel Flats leads across the canal to Saltwind Reach. The player repairs a
+crossing, commissions a pump and plants an orchard. The canal rises after day
+four: a quick bridge repair is no longer possible, so a late player must
+spend an extra crew shift on bracing or pay a specialist crew two coins. The
+water level and bridge bracing are authored Qualia `.10d` scene states. The
+player then chooses an ending:
+open a local commons with a harvest gathering, or outfit a trade boat for
+neighbouring settlements. The two endings have different requirements and
+consequences in the saved, replayable world. The interface shows a field
+dispatch, project progress, relevant orders, day count and a result screen.
+
+The Kestrel Flats scene compiles original town geometry through QualiaDB
+computational geometry, provenance-bearing `.10d` containers, and the full
+QualiaPortal WebGPU path. Players can buy or salvage solar parts, install them,
+seek committee endorsement, power the workshop, improve shelter, save and
+reload through QualiaDB OPFS, replay actions, and inspect semantic scene nodes.
+They can repair the shared water tank with coins or labour, then plant the
+garden once water is available.
+The page also exposes VibeScript cells for live world snapshot queries,
+SHACL-gated order proposals, and a bounded scene asset that compiles through
+Qualia computational geometry to a provenance-bearing `.10d` mesh.
+Kestrel Flats has 91 always-present original `.10d` scene organs; the new
+Saltwind Reach tile adds 24 more plus state variants. The connected scene uses
+QualiaPortal's camera target and daylight sky APIs. State variants live in
+the game-owned catalog. Rounded assets use Qualia's computational
+geometry authoring and parametric CAD; all scene assets retain source
+provenance. These are detailed composition blockouts; finished materials,
+animation and HMC packs remain upstream gates.
+
+The current two-territory build loads 115 Qualia `.10d` meshes and passes both
+campaign endings and replay self-tests. Browser visual acceptance is **blocked**: the full
+Qualia WebGPU canvas remains black even with one accepted mesh. The exact
+reproduction and generic Qualia renderer fix are recorded in
+[QG-12](docs/planning/19-qualiadb-upstream-gate-work-orders.md); this repository
+keeps using the full Qualia engine and treats QualiaDB as read-only.
+
+Build with `wasm-pack build crates/rolling-commons-shell --target web --out-dir ../../web/pkg --release`,
+serve `web/` with a local HTTP server, and open its root URL. `web/game.html?selftest`
+runs the scripted action, scene, VibeScript, and replay checks; `web/spike.html`
+retains the earlier capability spike.
+
+The current action session still holds N3 text in the game shell. A mutable
+Q42 graph session, game-scoped VibeScript capabilities, HMC packaging, and
+animated `.10d` assets are tracked QualiaDB upstream tasks in the
+[capability ledger](docs/planning/15-living-qualiadb-capability-ledger.md).
+
+The production direction is a real-time strategy game with the scale and
+control clarity associated with Age of Empires, while retaining Rolling
+Commons' original setting and rules. The current level is still early and the
+renderer gate prevents its art from being judged in play. See the [RTS and AAA-quality uplift blueprint](docs/planning/17-rts-aaa-uplift-blueprint.md)
+for the gameplay, art, interaction, QualiaDB upgrade, and delivery gates.
 
 ## What the game is about
 
-Rolling Commons is an original game about the pursuit of making human rights
+Maslows Challenge is an original game about the pursuit of making human rights
 meaningful: whether people have the dignity, fairness, tenure, material means,
 and lawful remedies needed to live with peace amid real-world harms, violence,
 material pressures, institutional barriers, and the daily challenges to
@@ -43,7 +104,7 @@ financial, legal, engineering, medical, emergency, or service-eligibility advice
 
 ## How it works
 
-The authoritative game world is a local QualiaDB semantic graph plus a
+The target authoritative game world is a local QualiaDB semantic graph plus a
 QualiaDB-provided deterministic Rust/WASM simulation capability. Players inspect places and resources, travel,
 learn, repair, exchange materials, propose projects, offer help, and contribute
 to projects. Each action passes through explicit schema, permission, safety, and
@@ -71,6 +132,12 @@ The planning set is the current source of truth:
 - [QualiaDB-only development contract](docs/planning/13-qualiadb-only-development-contract.md)
 - [QualiaDB format and tooling upstream tasks](docs/planning/14-qualiadb-format-and-tooling-upstream-tasks.md)
 - [Living QualiaDB capability ledger](docs/planning/15-living-qualiadb-capability-ledger.md)
+- [RTS and AAA-quality uplift blueprint](docs/planning/17-rts-aaa-uplift-blueprint.md)
+- [Asset production catalog](docs/planning/18-asset-production-catalog.md)
+- [QualiaDB upstream gate work orders](docs/planning/19-qualiadb-upstream-gate-work-orders.md)
+- [Current game build and QualiaDB needs](docs/planning/20-current-game-build-and-qualiadb-needs.md)
+- QualiaDB platform completion brief (sibling repository:
+  `docs/work-in-progress/qualia-capability-demonstration-program.md`)
 - [Technical architecture](docs/planning/02-technical-architecture.md)
 - [GIS, public-data, and content-pack plan](docs/planning/03-place-data-and-content.md)
 - [Narrative onboarding and life chapters](docs/planning/05-narrative-onboarding.md)

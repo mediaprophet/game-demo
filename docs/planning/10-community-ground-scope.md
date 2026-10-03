@@ -1,4 +1,4 @@
-# Rolling Commons: Community-Ground Scope and Service Boundaries
+# Maslows Challenge: Community-Ground Scope and Service Boundaries
 
 ## Purpose
 

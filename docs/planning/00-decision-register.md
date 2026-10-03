@@ -1,4 +1,4 @@
-# Rolling Commons: Decision Register
+# Maslows Challenge: Decision Register
 
 This register distinguishes agreed direction from questions that require a
 verified technical or product decision. A decision is not implementation proof;
@@ -51,6 +51,10 @@ recorded capability-spike result.
 | D-042 | Accepted | Treat `.10d` as the canonical dense geometry extension; Q42 owns semantic state and asset references, HCF authored content, HMC distribution, VibeScript bounded authoring/behaviour, and P64 optional model weights. | Preserve the distinct roles and versioned links described in the [upstream task register](14-qualiadb-format-and-tooling-upstream-tasks.md); older `.d10` prose is not a second format decision. |
 | D-043 | Open | Which existing HMC implementation and format version is canonical for game packs, and what animation representation connects `.10d`, Q42, Vibe, and Webizen? | QG-01 and QG-03 must reconcile live code with draft descriptions and prove producer/consumer round trips before these are release contracts. |
 | D-044 | Accepted | QualiaDB capability assessment and improvement is a continuous part of game implementation. | At every newly discovered block, record an upstream subtask, fix and test the QualiaDB capability, pin the revision, then resume the blocked game work. Do not treat Phase 0 as a one-time inventory or use a game-side workaround. |
+| D-045 | Accepted direction | Uplift Maslows Challenge into an Age of Empires-like real-time strategy experience with original setting, mechanics, art, and audio, targeting major-title quality. | Follow the [RTS and AAA-quality uplift blueprint](17-rts-aaa-uplift-blueprint.md): strategic camera, multi-unit commands, construction, economy, progression, territory, and a full Qualia WASM asset/simulation pipeline. The current slice is a precursor, not the target. |
+| D-046 | Open | Does the RTS include military units or combat, and if so under what revised product principle? | Compare an engaging non-combat strategic-pressure prototype with an explicit conflict proposal before implementing combat. The existing product vision excludes violence as entertaining player power. |
+| D-047 | Proposed | Use sealed `.q42` checkpoints plus a versioned Q42-family mutable transaction journal (provisionally `.q42j`); do not assume 48-byte NQuins imply a 48-byte `T48` file format. | Review the upstream `qualiaDB/docs/work-in-progress/q42-mutable-journal-game-proposal.md`, audit existing WAL/OPFS code, specify transaction framing and recovery, then prove native/WASM conformance before accepting a public extension. |
+| D-048 | Accepted | The player-facing title is **Maslows Challenge, an SDGs game**. | Use it in the game, entry page, and project documentation. Existing internal crate, data namespace, save, and provenance identifiers stay stable for compatibility. |
 
 ## Decision procedure
 

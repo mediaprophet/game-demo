@@ -1,10 +1,11 @@
-# Rolling Commons — first-playable seed world.
+# Maslows Challenge — first-playable seed world.
 # Kestrel Flats: a fictional town. One triple per line (token form); the
 # session strips @prefix/comments — gates match on raw lexical tokens.
 @prefix rc: <https://game.example/rc#> .
 @prefix ev: <https://game.example/ev#> .
 
 rc:player a rc:Resident .
+rc:world rc:contentVersion 4 .
 rc:player rc:atPlace rc:camp .
 rc:player rc:coin rc:c01 .
 rc:player rc:coin rc:c02 .
@@ -19,6 +20,8 @@ rc:player rc:coin rc:c10 .
 rc:player rc:coin rc:c11 .
 rc:player rc:coin rc:c12 .
 rc:player rc:labourToken rc:l0 .
+rc:community a rc:Community .
+rc:community rc:status "building" .
 
 rc:camp a rc:Place .
 rc:camp rc:name "Kestrel Flats camp" .
@@ -51,3 +54,27 @@ rc:scrapyard rc:mayYield rc:partInverter .
 
 rc:committee a rc:Committee .
 rc:committee rc:governs rc:solarProject .
+
+rc:waterTank a rc:WaterTank .
+rc:waterTank rc:name "Shared water tank" .
+rc:waterTank rc:status "offline" .
+rc:waterTank rc:waterLitres 0 .
+rc:garden a rc:Garden .
+rc:garden rc:name "Community garden" .
+rc:garden rc:status "dry" .
+rc:garden rc:usesWaterFrom rc:waterTank .
+
+# Saltwind Reach: a connected second territory, with projects that depend on
+# the first town's restored water and power rather than a separate rule stack.
+rc:saltwindReach a rc:Territory .
+rc:saltwindReach rc:name "Saltwind Reach" .
+rc:bridge a rc:Bridge .
+rc:bridge rc:connects rc:camp .
+rc:bridge rc:connects rc:saltwindReach .
+rc:bridge rc:status "broken" .
+rc:windPump a rc:Pump .
+rc:windPump rc:status "offline" .
+rc:windPump rc:atPlace rc:saltwindReach .
+rc:orchard a rc:Orchard .
+rc:orchard rc:status "dry" .
+rc:orchard rc:usesWaterFrom rc:windPump .

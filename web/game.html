@@ -2,49 +2,197 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Rolling Commons — Kestrel Flats (slice)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maslows Challenge, an SDGs game</title>
 <style>
-  body { font-family: Georgia, serif; background:#f6f1e7; color:#2c2418; margin:0; }
-  header { padding:10px 16px; border-bottom:2px solid #c9b98f; }
-  main { display:flex; gap:16px; padding:14px; }
-  .panel { background:#fffdf6; border:1px solid #c9b98f; border-radius:8px; padding:12px; }
-  #scene { width:420px; height:300px; background:#e8e0cc; border-radius:8px; }
-  button { font:inherit; margin:3px 4px 3px 0; padding:6px 10px; border:1px solid #a08c5a;
-           background:#efe6cd; border-radius:6px; cursor:pointer; }
-  button:hover { background:#e3d5b0; }
-  #why { border-left:4px solid #b3543e; background:#fbeee8; }
-  #log div { font-family:monospace; font-size:12px; }
-  .muted { color:#7a6c50; font-size:12px; }
-  dl { margin:4px 0; } dt { font-weight:bold; display:inline } dd { display:inline; margin:0 8px 0 4px }
+  :root { color-scheme:dark; --bg:#0b1718; --surface:#152527; --surface2:#1b3030;
+    --line:#36524e; --text:#f2eddb; --muted:#a9beb6; --accent:#e7b96d;
+    --good:#8dcc93; --warning:#ec9f75; }
+  * { box-sizing:border-box; }
+  body { font:15px/1.45 system-ui,Segoe UI,sans-serif; background:var(--bg); color:var(--text); margin:0; }
+  header { min-height:68px; padding:10px 20px; border-bottom:1px solid var(--line);
+    background:#102021; display:flex; gap:22px; align-items:center; flex-wrap:wrap; }
+  .brand { display:flex; flex-direction:column; line-height:1.12; }
+  .brand strong { font:700 20px Georgia,serif; letter-spacing:.02em; }
+  .eyebrow { color:var(--accent); font:700 10px/1.5 system-ui,sans-serif; letter-spacing:.18em; text-transform:uppercase; }
+  .header-meta { display:flex; gap:10px; margin-left:auto; flex-wrap:wrap; align-items:center; }
+  .badge { padding:5px 10px; border:1px solid var(--line); border-radius:30px; color:var(--muted); font-size:12px; }
+  main { display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,370px); gap:16px;
+    padding:16px; max-width:1800px; margin:auto; align-items:start; }
+  .world-column,.side-column { min-width:0; display:grid; gap:14px; }
+  .territory-nav { display:flex; gap:9px; flex-wrap:wrap; align-items:center; }
+  .territory-nav button { min-width:180px; }
+  .territory-nav button[aria-current="true"] { background:linear-gradient(#fce3a0,#f7c778); border-color:#ac7844; }
+  .panel { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .panel h2 { margin:0 0 10px; font:700 19px Georgia,serif; }
+  .panel h3 { margin:14px 0 8px; font-size:12px; color:var(--accent); text-transform:uppercase; letter-spacing:.12em; }
+  .scene-shell { position:relative; overflow:hidden; border:1px solid var(--line); border-radius:12px;
+    background:radial-gradient(circle at 50% 35%,#294645,#071112 75%); }
+  #scene { display:block; width:100%; height:auto; max-height:76vh; background:transparent; touch-action:none; cursor:grab; }
+  .scene-label { position:absolute; top:14px; left:16px; pointer-events:none; padding:7px 11px;
+    border:1px solid #8aa69c66; border-radius:8px; background:#0b1b1bd9; }
+  .scene-label strong { display:block; font:700 18px Georgia,serif; }
+  .scene-help { position:absolute; bottom:12px; left:12px; right:12px; pointer-events:none;
+    padding:8px 11px; border-radius:7px; background:#0b1b1bd9; color:#e7eadc; font-size:12px; }
+  .resource-bar { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
+  .resource { padding:9px 11px; background:var(--surface2); border:1px solid var(--line); border-radius:9px; }
+  .resource span { display:block; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+  .resource strong { display:block; margin-top:2px; font-size:15px; white-space:nowrap; }
+  .status-good { color:var(--good); } .status-warn { color:var(--warning); }
+  .objective { padding:11px 12px; border:1px solid var(--line); border-radius:8px; margin:8px 0;
+    display:flex; justify-content:space-between; gap:12px; align-items:start; }
+  .objective.done { border-color:#4f7756; background:#19352a; }
+  .objective small { color:var(--muted); display:block; }
+  .objective .check { font-size:19px; color:var(--good); }
+  button { font:inherit; border:1px solid #6e826f; background:#27423d; color:var(--text);
+    padding:9px 11px; border-radius:8px; cursor:pointer; text-align:left; }
+  button:hover { background:#35594c; border-color:var(--accent); }
+  button:focus-visible,input:focus-visible,summary:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .action-group { display:grid; gap:7px; margin-top:12px; }
+  .action-group h3 { margin:0; }
+  .action-group button { width:100%; }
+  .utility-buttons { display:flex; gap:7px; flex-wrap:wrap; }
+  .utility-buttons button { font-size:13px; }
+  #why { border-left:4px solid var(--warning); background:#352922; }
+  #why ul { padding-left:20px; }
+  #inspector dl { display:grid; grid-template-columns:max-content 1fr; gap:4px 10px; }
+  #inspector dt { color:var(--muted); } #inspector dd { margin:0; overflow-wrap:anywhere; }
+  #log { max-height:150px; overflow:auto; } #log div { border-bottom:1px solid #ffffff15; padding:5px 0; font:12px ui-monospace,monospace; }
+  .muted { color:var(--muted); font-size:12px; }
+  .vibe-input { width:100%; background:#0e1c1d; color:var(--text); border:1px solid var(--line);
+    border-radius:6px; font:14px ui-monospace,monospace; padding:9px; }
+  .vibe-result { display:block; white-space:pre-wrap; overflow-wrap:anywhere; font:12px ui-monospace,monospace; margin-top:5px; }
+  details summary { cursor:pointer; font-weight:700; }
+  @media (max-width:1050px) { main { grid-template-columns:1fr; } .resource-bar { grid-template-columns:repeat(3,1fr); } }
+  @media (max-width:560px) { header { padding:10px 13px; } main { padding:9px; gap:9px; }
+    .resource-bar { grid-template-columns:repeat(2,1fr); } .scene-label { display:none; } }
+  /* Warm storybook strategy shell around the original Qualia-rendered world. */
+  :root { color-scheme:light; --bg:#dce9d4; --surface:#fff8e9; --surface2:#f8e4bf;
+    --line:#c9ba9a; --text:#263b43; --muted:#657274; --accent:#d76442;
+    --good:#347b53; --warning:#bf5b3e; }
+  body { font-family:'Trebuchet MS',Segoe UI,sans-serif;
+    background:radial-gradient(circle at 48% -20%,#fff4d6 0,#e9eddb 38%,#cbded1 100%); }
+  header { background:linear-gradient(105deg,#284c56,#1b3948 58%,#304957); color:#fff5dd;
+    border-bottom:0; box-shadow:0 7px 23px #344a4c33; }
+  .brand strong { font-size:24px; text-shadow:0 2px 2px #10283288; }
+  .eyebrow { font-family:'Trebuchet MS',sans-serif; font-weight:800; letter-spacing:.16em; }
+  header .eyebrow { color:#ffc56f; }
+  .badge { padding:6px 11px; border-color:#ffffff55; background:#19384377; color:#fce9c8; }
+  .badge.tide-high { border-color:#f4b077; background:#704832; color:#fff1db; }
+  main { padding:18px; }
+  .panel { border-color:#e6d6b8; border-radius:20px; padding:18px;
+    box-shadow:0 9px 24px #3e584d1a,inset 0 1px #ffffff; }
+  .panel h2 { font-size:21px; }
+  .scene-shell { border:7px solid #fff8e9; border-radius:25px; background:#172f3b;
+    box-shadow:0 14px 31px #38524b38,0 0 0 1px #bfc9b8; }
+  .scene-label { padding:9px 14px; border:2px solid #fff4d4; border-radius:13px;
+    background:#fff3ddec; box-shadow:0 4px 12px #101d1e55; }
+  .scene-label strong { font-size:19px; }
+  .scene-help { padding:9px 13px; border-radius:11px; background:#233e4cea; color:#fff5db; }
+  .resource { padding:10px 12px; background:#fff7e8; border-color:#e8d9bd; border-radius:13px;
+    box-shadow:0 4px 10px #44645013; }
+  .resource:nth-child(1) { background:#fff0c6; } .resource:nth-child(2) { background:#f4e3d5; }
+  .resource:nth-child(3) { background:#e7edf1; } .resource:nth-child(4) { background:#dceeea; }
+  .resource:nth-child(5) { background:#e7efd2; }
+  .objective { padding:12px 13px; border-color:#dfd1b5; border-radius:12px;
+    margin:9px 0; background:#fffdf5; }
+  .objective.done { border-color:#83bc8c; background:#e6f5dc; }
+  button { font:700 14px/1.35 'Trebuchet MS',Segoe UI,sans-serif; border-color:#c77449;
+    background:linear-gradient(#f7bb78,#ed9b60); color:#402f2d; padding:10px 12px;
+    border-radius:11px; box-shadow:0 3px 0 #bd764e,0 5px 9px #6e664822; }
+  button:hover { background:linear-gradient(#ffd299,#f3aa70); border-color:#a95d3d;
+    transform:translateY(-1px); }
+  #why { border-left:5px solid var(--warning); background:#fff0df; }
+  #log div { border-bottom-color:#d3c5a744; }
+  .vibe-input { background:#fffdf5; }
+  @media (max-width:560px) { main { padding:9px; } .panel { padding:14px; }
+    .scene-shell { border-width:4px; border-radius:16px; } }
+  .dispatch { background:linear-gradient(135deg,#fff4d5,#fbe3bf); border-color:#e3bd82; }
+  .dispatch p { margin:7px 0 13px; max-width:55ch; }
+  .dispatch button { width:100%; text-align:center; background:linear-gradient(#76c7a7,#47a989);
+    color:#173e39; border-color:#3b8e76; box-shadow:0 3px 0 #327b68; }
+  .campaign-meter { height:9px; background:#e9d3aa; border-radius:9px; overflow:hidden; margin:10px 0 4px; }
+  .campaign-meter span { display:block; height:100%; background:linear-gradient(90deg,#66bda0,#efae62); transition:width .35s; }
+  .campaign-count { color:#6a6759; font-size:12px; }
+  .finale { background:linear-gradient(145deg,#fff6db,#e9f5dc); border-color:#b6cf99; }
+  .finale-options { display:grid; gap:10px; margin-top:12px; }
+  .finale-option { border:1px solid #d6c49f; border-radius:13px; background:#fffdf4; padding:12px; }
+  .finale-option strong { display:block; font:700 16px Georgia,serif; }
+  .finale-option p { margin:5px 0 10px; font-size:13px; color:#53646a; }
+  .finale-option button { width:100%; }
+  .finale-option small { display:block; margin-top:8px; color:#765e53; }
+  .scene-victory { position:absolute; inset:auto 8% 13% 8%; padding:18px; background:#fff6ddf0;
+    border:3px solid #edbb70; border-radius:18px; text-align:center; box-shadow:0 12px 30px #10292a77; }
+  .scene-victory strong { display:block; font:700 25px Georgia,serif; }
+  .scene-victory span { display:block; margin-top:3px; }
+  .order-hint { margin-top:3px; font-size:11px; font-weight:400; color:#684b3e; }
+  .action-group button { line-height:1.25; }
 </style>
 </head>
 <body>
 <header>
-  <b>Rolling Commons</b> — Kestrel Flats · <span id="pin" class="muted"></span>
+  <div class="brand"><span class="eyebrow">An SDGs game · community strategy</span><strong>Maslows Challenge</strong></div>
+  <div class="header-meta"><span class="badge" id="day">Day 1</span><span class="badge" id="tide">Low tide</span><span class="badge" id="pin"></span><span class="badge" id="tier"></span></div>
 </header>
 <main>
-  <div>
-    <canvas id="scene" width="420" height="300"></canvas>
-    <div class="muted">Click the scene to inspect a place.</div>
-    <div id="inspector" class="panel" style="margin-top:10px"></div>
+  <div class="world-column">
+    <nav class="territory-nav" aria-label="Territories">
+      <button id="tile-kestrel" aria-current="true">01 · Kestrel Flats</button>
+      <button id="tile-saltwind" aria-current="false">02 · Saltwind Reach</button>
+      <button id="sky-preset" aria-label="Change Qualia sky preset">☀ Daylight</button>
+    </nav>
+    <div class="scene-shell">
+      <canvas id="scene" width="960" height="600" aria-label="QualiaDB three-dimensional view of Kestrel Flats"></canvas>
+      <div class="scene-label"><span class="eyebrow" id="territory-step">Territory 01</span><strong id="territory-name">Kestrel Flats</strong></div>
+      <div class="scene-help">Choose a territory · Drag to orbit · Wheel to zoom · Click a site to inspect</div>
+      <div class="scene-victory" id="scene-victory" hidden></div>
+    </div>
+    <div id="resource-bar" class="resource-bar" aria-label="World resources"></div>
+    <div id="inspector" class="panel" aria-live="polite"></div>
+    <div class="panel"><h2>Event journal</h2><div id="log" role="log" aria-live="polite"></div></div>
   </div>
-  <div style="flex:1">
-    <div id="actions" class="panel"><b>What do you do?</b><br></div>
-    <div id="why" class="panel" style="display:none;margin-top:10px"></div>
-    <div class="panel" style="margin-top:10px">
+  <div class="side-column">
+    <div class="panel dispatch"><span class="eyebrow" id="dispatch-step">Field dispatch</span>
+      <h2 id="dispatch-title">A town waiting to work</h2><p id="dispatch-copy"></p>
+      <div class="campaign-meter" aria-label="Campaign progress"><span id="campaign-fill"></span></div>
+      <div class="campaign-count" id="campaign-count"></div>
+      <button id="dispatch-action"></button>
+    </div>
+    <div class="panel"><span class="eyebrow" id="chapter-label">Campaign · Chapter 1</span><h2 id="chapter-title">Restore the commons</h2>
+      <div class="muted" id="chapter-detail">Make a workable shelter and bring the shared workshop, water and garden into use.</div>
+      <div id="objectives"></div>
+    </div>
+    <div class="panel finale" id="finale-panel" hidden></div>
+    <div id="actions" class="panel"><h2>Orders and projects</h2><div class="muted">Commands pass through QualiaDB's world rules.</div></div>
+    <div id="why" class="panel" style="display:none" aria-live="polite"></div>
+    <div class="panel utility-buttons">
       <button id="save">Save (OPFS)</button><button id="load">Load</button>
-      <button id="replay">Replay tape</button>
+      <button id="replay">Replay tape</button><button id="new-game">New campaign</button>
       <span id="persist" class="muted"></span>
     </div>
-    <div class="panel" style="margin-top:10px"><b>Journal</b><div id="log"></div></div>
+    <details class="panel">
+      <summary>VibeScript workbench</summary>
+      <div class="muted">Pure cells read a world snapshot or propose a catalogued order. Scene cells compile through Qualia geometry into a provenance-bearing .10d mesh.</div>
+      <h3>World query</h3>
+      <input class="vibe-input" id="vibe-src" value="= world.coins" aria-label="VibeScript world query">
+      <button id="vibe-run">Query world</button>
+      <output class="vibe-result" id="vibe-result"></output>
+      <h3>Propose an order</h3>
+      <input class="vibe-input" id="vibe-command" value="= &quot;repairTankCoins&quot;" aria-label="VibeScript order cell">
+      <button id="vibe-propose">Propose through rules</button>
+      <output class="vibe-result" id="vibe-command-result"></output>
+      <h3>Author one scene asset</h3>
+      <textarea class="vibe-input" id="vibe-scene" rows="3" aria-label="VibeScript scene asset cell"></textarea>
+      <button id="vibe-preview">Compile and preview .10d</button>
+      <output class="vibe-result" id="vibe-scene-result"></output>
+    </details>
   </div>
 </main>
 <script type="module">
-window.onerror = (msg, src, line) =>
-  fetch(`/r?name=JSERROR&pass=false&detail=${encodeURIComponent(`${msg} @${line}`).slice(0,200)}`).catch(()=>{});
 const $ = (id) => document.getElementById(id);
 const jlog = (s) => { const d=document.createElement('div'); d.textContent=s; $('log').prepend(d); };
-const note = (s) => { jlog(s); fetch(`/r?name=${encodeURIComponent(s)}&pass=true&detail=`).catch(()=>{}); };
+const note = jlog;
+window.onerror = (msg, src, line) => note(`ERROR ${msg} @${line}`);
 const toObj = (v) => {
   if (v instanceof Map) return Object.fromEntries([...v].map(([k,x])=>[k,toObj(x)]));
   if (Array.isArray(v)) return v.map(toObj);
@@ -55,82 +203,359 @@ const toObj = (v) => {
 
 const m = await import('./pkg/rolling_commons_shell.js');
 await m.default();
-$('pin').textContent = 'qualiaDB ' + m.pinned_qualiadb_revision();
+$('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
 
-const [SEED, ACTIONS] = await Promise.all(
-  ['fixtures/seed.ttl', 'fixtures/actions.json'].map(async u => (await fetch(u)).text()));
+const [SEED, ACTIONS, VIBE_SCENE] = await Promise.all(
+  ['fixtures/seed.ttl', 'fixtures/actions.json', 'fixtures/community-beacon.vibe']
+    .map(async u => (await fetch(u, {cache:'no-store'})).text()));
+$('vibe-scene').value = VIBE_SCENE.trim();
 let session = new m.GameSession(SEED, ACTIONS);
 const catalog = JSON.parse(ACTIONS).actions;
 
-// --- presentation helpers (display only; authoritative truth is the doc) ---
+// ---------- world doc → display facts (presentation only) ----------
 const triples = () => session.world().split('\n')
   .map(l => l.trim().split(/\s+/)).filter(p => p.length >= 3)
   .map(p => ({ s:p[0], p:p[1], o:p[2].replace(/\.$/,'') }));
 const values = (s,p) => triples().filter(t => t.s===s && t.p===p).map(t => t.o);
 const short = (t) => t.replace(/^rc:/,'').replace(/^ev:/,'ev:');
+const state = () => ({
+  coins:  values('rc:player','rc:coin').length,
+  labour: values('rc:player','rc:labourToken').length > 0,
+  held:   values('rc:player','rc:holdsPart'),
+  parts:  values('rc:solarProject','rc:partInstalled'),
+  approved: values('rc:solarProject','rc:approvedBy').length > 0,
+  online: values('rc:workshop','rc:status').includes('"online"'),
+  upgrades: values('rc:swag','rc:upgrade').length,
+  waterOnline: values('rc:waterTank','rc:status').includes('"online"'),
+  gardenActive: values('rc:garden','rc:status').includes('"growing"'),
+  bridgeOpen: values('rc:bridge','rc:status').includes('"passable"'),
+  bridgeBraced: values('rc:bridge','rc:bracedBy').length > 0,
+  pumpOnline: values('rc:windPump','rc:status').includes('"online"'),
+  orchardActive: values('rc:orchard','rc:status').includes('"growing"'),
+  orderDelivered: values('rc:workshop','rc:deliveredOrder').length > 0,
+  finale: values('rc:community','rc:finale')[0] || '',
+  day: values('rc:player','rc:turn').length + 1,
+});
 
-function refresh() {
-  const coins = values('rc:player','rc:coin').length;
-  const labour = values('rc:player','rc:labourToken').length;
-  const held = values('rc:player','rc:holdsPart').map(short).join(', ') || 'nothing';
-  const parts = values('rc:solarProject','rc:partInstalled').map(short).join(', ') || 'none yet';
-  const approved = values('rc:solarProject','rc:approvedBy').length > 0;
-  const power = values('rc:workshop','rc:status')[0] || 'offline';
-  const ups = values('rc:swag','rc:upgrade').length;
-  $('inspector').innerHTML =
-    `<b>You</b> — ${coins} coins · labour: ${labour?'yes':'spent'} · holding ${held}<br>
-     <b>Shelter</b> (your swag) — ${ups} upgrade(s)<br>
-     <b>Solar project</b> — parts installed: ${parts} · ${approved?'endorsed by committee':'awaiting committee'}<br>
-     <b>Workshop</b> — ${power}`;
-  const box = $('actions'); box.querySelectorAll('button').forEach(b=>b.remove());
-  for (const a of catalog) {
-    const b = document.createElement('button');
-    b.textContent = a.label; b.onclick = () => tryAction(a.id);
-    box.appendChild(b);
+const STORY = {
+  repairTankLabour: 'The cistern has been dry for weeks. Salvage a fitting and get water moving before the next project.',
+  salvagePanel: 'The scrapyard has a usable panel. Work costs a day, but leaves your scarce coins for later.',
+  buyPanel: 'The market has a panel ready now. Buying saves a workday and spends four coins.',
+  salvageInverter: 'The missing inverter can be recovered with patient work at the railway yard.',
+  buyInverter: 'An inverter is available at the market. Seven coins is a serious commitment.',
+  contributePanel: 'You have the panel. Fit it to the shared solar project so everyone can use the workshop.',
+  contributeInverter: 'You have the inverter. Install it before asking the committee to approve the system.',
+  requestApproval: 'Bring the installed work to the committee. The workshop needs a public decision, not just parts.',
+  switchPowerOn: 'The system is fitted and endorsed. Switch it on to give the settlement repair capacity.',
+  startGarden: 'Water is back. Plant the first beds so the town can grow food locally.',
+  improveShelterLabour: 'A sound place to sleep matters. Use your own work to patch the shelter.',
+  restoreBridge: 'The canal bridge cuts Saltwind Reach off. Reopen it before high water arrives after day four.',
+  braceBridge: 'High water has reached the supports. Brace them today, then return tomorrow to finish without paying a specialist crew.',
+  restoreBridgeLateLabour: 'The supports are braced. One more crew shift reopens the crossing without spending coins.',
+  restoreBridgeLateCoins: 'A canal crew can finish the high-water repair now for two coins. Keep a workday or keep your money.',
+  raiseWindPump: 'Use the powered workshop and open crossing to bring the wind pump back to life.',
+  plantOrchard: 'The pump is ready. Plant Saltwind’s orchard for a lasting harvest.',
+  fulfilWorkshopOrder: 'The workshop can take one paid repair order. It is a way to fund shared supplies.',
+  endTurn: 'Your crew has spent its work for today. Rest and begin again tomorrow.',
+};
+function campaignLead(st) {
+  if (st.finale) return {title:st.finale==='"commons"'?'The commons are open':'The canal is connected',
+    copy:st.finale==='"commons"'?'You chose a local gathering and opened a shared place to celebrate the harvest.':'You chose a working trade link, carrying Saltwind’s produce to neighbouring communities.',
+    label:'Campaign complete · explore the map', action:null, territory:'saltwind'};
+  if (!st.waterOnline) return {title:'First, restore shared water',copy:STORY.repairTankLabour,
+    label:st.labour?'Repair the tank':'Rest for tomorrow',action:st.labour?'repairTankLabour':'endTurn',territory:'kestrel'};
+  const heldPanel=st.held.includes('rc:partPanel'), heldInverter=st.held.includes('rc:partInverter');
+  const fittedPanel=st.parts.includes('rc:partPanel'), fittedInverter=st.parts.includes('rc:partInverter');
+  if (!st.online) {
+    let action;
+    if (heldPanel) action='contributePanel';
+    else if (heldInverter) action='contributeInverter';
+    else if (!fittedPanel) action=st.labour?'salvagePanel':st.coins>=4?'buyPanel':'endTurn';
+    else if (!fittedInverter) action=st.coins>=7?'buyInverter':st.labour?'salvageInverter':'endTurn';
+    else if (!st.approved) action='requestApproval';
+    else action='switchPowerOn';
+    return {title:'Power the workshop',copy:STORY[action],label:catalog.find(a=>a.id===action)?.label||'Continue',action,territory:'kestrel'};
   }
+  if (!st.gardenActive) return {title:'Grow local food',copy:STORY.startGarden,
+    label:st.labour?'Plant the garden':'Rest for tomorrow',action:st.labour?'startGarden':'endTurn',territory:'kestrel'};
+  if (!st.bridgeOpen) {
+    const action=!st.labour?'endTurn':st.day<=4?'restoreBridge':
+      st.bridgeBraced?'restoreBridgeLateLabour':st.coins>=2?'restoreBridgeLateCoins':'braceBridge';
+    return {title:st.day<=4?'Reach the far bank':'Cross the high canal',copy:STORY[action],
+      label:action==='endTurn'?'Rest for tomorrow':catalog.find(a=>a.id===action)?.label||'Continue',
+      action,territory:'saltwind'};
+  }
+  if (!st.pumpOnline) return {title:'Bring water to Saltwind',copy:STORY.raiseWindPump,
+    label:st.labour?'Commission the wind pump':'Rest for tomorrow',action:st.labour?'raiseWindPump':'endTurn',territory:'saltwind'};
+  if (!st.orchardActive) return {title:'Plant for the future',copy:STORY.plantOrchard,
+    label:st.labour?'Plant the orchard':'Rest for tomorrow',action:st.labour?'plantOrchard':'endTurn',territory:'saltwind'};
+  return {title:'Choose what the town becomes',copy:'The essentials now work. Host a local harvest gathering or launch a canal trade route. Each ending asks for a different commitment.',
+    label:'Choose an ending below',action:null,territory:'saltwind'};
+}
+
+// Pick target identities match the node order in the QualiaDB scene receipt.
+const PLACES = [
+  'rc:camp', 'rc:scrapyard', 'rc:market', 'rc:workshop', 'rc:committee',
+  'rc:waterTank', 'rc:garden',
+  'rc:bridge', 'rc:windPump', 'rc:orchard',
+];
+// ---------- portal ----------
+const canvas = $('scene');
+try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
+const portal = new m.GamePortal(canvas);
+let skyPreset=1;
+portal.set_sky_preset(skyPreset);
+$('sky-preset').onclick = () => {
+  skyPreset=skyPreset===3?1:skyPreset+1;
+  portal.set_sky_preset(skyPreset);
+  $('sky-preset').textContent=['','☀ Daylight','◒ Golden hour','☾ Moonlight'][skyPreset];
+};
+$('tier').textContent = 'render tier ' + portal.tier();
+
+let camYaw=0.6, camPitch=0.42, camZoom=1.8;
+let territory='kestrel', tileCenters={};
+function applyCam(){
+  try {
+    const p=tileCenters[territory];
+    if (p) portal.set_camera_target(camYaw, camPitch, camZoom, p.x, p.y, p.z);
+    else portal.set_camera(camYaw, camPitch, camZoom);
+  } catch(e) { note(`camera: ${String(e).slice(0,80)}`); }
+}
+for (const id of ['kestrel','saltwind']) {
+  $('tile-'+id).onclick = () => { territory=id; refresh(); };
+}
+
+let sceneMeshes = 0;
+let sceneSource = '';
+function rebuild() {
+  const st = state();
+  const scene = m.scene_build(st.upgrades, st.parts.length, st.online, st.approved,
+    st.waterOnline, st.gardenActive, st.bridgeOpen, st.bridgeBraced, st.day>4,
+    st.pumpOnline, st.orchardActive, sceneSource);
+  tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
+  const receipt = toObj(portal.load_scene(scene.organs));
+  sceneMeshes = receipt.organs_loaded;
+  if (sceneMeshes !== scene.organs.length)
+    throw new Error(`QualiaDB refused ${scene.organs.length-sceneMeshes} scene meshes`);
+  portal.upload_tensor(scene.tensor);
+  applyCam();
+  return st;
+}
+
+// rAF render loop — tick drives GPU pick readback too
+let last=performance.now(), tickErrorShown=false;
+(function loop(t){
+  try { portal.tick(canvas, Math.min(50, t-last)); }
+  catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
+  last=t; requestAnimationFrame(loop);
+})(last);
+
+// orbit + pick
+let drag=null;
+canvas.addEventListener('pointerdown', e=>{ drag={x:e.clientX,y:e.clientY,moved:false}; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointermove', e=>{ if(!drag) return;
+  if (Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>4) drag.moved=true;
+  if (drag.moved){ camYaw+=(e.movementX||0)*0.008; camPitch=Math.max(-1.2,Math.min(1.4,camPitch+(e.movementY||0)*0.006)); applyCam(); }});
+canvas.addEventListener('pointerup', e=>{
+  if (drag && !drag.moved){
+    const r=canvas.getBoundingClientRect();
+    portal.queue_pick(
+      (e.clientX-r.left)*canvas.width/r.width,
+      (e.clientY-r.top)*canvas.height/r.height,
+      canvas.width, canvas.height);
+    const readPick = (tries) => {
+      const i=portal.poll_pick();
+      if(i>=0 && i<PLACES.length) inspect(PLACES[i]);
+      else if(tries>0) setTimeout(()=>readPick(tries-1),50);
+      else $('why').style.display='none';
+    };
+    setTimeout(()=>readPick(20),50);
+  }
+  drag=null;
+});
+canvas.addEventListener('wheel', e=>{ e.preventDefault(); camZoom=Math.max(1.2,Math.min(20,camZoom*Math.exp(e.deltaY*0.001))); applyCam(); }, {passive:false});
+
+function inspect(s){
+  $('why').style.display='block';
+  $('why').innerHTML = `<b>${short(s)}</b><dl>` +
+    triples().filter(t=>t.s===s).map(t=>`<dt>${short(t.p)}</dt><dd>${short(t.o)}</dd>`).join('') +
+    `</dl>`;
+}
+
+// ---------- HUD ----------
+function refresh() {
+  const st = rebuild();
+  const saltwind=territory==='saltwind';
+  const lead=campaignLead(st);
+  $('day').textContent=`Day ${st.day}`;
+  $('tide').textContent=st.bridgeOpen?'Crossing secured':st.day<=4?`Low tide · ${5-st.day} day${st.day===4?'':'s'} left`:'High tide · extra work';
+  $('tide').classList.toggle('tide-high',!st.bridgeOpen&&st.day>4);
+  $('dispatch-step').textContent=st.finale?'Campaign complete':`Field dispatch · Day ${st.day}`;
+  $('dispatch-title').textContent=lead.title;
+  $('dispatch-copy').textContent=lead.copy;
+  const milestones=[st.upgrades>0,st.online,st.waterOnline,st.gardenActive,
+    st.bridgeOpen,st.pumpOnline,st.orchardActive];
+  const done=milestones.filter(Boolean).length;
+  $('campaign-fill').style.width=`${Math.round(done/7*100)}%`;
+  $('campaign-count').textContent=`${done} of 7 community projects working`;
+  $('dispatch-action').textContent=lead.label;
+  $('dispatch-action').onclick=()=>{
+    territory=lead.territory;
+    if (lead.action) tryAction(lead.action);
+    else { refresh(); (st.finale?$('scene'):$('finale-panel')).scrollIntoView({behavior:'smooth',block:'center'}); }
+  };
+  const victory=$('scene-victory');
+  victory.hidden=!st.finale;
+  if (st.finale) victory.innerHTML=(st.finale==='"commons"'?
+    '<strong>The commons are open</strong><span>Shared water, food and shelter became a place to gather.</span>':
+    '<strong>The canal is connected</strong><span>The first boat carries a harvest to neighbouring communities.</span>')+
+    `<span>Day ${st.day} · ${done}/7 projects working · ${st.coins} coins in reserve</span>`;
+  $('tile-kestrel').setAttribute('aria-current', String(!saltwind));
+  $('tile-saltwind').setAttribute('aria-current', String(saltwind));
+  $('territory-step').textContent=saltwind?'Territory 02':'Territory 01';
+  $('territory-name').textContent=saltwind?'Saltwind Reach':'Kestrel Flats';
+  $('chapter-label').textContent=saltwind?'Campaign · Chapter 2':'Campaign · Chapter 1';
+  $('chapter-title').textContent=saltwind?'Cross the canal':'Restore the commons';
+  $('chapter-detail').textContent=saltwind?
+    'Reconnect the crossing, bring the wind pump online and plant the orchard.':
+    'Make a workable shelter and bring the shared workshop, water and garden into use.';
+  canvas.setAttribute('aria-label',`QualiaDB three-dimensional view of ${saltwind?'Saltwind Reach':'Kestrel Flats'}`);
+  const resource = (label,value,cls='') => `<div class="resource"><span>${label}</span><strong class="${cls}">${value}</strong></div>`;
+  $('resource-bar').innerHTML = resource('Coins',st.coins) +
+    resource('Labour',st.labour?'Ready':'Spent',st.labour?'status-good':'status-warn') +
+    (saltwind ?
+      resource('Bridge',st.bridgeOpen?'Open':'Broken',st.bridgeOpen?'status-good':'status-warn') +
+      resource('Wind pump',st.pumpOnline?'Running':'Offline',st.pumpOnline?'status-good':'status-warn') +
+      resource('Orchard',st.orchardActive?'Growing':'Dry',st.orchardActive?'status-good':'status-warn') :
+      resource('Workshop',st.online?'Powered':'Offline',st.online?'status-good':'status-warn') +
+      resource('Water',st.waterOnline?'Flowing':'Offline',st.waterOnline?'status-good':'status-warn') +
+      resource('Garden',st.gardenActive?'Growing':'Dry',st.gardenActive?'status-good':'status-warn'));
+  const objective = (title,detail,done) => `<div class="objective ${done?'done':''}"><div><b>${title}</b><small>${detail}</small></div><span class="check">${done?'✓':'○'}</span></div>`;
+  $('objectives').innerHTML = saltwind ?
+    objective('Reconnect the crossing',st.bridgeOpen?'Bridge passable':st.day<=4?
+      `Low tide until day 4 · ${st.waterOnline?'crew can work':'restore Kestrel water first'}`:
+      st.bridgeBraced?'Supports braced · finish next workday':'High tide · brace supports or hire a crew',st.bridgeOpen) +
+    objective('Commission the wind pump',st.pumpOnline?'Pump running':'Needs bridge and powered workshop',st.pumpOnline) +
+    objective('Plant the orchard',st.orchardActive?'Fruit growing':'Needs the wind pump',st.orchardActive) :
+    objective('Improve your shelter',`${st.upgrades} upgrade${st.upgrades===1?'':'s'} made`,st.upgrades>0) +
+    objective('Power the workshop',`${st.parts.length}/2 parts · ${st.approved?'endorsed':'approval pending'}`,st.online) +
+    objective('Restore shared water',st.waterOnline?'Tank operational':'Repair by buying or salvaging',st.waterOnline) +
+    objective('Start the garden',st.gardenActive?'Beds planted':'Needs water and labour',st.gardenActive);
+  const finalePanel=$('finale-panel');
+  finalePanel.hidden=!st.orchardActive || !!st.finale;
+  if (!finalePanel.hidden) {
+    finalePanel.innerHTML=`<span class="eyebrow">Final decision</span><h2>What will the new capacity serve?</h2>
+      <div class="muted">Both are valid endings. Your choice is recorded in the Qualia world and replay.</div>
+      <div class="finale-options">
+        <div class="finale-option"><strong>Open the commons</strong><p>Put local food, water and a sound shelter first. Host a harvest gathering for the community.</p>
+          <button data-finale="openCommons">Host the gathering · 4 coins + 1 labour</button>
+          <small>${st.upgrades>0?'✓ Shelter':'○ Improve the shelter'} · ${st.gardenActive?'✓ Garden':'○ Plant the garden'} · ${st.coins>=4?'✓ Four coins':'○ Find four coins'} · ${st.labour?'✓ Crew ready':'○ Rest first'}</small></div>
+        <div class="finale-option"><strong>Launch the trade route</strong><p>Use the crossing and harvest to build a dependable link with neighbouring settlements.</p>
+          <button data-finale="launchTradeRoute">Outfit the first boat · 2 coins + 1 labour</button>
+          <small>${st.coins>=2?'✓ Two coins':'○ Find two coins'} · ${st.labour?'✓ Crew ready':'○ Rest first'}</small></div>
+      </div>`;
+    finalePanel.querySelectorAll('[data-finale]').forEach(b=>b.onclick=()=>tryAction(b.dataset.finale));
+  }
+  $('inspector').innerHTML = saltwind ? `<h2>Saltwind Reach</h2><dl>
+    <dt>Crossing</dt><dd>${st.bridgeOpen?'Bridge restored':'Bridge is broken'}</dd>
+    <dt>Water</dt><dd>${st.pumpOnline?'Wind pump commissioned':'Pump awaiting crew'}</dd>
+    <dt>Harvest</dt><dd>${st.orchardActive?'Orchard growing':'Orchard not planted'}</dd>
+  </dl>` : `<h2>Community overview</h2><dl>
+    <dt>Location</dt><dd>Kestrel Flats camp</dd>
+    <dt>Inventory</dt><dd>${st.held.map(short).join(', ')||'No parts held'}</dd>
+    <dt>Solar project</dt><dd>${st.parts.length}/2 parts installed · ${st.approved?'endorsed':'awaiting committee'}</dd>
+    <dt>Shelter</dt><dd>${st.upgrades} improvement${st.upgrades===1?'':'s'}</dd>
+    <dt>Shared water</dt><dd>${st.waterOnline?'200 L available':'Tank needs repair'}</dd>
+  </dl>`;
+  const box = $('actions'); box.querySelectorAll('button').forEach(b=>b.remove());
+  box.querySelectorAll('.action-group').forEach(g=>g.remove());
+  box.querySelector('#campaign-finished-note')?.remove();
+  const fittedPanel=st.parts.includes('rc:partPanel'), fittedInverter=st.parts.includes('rc:partInverter');
+  const heldPanel=st.held.includes('rc:partPanel'), heldInverter=st.held.includes('rc:partInverter');
+  const groups=st.finale ? [] : saltwind ? [
+    ['Saltwind projects',st.bridgeOpen ? st.pumpOnline ?
+      st.orchardActive?[]:['plantOrchard'] : ['raiseWindPump'] :
+      st.day<=4?['restoreBridge']:
+      st.bridgeBraced?['restoreBridgeLateLabour','restoreBridgeLateCoins']:
+      ['braceBridge','restoreBridgeLateCoins']],
+    ['Crew',st.labour?[]:['endTurn']],
+  ] : [
+    ['Workshop power',st.online?[]:[
+      ...(!fittedPanel&&!heldPanel?['buyPanel','salvagePanel']:[]),
+      ...(!fittedInverter&&!heldInverter?['buyInverter','salvageInverter']:[]),
+      ...(heldPanel?['contributePanel']:[]),...(heldInverter?['contributeInverter']:[]),
+      ...(st.parts.length>0&&!st.approved?['requestApproval']:[]),
+      ...(st.parts.length>=2&&st.approved?['switchPowerOn']:[]) ]],
+    ['Shelter',st.upgrades>0?[]:['improveShelterCoins','improveShelterLabour']],
+    ['Water and food',st.waterOnline ? st.gardenActive?[]:['startGarden'] : ['repairTankCoins','repairTankLabour']],
+    ['Workshop work',st.online&&!st.orderDelivered?['fulfilWorkshopOrder']:[]],
+    ['Crew',st.labour?[]:['endTurn']],
+  ];
+  for (const [heading,ids] of groups) {
+    if (!ids.length) continue;
+    const section = document.createElement('section'); section.className='action-group';
+    const h = document.createElement('h3'); h.textContent=heading; section.appendChild(h);
+    for (const id of ids) {
+      const a = catalog.find(x=>x.id===id); if (!a) continue;
+      const b = document.createElement('button');
+      b.textContent = a.label; b.onclick = () => tryAction(a.id);
+      section.appendChild(b);
+    }
+    box.appendChild(section);
+  }
+  if (st.finale) {
+    const p=document.createElement('p'); p.id='campaign-finished-note'; p.className='muted';
+    p.textContent='The campaign has an ending. Explore the map, replay your choices or begin a new campaign.';
+    box.appendChild(p);
+  }
+  $('tier').textContent = `QualiaPortal tier ${portal.tier()} · 2 territories · ${sceneMeshes} .10d meshes`;
 }
 
 function tryAction(id) {
   const r = toObj(session.propose(id));
-  if (r.ok) { $('why').style.display='none'; note(`event ${r.seq}: ${id}`); refresh(); return; }
-  // Blocked → the "Why?" view: engine violation report + the action's own
-  // explanation + the other routes that exist in the catalogue.
-  const rows = (r.report?.results || []).map(v =>
+  if (r.ok) {
+    $('why').style.display='none';
+    const eventCopy={
+      repairTankLabour:'The tank is flowing again.',repairTankCoins:'New fittings brought the tank back online.',
+      startGarden:'The first garden beds are planted.',switchPowerOn:'The workshop lights come on.',
+      restoreBridge:'The bridge is passable. Saltwind Reach is open.',
+      braceBridge:'The bridge supports are braced against the high canal.',
+      restoreBridgeLateLabour:'The braced bridge is passable.',
+      restoreBridgeLateCoins:'The canal crew reopens the bridge.',
+      raiseWindPump:'The wind pump begins to turn.',plantOrchard:'The orchard is planted.',
+      fulfilWorkshopOrder:'The repair order is delivered. Three coins earned.',
+      openCommons:'The commons opens with a harvest gathering.',
+      launchTradeRoute:'The first trade boat sets out.',endTurn:'The crew rests. A new day begins.'
+    };
+    note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
+    if (id==='openCommons'||id==='launchTradeRoute') territory='saltwind';
+    refresh(); return;
+  }
+  const rep = toObj(r.report||{});
+  const rows = (rep.results||[]).map(v =>
     `<li>${short(String(v.focus_node))} needs <b>${short(String(v.result_path))}</b>: ${v.message}</li>`).join('');
-  const routes = catalog.filter(c => c.id !== id)
-    .map(c => `<li>${c.label}</li>`).join('');
+  const alternatives={
+    repairTankCoins:['repairTankLabour'],repairTankLabour:['repairTankCoins','endTurn'],
+    buyPanel:['salvagePanel'],buyInverter:['salvageInverter'],
+    salvagePanel:['buyPanel','endTurn'],salvageInverter:['buyInverter','endTurn'],
+    improveShelterCoins:['improveShelterLabour'],improveShelterLabour:['improveShelterCoins','endTurn'],
+    restoreBridge:['braceBridge','restoreBridgeLateCoins','endTurn'],
+    braceBridge:['restoreBridgeLateCoins','endTurn'],
+    restoreBridgeLateCoins:['braceBridge','endTurn'],
+    restoreBridgeLateLabour:['restoreBridgeLateCoins','endTurn'],
+    openCommons:['improveShelterLabour','fulfilWorkshopOrder','endTurn','launchTradeRoute'],
+    launchTradeRoute:['fulfilWorkshopOrder','endTurn','openCommons']
+  };
+  const lead=campaignLead(state());
+  const suggestions=[...(alternatives[id]||[]),...(lead.action?[lead.action]:[])].filter((x,i,a)=>x!==id&&a.indexOf(x)===i).slice(0,3);
   $('why').style.display='block';
-  $('why').innerHTML = `<b>Why can't I?</b> <span class="muted">${r.explain||''}</span>
-    <ul>${rows}</ul><b>Other ways forward:</b><ul>${routes}</ul>`;
+  $('why').innerHTML = `<h2>That order cannot go ahead yet</h2><p>${r.explain||'Its requirements are not met.'}</p>
+    ${suggestions.length?'<b>Try next:</b><div class="action-group">'+suggestions.map(x=>
+      `<button data-suggestion="${x}">${catalog.find(c=>c.id===x)?.label||x}</button>`).join('')+'</div>':''}
+    <details><summary class="muted">Show rule details</summary><ul>${rows}</ul></details>`;
+  $('why').querySelectorAll('[data-suggestion]').forEach(b=>b.onclick=()=>tryAction(b.dataset.suggestion));
   note(`BLOCKED ${id}: ${rows.replace(/<[^>]+>/g,'').slice(0,120)}`);
 }
-
-// --- scene: tensor nodes are the pickable semantic layer over the props ---
-const canvas = $('scene');
-const portal = new m.GamePortal(canvas);
-// nodes [q,v,w, x,y,z, t,alpha,mu,sigma] — one per place, origin node centre
-const N = new Float32Array([
-  0,0,4, -0.6, 0.0,0, 0,1,0.7,0.2,   // camp
-  0,0,4,  0.6,-0.2,0, 0,1,0.7,0.5,  // scrapyard
-  0,0,4, -0.2,-0.7,0, 0,1,0.7,0.7,  // market
-  0,0,4,  0.2, 0.6,0, 0,1,0.7,0.9,  // workshop
-]);
-const PLACES = ['rc:camp','rc:scrapyard','rc:market','rc:workshop'];
-portal.upload_tensor(m.tensor_buffer_build(N));
-portal.tick(canvas, 16);
-canvas.addEventListener('click', (e) => {
-  const r = canvas.getBoundingClientRect();
-  portal.queue_pick(e.clientX-r.left, e.clientY-r.top, canvas.width, canvas.height);
-  portal.tick(canvas, 16);
-  const i = portal.poll_pick();
-  if (i >= 0) {
-    const s = PLACES[i];
-    $('why').style.display='block';
-    $('why').innerHTML = `<b>${short(s)}</b><dl>` +
-      triples().filter(t=>t.s===s).map(t=>`<dt>${short(t.p)}</dt><dd>${short(t.o)}</dd>`).join('') +
-      `</dl>`;
-  }
-});
 
 $('save').onclick = async () => {
   await m.world_save('rc-save.n3', new TextEncoder().encode(session.world()));
@@ -138,7 +563,12 @@ $('save').onclick = async () => {
 };
 $('load').onclick = async () => {
   const b = await m.world_load('rc-save.n3');
-  session = new m.GameSession(new TextDecoder().decode(b), ACTIONS);
+  const saved = new TextDecoder().decode(b);
+  if (!saved.includes('rc:world rc:contentVersion 4 .')) {
+    $('persist').textContent = 'older save needs a Qualia Q42 migration';
+    return;
+  }
+  session = new m.GameSession(saved, ACTIONS);
   refresh(); $('persist').textContent = 'loaded';
 };
 $('replay').onclick = () => {
@@ -147,14 +577,54 @@ $('replay').onclick = () => {
   const same = r.diverged_at === null && r.world === session.world();
   note(`replay ${same ? 'reproduced world byte-for-byte' : 'DIVERGED at '+r.diverged_at}`);
 };
+$('new-game').onclick = () => {
+  session = new m.GameSession(SEED, ACTIONS);
+  territory='kestrel';
+  $('why').style.display='none';
+  $('persist').textContent='new campaign started; save when ready';
+  refresh(); note('A new campaign begins at Kestrel Flats.');
+};
+
+$('vibe-run').onclick = () => {
+  const result = toObj(session.vibe_query($('vibe-src').value));
+  $('vibe-result').textContent = result.ok ? JSON.stringify(result.value, null, 2) : String(result.error||'Evaluation failed');
+};
+$('vibe-propose').onclick = () => {
+  const result = toObj(session.vibe_propose($('vibe-command').value));
+  $('vibe-command-result').textContent = JSON.stringify(result, null, 2);
+  if (result.ok) { note(`VibeScript event ${result.seq}: ${result.action}`); refresh(); }
+};
+$('vibe-preview').onclick = () => {
+  const previous = sceneSource;
+  sceneSource = $('vibe-scene').value;
+  try {
+    refresh();
+    $('vibe-scene-result').textContent = `Qualia geometry compiled; ${sceneMeshes} .10d meshes loaded. Source embedded in provenance.`;
+  } catch (e) {
+    sceneSource = previous;
+    $('vibe-scene-result').textContent = String(e);
+    note(`VibeScript scene rejected: ${String(e).slice(0,120)}`);
+  }
+};
 
 refresh();
-note('slice ready');
+note('slice ready — tier ' + portal.tier());
 
 // Scripted acceptance playthrough for headless verification (?selftest).
 if (new URLSearchParams(location.search).has('selftest')) {
+  const testSession = new m.GameSession(SEED, ACTIONS);
+  note(`TEST scene: ${sceneMeshes > 0 ? 'PASS' : 'FAIL'}`);
+  const vibe = toObj(m.vibe_eval_cell('= 1 + 2'));
+  note(`TEST VibeScript: ${vibe.ok && String(vibe.value)==='3' ? 'PASS' : 'FAIL'}`);
+  const query = toObj(testSession.vibe_query('= world.coins'));
+  note(`TEST Vibe world query: ${query.ok && query.value===12 ? 'PASS' : 'FAIL'}`);
+  const scriptBlock = toObj(testSession.vibe_propose('= "startGarden"'));
+  note(`TEST Vibe blocked order: ${scriptBlock.ok===false ? 'PASS' : 'FAIL'}`);
+  const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, VIBE_SCENE);
+  note(`TEST Vibe scene asset: ${scriptAsset.organs.length===sceneMeshes+1 ? 'PASS' : 'FAIL'}`);
+  note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=115 ? 'PASS' : 'FAIL'}`);
   const expect = (name, id, wantOk) => {
-    const r = toObj(session.propose(id));
+    const r = toObj(testSession.propose(id));
     note(`TEST ${name}: ${id} ${r.ok===wantOk?'PASS':'FAIL'}`);
     if (r.ok !== wantOk)
       note(`TEST ${name} detail: ${JSON.stringify(r).slice(0,200)}`);
@@ -165,14 +635,71 @@ if (new URLSearchParams(location.search).has('selftest')) {
   expect('route B: salvage', 'salvagePanel', true);       // labour spent
   expect('rest after labour', 'endTurn', true);           // regain labour token
   expect('rest while rested', 'endTurn', false);          // blocked: labour still held
+  expect('cannot acquire same panel twice', 'salvagePanel', false);
+  expect('cannot acquire same inverter twice', 'salvageInverter', false);
   expect('contribute 1', 'contributeInverter', true);
   expect('contribute 2', 'contributePanel', true);
   expect('committee endorses', 'requestApproval', true);  // parts>=1 → endorsement
+  expect('committee decision is unique', 'requestApproval', false);
   expect('improve shelter', 'improveShelterCoins', true); // 5 >= 3 coins
   expect('goal', 'switchPowerOn', true);
-  const ids = toObj(session.events());
+  expect('solar completion is unique', 'switchPowerOn', false);
+  expect('water: coin route blocked', 'repairTankCoins', false);
+  expect('water: labour route', 'repairTankLabour', true);
+  expect('rest before planting', 'endTurn', true);
+  expect('garden', 'startGarden', true);
+  expect('bridge before rest', 'restoreBridge', false);
+  expect('rest before bridge', 'endTurn', true);
+  expect('bridge', 'restoreBridge', true);
+  expect('pump before rest', 'raiseWindPump', false);
+  expect('rest before pump', 'endTurn', true);
+  expect('pump', 'raiseWindPump', true);
+  expect('rest before orchard', 'endTurn', true);
+  expect('orchard', 'plantOrchard', true);
+  expect('commons before funds and rest', 'openCommons', false);
+  expect('rest before paid order', 'endTurn', true);
+  expect('commons before funds', 'openCommons', false);
+  expect('workshop earns scarce funds', 'fulfilWorkshopOrder', true);
+  expect('paid order can only run once', 'fulfilWorkshopOrder', false);
+  expect('rest before commons', 'endTurn', true);
+  expect('commons ending', 'openCommons', true);
+  expect('only one ending', 'launchTradeRoute', false);
+  const ids = toObj(testSession.events());
   const rep = toObj(m.session_replay(SEED, ACTIONS, ids));
-  note(`TEST replay: ${rep.diverged_at===null && rep.world===session.world() ? 'PASS' : 'FAIL'}`);
+  note(`TEST replay: ${rep.diverged_at===null && rep.world===testSession.world() ? 'PASS' : 'FAIL'}`);
+  const tradeSession = new m.GameSession(SEED, ACTIONS);
+  const tradeSteps=[
+    'buyInverter','salvagePanel','endTurn','contributeInverter','contributePanel',
+    'requestApproval','switchPowerOn','repairTankCoins','restoreBridge','endTurn',
+    'raiseWindPump','endTurn','plantOrchard','endTurn','launchTradeRoute'
+  ];
+  const tradeResults=tradeSteps.map(id=>toObj(tradeSession.propose(id)));
+  const tradeWorld=tradeSession.world();
+  note(`TEST trade ending: ${tradeResults.every(r=>r.ok)&&tradeWorld.includes('rc:community rc:finale "trade" .')?'PASS':'FAIL'}`);
+  const tradeReplay=toObj(m.session_replay(SEED,ACTIONS,toObj(tradeSession.events())));
+  note(`TEST trade replay: ${tradeReplay.diverged_at===null&&tradeReplay.world===tradeWorld?'PASS':'FAIL'}`);
+  const lateStart=()=>{
+    const s=new m.GameSession(SEED,ACTIONS);
+    const receipts=[toObj(s.propose('repairTankCoins'))];
+    for(let i=0;i<4;i++) {
+      receipts.push(toObj(s.propose('improveShelterLabour')));
+      receipts.push(toObj(s.propose('endTurn')));
+    }
+    return {s,ready:receipts.every(r=>r.ok)};
+  };
+  const late=lateStart();
+  const earlyBridge=toObj(late.s.propose('restoreBridge'));
+  const braced=toObj(late.s.propose('braceBridge'));
+  const tooTired=toObj(late.s.propose('restoreBridgeLateLabour'));
+  const lateRest=toObj(late.s.propose('endTurn'));
+  const lateBuilt=toObj(late.s.propose('restoreBridgeLateLabour'));
+  note(`TEST high-tide labour route: ${late.ready&&!earlyBridge.ok&&braced.ok&&!tooTired.ok&&lateRest.ok&&lateBuilt.ok?'PASS':'FAIL'}`);
+  const lateRep=toObj(m.session_replay(SEED,ACTIONS,toObj(late.s.events())));
+  note(`TEST high-tide replay: ${lateRep.diverged_at===null&&lateRep.world===late.s.world()?'PASS':'FAIL'}`);
+  const paid=lateStart();
+  const paidBuilt=toObj(paid.s.propose('restoreBridgeLateCoins'));
+  const noBracingAfter=toObj(paid.s.propose('braceBridge'));
+  note(`TEST high-tide paid route: ${paid.ready&&paidBuilt.ok&&!noBracingAfter.ok?'PASS':'FAIL'}`);
   note('SUMMARY done');
 }
 </script>

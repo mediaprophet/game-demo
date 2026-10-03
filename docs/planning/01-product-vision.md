@@ -1,8 +1,8 @@
-# Rolling Commons: Product Vision
+# Maslows Challenge, an SDGs game: Product Vision
 
 ## Purpose
 
-**Rolling Commons** is an original, browser-first WASM game that makes the
+**Maslows Challenge, an SDGs game** is an original, browser-first WASM game that makes the
 capabilities of QualiaDB visible through play. It is about the pursuit of making
 human rights meaningful: whether people have the dignity, fairness, tenure,
 material means, and lawful remedies needed to live with peace amid harms,

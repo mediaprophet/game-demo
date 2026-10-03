@@ -1,8 +1,8 @@
-# Rolling Commons: QualiaDB-Only Development Contract
+# Maslows Challenge: QualiaDB-Only Development Contract
 
 ## Binding rule
 
-Rolling Commons is a **QualiaDB ecosystem application**. Game development must
+Maslows Challenge is a **QualiaDB ecosystem application**. Game development must
 use QualiaDB/Webizen capabilities for the game runtime, semantic state, rules,
 simulation, rendering, spatial processing, asset generation and packaging,
 authoring, inference, and persistence. The game repository may contain scenario

@@ -1,10 +1,18 @@
-# Rolling Commons: Implementation Plan
+# Maslows Challenge: Implementation Plan
 
 ## Delivery strategy
 
 Build a playable, verifiable vertical slice before broad content, networking, or
 advanced agent work. Each phase has an exit gate; later phases do not hide an
 unproven core dependency.
+
+The project owner's subsequent RTS direction is specified in the
+[RTS and AAA-quality uplift blueprint](17-rts-aaa-uplift-blueprint.md). Its
+Gates A-E supersede the earlier text-first presentation sequence for future
+production. The phase tasks below remain a system inventory and source of
+domain requirements, not a claim that the current browser slice is already an
+RTS. When implementing an overlapping task, use the RTS control, simulation,
+asset, quality, and QualiaDB dependency gates in that blueprint.
 
 The [first-playable spec](12-first-playable-spec-and-open-questions.md) defines
 the proposed player journey and the unresolved gameplay decisions. The phase

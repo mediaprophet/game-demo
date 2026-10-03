@@ -3,7 +3,7 @@ resolver = "2"
 members = ["crates/rolling-commons-shell"]
 
 [workspace.dependencies]
-# Pinned upstream surface. The pinned commit is recorded in
+# Full local QualiaDB engine. The verified checkout revision is recorded in
 # docs/planning/15-living-qualiadb-capability-ledger.md and docs/adr/0001.
 qualia-core-db = { path = "../qualiaDB/crates/qualia-core-db", default-features = false }
 

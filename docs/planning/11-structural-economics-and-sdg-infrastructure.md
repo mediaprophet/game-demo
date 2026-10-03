@@ -1,4 +1,4 @@
-# Rolling Commons: Structural Economics and SDG-Aligned Infrastructure
+# Maslows Challenge: Structural Economics and SDG-Aligned Infrastructure
 
 ## Premise
 

@@ -1,8 +1,8 @@
-# Rolling Commons: Technical Architecture
+# Maslows Challenge: Technical Architecture
 
 ## Architectural position
 
-Rolling Commons is a WASM-first QualiaDB application. QualiaDB's Rust/WASM
+Maslows Challenge is a WASM-first QualiaDB application. QualiaDB's Rust/WASM
 simulation capability owns deterministic state transitions and provides the semantic graph,
 query, logical validation, Q42 persistence, local inference surfaces, geometry
 and rendering integration. The browser UI presents an attractive game, a 3D

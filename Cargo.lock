@@ -3449,6 +3449,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
+ "vibe",
  "vibe-wasm",
  "wasm-bindgen",
  "wasm-bindgen-futures",

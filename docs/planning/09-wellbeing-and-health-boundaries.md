@@ -1,8 +1,8 @@
-# Rolling Commons: Wellbeing, Health Boundaries, and Reflection
+# Maslows Challenge: Wellbeing, Health Boundaries, and Reflection
 
 ## Purpose
 
-Rolling Commons can be a calm, dignified space in which a player explores
+Maslows Challenge can be a calm, dignified space in which a player explores
 housing, travel, community, care, stress, routines, and support choices that may
 otherwise be difficult to talk about. It can help a player rehearse possibilities
 and recognise that there are multiple paths through a difficult life chapter. It

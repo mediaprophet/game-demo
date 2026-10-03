@@ -1,7 +1,8 @@
 # ADR 0002: Session model — N3 world document, SHACL gates, event-sourced replay
 
-Status: Accepted — verified in the browser slice 2026-10-02 (10/10 step
-playthrough + byte-identical replay, see `web/game.html?selftest`).
+Status: Temporary implementation — superseded by the QualiaDB-only
+development rule for authoritative game state. The earlier browser slice
+verified this implementation, not the target Q42-backed design.
 Date: 2026-10-02
 
 ## Context
@@ -41,6 +42,7 @@ replays deterministically.
 - "Blocked spends nothing" is structural: gates run before any edit.
 - An imperfect/unresolved end state is just a shorter tape — replay still
   works.
-- If QualiaDB later ships a wasm graph-store capability, the document model
-  can migrate underneath the same action catalogue without changing gates
-  or fixtures.
+- Required QualiaDB task: provide a mutable WASM graph session with Q42
+  persistence, deterministic command application and replay receipts, and
+  stable VibeScript access. Move this reducer from the game shell into that
+  capability. Treat the N3 document path as a temporary playable slice.

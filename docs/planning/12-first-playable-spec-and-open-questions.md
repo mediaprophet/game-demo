@@ -1,4 +1,4 @@
-# Rolling Commons: First-Playable Spec and Open Questions
+# Maslows Challenge: First-Playable Spec and Open Questions
 
 ## Status and use
 
