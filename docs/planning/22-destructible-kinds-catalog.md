@@ -14,7 +14,7 @@ smash toy and never a real human in the wreck.
 
 | Rule | Meaning |
 | --- | --- |
-| Humans | **Not a destructible kind.** No intact/stressed/failed mesh for a who. A life that ends is scene state, not an asset. |
+| Humans | **Not a destructible kind.** No intact/stressed/failed mesh for a who. A life that ends is a **scene receipt** that may show a soft blurred shape in the wreck (Pixar-like implication: no face, no wounds, no likeness, no name from the snapshot). Blur hides the body, not the fact. Never Call-of-Duty gore. |
 | Kind before mesh | Catalog kinds and how each fails; do not invent stub meshes |
 | Three looks | Every kind that can break: `intact` → `stressed` → `failed` |
 | Cause named | A destruction cell names **kind** + **cause** |
@@ -109,3 +109,14 @@ Fuel cost stays a **trip scenario claim**, not spending authority.
 No soft-rise of destruction looks, smash VFX, or “destructible toy” chrome while
 `?firstpaint` is still a receipt / empty shell. Tip `1987916` pin `v0.0.40.11`
 does not count as paint until a tick shows non-black pixels without `unreachable`.
+
+## Wreck presentation (life that ends)
+
+A write-off **can** take a life — that is the sourced mechanic. Presentation:
+
+- Consequence stays **readable** (wrecked instruments clear).
+- Anyone in the wreck is a **soft shape under blur**: no face, no wounds, no likeness.
+- Who is the **fictional participant** only — never a name or resident from public-data snapshots.
+- Aesthetic is Pixar-like implication, **not** Call-of-Duty / gore assets.
+- Blur is look: it does not delete or soften the receipt that a life ended.
+
