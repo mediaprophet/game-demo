@@ -1,0 +1,98 @@
+# Maslows Challenge — first-playable seed world.
+# Kestrel Flats: a fictional town. One triple per line (token form); the
+# session strips @prefix/comments — gates match on raw lexical tokens.
+@prefix rc: <https://game.example/rc#> .
+@prefix ev: <https://game.example/ev#> .
+
+rc:player a rc:Resident .
+rc:world rc:contentVersion 5 .
+rc:player rc:atPlace rc:camp .
+rc:player rc:coin rc:c01 .
+rc:player rc:coin rc:c02 .
+rc:player rc:coin rc:c03 .
+rc:player rc:coin rc:c04 .
+rc:player rc:coin rc:c05 .
+rc:player rc:coin rc:c06 .
+rc:player rc:coin rc:c07 .
+rc:player rc:coin rc:c08 .
+rc:player rc:coin rc:c09 .
+rc:player rc:coin rc:c10 .
+rc:player rc:coin rc:c11 .
+rc:player rc:coin rc:c12 .
+rc:player rc:labourToken rc:l0 .
+rc:community a rc:Community .
+rc:community rc:status "building" .
+
+rc:camp a rc:Place .
+rc:camp rc:name "Kestrel Flats camp" .
+rc:swag a rc:Shelter .
+rc:swag rc:atPlace rc:camp .
+rc:swag rc:owner rc:player .
+
+rc:workshop a rc:Workshop .
+rc:workshop rc:name "Community workshop" .
+rc:workshop rc:status "offline" .
+rc:workshop rc:powerWatts 0 .
+
+rc:solarProject a rc:CommunityProject .
+rc:solarProject rc:name "Workshop solar upgrade" .
+rc:solarProject rc:forFacility rc:workshop .
+rc:solarProject rc:targetWatts 400 .
+
+rc:market a rc:Market .
+rc:market rc:sells rc:partPanel .
+rc:market rc:sells rc:partInverter .
+rc:partPanel a rc:Part .
+rc:partPanel rc:coinCost 4 .
+rc:partInverter a rc:Part .
+rc:partInverter rc:coinCost 7 .
+
+rc:scrapyard a rc:Place .
+rc:scrapyard rc:name "Old railway scrapyard" .
+rc:scrapyard rc:mayYield rc:partPanel .
+rc:scrapyard rc:mayYield rc:partInverter .
+
+rc:committee a rc:Committee .
+rc:committee rc:governs rc:solarProject .
+
+rc:waterTank a rc:WaterTank .
+rc:waterTank rc:name "Shared water tank" .
+rc:waterTank rc:status "offline" .
+rc:waterTank rc:waterLitres 0 .
+rc:garden a rc:Garden .
+rc:garden rc:name "Community garden" .
+rc:garden rc:status "dry" .
+rc:garden rc:usesWaterFrom rc:waterTank .
+
+# Saltwind Reach: a connected second territory, with projects that depend on
+# the first town's restored water and power rather than a separate rule stack.
+rc:saltwindReach a rc:Territory .
+rc:saltwindReach rc:name "Saltwind Reach" .
+rc:bridge a rc:Bridge .
+rc:bridge rc:connects rc:camp .
+rc:bridge rc:connects rc:saltwindReach .
+rc:bridge rc:status "broken" .
+rc:windPump a rc:Pump .
+rc:windPump rc:status "offline" .
+rc:windPump rc:atPlace rc:saltwindReach .
+rc:orchard a rc:Orchard .
+rc:orchard rc:status "dry" .
+rc:orchard rc:usesWaterFrom rc:windPump .
+
+# Canal tide is a world fact. Day five (four rests) rewrites it to "high".
+# The scene mesh reads this token; the page does not invent a second water level.
+rc:canal a rc:Canal .
+rc:canal rc:name "Kestrel canal" .
+rc:canal rc:tide "low" .
+rc:canal rc:crossedBy rc:bridge .
+
+# Scenario wallet and committee treasury are instruments on the session
+# handle. They are not the player, and the treasury is not a player balance.
+# Gate credits stay on rc:player rc:coin, which the wallet names.
+rc:sessionHandle a rc:SessionHandle .
+rc:scenarioWallet a rc:Wallet .
+rc:scenarioWallet rc:instrumentOn rc:sessionHandle .
+rc:scenarioWallet rc:namesCreditsOf rc:player .
+rc:committeeTreasury a rc:Treasury .
+rc:committeeTreasury rc:ownedBy rc:committee .
+rc:committeeTreasury rc:instrumentOn rc:sessionHandle .

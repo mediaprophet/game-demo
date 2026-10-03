@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maslows Challenge — Phase 0 WASM spike</title>
+<style>
+  body { font-family: ui-monospace, Consolas, monospace; margin: 2rem; background:#10141a; color:#dfe7ef; }
+  h1 { font-size: 1.1rem; } #log { white-space: pre-wrap; }
+  .pass { color:#7ee787; } .fail { color:#ff7b72; }
+</style>
+</head>
+<body>
+<h1>Maslows Challenge — Phase 0 browser spike</h1>
+<canvas id="scene" width="640" height="360" style="border:1px solid #345"></canvas>
+<pre id="log">loading wasm…</pre>
+<script type="module">
+const logEl = document.getElementById('log');
+const log = (s) => { logEl.textContent += s + "\n"; };
+const ok = (b) => b ? "PASS" : "FAIL";
+// serde_wasm_bindgen returns Maps for structs — unwrap recursively.
+const toObj = (v) => {
+  if (v instanceof Map) return Object.fromEntries([...v].map(([k, x]) => [k, toObj(x)]));
+  if (Array.isArray(v)) return v.map(toObj);
+  return v;
+};
+const results = [];
+const record = (name, pass, detail="") => {
+  results.push({name, pass});
+  log(`[${ok(pass)}] ${name}${detail ? " — " + detail : ""}`);
+  // Mirror results to the dev-server request log for headless verification.
+  fetch(`/r?name=${encodeURIComponent(name)}&pass=${pass}&detail=${encodeURIComponent(detail.slice(0,120))}`).catch(()=>{});
+};
+
+const tInit0 = performance.now();
+let m;
+try {
+  m = await import('./pkg/rolling_commons_shell.js');
+  await m.default();
+} catch (e) {
+  log("FAIL: module load — " + e);
+  throw e;
+}
+const initMs = performance.now() - tInit0;
+record("spike1: wasm module loads", true, `${initMs.toFixed(1)} ms`);
+log(`pinned qualiaDB revision: ${m.pinned_qualiadb_revision()}`);
+
+// --- small authored world (N3/N-Triples) ---
+// Turtle parser (rio/oxttl) needs declared prefixes / full IRIs.
+const worldOk = `@prefix rc: <https://game.example/rc#> .
+rc:player a rc:Person .
+rc:workshop a rc:Facility ; rc:powerWatts 200 .
+`;
+// The SHACL/N3 token path (build_graph) keeps raw prefixed tokens — shapes
+// match by lexical form.
+const worldShaclOk = `rc:player a rc:Person .
+rc:workshop a rc:Facility ; rc:powerWatts 200 .
+`;
+const worldBad = `rc:shed a rc:Facility .
+`;
+
+// Spike 2 (part): create/query world
+try {
+  const t = performance.now();
+  const parsed = toObj(m.world_load_turtle(worldOk));
+  record("spike2: world parse", Array.isArray(parsed) && parsed.length > 0,
+         `${JSON.stringify(parsed).slice(0,160)} (${(performance.now()-t).toFixed(1)} ms)`);
+} catch (e) { record("spike2: world parse", false, String(e)); }
+
+// Spike 3: SHACL validation + explanation payload
+const shapes = JSON.stringify([{
+  targetClass: "rc:Facility",
+  path: "rc:powerWatts",
+  constraints: [{kind: "minCount", num: 1}]
+}]);
+try {
+  const t = performance.now();
+  const okReport = toObj(m.action_validate_shacl(worldShaclOk, shapes));
+  record("spike3: conforming graph validates", okReport.conforms === true,
+         `${JSON.stringify(okReport).slice(0,160)} (${(performance.now()-t).toFixed(1)} ms)`);
+  const badReport = toObj(m.action_validate_shacl(worldBad, shapes));
+  record("spike3: violating graph explains itself",
+         badReport.conforms === false && (badReport.results || []).length > 0,
+         JSON.stringify(badReport).slice(0,160));
+} catch (e) { record("spike3: shacl validation", false, String(e)); }
+
+// Spike 2 (part): OPFS persist + reload
+try {
+  const data = new TextEncoder().encode(worldOk);
+  const t = performance.now();
+  await m.world_save("rc-spike-world.n3", data);
+  const back = await m.world_load("rc-spike-world.n3");
+  const same = back && new TextDecoder().decode(back) === worldOk;
+  record("spike2: OPFS save + reload", same === true,
+         `${(performance.now()-t).toFixed(1)} ms`);
+} catch (e) { record("spike2: OPFS save + reload", false, String(e)); }
+
+// Spike 4: agent-authored prop -> .10d -> verify -> portal render -> pick
+try {
+  // A unit cube as an original authored prop (flat xyz + triangle indices).
+  const P = new Float32Array([
+    -0.5,-0.5,-0.5,  0.5,-0.5,-0.5,  0.5, 0.5,-0.5, -0.5, 0.5,-0.5,
+    -0.5,-0.5, 0.5,  0.5,-0.5, 0.5,  0.5, 0.5, 0.5, -0.5, 0.5, 0.5,
+  ]);
+  const T = new Uint32Array([
+    0,2,1, 0,3,2,  4,5,6, 4,6,7,  0,1,5, 0,5,4,
+    2,3,7, 2,7,6,  0,4,7, 0,7,3,  1,2,6, 1,6,5,
+  ]);
+  // Two semantic nodes the .10d carries and the tensor buffer exposes for
+  // picking: [q, v, w, x, y, z, t, alpha, mu, sigma]. Node 0 sits at the
+  // origin (projects to canvas centre) with mu=0.7 provenance.
+  const N = new Float32Array([
+    0,0,4, 0,0,0,    0,1.0,0.7,0.4,
+    0,0,4, 0.6,0.4,0, 0,1.0,0.5,0.9,
+  ]);
+  const t4 = performance.now();
+  const container = m.asset_compile_10d(P, T, N);
+  const ver = toObj(m.asset_verify_10d(container));
+  record("spike4: prop compiles+verifies .10d",
+         ver.vertices === 8 && ver.triangles === 12 && typeof ver.digest === "number",
+         `${JSON.stringify(ver).slice(0,140)} (${(performance.now()-t4).toFixed(1)} ms)`);
+
+  try {
+    const canvas = document.getElementById('scene');
+    const portal = new m.GamePortal(canvas);
+    const load = toObj(m_portal_load(portal, container));
+    record("spike4: .10d ingests into portal",
+           load && typeof load.vertex_count === "number" && load.provenance_mu > 0,
+           JSON.stringify(load).slice(0,140));
+    // Same authored nodes → pickable tensor buffer (CPU pick needs no GPU).
+    portal.upload_tensor(m.tensor_buffer_build(N));
+    portal.queue_pick(canvas.width/2, canvas.height/2, canvas.width, canvas.height);
+    let hit = -1;
+    for (let i = 0; i < 5 && hit < 0; i++) {
+      portal.tick(canvas, 16);
+      hit = portal.poll_pick();
+    }
+    record("spike4: render+semantic pick", hit === 0, `pick index ${hit}`);
+  } catch (e) {
+    record("spike4: portal render/pick", false,
+           `WebGPU/render path unavailable: ${String(e).slice(0,140)}`);
+  }
+} catch (e) { record("spike4: .10d pipeline", false, String(e).slice(0,160)); }
+function m_portal_load(portal, bytes) { return portal.load_10d(bytes); }
+
+// Spike 5: Vibe cell eval + capability boundary
+try {
+  const r1 = toObj(m.vibe_eval_cell("= 1 + 2"));
+  record("spike5: vibe cell evaluates", r1.ok === true, JSON.stringify(r1).slice(0,120));
+  const denied = toObj(m.vibe_invoke("Storage.writeFile", "{\"path\":\"/x\"}"));
+  record("spike5: ungranted capability denied", denied.ok === false,
+         JSON.stringify(denied).slice(0,140));
+} catch (e) { record("spike5: vibe host", false, String(e).slice(0,160)); }
+
+// Spike 7: measurements
+try {
+  const resp = await fetch('./pkg/rolling_commons_shell_bg.wasm');
+  const buf = await resp.arrayBuffer();
+  log(`wasm size: ${(buf.byteLength/1024/1024).toFixed(2)} MiB`);
+  if (performance.memory) {
+    log(`js heap: ${(performance.memory.usedJSHeapSize/1024/1024).toFixed(1)} MiB`);
+  }
+} catch (e) { log("measurements: " + e); }
+
+const failures = results.filter(r => !r.pass).length;
+log(`\n${results.length - failures}/${results.length} spike checks passed`);
+fetch(`/r?name=SUMMARY&pass=${failures===0}&detail=${results.length - failures}/${results.length}`).catch(()=>{});
+</script>
+</body>
+</html>

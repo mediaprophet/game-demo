@@ -1,0 +1,370 @@
+{
+  "actions": [
+    {
+      "id": "buyPanel",
+      "label": "Buy a solar panel at the market (4 coins)",
+      "explain": "The market route: fast, but spends coins.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:coin",
+                "constraints": [{"kind": "minCount", "num": 4}]},
+               {"targetClass": "rc:Resident", "path": "rc:panelAcquired",
+                "constraints": [{"kind": "maxCount", "num": 0}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 4}],
+      "add": ["rc:player rc:holdsPart rc:partPanel .",
+              "rc:player rc:panelAcquired rc:partPanel ."]
+    },
+    {
+      "id": "buyInverter",
+      "label": "Buy an inverter at the market (7 coins)",
+      "explain": "The market route: fast, but spends coins.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:coin",
+                "constraints": [{"kind": "minCount", "num": 7}]},
+               {"targetClass": "rc:Resident", "path": "rc:inverterAcquired",
+                "constraints": [{"kind": "maxCount", "num": 0}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 7}],
+      "add": ["rc:player rc:holdsPart rc:partInverter .",
+              "rc:player rc:inverterAcquired rc:partInverter ."]
+    },
+    {
+      "id": "salvagePanel",
+      "label": "Salvage a panel from the scrapyard (1 labour)",
+      "explain": "The labour route: keeps coins, spends a turn's work.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
+                "constraints": [{"kind": "minCount", "num": 1}]},
+               {"targetClass": "rc:Resident", "path": "rc:panelAcquired",
+                "constraints": [{"kind": "maxCount", "num": 0}]}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:player rc:holdsPart rc:partPanel .",
+              "rc:player rc:panelAcquired rc:partPanel .",
+              "rc:player rc:salvagedAt rc:scrapyard ."]
+    },
+    {
+      "id": "salvageInverter",
+      "label": "Salvage an inverter from the scrapyard (1 labour)",
+      "explain": "The labour route: keeps coins, spends a turn's work.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
+                "constraints": [{"kind": "minCount", "num": 1}]},
+               {"targetClass": "rc:Resident", "path": "rc:inverterAcquired",
+                "constraints": [{"kind": "maxCount", "num": 0}]}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:player rc:holdsPart rc:partInverter .",
+              "rc:player rc:inverterAcquired rc:partInverter .",
+              "rc:player rc:salvagedAt rc:scrapyard ."]
+    },
+    {
+      "id": "contributePanel",
+      "label": "Install the panel into the solar project",
+      "explain": "Shared work: your part becomes community infrastructure.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:holdsPart",
+                "constraints": [{"kind": "hasValue", "text": "rc:partPanel"}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:holdsPart", "o": "rc:partPanel", "n": 1}],
+      "add": ["rc:solarProject rc:partInstalled rc:partPanel .",
+              "rc:solarProject rc:contributedBy rc:player ."]
+    },
+    {
+      "id": "contributeInverter",
+      "label": "Install the inverter into the solar project",
+      "explain": "Shared work: your part becomes community infrastructure.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:holdsPart",
+                "constraints": [{"kind": "hasValue", "text": "rc:partInverter"}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:holdsPart", "o": "rc:partInverter", "n": 1}],
+      "add": ["rc:solarProject rc:partInstalled rc:partInverter .",
+              "rc:solarProject rc:contributedBy rc:player ."]
+    },
+    {
+      "id": "requestApproval",
+      "label": "Present the project at the committee meeting",
+      "explain": "The committee endorses a project once real parts are installed.",
+      "gate": [{"targetClass": "rc:CommunityProject", "path": "rc:partInstalled",
+                "constraints": [{"kind": "minCount", "num": 1}]},
+               {"targetClass": "rc:CommunityProject", "path": "rc:approvedBy",
+                "constraints": [{"kind": "maxCount", "num": 0}]}],
+      "add": ["rc:solarProject rc:approvedBy rc:committee ."]
+    },
+    {
+      "id": "switchPowerOn",
+      "label": "Switch on the workshop solar system",
+      "explain": "Needs both parts installed AND committee endorsement.",
+      "gate": [
+        {"targetClass": "rc:CommunityProject", "path": "rc:partInstalled",
+         "constraints": [{"kind": "hasValue", "text": "rc:partPanel"},
+                         {"kind": "hasValue", "text": "rc:partInverter"}]},
+        {"targetClass": "rc:CommunityProject", "path": "rc:approvedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:workshop", "p": "rc:status"},
+                    {"s": "rc:workshop", "p": "rc:powerWatts"}],
+      "add": ["rc:workshop rc:status \"online\" .",
+              "rc:workshop rc:powerWatts 400 .",
+              "rc:solarProject rc:completedIn rc:e{seq} ."]
+    },
+    {
+      "id": "improveShelterCoins",
+      "label": "Improve the shelter with bought materials (3 coins)",
+      "explain": "Personal asset improvement via the market route.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:coin",
+                "constraints": [{"kind": "minCount", "num": 3}]}],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 3}],
+      "add": ["rc:swag rc:upgrade rc:u{seq} .",
+              "rc:swag rc:improvedWith rc:materials ."]
+    },
+    {
+      "id": "improveShelterLabour",
+      "label": "Patch the shelter yourself (1 labour)",
+      "explain": "Personal asset improvement via the labour route.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
+                "constraints": [{"kind": "minCount", "num": 1}]}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:swag rc:upgrade rc:u{seq} .",
+              "rc:swag rc:repairedBy rc:player ."]
+    },
+    {
+      "id": "endTurn",
+      "label": "Rest for the evening (regain labour)",
+      "explain": "Only useful once you've spent your labour.",
+      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
+                "constraints": [{"kind": "maxCount", "num": 0}]}],
+      "add": ["rc:player rc:labourToken rc:l{seq} .",
+              "rc:player rc:turn rc:t{seq} ."]
+    },
+    {
+      "id": "repairTankCoins",
+      "label": "Repair the water tank with parts (3 coins)",
+      "explain": "Buy a replacement fitting and return the shared tank to service.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:coin",
+         "constraints": [{"kind": "minCount", "num": 3}]},
+        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 3}],
+      "removeAll": [{"s": "rc:waterTank", "p": "rc:status"},
+                    {"s": "rc:waterTank", "p": "rc:waterLitres"}],
+      "add": ["rc:waterTank rc:status \"online\" .",
+              "rc:waterTank rc:waterLitres 200 .",
+              "rc:waterTank rc:repairedBy rc:player ."]
+    },
+    {
+      "id": "repairTankLabour",
+      "label": "Repair the water tank with salvaged fittings (1 labour)",
+      "explain": "Use time and repair skill instead of buying a new fitting.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:waterTank", "p": "rc:status"},
+                    {"s": "rc:waterTank", "p": "rc:waterLitres"}],
+      "add": ["rc:waterTank rc:status \"online\" .",
+              "rc:waterTank rc:waterLitres 200 .",
+              "rc:waterTank rc:repairedBy rc:player ."]
+    },
+    {
+      "id": "startGarden",
+      "label": "Plant the garden using shared water (1 labour)",
+      "explain": "The garden needs a working tank and one block of labour.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Garden", "path": "rc:plantedBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:garden", "p": "rc:status"}],
+      "add": ["rc:garden rc:status \"growing\" .",
+              "rc:garden rc:plantedBy rc:player ."]
+    },
+    {
+      "id": "restoreBridge",
+      "label": "Rebuild the canal bridge (1 labour)",
+      "explain": "The bridge crew needs working water and one block of labour. Finish by the end of day four before the canal rises.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Resident", "path": "rc:turn",
+         "constraints": [{"kind": "maxCount", "num": 3}]},
+        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:bridge", "p": "rc:status"}],
+      "add": ["rc:bridge rc:status \"passable\" .",
+              "rc:bridge rc:restoredBy rc:player ."]
+    },
+    {
+      "id": "braceBridge",
+      "label": "Brace the flooded bridge supports (1 labour)",
+      "explain": "After day four, the high canal needs a bracing shift before the usual crew can finish the bridge.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:turn",
+         "constraints": [{"kind": "minCount", "num": 4}]},
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Bridge", "path": "rc:bracedBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]},
+        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:bridge rc:bracedBy rc:player ."]
+    },
+    {
+      "id": "restoreBridgeLateLabour",
+      "label": "Finish the braced bridge (1 labour)",
+      "explain": "The supports are braced. One more workday reopens the crossing without spending coins.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:turn",
+         "constraints": [{"kind": "minCount", "num": 4}]},
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Bridge", "path": "rc:bracedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:bridge", "p": "rc:status"}],
+      "add": ["rc:bridge rc:status \"passable\" .",
+              "rc:bridge rc:restoredBy rc:player ."]
+    },
+    {
+      "id": "restoreBridgeLateCoins",
+      "label": "Hire a canal crew to rebuild now (2 coins, 1 labour)",
+      "explain": "After day four, a specialist crew can work through the high water in one day. It costs two coins and your labour to coordinate.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:turn",
+         "constraints": [{"kind": "minCount", "num": 4}]},
+        {"targetClass": "rc:Resident", "path": "rc:coin",
+         "constraints": [{"kind": "minCount", "num": 2}]},
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 2}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:bridge", "p": "rc:status"}],
+      "add": ["rc:bridge rc:status \"passable\" .",
+              "rc:bridge rc:restoredBy rc:player ."]
+    },
+    {
+      "id": "raiseWindPump",
+      "label": "Commission the wind pump (1 labour)",
+      "explain": "The crossing must be restored and the workshop powered before the pump can be commissioned.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Pump", "path": "rc:commissionedBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:windPump", "p": "rc:status"}],
+      "add": ["rc:windPump rc:status \"online\" .",
+              "rc:windPump rc:commissionedBy rc:player ."]
+    },
+    {
+      "id": "plantOrchard",
+      "label": "Plant the Saltwind orchard (1 labour)",
+      "explain": "The orchard needs the commissioned wind pump and one block of labour.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Pump", "path": "rc:commissionedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:orchard", "p": "rc:status"}],
+      "add": ["rc:orchard rc:status \"growing\" .",
+              "rc:orchard rc:plantedBy rc:player ."]
+    },
+    {
+      "id": "fulfilWorkshopOrder",
+      "label": "Complete the repair order (+3 coins, 1 labour)",
+      "explain": "A nearby settlement pays for one urgent repair after the workshop has power.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Workshop", "path": "rc:deliveredOrder",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:workshop rc:deliveredOrder rc:order{seq} .",
+              "rc:player rc:coin rc:earned{seq}a .",
+              "rc:player rc:coin rc:earned{seq}b .",
+              "rc:player rc:coin rc:earned{seq}c ."]
+    },
+    {
+      "id": "openCommons",
+      "label": "Open the commons with a harvest gathering (4 coins, 1 labour)",
+      "explain": "Celebrate a safe local food and water network. Needs a repaired shelter, the garden, the orchard and four coins for shared supplies.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:coin",
+         "constraints": [{"kind": "minCount", "num": 4}]},
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Shelter", "path": "rc:upgrade",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Garden", "path": "rc:plantedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Community", "path": "rc:finale",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 4}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:community", "p": "rc:status"}],
+      "add": ["rc:community rc:status \"open\" .",
+              "rc:community rc:finale \"commons\" .",
+              "rc:community rc:gatheredAt rc:saltwindReach ."]
+    },
+    {
+      "id": "launchTradeRoute",
+      "label": "Launch the canal trade route (2 coins, 1 labour)",
+      "explain": "Connect the repaired infrastructure to neighbours. Needs the crossing, pump and orchard, plus two coins to outfit the first boat.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:coin",
+         "constraints": [{"kind": "minCount", "num": 2}]},
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Pump", "path": "rc:commissionedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Community", "path": "rc:finale",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 2}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:community", "p": "rc:status"}],
+      "add": ["rc:community rc:status \"connected\" .",
+              "rc:community rc:finale \"trade\" .",
+              "rc:community rc:tradesWith rc:neighbours .",
+              "rc:player rc:coin rc:freight{seq}a .",
+              "rc:player rc:coin rc:freight{seq}b .",
+              "rc:player rc:coin rc:freight{seq}c .",
+              "rc:player rc:coin rc:freight{seq}d ."]
+    }
+  ]
+}
