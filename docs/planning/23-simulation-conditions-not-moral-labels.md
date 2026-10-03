@@ -23,8 +23,15 @@ one side is spared.
 ## Presentation
 
 Same original Pixar-like appeal on everyone. A worn van and a polished car do
-not tell you who is kind. No halo chrome for the poor, no villain palette for
-the wealthy. Civics sites ≠ civic government ≠ game.
+not tell you who is kind.
+
+**Halo and villain light are allowed**, and they come only from **what someone
+does** in the scene — never from poverty, wealth, or the finish of a vehicle.
+They sit as light on the frame, not as a costume and not as the car's paint, so
+the same van can read either way. The palette shows the act; it does not change
+the mechanic and does not store good/bad as a who-kind.
+
+Civics sites ≠ civic government ≠ game.
 
 ## Privacy
 
