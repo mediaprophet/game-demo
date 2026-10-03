@@ -26,7 +26,7 @@ Kestrel Flats leads across the canal to Saltwind Reach. The player repairs a
 crossing, commissions a pump and plants an orchard. The canal rises after day
 four: a quick bridge repair is no longer possible, so a late player must
 spend an extra crew shift on bracing or pay a specialist crew two coins. The
-water level and bridge bracing are authored Qualia `.10d` scene states. The
+canal tide is a saved world fact (`low` until day five, then `high`), and the water mesh reads that token. Broken-bridge rails stop at the gap. The
 player then chooses an ending:
 open a local commons with a harvest gathering, or outfit a trade boat for
 neighbouring settlements. The two endings have different requirements and
@@ -43,6 +43,10 @@ garden once water is available.
 The page also exposes VibeScript cells for live world snapshot queries,
 SHACL-gated order proposals, and a bounded scene asset that compiles through
 Qualia computational geometry to a provenance-bearing `.10d` mesh.
+The snapshot names the scenario wallet and the committee treasury as instruments
+on the session handle. They are not the player. `web/game.html?firstpaint=1`
+loads one water-tank organ on the existing portal with daylight sky and the
+territory camera. That flag does not claim a painted frame.
 Kestrel Flats has 91 always-present original `.10d` scene organs; the new
 Saltwind Reach tile adds 24 more plus state variants. The connected scene uses
 QualiaPortal's camera target and daylight sky APIs. State variants live in

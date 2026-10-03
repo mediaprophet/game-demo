@@ -8,6 +8,18 @@ for the QualiaDB development agent; it is not rebuilt privately in the game.
 
 ## Game work in this pass
 
+**Session clarity pass (2026-10-04):** Canal tide is a world token
+(`rc:canal rc:tide`), rewritten to `high` on the fourth rest (day five) inside
+the same propose/replay path the campaign already uses. The page and the
+`.10d` water mesh read that token. Broken-bridge rails no longer span the gap.
+The field dispatch states day, labour, coins, canal, bridge and tank litres,
+and the ending choice lists what each ending still needs. VibeScript `world`
+exposes `canal_tide`, `bridge_status`, `water_status`, `water_litres`, and the
+handle instruments `rc:scenarioWallet` / `rc:committeeTreasury`
+(`instruments_on_player` is false). Save content version is 5. `?firstpaint=1`
+loads a single water-tank organ through the existing portal with daylight sky
+and the territory camera; it is not a visual acceptance of QG-12.
+
 **Canal tide scenario pass (2026-10-04):** Day four is the last day for the
 simple bridge repair. Starting on day five, a player can brace the supports
 with one work shift and finish on another, or pay two coins and coordinate a

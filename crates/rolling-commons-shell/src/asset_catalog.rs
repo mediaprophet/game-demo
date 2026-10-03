@@ -950,10 +950,20 @@ pub fn saltwind_reach(
     scene.push(asset(
         "rc:asset/bridge-rails",
         [0.92, 0.75, 0.48, 1.0],
-        vec![
-            block([8.0, 0.42, -0.28], [2.6, 0.08, 0.09]),
-            block([8.0, 0.42, 1.27], [2.6, 0.08, 0.09]),
-        ],
+        // Rails follow the deck. A broken span does not keep a rail across the gap.
+        if bridge_open {
+            vec![
+                block([8.0, 0.42, -0.28], [2.6, 0.08, 0.09]),
+                block([8.0, 0.42, 1.27], [2.6, 0.08, 0.09]),
+            ]
+        } else {
+            vec![
+                block([7.18, 0.42, -0.28], [0.70, 0.08, 0.09]),
+                block([7.18, 0.42, 1.27], [0.70, 0.08, 0.09]),
+                block([8.82, 0.42, -0.28], [0.70, 0.08, 0.09]),
+                block([8.82, 0.42, 1.27], [0.70, 0.08, 0.09]),
+            ]
+        },
     ));
     if bridge_braced && !bridge_open {
         scene.push(asset(

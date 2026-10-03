@@ -154,6 +154,7 @@
   <div class="side-column">
     <div class="panel dispatch"><span class="eyebrow" id="dispatch-step">Field dispatch</span>
       <h2 id="dispatch-title">A town waiting to work</h2><p id="dispatch-copy"></p>
+      <p class="muted" id="dispatch-facts"></p>
       <div class="campaign-meter" aria-label="Campaign progress"><span id="campaign-fill"></span></div>
       <div class="campaign-count" id="campaign-count"></div>
       <button id="dispatch-action"></button>
@@ -172,9 +173,9 @@
     </div>
     <details class="panel">
       <summary>VibeScript workbench</summary>
-      <div class="muted">Pure cells read a world snapshot or propose a catalogued order. Scene cells compile through Qualia geometry into a provenance-bearing .10d mesh.</div>
+      <div class="muted">Read <code>world</code> (day, coins, labour_ready, canal_tide, bridge_status, water_status, water_litres, wallet_instrument, treasury_instrument, instruments_on_player). An order cell returns one catalogue id and still goes through the rules. A scene cell is one sphere or cylinder; compile seals a .10d mesh. None of these paint the canvas.</div>
       <h3>World query</h3>
-      <input class="vibe-input" id="vibe-src" value="= world.coins" aria-label="VibeScript world query">
+      <input class="vibe-input" id="vibe-src" value="= world" aria-label="VibeScript world query">
       <button id="vibe-run">Query world</button>
       <output class="vibe-result" id="vibe-result"></output>
       <h3>Propose an order</h3>
@@ -227,7 +228,11 @@ const state = () => ({
   online: values('rc:workshop','rc:status').includes('"online"'),
   upgrades: values('rc:swag','rc:upgrade').length,
   waterOnline: values('rc:waterTank','rc:status').includes('"online"'),
+  waterLitres: Number(String(values('rc:waterTank','rc:waterLitres')[0]||'0').replace(/"/g,''))||0,
+  waterStatus: String(values('rc:waterTank','rc:status')[0]||'offline').replace(/"/g,''),
   gardenActive: values('rc:garden','rc:status').includes('"growing"'),
+  canalTide: values('rc:canal','rc:tide').includes('"high"') ? 'high' : 'low',
+  bridgeStatus: String(values('rc:bridge','rc:status')[0]||'broken').replace(/"/g,''),
   bridgeOpen: values('rc:bridge','rc:status').includes('"passable"'),
   bridgeBraced: values('rc:bridge','rc:bracedBy').length > 0,
   pumpOnline: values('rc:windPump','rc:status').includes('"online"'),
@@ -300,6 +305,7 @@ const PLACES = [
   'rc:bridge', 'rc:windPump', 'rc:orchard',
 ];
 // ---------- portal ----------
+const FIRST_PAINT = new URLSearchParams(location.search).has('firstpaint');
 const canvas = $('scene');
 try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
 const portal = new m.GamePortal(canvas);
@@ -330,13 +336,17 @@ let sceneSource = '';
 function rebuild() {
   const st = state();
   const scene = m.scene_build(st.upgrades, st.parts.length, st.online, st.approved,
-    st.waterOnline, st.gardenActive, st.bridgeOpen, st.bridgeBraced, st.day>4,
+    st.waterOnline, st.gardenActive, st.bridgeOpen, st.bridgeBraced, st.canalTide==='high',
     st.pumpOnline, st.orchardActive, sceneSource);
   tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
-  const receipt = toObj(portal.load_scene(scene.organs));
+  const organs = FIRST_PAINT
+    ? [...scene.organs].filter(o => o.id==='rc:asset/water-tank').slice(0,1)
+    : [...scene.organs];
+  const chosen = organs.length ? organs : [...scene.organs].slice(0,1);
+  const receipt = toObj(portal.load_scene(chosen));
   sceneMeshes = receipt.organs_loaded;
-  if (sceneMeshes !== scene.organs.length)
-    throw new Error(`QualiaDB refused ${scene.organs.length-sceneMeshes} scene meshes`);
+  if (sceneMeshes !== chosen.length)
+    throw new Error(`QualiaDB refused ${chosen.length-sceneMeshes} scene meshes`);
   portal.upload_tensor(scene.tensor);
   applyCam();
   return st;
@@ -388,8 +398,12 @@ function refresh() {
   const saltwind=territory==='saltwind';
   const lead=campaignLead(st);
   $('day').textContent=`Day ${st.day}`;
-  $('tide').textContent=st.bridgeOpen?'Crossing secured':st.day<=4?`Low tide · ${5-st.day} day${st.day===4?'':'s'} left`:'High tide · extra work';
-  $('tide').classList.toggle('tide-high',!st.bridgeOpen&&st.day>4);
+  const tideWord = st.canalTide==='high' ? 'High canal' : 'Low canal';
+  const bridgeWord = st.bridgeOpen ? 'bridge passable' : st.bridgeBraced ? 'bridge braced' : 'bridge broken';
+  $('tide').textContent=st.bridgeOpen?`${tideWord} · ${bridgeWord}`:
+    st.canalTide==='high'?`${tideWord} · ${bridgeWord}`:
+    `${tideWord} · ${5-st.day} day${st.day===4?'':'s'} to the rise · ${bridgeWord}`;
+  $('tide').classList.toggle('tide-high', st.canalTide==='high' && !st.bridgeOpen);
   $('dispatch-step').textContent=st.finale?'Campaign complete':`Field dispatch · Day ${st.day}`;
   $('dispatch-title').textContent=lead.title;
   $('dispatch-copy').textContent=lead.copy;
@@ -397,7 +411,17 @@ function refresh() {
     st.bridgeOpen,st.pumpOnline,st.orchardActive];
   const done=milestones.filter(Boolean).length;
   $('campaign-fill').style.width=`${Math.round(done/7*100)}%`;
-  $('campaign-count').textContent=`${done} of 7 community projects working`;
+  $('campaign-count').textContent=st.finale
+    ? `${done} of 7 projects in service · ending recorded`
+    : `${done} of 7 projects in service · ending still open`;
+  $('dispatch-facts').textContent=
+    `Day ${st.day} · ${st.labour?'labour ready':'labour spent'} · ${st.coins} coins · ${st.canalTide} canal · bridge ${st.bridgeStatus}${st.bridgeBraced&&!st.bridgeOpen?' · supports braced':''} · tank ${st.waterStatus} ${st.waterLitres} L`;
+  if (!st.finale && !lead.action && st.orchardActive) {
+    const gap = (items) => items.filter(Boolean).join(', ') || 'nothing else';
+    const commons = gap([st.upgrades>0?null:'a shelter upgrade', st.gardenActive?null:'the garden', st.coins>=4?null:'4 coins', st.labour?null:'a labour']);
+    const trade = gap([st.bridgeOpen?null:'the bridge', st.pumpOnline?null:'the pump', st.coins>=2?null:'2 coins', st.labour?null:'a labour']);
+    $('dispatch-copy').textContent = `${lead.copy} Commons still needs ${commons}. Trade still needs ${trade}.`;
+  }
   $('dispatch-action').textContent=lead.label;
   $('dispatch-action').onclick=()=>{
     territory=lead.territory;
@@ -432,9 +456,9 @@ function refresh() {
       resource('Garden',st.gardenActive?'Growing':'Dry',st.gardenActive?'status-good':'status-warn'));
   const objective = (title,detail,done) => `<div class="objective ${done?'done':''}"><div><b>${title}</b><small>${detail}</small></div><span class="check">${done?'✓':'○'}</span></div>`;
   $('objectives').innerHTML = saltwind ?
-    objective('Reconnect the crossing',st.bridgeOpen?'Bridge passable':st.day<=4?
-      `Low tide until day 4 · ${st.waterOnline?'crew can work':'restore Kestrel water first'}`:
-      st.bridgeBraced?'Supports braced · finish next workday':'High tide · brace supports or hire a crew',st.bridgeOpen) +
+    objective('Reconnect the crossing',st.bridgeOpen?`Bridge passable · ${st.canalTide} canal`:st.canalTide==='low'?
+      `Low canal until day 4 · ${st.waterOnline?'crew can work':'restore Kestrel water first'}`:
+      st.bridgeBraced?'Supports braced · finish next workday':'High canal · brace supports or hire a crew',st.bridgeOpen) +
     objective('Commission the wind pump',st.pumpOnline?'Pump running':'Needs bridge and powered workshop',st.pumpOnline) +
     objective('Plant the orchard',st.orchardActive?'Fruit growing':'Needs the wind pump',st.orchardActive) :
     objective('Improve your shelter',`${st.upgrades} upgrade${st.upgrades===1?'':'s'} made`,st.upgrades>0) +
@@ -457,7 +481,8 @@ function refresh() {
     finalePanel.querySelectorAll('[data-finale]').forEach(b=>b.onclick=()=>tryAction(b.dataset.finale));
   }
   $('inspector').innerHTML = saltwind ? `<h2>Saltwind Reach</h2><dl>
-    <dt>Crossing</dt><dd>${st.bridgeOpen?'Bridge restored':'Bridge is broken'}</dd>
+    <dt>Crossing</dt><dd>${st.bridgeOpen?'Bridge restored':st.bridgeBraced?'Supports braced, deck still open':'Bridge is broken'}</dd>
+    <dt>Canal</dt><dd>${st.canalTide==='high'?'High water recorded':'Low water recorded'}</dd>
     <dt>Water</dt><dd>${st.pumpOnline?'Wind pump commissioned':'Pump awaiting crew'}</dd>
     <dt>Harvest</dt><dd>${st.orchardActive?'Orchard growing':'Orchard not planted'}</dd>
   </dl>` : `<h2>Community overview</h2><dl>
@@ -465,7 +490,8 @@ function refresh() {
     <dt>Inventory</dt><dd>${st.held.map(short).join(', ')||'No parts held'}</dd>
     <dt>Solar project</dt><dd>${st.parts.length}/2 parts installed · ${st.approved?'endorsed':'awaiting committee'}</dd>
     <dt>Shelter</dt><dd>${st.upgrades} improvement${st.upgrades===1?'':'s'}</dd>
-    <dt>Shared water</dt><dd>${st.waterOnline?'200 L available':'Tank needs repair'}</dd>
+    <dt>Shared water</dt><dd>${st.waterOnline?`${st.waterLitres} L available`:'Tank needs repair'}</dd>
+    <dt>Canal</dt><dd>${st.canalTide==='high'?'High water':'Low water'} · bridge ${st.bridgeStatus}</dd>
   </dl>`;
   const box = $('actions'); box.querySelectorAll('button').forEach(b=>b.remove());
   box.querySelectorAll('.action-group').forEach(g=>g.remove());
@@ -508,7 +534,9 @@ function refresh() {
     p.textContent='The campaign has an ending. Explore the map, replay your choices or begin a new campaign.';
     box.appendChild(p);
   }
-  $('tier').textContent = `QualiaPortal tier ${portal.tier()} · 2 territories · ${sceneMeshes} .10d meshes`;
+  $('tier').textContent = FIRST_PAINT
+    ? `QualiaPortal tier ${portal.tier()} · first-paint path · ${sceneMeshes} organ loaded`
+    : `QualiaPortal tier ${portal.tier()} · 2 territories · ${sceneMeshes} .10d meshes`;
 }
 
 function tryAction(id) {
@@ -564,7 +592,7 @@ $('save').onclick = async () => {
 $('load').onclick = async () => {
   const b = await m.world_load('rc-save.n3');
   const saved = new TextDecoder().decode(b);
-  if (!saved.includes('rc:world rc:contentVersion 4 .')) {
+  if (!saved.includes('rc:world rc:contentVersion 5 .')) {
     $('persist').textContent = 'older save needs a Qualia Q42 migration';
     return;
   }
@@ -599,7 +627,7 @@ $('vibe-preview').onclick = () => {
   sceneSource = $('vibe-scene').value;
   try {
     refresh();
-    $('vibe-scene-result').textContent = `Qualia geometry compiled; ${sceneMeshes} .10d meshes loaded. Source embedded in provenance.`;
+    $('vibe-scene-result').textContent = `Scene cell compiled to .10d (${sceneMeshes} mesh${sceneMeshes===1?'':'es'} loaded, source in provenance). This is a receipt, not a painted frame.`;
   } catch (e) {
     sceneSource = previous;
     $('vibe-scene-result').textContent = String(e);
@@ -608,7 +636,9 @@ $('vibe-preview').onclick = () => {
 };
 
 refresh();
-note('slice ready — tier ' + portal.tier());
+note(FIRST_PAINT
+  ? 'first-paint path armed — one water-tank organ, daylight sky, camera target set'
+  : 'slice ready — tier ' + portal.tier());
 
 // Scripted acceptance playthrough for headless verification (?selftest).
 if (new URLSearchParams(location.search).has('selftest')) {
@@ -700,6 +730,30 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const paidBuilt=toObj(paid.s.propose('restoreBridgeLateCoins'));
   const noBracingAfter=toObj(paid.s.propose('braceBridge'));
   note(`TEST high-tide paid route: ${paid.ready&&paidBuilt.ok&&!noBracingAfter.ok?'PASS':'FAIL'}`);
+  const opening = new m.GameSession(SEED, ACTIONS);
+  const tide0 = toObj(opening.vibe_query('= world.canal_tide'));
+  note(`TEST canal starts low: ${tide0.ok && tide0.value==='low' ? 'PASS' : 'FAIL'}`);
+  const bridge0 = toObj(opening.vibe_query('= world.bridge_status'));
+  note(`TEST bridge starts broken: ${bridge0.ok && bridge0.value==='broken' ? 'PASS' : 'FAIL'}`);
+  const litres0 = toObj(opening.vibe_query('= world.water_litres'));
+  note(`TEST tank starts empty: ${litres0.ok && litres0.value===0 ? 'PASS' : 'FAIL'}`);
+  const wallet = toObj(opening.vibe_query('= world.wallet_instrument'));
+  const treasury = toObj(opening.vibe_query('= world.treasury_instrument'));
+  const onPlayer = toObj(opening.vibe_query('= world.instruments_on_player'));
+  note(`TEST handle instruments: ${wallet.ok && wallet.value==='rc:scenarioWallet' && treasury.ok && treasury.value==='rc:committeeTreasury' && onPlayer.ok && onPlayer.value===false ? 'PASS' : 'FAIL'}`);
+  const clock = new m.GameSession(SEED, ACTIONS);
+  let clockOk = true;
+  for (let i=0;i<3;i++) {
+    clockOk = clockOk && toObj(clock.propose('improveShelterLabour')).ok && toObj(clock.propose('endTurn')).ok;
+  }
+  const after3 = toObj(clock.vibe_query('= world.canal_tide'));
+  clockOk = clockOk && toObj(clock.propose('improveShelterLabour')).ok && toObj(clock.propose('endTurn')).ok;
+  const after4 = toObj(clock.vibe_query('= world.canal_tide'));
+  const clockWorld = clock.world();
+  const clockRep = toObj(m.session_replay(SEED, ACTIONS, toObj(clock.events())));
+  note(`TEST canal clock: ${clockOk && after3.ok && after3.value==='low' && after4.ok && after4.value==='high' && clockWorld.includes('rc:canal rc:tide "high" .') && clockRep.diverged_at===null && clockRep.world===clockWorld ? 'PASS' : 'FAIL'}`);
+  const lateTide = toObj(late.s.vibe_query('= world.canal_tide'));
+  note(`TEST high-tide world fact: ${lateTide.ok && lateTide.value==='high' ? 'PASS' : 'FAIL'}`);
   note('SUMMARY done');
 }
 </script>

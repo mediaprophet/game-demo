@@ -5,7 +5,7 @@
 @prefix ev: <https://game.example/ev#> .
 
 rc:player a rc:Resident .
-rc:world rc:contentVersion 4 .
+rc:world rc:contentVersion 5 .
 rc:player rc:atPlace rc:camp .
 rc:player rc:coin rc:c01 .
 rc:player rc:coin rc:c02 .
@@ -78,3 +78,21 @@ rc:windPump rc:atPlace rc:saltwindReach .
 rc:orchard a rc:Orchard .
 rc:orchard rc:status "dry" .
 rc:orchard rc:usesWaterFrom rc:windPump .
+
+# Canal tide is a world fact. Day five (four rests) rewrites it to "high".
+# The scene mesh reads this token; the page does not invent a second water level.
+rc:canal a rc:Canal .
+rc:canal rc:name "Kestrel canal" .
+rc:canal rc:tide "low" .
+rc:canal rc:crossedBy rc:bridge .
+
+# Scenario wallet and committee treasury are instruments on the session
+# handle. They are not the player, and the treasury is not a player balance.
+# Gate credits stay on rc:player rc:coin, which the wallet names.
+rc:sessionHandle a rc:SessionHandle .
+rc:scenarioWallet a rc:Wallet .
+rc:scenarioWallet rc:instrumentOn rc:sessionHandle .
+rc:scenarioWallet rc:namesCreditsOf rc:player .
+rc:committeeTreasury a rc:Treasury .
+rc:committeeTreasury rc:ownedBy rc:committee .
+rc:committeeTreasury rc:instrumentOn rc:sessionHandle .
