@@ -136,15 +136,21 @@
 </header>
 <main>
   <div class="world-column">
-    <nav class="territory-nav" aria-label="Territories">
-      <button id="tile-kestrel" aria-current="true">01 · Kestrel Flats</button>
-      <button id="tile-saltwind" aria-current="false">02 · Saltwind Reach</button>
+    <nav class="territory-nav" aria-label="People and place">
+      <button id="tile-kestrel" aria-current="true" type="button">Here · Kestrel Flats</button>
+      <button id="tile-saltwind" aria-current="false" type="button">Saltwind — walk there</button>
+      <label class="muted" for="roster">People</label>
+      <select id="roster" aria-label="Fictional participants"></select>
+      <button id="follow-person" type="button">Follow</button>
+      <button id="direct-person" type="button">Direct</button>
+      <button id="create-person" type="button">New person</button>
+      <button id="walk-road" type="button">Walk the road</button>
       <button id="sky-preset" aria-label="Change Qualia sky preset">☀ Daylight</button>
     </nav>
     <div class="scene-shell">
       <canvas id="scene" width="960" height="600" aria-label="QualiaDB three-dimensional view of Kestrel Flats"></canvas>
       <div class="scene-label"><span class="eyebrow" id="territory-step">Territory 01</span><strong id="territory-name">Kestrel Flats</strong></div>
-      <div class="scene-help">Choose a territory · Drag to orbit · Wheel to zoom · Click a site to inspect</div>
+      <div class="scene-help">WASD or Walk the road · the next place loads when you arrive · drag to orbit · wheel to zoom</div>
       <div class="scene-victory" id="scene-victory" hidden></div>
     </div>
     <div id="resource-bar" class="resource-bar" aria-label="World resources"></div>
@@ -307,22 +313,48 @@ const PLACES = [
 ];
 // ---------- portal ----------
 const FIRST_PAINT = new URLSearchParams(location.search).has('firstpaint');
-const canvas = $('scene');
-// Default tick draws on the canvas fallback so a missing or stuck WebGPU
-// adapter cannot take the canvas and leave it black. ?webgpu=1 opts into
-// the GPU path on a machine whose adapter actually presents.
-const WANT_GPU = new URLSearchParams(location.search).has('webgpu');
+const params = new URLSearchParams(location.search);
+// Lit path is the default when WebGPU presents. ?canvas=1, ?proof=1, or
+// ?webgpu=0 keeps the proof tick. A stuck adapter must not be the only way
+// in, and must not leave the page black.
+const FORCE_PROOF = params.has('canvas') || params.has('proof') || params.get('webgpu') === '0';
+function liveCanvas() { return document.getElementById('scene'); }
+function replaceSceneCanvas() {
+  const old = liveCanvas();
+  const fresh = old.cloneNode(false);
+  old.replaceWith(fresh);
+  return fresh;
+}
 let gpuOk = false;
-if (WANT_GPU) {
+if (!FORCE_PROOF && navigator.gpu) {
   try {
-    gpuOk = await Promise.race([
-      m.init_webgpu(canvas),
-      new Promise(resolve => setTimeout(() => resolve(false), 3000)),
+    const attempt = m.init_webgpu(liveCanvas());
+    const gate = await Promise.race([
+      attempt.then(ok => ok === true ? 'ok' : 'miss').catch(() => 'miss'),
+      new Promise(resolve => setTimeout(() => resolve('timeout'), 2500)),
     ]);
-  } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
+    if (gate === 'ok') {
+      gpuOk = true;
+    } else {
+      try { m.abort_webgpu_init(); } catch (_) {}
+      replaceSceneCanvas();
+      note('webgpu did not present (' + gate + ') — proof tick, not the lit look');
+    }
+  } catch(e) {
+    try { m.abort_webgpu_init(); } catch (_) {}
+    replaceSceneCanvas();
+    note('webgpu init: '+String(e).slice(0,80));
+  }
 }
 
-const portal = new m.GamePortal(canvas);
+const portal = new m.GamePortal(liveCanvas());
+function tierLabel() {
+  const tier = portal.tier();
+  // Tier 2 is the lit present (shade + depth). Tier 0 is proof only:
+  // same camera, solid fill, no depth buffer, not occlusion.
+  if (tier >= 2 && gpuOk) return 'tier ' + tier + ' lit · depth';
+  return 'tier ' + tier + ' proof · no occlusion';
+}
 let skyPreset=1;
 portal.set_sky_preset(skyPreset);
 $('sky-preset').onclick = () => {
@@ -330,41 +362,143 @@ $('sky-preset').onclick = () => {
   portal.set_sky_preset(skyPreset);
   $('sky-preset').textContent=['','☀ Daylight','◒ Golden hour','☾ Moonlight'][skyPreset];
 };
-$('tier').textContent = 'render tier ' + portal.tier();
+$('tier').textContent = tierLabel();
 
-let camYaw=0.6, camPitch=0.42, camZoom=FIRST_PAINT?4:1.8;
-let territory='kestrel', tileCenters={};
-// Town-frame centre of the one loaded organ. Not a portal_point tile.
+let camYaw=0.6, camPitch=0.55, camZoom=FIRST_PAINT?4:8;
+// Each entry is one fictional participant. Not a likeness, not a chatbot.
+const PEOPLE_SEED=[
+  {id:'p0', name:'Ada', x:0, z:0.4, story:'Keeps the shared workshop.', claims:[], shape:0, color:[0.86,0.45,0.28]},
+  {id:'p1', name:'Bo', x:-2.2, z:1.6, story:'Walks the crossing when the water changes.', claims:['act.kindness'], shape:1, color:[0.30,0.52,0.74]},
+];
+let party=PEOPLE_SEED.map(p=>({...p, claims:[...p.claims]}));
+let followId='p0', directId='p0';
+let walkTarget=null;
+let arrivedSaltwind=false;
+let meshMark=null;
+const walkKeys=new Set();
 let tankAim=null;
+const who=id=>party.find(p=>p.id===id)||party[0];
+function placeOf(p){
+  if (p.x>12) return 'saltwind';
+  if (p.x>6.5) return 'corridor';
+  return 'kestrel';
+}
+function stoodPlace(){ return placeOf(who(followId)); }
+function partyRecord(){
+  return party.map(p=>[p.x.toFixed(2), p.z.toFixed(2), ...p.color, p.shape].join(',')).join(';');
+}
+function lightOf(p){
+  try {
+    const frame=toObj(m.acts_frame_eval('human', JSON.stringify(p.claims)));
+    return frame.light||'none';
+  } catch(_) { return 'none'; }
+}
+function paintRoster(){
+  const sel=$('roster');
+  const keep=sel.value||followId;
+  sel.replaceChildren();
+  for (const p of party) {
+    const o=document.createElement('option');
+    o.value=p.id;
+    const cam=p.id===followId?' · camera':'';
+    const step=p.id===directId?' · steps':'';
+    o.textContent=`${p.name} · ${placeOf(p)} · ${lightOf(p)}${cam}${step}`;
+    sel.appendChild(o);
+  }
+  sel.value=party.some(p=>p.id===keep)?keep:followId;
+}
 function applyCam(){
   try {
     if (FIRST_PAINT && tankAim) {
       portal.set_camera_target(camYaw, camPitch, camZoom, tankAim.x, tankAim.y, tankAim.z);
       return;
     }
-    const p=tileCenters[territory];
-    if (p) portal.set_camera_target(camYaw, camPitch, camZoom, p.x, p.y, p.z);
-    else portal.set_camera(camYaw, camPitch, camZoom);
+    const p=who(followId);
+    portal.set_camera_target(camYaw, camPitch, camZoom, p.x, 1.4, p.z);
   } catch(e) { note(`camera: ${String(e).slice(0,80)}`); }
 }
-for (const id of ['kestrel','saltwind']) {
-  $('tile-'+id).onclick = () => { territory=id; refresh(); };
+function stepWalker(dt){
+  const p=who(directId);
+  let dx=0, dz=0;
+  if (walkKeys.has('KeyW')||walkKeys.has('ArrowUp')) dz -= 1;
+  if (walkKeys.has('KeyS')||walkKeys.has('ArrowDown')) dz += 1;
+  if (walkKeys.has('KeyA')||walkKeys.has('ArrowLeft')) dx -= 1;
+  if (walkKeys.has('KeyD')||walkKeys.has('ArrowRight')) dx += 1;
+  if (walkTarget && walkTarget.id===p.id) {
+    dx += walkTarget.x - p.x;
+    dz += walkTarget.z - p.z;
+    if (Math.hypot(walkTarget.x-p.x, walkTarget.z-p.z) < 0.4) walkTarget=null;
+  }
+  if (!dx && !dz) return false;
+  const len=Math.hypot(dx,dz)||1;
+  const step=7*(dt/1000);
+  p.x=Math.max(-6.5, Math.min(22, p.x + dx/len*step));
+  p.z=Math.max(-6, Math.min(6, p.z + dz/len*step));
+  return true;
 }
+addEventListener('keydown', e=>{
+  if (e.target && (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')) return;
+  if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) {
+    walkKeys.add(e.code); e.preventDefault();
+  }
+});
+addEventListener('keyup', e=>walkKeys.delete(e.code));
+$('follow-person').onclick=()=>{
+  followId=$('roster').value;
+  note(`Camera on ${who(followId).name}. Same world. ${who(followId).story}`);
+  paintRoster(); applyCam();
+};
+$('direct-person').onclick=()=>{
+  directId=$('roster').value;
+  walkTarget=null;
+  note(`Steps go to ${who(directId).name}. That does not make them you.`);
+  paintRoster();
+};
+$('create-person').onclick=()=>{
+  if (party.length>=4) { note('Four people is the roster. Not a crowd of bots.'); return; }
+  const seeds=[
+    {name:'Chi', story:'Plants once water is in the tank.', claims:[], shape:2, color:[0.45,0.62,0.34]},
+    {name:'Dee', story:'Carries the committee notes, not a sentence from the workbench.', claims:['act.kindness'], shape:0, color:[0.58,0.40,0.62]},
+  ];
+  const seed=seeds[party.length-2];
+  const id='p'+party.length;
+  const at=who(followId);
+  party.push({id, name:seed.name, x:at.x+0.8, z:at.z-0.6, story:seed.story, claims:[...seed.claims], shape:seed.shape, color:seed.color});
+  directId=id;
+  note(`${seed.name} is their own person. ${seed.story}`);
+  paintRoster(); refresh();
+};
+$('walk-road').onclick=()=>{
+  const p=who(directId);
+  walkTarget={id:p.id, x:p.x>12?0:14, z:0.4};
+  note(p.x>12?`${p.name} walks back along the road.`:`${p.name} walks the road. The next place loads if they arrive.`);
+};
+$('tile-kestrel').onclick=()=>note('Kestrel is a place underfoot, not a camera button.');
+$('tile-saltwind').onclick=()=>{
+  if (!arrivedSaltwind) note('Saltwind is not loaded. Someone has to walk the crossing.');
+  else note('Saltwind is loaded because someone walked there.');
+};
+paintRoster();
 
 let sceneMeshes = 0;
+let sceneOrganCount = 0;
 let sceneSource = '';
 function rebuild() {
   const st = state();
   const scene = m.scene_build(st.upgrades, st.parts.length, st.online, st.approved,
     st.waterOnline, st.gardenActive, st.bridgeOpen, st.bridgeBraced, st.canalTide==='high',
-    st.pumpOnline, st.orchardActive, sceneSource);
-  tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
+    st.pumpOnline, st.orchardActive, sceneSource, partyRecord());
+  sceneOrganCount = scene.organs.length;
   const organs = FIRST_PAINT
     ? [...scene.organs].filter(o => o.id==='rc:asset/water-tank').slice(0,1)
-    : [...scene.organs];
+    : [...scene.organs].filter(o => {
+        const place = o.place || 'kestrel';
+        if (place==='saltwind') return arrivedSaltwind;
+        return true;
+      });
   const chosen = organs.length ? organs : [...scene.organs].slice(0,1);
-  // One scene: the tank stays in town coordinates, then the camera aims at it.
-  if (FIRST_PAINT) portal.set_preserve_authored_frame(true);
+  // Town metres, so a walker and the mesh share one frame.
+  portal.set_preserve_authored_frame(true);
   const receipt = toObj(portal.load_scene(chosen));
   sceneMeshes = receipt.organs_loaded;
   if (sceneMeshes !== chosen.length)
@@ -384,7 +518,23 @@ function rebuild() {
 let last=performance.now(), tickErrorShown=false;
 function startRenderLoop(){
   (function loop(t){
-    try { portal.tick(canvas, Math.min(50, t-last)); }
+    const dt=Math.min(50, t-last);
+    try {
+      if (!FIRST_PAINT && stepWalker(dt)) {
+        const crossed=party.some(p=>p.x>12);
+        if (!arrivedSaltwind && crossed) {
+          arrivedSaltwind=true;
+          note('Saltwind Reach loaded because someone walked onto it.');
+          meshMark=partyRecord();
+          refresh();
+        } else if (party.some(q=>q._mx==null || Math.hypot(q.x-q._mx, q.z-q._mz)>0.9)) {
+          for (const q of party) { q._mx=q.x; q._mz=q.z; }
+          refresh();
+        }
+        applyCam();
+      }
+      portal.tick(liveCanvas(), dt);
+    }
     catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
     last=t; requestAnimationFrame(loop);
   })(last);
@@ -392,12 +542,18 @@ function startRenderLoop(){
 
 // orbit + pick
 let drag=null;
-canvas.addEventListener('pointerdown', e=>{ drag={x:e.clientX,y:e.clientY,moved:false}; canvas.setPointerCapture(e.pointerId); });
-canvas.addEventListener('pointermove', e=>{ if(!drag) return;
+const sceneShell = document.querySelector('.scene-shell');
+sceneShell.addEventListener('pointerdown', e=>{
+  const canvas = liveCanvas();
+  if (e.target !== canvas) return;
+  drag={x:e.clientX,y:e.clientY,moved:false}; canvas.setPointerCapture(e.pointerId);
+});
+sceneShell.addEventListener('pointermove', e=>{ if(!drag) return;
   if (Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>4) drag.moved=true;
   if (drag.moved){ camYaw+=(e.movementX||0)*0.008; camPitch=Math.max(-1.2,Math.min(1.4,camPitch+(e.movementY||0)*0.006)); applyCam(); }});
-canvas.addEventListener('pointerup', e=>{
-  if (drag && !drag.moved){
+sceneShell.addEventListener('pointerup', e=>{
+  const canvas = liveCanvas();
+  if (drag && !drag.moved && e.target === canvas){
     const r=canvas.getBoundingClientRect();
     portal.queue_pick(
       (e.clientX-r.left)*canvas.width/r.width,
@@ -413,7 +569,10 @@ canvas.addEventListener('pointerup', e=>{
   }
   drag=null;
 });
-canvas.addEventListener('wheel', e=>{ e.preventDefault(); camZoom=Math.max(1.2,Math.min(20,camZoom*Math.exp(e.deltaY*0.001))); applyCam(); }, {passive:false});
+sceneShell.addEventListener('wheel', e=>{
+  if (e.target !== liveCanvas()) return;
+  e.preventDefault(); camZoom=Math.max(1.2,Math.min(20,camZoom*Math.exp(e.deltaY*0.001))); applyCam();
+}, {passive:false});
 
 function inspect(s){
   $('why').style.display='block';
@@ -425,7 +584,8 @@ function inspect(s){
 // ---------- HUD ----------
 function refresh() {
   const st = rebuild();
-  const saltwind=territory==='saltwind';
+  const here=stoodPlace();
+  const saltwind=here==='saltwind'||here==='corridor';
   const lead=campaignLead(st);
   $('day').textContent=`Day ${st.day}`;
   const tideWord = st.canalTide==='high' ? 'High canal' : 'Low canal';
@@ -454,7 +614,11 @@ function refresh() {
   }
   $('dispatch-action').textContent=lead.label;
   $('dispatch-action').onclick=()=>{
-    territory=lead.territory;
+    if (lead.territory==='saltwind' && !arrivedSaltwind) {
+      walkTarget={x:14, z:0.4};
+      note('That place is across the road. Walking. It loads when you arrive.');
+      return;
+    }
     if (lead.action) tryAction(lead.action);
     else { refresh(); (st.finale?$('scene'):$('finale-panel')).scrollIntoView({behavior:'smooth',block:'center'}); }
   };
@@ -464,16 +628,19 @@ function refresh() {
     '<strong>The commons are open</strong><span>Shared water, food and shelter became a place to gather.</span>':
     '<strong>The canal is connected</strong><span>The first boat carries a harvest to neighbouring communities.</span>')+
     `<span>Day ${st.day} · ${done}/7 projects working · ${st.coins} coins in reserve</span>`;
-  $('tile-kestrel').setAttribute('aria-current', String(!saltwind));
-  $('tile-saltwind').setAttribute('aria-current', String(saltwind));
-  $('territory-step').textContent=saltwind?'Territory 02':'Territory 01';
-  $('territory-name').textContent=saltwind?'Saltwind Reach':'Kestrel Flats';
+  const placeWord=here==='saltwind'?'Saltwind Reach':here==='corridor'?'The crossing':'Kestrel Flats';
+  $('territory-step').textContent=here==='saltwind'?'You arrived':here==='corridor'?'On the road':'Where you stand';
+  $('territory-name').textContent=placeWord;
+  $('tile-kestrel').textContent=here==='kestrel'?'Here · Kestrel Flats':'Kestrel Flats';
+  $('tile-kestrel').setAttribute('aria-current', String(here==='kestrel'));
+  $('tile-saltwind').textContent=arrivedSaltwind?(here==='saltwind'?'Here · Saltwind Reach':'Saltwind Reach'):'Saltwind — walk there';
+  $('tile-saltwind').setAttribute('aria-current', String(here==='saltwind'));
   $('chapter-label').textContent=saltwind?'Campaign · Chapter 2':'Campaign · Chapter 1';
   $('chapter-title').textContent=saltwind?'Cross the canal':'Restore the commons';
   $('chapter-detail').textContent=saltwind?
     'Reconnect the crossing, bring the wind pump online and plant the orchard.':
     'Make a workable shelter and bring the shared workshop, water and garden into use.';
-  canvas.setAttribute('aria-label',`QualiaDB three-dimensional view of ${saltwind?'Saltwind Reach':'Kestrel Flats'}`);
+  liveCanvas().setAttribute('aria-label',`QualiaDB three-dimensional view of ${saltwind?'Saltwind Reach':'Kestrel Flats'}`);
   const resource = (label,value,cls='') => `<div class="resource"><span>${label}</span><strong class="${cls}">${value}</strong></div>`;
   $('resource-bar').innerHTML = resource('Coins',st.coins) +
     resource('Labour',st.labour?'Ready':'Spent',st.labour?'status-good':'status-warn') +
@@ -565,8 +732,8 @@ function refresh() {
     box.appendChild(p);
   }
   $('tier').textContent = FIRST_PAINT
-    ? `QualiaPortal tier ${portal.tier()} · first-paint path · ${sceneMeshes} organ loaded`
-    : `QualiaPortal tier ${portal.tier()} · 2 territories · ${sceneMeshes} .10d meshes`;
+    ? `${tierLabel()} · first-paint path · ${sceneMeshes} organ loaded`
+    : `${tierLabel()} · 2 territories · ${sceneMeshes} .10d meshes`;
 }
 
 function tryAction(id) {
@@ -586,7 +753,10 @@ function tryAction(id) {
       launchTradeRoute:'The first trade boat sets out.',endTurn:'The crew rests. A new day begins.'
     };
     note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
-    if (id==='openCommons'||id==='launchTradeRoute') territory='saltwind';
+    if ((id==='openCommons'||id==='launchTradeRoute') && !arrivedSaltwind) {
+      walkTarget={x:14, z:0.4};
+      note('The ending is in Saltwind. Walk there; the place loads on arrival.');
+    }
     refresh(); return;
   }
   const rep = toObj(r.report||{});
@@ -637,7 +807,8 @@ $('replay').onclick = () => {
 };
 $('new-game').onclick = () => {
   session = new m.GameSession(SEED, ACTIONS);
-  territory='kestrel';
+  party=PEOPLE_SEED.map(p=>({...p, claims:[...p.claims]}));
+  followId='p0'; directId='p0'; walkTarget=null; arrivedSaltwind=false; meshMark=null;
   $('why').style.display='none';
   $('persist').textContent='new campaign started; save when ready';
   refresh(); note('A new campaign begins at Kestrel Flats.');
@@ -669,7 +840,7 @@ refresh();
 startRenderLoop();
 note(FIRST_PAINT
   ? 'first-paint path armed — water tank in town frame, camera on that mesh'
-  : 'slice ready — tier ' + portal.tier());
+  : 'slice ready — ' + tierLabel());
 
 // Scripted acceptance playthrough for headless verification (?selftest).
 if (new URLSearchParams(location.search).has('selftest')) {
@@ -681,9 +852,10 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST Vibe world query: ${query.ok && query.value===12 ? 'PASS' : 'FAIL'}`);
   const scriptBlock = toObj(testSession.vibe_propose('= "startGarden"'));
   note(`TEST Vibe blocked order: ${scriptBlock.ok===false ? 'PASS' : 'FAIL'}`);
-  const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, VIBE_SCENE);
-  note(`TEST Vibe scene asset: ${scriptAsset.organs.length===sceneMeshes+1 ? 'PASS' : 'FAIL'}`);
-  note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=115 ? 'PASS' : 'FAIL'}`);
+  const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, VIBE_SCENE, '');
+  note(`TEST Vibe scene asset: ${scriptAsset.organs.length===sceneOrganCount-party.length+1 ? 'PASS' : 'FAIL'}`);
+  note(`TEST places in the build: ${sceneOrganCount>=115 ? 'PASS' : 'FAIL'}`);
+  note(`TEST saltwind stays unloaded until you walk there: ${sceneMeshes<sceneOrganCount ? 'PASS' : 'FAIL'}`);
   const expect = (name, id, wantOk) => {
     const r = toObj(testSession.propose(id));
     note(`TEST ${name}: ${id} ${r.ok===wantOk?'PASS':'FAIL'}`);

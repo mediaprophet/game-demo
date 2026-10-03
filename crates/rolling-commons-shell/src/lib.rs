@@ -19,10 +19,10 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-/// `1e5ca0ed` draws the loaded mesh on the canvas tick when WebGPU does not
-/// present, and an omitted material does not become sugar. Authored
-/// coordinates still hold. A receipt is not paint; the tick is.
-pub const QUALIADB_PINNED_REVISION: &str = "1e5ca0ed";
+/// `231e3e94` presents the lit mesh (shade + depth + shell colour) when
+/// WebGPU answers. If the adapter hangs or the present fails, the canvas is
+/// replaced and the tick is a solid proof fill — not occlusion, not the look.
+pub const QUALIADB_PINNED_REVISION: &str = "231e3e94";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
@@ -210,12 +210,13 @@ pub fn scene_build(
     pump_online: bool,
     orchard_active: bool,
     vibe_scene: &str,
+    party: &str,
 ) -> Result<JsValue, JsValue> {
     use qualia_core_db::container_10d::provenance_section::ProvenanceSidecar;
     use qualia_core_db::render::assets::Mesh;
     use qualia_core_db::render::compile_10d::compile_mesh_to_10d_with_provenance;
     use qualia_core_db::render::scene_primitives::{
-        assemble_into, portal_point, recipe_write, Primitive,
+        assemble_into, recipe_write, Primitive,
     };
     use qualia_core_db::specialized_libs::computational_geometry::geometry_workspace::{
         Cancellation, GeometryWorkspace,
@@ -307,6 +308,17 @@ pub fn scene_build(
         for (key, value) in ["cx", "cy", "cz"].iter().zip(center) {
             js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
         }
+        // Place is where the part sits, not a camera preset. The crossing
+        // is the corridor between the two grounds. Saltwind stays a different
+        // place until a participant walks onto it.
+        let place = if center[0] > 10.5 {
+            "saltwind"
+        } else if center[0] > 6.5 {
+            "corridor"
+        } else {
+            "kestrel"
+        };
+        js_sys::Reflect::set(&obj, &"place".into(), &JsValue::from_str(place))?;
         Ok((mesh, obj.into()))
     }
 
@@ -331,6 +343,7 @@ pub fn scene_build(
     if !vibe_scene.trim().is_empty() {
         recipes.push(vibe_scene_recipe(vibe_scene).map_err(|e| JsValue::from_str(&e))?);
     }
+    recipes.extend(asset_catalog::participant_markers(party));
     for recipe in recipes {
         let (mesh, obj) = organ(&recipe)?;
         for axis in 0..3 {
@@ -352,9 +365,10 @@ pub fn scene_build(
         [17.6, 0.8, 4.0],
     ];
     let mut nodes = Vec::with_capacity(places.len() * 10);
+    // Town metres, same frame as a preserved upload. A walker and a pick
+    // share that frame; they are not a normalised stage you aim at.
     for point in places {
-        let p = portal_point(min, max, point);
-        nodes.extend_from_slice(&[0.0, 0.0, 4.0, p[0], p[1], p[2], 0.0, 1.0, 0.7, 0.5]);
+        nodes.extend_from_slice(&[0.0, 0.0, 4.0, point[0], point[1], point[2], 0.0, 1.0, 0.7, 0.5]);
     }
     let tensor = tensor_buffer_build(&nodes)?;
     let result = js_sys::Object::new();
@@ -365,16 +379,16 @@ pub fn scene_build(
         &js_sys::Uint8Array::from(tensor.as_slice()),
     )?;
     let tiles = js_sys::Array::new();
-    for (id, center) in [("kestrel", [0.0, 0.0, 0.0]), ("saltwind", [16.0, 0.0, 0.0])] {
-        let p = portal_point(min, max, center);
+    for (id, center) in [("kestrel", [0.0_f32, 0.0, 0.0]), ("saltwind", [16.0, 0.0, 0.0])] {
         let tile = js_sys::Object::new();
         js_sys::Reflect::set(&tile, &"id".into(), &JsValue::from_str(id))?;
-        for (key, value) in ["x", "y", "z"].iter().zip(p) {
+        for (key, value) in ["x", "y", "z"].iter().zip(center) {
             js_sys::Reflect::set(&tile, &(*key).into(), &JsValue::from_f64(value as f64))?;
         }
         tiles.push(&tile);
     }
     js_sys::Reflect::set(&result, &"tiles".into(), &tiles)?;
+    let _bounds = (min, max);
     Ok(result.into())
 }
 
@@ -390,11 +404,28 @@ pub struct GamePortal {
     inner: qualia_core_db::QualiaPortal,
 }
 
-/// Arm the WebGPU path. Await once before constructing the portal; on
-/// `false`/throw the portal keeps its canvas2d (tier-1) fallback.
+/// Arm the WebGPU path. Await once before constructing the portal.
+/// `true` means a device is stashed and the next tick can present the lit
+/// mesh (shade + depth). `false` means no present — use the proof tick.
+/// If [`webgpu_canvas_claimed`] is true, replace the canvas first; a 2d
+/// context cannot be created on an element WebGPU already took.
 #[wasm_bindgen]
 pub async fn init_webgpu(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
     qualia_core_db::render::portal::portal_init_webgpu(canvas).await
+}
+
+/// Stop a late WebGPU init from being adopted. Call this when the page
+/// timeout wins, then replace the canvas if [`webgpu_canvas_claimed`].
+#[wasm_bindgen]
+pub fn abort_webgpu_init() {
+    qualia_core_db::render::portal::portal_abort_webgpu();
+}
+
+/// True when init took the canvas's WebGPU context. The proof tick needs a
+/// new element; solid fill on that element is not occlusion and not lit.
+#[wasm_bindgen]
+pub fn webgpu_canvas_claimed() -> bool {
+    qualia_core_db::render::portal::portal_webgpu_canvas_claimed()
 }
 
 #[wasm_bindgen]
@@ -420,7 +451,7 @@ impl GamePortal {
         self.inner.load_body_organs_colored(organs)
     }
 
-    /// Render tier: 0 = no webgpu, 1 = canvas2d fallback, 2 = GPU path.
+    /// Render tier: 0 = proof canvas (no depth buffer), 2 = lit WebGPU present.
     pub fn tier(&self) -> u8 {
         self.inner.tier()
     }

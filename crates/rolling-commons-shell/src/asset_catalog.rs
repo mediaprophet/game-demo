@@ -189,6 +189,49 @@ pub fn hdpe_shell_colour() -> [f32; 4] {
     ]
 }
 
+
+/// Fictional participants. Not likenesses and not a chatbot.
+/// `party` records are `x,z,r,g,b,shape` separated by `;`, at most four.
+/// Shapes differ so the roster is not one repeated bot.
+pub fn participant_markers(party: &str) -> Vec<AssetRecipe> {
+    const IDS: [&str; 4] = [
+        "rc:participant/0",
+        "rc:participant/1",
+        "rc:participant/2",
+        "rc:participant/3",
+    ];
+    let mut out = Vec::new();
+    for (n, rec) in party.split(';').take(4).enumerate() {
+        if rec.trim().is_empty() {
+            continue;
+        }
+        let nums: Vec<f32> = rec.split(',').filter_map(|s| s.trim().parse().ok()).collect();
+        if nums.len() < 6 {
+            continue;
+        }
+        let (x, z) = (nums[0], nums[1]);
+        let color = [nums[2].clamp(0.0, 1.0), nums[3].clamp(0.0, 1.0), nums[4].clamp(0.0, 1.0), 1.0];
+        let parts = match nums[5] as u32 {
+            1 => vec![block([x, 0.62, z], [0.9, 1.15, 0.5])],
+            2 => vec![
+                block([x, 0.62, z], [0.38, 1.25, 0.34]),
+                block([x, 1.4, z], [0.72, 0.18, 0.62]),
+            ],
+            _ => vec![block([x, 0.85, z], [0.36, 1.7, 0.32])],
+        };
+        out.push(AssetRecipe {
+            id: IDS[n],
+            parts,
+            parametric: None,
+            color,
+            vibe_source: None,
+            shell_signature: None,
+            spectrum_reading: None,
+        });
+    }
+    out
+}
+
 /// First-pass blockout kit. Keep IDs stable when replacing geometry with
 /// finished, independently packaged assets. Dimensions are scene metres.
 pub fn kestrel_flats(
