@@ -144,13 +144,14 @@
       <button id="follow-person" type="button">Follow</button>
       <button id="direct-person" type="button">Direct</button>
       <button id="create-person" type="button">New person</button>
-      <button id="walk-road" type="button">Walk the road</button>
+      <button id="walk-road" type="button">Their next step</button>
+      <span id="direct-mark" class="muted"></span>
       <button id="sky-preset" aria-label="Change Qualia sky preset">☀ Daylight</button>
     </nav>
     <div class="scene-shell">
       <canvas id="scene" width="960" height="600" aria-label="QualiaDB three-dimensional view of Kestrel Flats"></canvas>
       <div class="scene-label"><span class="eyebrow" id="territory-step">Territory 01</span><strong id="territory-name">Kestrel Flats</strong></div>
-      <div class="scene-help">WASD or Walk the road · the next place loads when you arrive · drag to orbit · wheel to zoom</div>
+      <div class="scene-help">Keys move the one person you direct · others keep their own step · drag to orbit</div>
       <div class="scene-victory" id="scene-victory" hidden></div>
     </div>
     <div id="resource-bar" class="resource-bar" aria-label="World resources"></div>
@@ -367,10 +368,12 @@ $('tier').textContent = tierLabel();
 let camYaw=0.6, camPitch=0.55, camZoom=FIRST_PAINT?4:8;
 // Each entry is one fictional participant. Not a likeness, not a chatbot.
 const PEOPLE_SEED=[
-  {id:'p0', name:'Ada', x:0, z:0.4, story:'Keeps the shared workshop.', claims:[], shape:0, color:[0.86,0.45,0.28]},
-  {id:'p1', name:'Bo', x:-2.2, z:1.6, story:'Walks the crossing when the water changes.', claims:['act.kindness'], shape:1, color:[0.30,0.52,0.74]},
+  {id:'p0', name:'Ada', x:3.1, z:-2.1, story:'Keeps the shared workshop.', need:'the workshop', claims:[], shape:0, color:[0.86,0.45,0.28], day:1,
+    route:[[3.2,-2.2],[-3.0,2.4],[-4.6,-0.4]]},
+  {id:'p1', name:'Bo', x:-2.4, z:2.8, story:'Has their own errand at the water.', need:'the cistern', claims:['act.kindness'], shape:1, color:[0.30,0.52,0.74], day:1,
+    route:[[-5.0,-0.4],[-3.6,-3.2],[1.2,3.4]]},
 ];
-let party=PEOPLE_SEED.map(p=>({...p, claims:[...p.claims]}));
+let party=PEOPLE_SEED.map(p=>({...p, claims:[...p.claims], route:p.route.map(q=>q.slice()), step:0}));
 let followId='p0', directId='p0';
 let walkTarget=null;
 let arrivedSaltwind=false;
@@ -385,7 +388,7 @@ function placeOf(p){
 }
 function stoodPlace(){ return placeOf(who(followId)); }
 function partyRecord(){
-  return party.map(p=>[p.x.toFixed(2), p.z.toFixed(2), ...p.color, p.shape].join(',')).join(';');
+  return party.map(p=>[p.x.toFixed(2), p.z.toFixed(2), ...p.color, p.shape, p.id===directId?1:0].join(',')).join(';');
 }
 function lightOf(p){
   try {
@@ -400,12 +403,12 @@ function paintRoster(){
   for (const p of party) {
     const o=document.createElement('option');
     o.value=p.id;
-    const cam=p.id===followId?' · camera':'';
-    const step=p.id===directId?' · steps':'';
-    o.textContent=`${p.name} · ${placeOf(p)} · ${lightOf(p)}${cam}${step}`;
+    o.textContent=p.name;
     sel.appendChild(o);
   }
   sel.value=party.some(p=>p.id===keep)?keep:followId;
+  const d=who(directId);
+  $('direct-mark').textContent=`Directing ${d.name} · their day ${d.day} · ${d.need}`;
 }
 function applyCam(){
   try {
@@ -416,6 +419,30 @@ function applyCam(){
     const p=who(followId);
     portal.set_camera_target(camYaw, camPitch, camZoom, p.x, 1.4, p.z);
   } catch(e) { note(`camera: ${String(e).slice(0,80)}`); }
+}
+function ownTarget(p){
+  const pt=p.route[p.step % p.route.length];
+  return {x:pt[0], z:pt[1]};
+}
+function stepOthers(dt){
+  let moved=false;
+  const step=1.5*(dt/1000);
+  for (const p of party) {
+    if (p.id===directId) continue;
+    const n=ownTarget(p);
+    const dx=n.x-p.x, dz=n.z-p.z;
+    const dist=Math.hypot(dx,dz);
+    if (dist<0.35) {
+      p.step++;
+      p.day++;
+      moved=true;
+      continue;
+    }
+    p.x=Math.max(-6.5, Math.min(22, p.x + dx/dist*step));
+    p.z=Math.max(-6, Math.min(6, p.z + dz/dist*step));
+    moved=true;
+  }
+  return moved;
 }
 function stepWalker(dt){
   const p=who(directId);
@@ -451,27 +478,28 @@ $('follow-person').onclick=()=>{
 $('direct-person').onclick=()=>{
   directId=$('roster').value;
   walkTarget=null;
-  note(`Steps go to ${who(directId).name}. That does not make them you.`);
-  paintRoster();
+  note(`Only ${who(directId).name} takes direction. The others keep their own step.`);
+  paintRoster(); refresh();
 };
 $('create-person').onclick=()=>{
   if (party.length>=4) { note('Four people is the roster. Not a crowd of bots.'); return; }
   const seeds=[
-    {name:'Chi', story:'Plants once water is in the tank.', claims:[], shape:2, color:[0.45,0.62,0.34]},
-    {name:'Dee', story:'Carries the committee notes, not a sentence from the workbench.', claims:['act.kindness'], shape:0, color:[0.58,0.40,0.62]},
+    {name:'Chi', story:'Plants once water is in the tank.', need:'the garden beds', claims:[], shape:2, color:[0.45,0.62,0.34],
+      x:-3.8, z:-3.4, route:[[-3.9,-3.6],[-4.8,1.2],[-2.2,-2.4]]},
+    {name:'Dee', story:'Carries the committee notes.', need:'the committee', claims:['act.kindness'], shape:0, color:[0.58,0.40,0.62],
+      x:0.4, z:-1.8, route:[[0.2,-0.8],[2.6,1.4],[-1.2,-2.6]]},
   ];
   const seed=seeds[party.length-2];
   const id='p'+party.length;
-  const at=who(followId);
-  party.push({id, name:seed.name, x:at.x+0.8, z:at.z-0.6, story:seed.story, claims:[...seed.claims], shape:seed.shape, color:seed.color});
-  directId=id;
-  note(`${seed.name} is their own person. ${seed.story}`);
+  party.push({id, name:seed.name, x:seed.x, z:seed.z, story:seed.story, need:seed.need, claims:[...seed.claims], shape:seed.shape, color:seed.color, day:1, route:seed.route.map(q=>q.slice()), step:0});
+  note(`${seed.name} starts on their own ground. ${seed.need}. Not behind anyone.`);
   paintRoster(); refresh();
 };
 $('walk-road').onclick=()=>{
   const p=who(directId);
-  walkTarget={id:p.id, x:p.x>12?0:14, z:0.4};
-  note(p.x>12?`${p.name} walks back along the road.`:`${p.name} walks the road. The next place loads if they arrive.`);
+  const n=ownTarget(p);
+  walkTarget={id:p.id, x:n.x, z:n.z};
+  note(`${p.name}'s next step only. The others do not take it.`);
 };
 $('tile-kestrel').onclick=()=>note('Kestrel is a place underfoot, not a camera button.');
 $('tile-saltwind').onclick=()=>{
@@ -520,7 +548,8 @@ function startRenderLoop(){
   (function loop(t){
     const dt=Math.min(50, t-last);
     try {
-      if (!FIRST_PAINT && stepWalker(dt)) {
+      const moved=FIRST_PAINT?false:(stepWalker(dt)|stepOthers(dt));
+      if (moved) {
         const crossed=party.some(p=>p.x>12);
         if (!arrivedSaltwind && crossed) {
           arrivedSaltwind=true;
@@ -615,8 +644,9 @@ function refresh() {
   $('dispatch-action').textContent=lead.label;
   $('dispatch-action').onclick=()=>{
     if (lead.territory==='saltwind' && !arrivedSaltwind) {
-      walkTarget={x:14, z:0.4};
-      note('That place is across the road. Walking. It loads when you arrive.');
+      const one=who(directId);
+      walkTarget={id:one.id, x:14, z:one.z};
+      note(`Only ${one.name} is sent across. The others keep their own step.`);
       return;
     }
     if (lead.action) tryAction(lead.action);
@@ -754,8 +784,9 @@ function tryAction(id) {
     };
     note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
     if ((id==='openCommons'||id==='launchTradeRoute') && !arrivedSaltwind) {
-      walkTarget={x:14, z:0.4};
-      note('The ending is in Saltwind. Walk there; the place loads on arrival.');
+      const one=who(directId);
+      walkTarget={id:one.id, x:16, z:one.z};
+      note(`Only ${one.name} is sent. That order is not everyone's.`);
     }
     refresh(); return;
   }
@@ -807,7 +838,7 @@ $('replay').onclick = () => {
 };
 $('new-game').onclick = () => {
   session = new m.GameSession(SEED, ACTIONS);
-  party=PEOPLE_SEED.map(p=>({...p, claims:[...p.claims]}));
+  party=PEOPLE_SEED.map(p=>({...p, claims:[...p.claims], route:p.route.map(q=>q.slice()), step:0}));
   followId='p0'; directId='p0'; walkTarget=null; arrivedSaltwind=false; meshMark=null;
   $('why').style.display='none';
   $('persist').textContent='new campaign started; save when ready';

@@ -191,8 +191,8 @@ pub fn hdpe_shell_colour() -> [f32; 4] {
 
 
 /// Fictional participants. Not likenesses and not a chatbot.
-/// `party` records are `x,z,r,g,b,shape` separated by `;`, at most four.
-/// Shapes differ so the roster is not one repeated bot.
+/// `party` records are `x,z,r,g,b,shape,mark` separated by `;`, at most four.
+/// Shapes differ. `mark` is a quiet foot pad on the one person being directed.
 pub fn participant_markers(party: &str) -> Vec<AssetRecipe> {
     const IDS: [&str; 4] = [
         "rc:participant/0",
@@ -211,7 +211,7 @@ pub fn participant_markers(party: &str) -> Vec<AssetRecipe> {
         }
         let (x, z) = (nums[0], nums[1]);
         let color = [nums[2].clamp(0.0, 1.0), nums[3].clamp(0.0, 1.0), nums[4].clamp(0.0, 1.0), 1.0];
-        let parts = match nums[5] as u32 {
+        let mut parts = match nums[5] as u32 {
             1 => vec![block([x, 0.62, z], [0.9, 1.15, 0.5])],
             2 => vec![
                 block([x, 0.62, z], [0.38, 1.25, 0.34]),
@@ -219,6 +219,9 @@ pub fn participant_markers(party: &str) -> Vec<AssetRecipe> {
             ],
             _ => vec![block([x, 0.85, z], [0.36, 1.7, 0.32])],
         };
+        if nums.get(6).copied().unwrap_or(0.0) > 0.5 {
+            parts.push(block([x, 0.03, z], [0.5, 0.05, 0.5]));
+        }
         out.push(AssetRecipe {
             id: IDS[n],
             parts,
