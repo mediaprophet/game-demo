@@ -19,7 +19,7 @@ The corridor between places is a mechanic, not a map texture.
   one object and not a who.
 - **Load** is how the mass sits on that hitch. A badly loaded van or bad
   driving can write off both instruments.
-- **Overheat** and **fuel** are states of those instruments. Fuel has a cost.
+- **Overheat** and **fuel** are states of those instruments. Fuel cost is a **scenario claim on the trip**, not spending authority and not a checkout.
 - A **write-off** is a receipt: both instruments end as wrecked scene state.
 - A **licence** is the capacity to use the instruments. Lose it and they stay
   parked; the cell cannot take the corridor.
