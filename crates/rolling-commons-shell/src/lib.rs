@@ -19,10 +19,11 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-/// `f101983e` is `fix/qg12-town-frame-firstpaint` on top of tag `v0.0.40.11`
-/// (`19e2abe`). Town uploads can keep authored coordinates. A scene receipt
-/// is not paint; canvas soft-rise waits on visual confirm.
-pub const QUALIADB_PINNED_REVISION: &str = "f101983e";
+/// `774e5d8a` is `fix/qg12-town-frame-firstpaint` on top of tag `v0.0.40.11`
+/// (`19e2abe`). Portal uploads can keep authored coordinates. Wasm uniform
+/// upload no longer maps a buffer at creation. A scene receipt is not paint;
+/// canvas soft-rise waits on visual confirm.
+pub const QUALIADB_PINNED_REVISION: &str = "774e5d8a";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
