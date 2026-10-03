@@ -14,6 +14,7 @@ smash toy and never a real human in the wreck.
 
 | Rule | Meaning |
 | --- | --- |
+| Humans | **Not a destructible kind.** No intact/stressed/failed mesh for a who. A life that ends is scene state, not an asset. |
 | Kind before mesh | Catalog kinds and how each fails; do not invent stub meshes |
 | Three looks | Every kind that can break: `intact` → `stressed` → `failed` |
 | Cause named | A destruction cell names **kind** + **cause** |
@@ -32,6 +33,7 @@ smash toy and never a real human in the wreck.
 | `cause.fire` | Wildfire / structure fire (disaster) |
 | `cause.storm` | Wind, hail, tree-fall |
 | `cause.wear` | Gradual maintenance failure |
+| `cause.drought` | Water stress on living flora/funga (and soil moisture fields) |
 | `cause.violence` | Intentional harm in-scene — consequence, not a toy mode |
 
 Violence and disaster both stay **scene receipts**. Neither binds or instructs
@@ -76,9 +78,9 @@ Fuel cost stays a **trip scenario claim**, not spending authority.
 
 | kind_id | Causes | intact | stressed | failed | notes | mesh |
 | --- | --- | --- | --- | --- | --- | --- |
-| `living.flora.*` | fire, flood, storm, drought/wear, violence | healthy | stressed | dead / cleared | presence on place | empty / blockout trees |
+| `living.flora.*` | fire, flood, storm, drought, wear, violence | healthy | stressed | dead / cleared | presence on place | empty / blockout trees |
 | `living.fauna.*` | fire, flood, storm, impact, violence | healthy | injured / fleeing | dead (scene) | **personality = trait**, not who | empty |
-| `living.funga.*` | fire, flood, drought, violence | present | stressed | gone | separate kind | empty |
+| `living.funga.*` | fire, flood, storm, drought, violence | present | stressed | gone | separate kind | empty |
 
 ### Props and resources
 
