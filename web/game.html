@@ -754,6 +754,39 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST canal clock: ${clockOk && after3.ok && after3.value==='low' && after4.ok && after4.value==='high' && clockWorld.includes('rc:canal rc:tide "high" .') && clockRep.diverged_at===null && clockRep.world===clockWorld ? 'PASS' : 'FAIL'}`);
   const lateTide = toObj(late.s.vibe_query('= world.canal_tide'));
   note(`TEST high-tide world fact: ${lateTide.ok && lateTide.value==='high' ? 'PASS' : 'FAIL'}`);
+  const frame = (kind, claims) => toObj(m.acts_frame_eval(kind, JSON.stringify(claims)));
+  const poverty = frame('human', ['condition.poverty']);
+  note(`TEST acts frame: poverty alone custody false light none: ${poverty.custody===false && poverty.light==='none' && poverty.drug_inference===false ? 'PASS' : 'FAIL'}`);
+  const wealth = frame('human', ['condition.wealth']);
+  note(`TEST acts frame: wealth alone custody false light none: ${wealth.custody===false && wealth.light==='none' ? 'PASS' : 'FAIL'}`);
+  const noHousing = frame('human', ['condition.no_housing']);
+  note(`TEST acts frame: no_housing alone no villain no custody no drug inference: ${noHousing.custody===false && noHousing.light==='none' && noHousing.drug_inference===false && noHousing.look!=='junkie' ? 'PASS' : 'FAIL'}`);
+  const injury = frame('human', ['condition.injury', 'condition.no_medication']);
+  note(`TEST acts frame: injury and no medication are conditions not guilt: ${injury.custody===false && injury.light==='none' && injury.drug_inference===false ? 'PASS' : 'FAIL'}`);
+  const cell = frame('human', ['act.violence_against_person']);
+  note(`TEST acts frame: human warranting act custody true: ${cell.custody===true && cell.light==='villain' ? 'PASS' : 'FAIL'}`);
+  const company = frame('company', ['act.violence_against_person']);
+  note(`TEST acts frame: company same act custody false: ${company.custody===false ? 'PASS' : 'FAIL'}`);
+  const kind = frame('human', ['act.kindness']);
+  note(`TEST acts frame: human kindness halo no custody: ${kind.light==='halo' && kind.custody===false ? 'PASS' : 'FAIL'}`);
+  const supply = frame('human', ['act.illegal_drug_supply']);
+  note(`TEST acts frame: drug supply is an act not a housing look: ${supply.custody===true && supply.light==='villain' && supply.drug_inference===true ? 'PASS' : 'FAIL'}`);
+  const housedSupply = frame('human', ['condition.no_housing', 'act.illegal_drug_supply']);
+  note(`TEST acts frame: cell does not infer drug act from no housing: ${housedSupply.custody===true && housedSupply.reason==='act.illegal_drug_supply' && noHousing.drug_inference===false ? 'PASS' : 'FAIL'}`);
+  const pathways = [
+    'condition.cannot_afford_child',
+    'condition.spent_caring_for_relative',
+    'condition.lost_business',
+    'condition.returned_from_war',
+    'condition.unhappy_relationship_mortgage_stuck'
+  ];
+  for (const id of pathways) {
+    const r = frame('human', [id]);
+    const kept = Array.isArray(r.pathways) && r.pathways.length===1 && r.pathways[0]===id;
+    note(`TEST acts frame: ${id} alone no custody no villain pathway kept: ${r.custody===false && r.light==='none' && r.look!=='junkie' && r.drug_inference===false && kept ? 'PASS' : 'FAIL'}`);
+  }
+  const silhouette = frame('human', ['look.homeless_silhouette']);
+  note(`TEST acts frame: homeless silhouette that hides the path is refused: ${silhouette.custody===false && silhouette.light==='none' && silhouette.look==='none' && (!silhouette.pathways || silhouette.pathways.length===0) ? 'PASS' : 'FAIL'}`);
   note('SUMMARY done');
 }
 </script>
