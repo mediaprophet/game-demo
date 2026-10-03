@@ -10,6 +10,7 @@
 
 #![cfg(target_arch = "wasm32")]
 
+mod acts_frame;
 mod asset_catalog;
 
 use std::collections::BTreeMap;
@@ -18,7 +19,10 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-pub const QUALIADB_PINNED_REVISION: &str = "32ef0175";
+/// `1e5ca0ed` draws the loaded mesh on the canvas tick when WebGPU does not
+/// present, and an omitted material does not become sugar. Authored
+/// coordinates still hold. A receipt is not paint; the tick is.
+pub const QUALIADB_PINNED_REVISION: &str = "1e5ca0ed";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
@@ -252,14 +256,21 @@ pub fn scene_build(
                 min: receipt.min,
                 max: receipt.max,
             };
-            let mut source = vec![0u8; 6 + parts.len() * 25];
-            recipe_write(parts, &mut source)
-                .map_err(|e| JsValue::from_str(&format!("scene recipe: {e:?}")))?;
-            (
-                mesh,
-                source,
-                "application/vnd.qualia.scene-primitives;version=1",
-            )
+            let (source, mime) = if let Some(src) = &recipe.vibe_source {
+                (
+                    src.as_bytes().to_vec(),
+                    "application/vnd.qualia.part-record;version=1",
+                )
+            } else {
+                let mut source = vec![0u8; 6 + parts.len() * 25];
+                recipe_write(parts, &mut source)
+                    .map_err(|e| JsValue::from_str(&format!("scene recipe: {e:?}")))?;
+                (
+                    source,
+                    "application/vnd.qualia.scene-primitives;version=1",
+                )
+            };
+            (mesh, source, mime)
         };
         // The scene is original authored data with no external reuse grant.
         // This records that status; it does not alter the QualiaDB licence.
@@ -275,6 +286,25 @@ pub fn scene_build(
             &js_sys::Uint8Array::from(bytes.as_slice()),
         )?;
         for (key, value) in ["r", "g", "b", "a"].iter().zip(recipe.color) {
+            js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
+        }
+        // Colour is a spectrum reading on the part, not a baked texture swap.
+        js_sys::Reflect::set(&obj, &"baked_texture".into(), &JsValue::from_bool(false))?;
+        if let Some(sig) = recipe.shell_signature {
+            js_sys::Reflect::set(&obj, &"signature".into(), &JsValue::from_str(sig))?;
+        }
+        if let Some(reading) = recipe.spectrum_reading {
+            js_sys::Reflect::set(&obj, &"reading".into(), &JsValue::from_str(reading))?;
+        }
+        js_sys::Reflect::set(&obj, &"baked_clip".into(), &JsValue::from_bool(false))?;
+        // Authored town-frame centre. The portal ignores these; the page aims
+        // the camera here when the upload keeps town coordinates.
+        let center = [
+            (mesh.min[0] + mesh.max[0]) * 0.5,
+            (mesh.min[1] + mesh.max[1]) * 0.5,
+            (mesh.min[2] + mesh.max[2]) * 0.5,
+        ];
+        for (key, value) in ["cx", "cy", "cz"].iter().zip(center) {
             js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
         }
         Ok((mesh, obj.into()))
@@ -438,6 +468,12 @@ impl GamePortal {
     pub fn set_sky_preset(&mut self, preset: u32) {
         self.inner.set_sky_preset(preset);
     }
+
+    /// Leave the next scene upload in authored town coordinates instead of
+    /// the portal orbit frame. One camera then aims at that mesh.
+    pub fn set_preserve_authored_frame(&mut self, on: bool) {
+        self.inner.set_preserve_authored_frame(on);
+    }
 }
 
 // --- Session: deterministic world document + event log ---
@@ -519,12 +555,16 @@ impl GameSession {
             }
         }
         events.sort_by_key(|(n, _)| *n);
-        Ok(GameSession {
+        let mut session = GameSession {
             lines,
             actions,
             events: events.into_iter().map(|(_, id)| id).collect(),
             seq,
-        })
+        };
+        // The canal clock is a fact in the world, not a page-side guess.
+        // Reloaded documents are corrected to the same rule replay uses.
+        session.sync_canal_clock();
+        Ok(session)
     }
 
     /// Current world document as N3 text (includes `ev:` event lines).
@@ -604,11 +644,42 @@ impl GameSession {
             .push(format!("ev:e{seq} ev:action \"{action_id}\" ."));
         self.lines.push(format!("ev:e{seq} ev:seq {seq} ."));
         self.events.push(action.id.clone());
+        self.sync_canal_clock();
         let mut o = js_sys::Object::new();
         set(&mut o, "ok", JsValue::TRUE);
         set(&mut o, "action", JsValue::from_str(&action.id));
         set(&mut o, "seq", JsValue::from_f64(seq as f64));
         o.into()
+    }
+
+    /// Day five (four recorded rests) raises the canal. The bridge may
+    /// already be passable; high water stays a fact either way. No-op when
+    /// the seed has no canal subject, so the rule cannot invent one.
+    fn sync_canal_clock(&mut self) {
+        let has_canal = self.lines.iter().any(|line| {
+            let mut tokens = line.split_whitespace();
+            tokens.next() == Some("rc:canal") && tokens.next() == Some("rc:tide")
+        });
+        if !has_canal {
+            return;
+        }
+        let turns = self
+            .lines
+            .iter()
+            .filter(|line| {
+                let mut tokens = line.split_whitespace();
+                tokens.next() == Some("rc:player") && tokens.next() == Some("rc:turn")
+            })
+            .count();
+        let tide = if turns >= 4 { "high" } else { "low" };
+        let written = format!("rc:canal rc:tide \"{tide}\" .");
+        for line in &mut self.lines {
+            let mut tokens = line.split_whitespace();
+            if tokens.next() == Some("rc:canal") && tokens.next() == Some("rc:tide") {
+                *line = written.clone();
+                break;
+            }
+        }
     }
 
     fn remove_matching(&mut self, spec: &RemoveSpec, limit: usize) {
@@ -711,6 +782,71 @@ fn eval_vibe(src: &str, session: Option<&GameSession>) -> Result<vibe::Value, St
             "trade_route_open".into(),
             vibe::Value::Bool(has("rc:community", "rc:finale", "\"trade\"")),
         );
+        let bare = |s: &str, p: &str| -> String {
+            session
+                .lines
+                .iter()
+                .find_map(|line| {
+                    let mut tokens = line.split_whitespace();
+                    if tokens.next() == Some(s) && tokens.next() == Some(p) {
+                        tokens
+                            .next()
+                            .map(|token| token.trim_end_matches('.').trim_matches('"').to_string())
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or_default()
+        };
+        let litres = bare("rc:waterTank", "rc:waterLitres")
+            .parse::<i64>()
+            .unwrap_or(0);
+        world.insert("canal_tide".into(), vibe::Value::String(bare("rc:canal", "rc:tide")));
+        world.insert(
+            "bridge_status".into(),
+            vibe::Value::String(bare("rc:bridge", "rc:status")),
+        );
+        world.insert(
+            "water_status".into(),
+            vibe::Value::String(bare("rc:waterTank", "rc:status")),
+        );
+        world.insert("water_litres".into(), vibe::Value::I64(litres));
+        world.insert(
+            "wallet_instrument".into(),
+            vibe::Value::String(if has(
+                "rc:scenarioWallet",
+                "rc:instrumentOn",
+                "rc:sessionHandle",
+            ) {
+                "rc:scenarioWallet".into()
+            } else {
+                String::new()
+            }),
+        );
+        world.insert(
+            "treasury_instrument".into(),
+            vibe::Value::String(
+                if has(
+                    "rc:committeeTreasury",
+                    "rc:instrumentOn",
+                    "rc:sessionHandle",
+                ) && has("rc:committeeTreasury", "rc:ownedBy", "rc:committee")
+                {
+                    "rc:committeeTreasury".into()
+                } else {
+                    String::new()
+                },
+            ),
+        );
+        // Coins remain the scenario credits the gates already count. The
+        // wallet and treasury are instruments on the session handle, not
+        // the player and not a spendable player balance.
+        world.insert(
+            "instruments_on_player".into(),
+            vibe::Value::Bool(
+                has("rc:player", "a", "rc:Wallet") || has("rc:player", "a", "rc:Treasury"),
+            ),
+        );
         env.vars.insert("world".into(), vibe::Value::Record(world));
     }
     vibe::eval_cell(src, &mut host, &mut env).map_err(|e| e.to_string())
@@ -792,6 +928,8 @@ fn vibe_scene_recipe(src: &str) -> Result<asset_catalog::AssetRecipe, String> {
         parametric: Some(shape),
         color,
         vibe_source: Some(src.to_string()),
+        shell_signature: None,
+        spectrum_reading: None,
     })
 }
 

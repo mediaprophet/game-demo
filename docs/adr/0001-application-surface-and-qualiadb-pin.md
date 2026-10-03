@@ -12,12 +12,16 @@ Qualia graph and logic capabilities, and Qualia OPFS storage. The engine and
 its licence remain QualiaDB's. WebCivics is a separate capability profile and
 is not a game dependency or destination for missing game features.
 
-The tested QualiaDB checkout revision for the two-territory build is
-`32ef0175`, including the WASM bridge duplicate-export fix. The game still
-uses a sibling path dependency at `C:/github/qualiaDB`; that path can move,
-so the revision string alone is an observation, not an immutable Cargo pin.
-Record a clean checkout and browser conformance with each build. A later
-release should bind the dependency to an immutable revision.
+The tested QualiaDB checkout for the two-territory build is tag
+`v0.0.40.11` (commit `19e2abe448bf6f5d9e87067ffe51ef889910bb6d` on branch
+`0.0.40.6`). That commit is the upstream QG-12 black-viewport fix. The
+previous observation was `32ef0175` (WASM bridge duplicate-export fix only).
+The game still uses a sibling path dependency at `../qualiaDB` (historically
+`C:/github/qualiaDB`); that path can move, so the revision string alone is an
+observation, not an immutable Cargo pin. Record a clean checkout and browser
+conformance with each build. Canvas soft-rise is allowed only after visual
+confirm: a scene receipt is not paint. A later release should bind the
+dependency to an immutable revision.
 
 ## Implementation rule
 

@@ -142,3 +142,7 @@ profile is part of this pipeline. A missing feature becomes a QualiaDB
 upstream task and resumes here when tested. The existing blockout catalog can
 remain useful for rapid composition and as a baseline test while finished
 assets replace it family by family.
+
+## Destructible kinds
+
+See [22-destructible-kinds-catalog.md](22-destructible-kinds-catalog.md): kinds and failure modes first; intact/stressed/failed; no smash toy; no mesh stubs before paint.
