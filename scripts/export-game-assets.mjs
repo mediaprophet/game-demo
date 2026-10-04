@@ -29,7 +29,7 @@ const assets = new Map();
 const scenes = [];
 for (const [name, args] of cases) {
   const scene = scene_build(...args);
-  if (!Array.isArray(scene.organs) || scene.organs.length < 119) {
+  if (!Array.isArray(scene.organs) || scene.organs.length < 135) {
     throw new Error(`${name}: unexpected Qualia scene receipt`);
   }
   const entries = [];

@@ -50,8 +50,8 @@ garden once water is available.
 The page also exposes VibeScript cells for live world snapshot queries,
 SHACL-gated order proposals, and a bounded scene asset that compiles through
 Qualia computational geometry to a provenance-bearing `.10d` mesh.
-Kestrel Flats has 93 always-present original `.10d` scene organs; the
-Saltwind Reach tile adds 26 more plus state variants. The connected scene uses
+Kestrel Flats has 108 always-present original `.10d` scene organs; the
+Saltwind Reach tile adds 27 more plus state variants. The connected scene uses
 QualiaPortal's camera target and daylight sky APIs. State variants live in
 the game-owned catalog. Rounded assets use Qualia's computational
 geometry authoring and parametric CAD; all scene assets retain source

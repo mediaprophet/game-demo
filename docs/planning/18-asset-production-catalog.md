@@ -20,7 +20,7 @@ QG-12/13/14. Do not approximate those engine features with page overlays.
 
 ## What exists today
 
-`crates/rolling-commons-shell/src/asset_catalog.rs` now produces 93
+`crates/rolling-commons-shell/src/asset_catalog.rs` now produces 108
 always-present original Kestrel Flats scene organs, with additional solar and
 garden variants. They cover terrain colour zones, paths, detailed buildings,
 market stock, garden soil and crops, a rounded tank, trees, lamps, salvage
@@ -38,12 +38,15 @@ manifest. It verifies the pack with Qualia's reader. QG-01/02/14 remain the
 production gate: the canonical HMC variant, Q42 identity/rights manifest,
 browser pack loading, and complete state/animation packaging are not yet proven.
 
-Saltwind Reach adds 26 always-present organs on a second connected land tile:
+Saltwind Reach adds 27 always-present organs on a second connected land tile:
 canal, bridge, roads, barn, market, quay, boat, wind pump and orchard. Bridge,
 pump and fruit variants follow the SHACL-validated project states. The full
-map is 119 persistent `.10d` organs before conditional variants. Qualia's
+map is 135 persistent `.10d` organs before conditional variants. Qualia's
 public camera target and sky preset APIs provide territory navigation and
 daylight presentation in the full WASM game.
+These counts come from the current `opening` scene in the generated manifest;
+the older planning estimates did not include later environment and character
+organs.
 
 The current asset export contains 158 distinct `.10d` variants across eight
 scene states in the game-owned HMC pack. A focused building pass separates the
