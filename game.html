@@ -211,7 +211,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = 'f95bd5cbe7de11de';
+const WASM_BUILD = '578a04ebbdd9c1d2';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 $('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
