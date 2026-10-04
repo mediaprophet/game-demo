@@ -46,6 +46,10 @@ divergence log says the HCF draft's Bao/BLAKE3 claims do not match that code.
 There is also a `qualia-semantic-library` `.hmc` ZIP implementation. Which
 producer and reader are canonical for a game content pack must be decided and
 tested before shipping; an extension alone does not establish interchange.
+The game now creates a provisional core QBDL/HMC from its exported `.10d`
+snapshots using `BundleWriter`, and verifies all entries with `BundleReader`.
+That proves this one producer/reader pair, but does not close the canonical
+variant decision or the Q42 manifest/browser-loading acceptance criteria.
 
 ## Upstream subtasks
 

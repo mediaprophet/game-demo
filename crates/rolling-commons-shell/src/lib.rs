@@ -14,6 +14,7 @@ mod asset_catalog;
 
 use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
@@ -23,6 +24,72 @@ pub const QUALIADB_PINNED_REVISION: &str = "0006a07d+local-hud";
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
     QUALIADB_PINNED_REVISION.to_string()
+}
+
+/// Package intact game assets through Qualia's transparent QBDL/HMC writer.
+/// The application owns entry names and its manifest; Qualia owns the format,
+/// checksums, alignment, and reader verification.
+#[wasm_bindgen]
+pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec<u8>, JsValue> {
+    use qualia_core_db::bundle::{BundleReader, BundleWriter};
+
+    if entries.length() > 512 || manifest_json.len() > 512_000 {
+        return Err(JsValue::from_str(
+            "game pack exceeds bounded entry or manifest limit",
+        ));
+    }
+    let mut writer = BundleWriter::new();
+    writer
+        .add_file(
+            "manifest.json",
+            "manifest",
+            manifest_json.as_bytes().to_vec(),
+            None,
+        )
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    for item in entries.iter() {
+        let key = js_sys::Reflect::get(&item, &"key".into())?
+            .as_string()
+            .ok_or_else(|| JsValue::from_str("HMC entry key must be a string"))?;
+        if !key.starts_with("10d/") || !key.ends_with(".10d") || key.contains("..") {
+            return Err(JsValue::from_str("invalid game HMC entry key"));
+        }
+        let value = js_sys::Reflect::get(&item, &"bytes".into())?;
+        let bytes = value
+            .dyn_into::<js_sys::Uint8Array>()
+            .map_err(|_| JsValue::from_str("HMC entry bytes must be Uint8Array"))?
+            .to_vec();
+        writer
+            .add_file(key, "10d", bytes, None)
+            .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    }
+    let bytes = writer
+        .build()
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let reader = BundleReader::parse(&bytes).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    if reader
+        .entries()
+        .iter()
+        .any(|entry| !reader.verify_entry(&entry.key))
+    {
+        return Err(JsValue::from_str("HMC entry digest verification failed"));
+    }
+    Ok(bytes)
+}
+
+/// Validate a game pack using Qualia's reader and report its verified entry count.
+#[wasm_bindgen]
+pub fn verify_game_hmc(bytes: &[u8]) -> Result<u32, JsValue> {
+    use qualia_core_db::bundle::BundleReader;
+    let reader = BundleReader::parse(bytes).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    if reader
+        .entries()
+        .iter()
+        .any(|entry| !reader.verify_entry(&entry.key))
+    {
+        return Err(JsValue::from_str("HMC entry digest verification failed"));
+    }
+    Ok(reader.entries().len() as u32)
 }
 
 #[wasm_bindgen]

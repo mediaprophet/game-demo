@@ -32,7 +32,11 @@ revolution. Every organ is sealed through the Qualia `.10d` compiler with a
 game-owned source recipe and provenance sidecar, then rendered by full
 QualiaPortal. Stable `rc:asset/` IDs remain available. These are **detailed
 blockouts for composition and interaction testing**, not finished AAA art.
-They are not yet a separate HMC pack; QG-01/02/14 remain the packaging gate.
+The current game export now emits loose `.10d` snapshots and a provisional
+Qualia core QBDL/HMC pack containing those intact assets and a JSON scene
+manifest. It verifies the pack with Qualia's reader. QG-01/02/14 remain the
+production gate: the canonical HMC variant, Q42 identity/rights manifest,
+browser pack loading, and complete state/animation packaging are not yet proven.
 
 Saltwind Reach adds 24 always-present organs on a second connected land tile:
 canal, bridge, roads, barn, market, quay, boat, wind pump and orchard. Bridge,

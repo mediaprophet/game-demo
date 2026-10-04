@@ -1,5 +1,5 @@
 /target
-**/pkg/
+# web/pkg is a game-owned, versionable WASM runtime artifact.
 **/pkg-*/
 node_modules
 *.log

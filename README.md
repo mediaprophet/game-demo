@@ -58,8 +58,12 @@ reproduction and generic Qualia renderer fix are recorded in
 [QG-12](docs/planning/19-qualiadb-upstream-gate-work-orders.md); this repository
 keeps using the full Qualia engine and treats QualiaDB as read-only.
 
-Build with `wasm-pack build crates/rolling-commons-shell --target web --out-dir ../../web/pkg --release`,
-serve `web/` with a local HTTP server, and open its root URL. `web/game.html?selftest`
+Build with `scripts/build-game.ps1` to produce the full Qualia WASM package in
+`web/pkg/`, the game's `.10d` asset snapshots in `assets/generated/`, and a
+Qualia QBDL/HMC pack in `web/assets/maslows-challenge-scenes.hmc`.
+Both outputs live in this game repository. The game owns its asset recipes,
+scene states and exported containers; QualiaDB owns the generic compiler and
+renderer. Serve `web/` with a local HTTP server and open its root URL. `web/game.html?selftest`
 runs the scripted action, scene, VibeScript, and replay checks; `web/spike.html`
 retains the earlier capability spike.
 
