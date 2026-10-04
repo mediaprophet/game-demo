@@ -4873,6 +4873,7 @@ export function sample_packed_quins_wasm(db_bytes, max_quins) {
  * @param {boolean} approved
  * @param {boolean} water_online
  * @param {boolean} garden_active
+ * @param {boolean} signal_online
  * @param {boolean} bridge_open
  * @param {boolean} bridge_braced
  * @param {boolean} high_tide
@@ -4881,10 +4882,10 @@ export function sample_packed_quins_wasm(db_bytes, max_quins) {
  * @param {string} vibe_scene
  * @returns {any}
  */
-export function scene_build(upgrades, parts, online, approved, water_online, garden_active, bridge_open, bridge_braced, high_tide, pump_online, orchard_active, vibe_scene) {
+export function scene_build(upgrades, parts, online, approved, water_online, garden_active, signal_online, bridge_open, bridge_braced, high_tide, pump_online, orchard_active, vibe_scene) {
     const ptr0 = passStringToWasm0(vibe_scene, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.scene_build(upgrades, parts, online, approved, water_online, garden_active, bridge_open, bridge_braced, high_tide, pump_online, orchard_active, ptr0, len0);
+    const ret = wasm.scene_build(upgrades, parts, online, approved, water_online, garden_active, signal_online, bridge_open, bridge_braced, high_tide, pump_online, orchard_active, ptr0, len0);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }

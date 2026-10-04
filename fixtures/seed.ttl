@@ -5,7 +5,7 @@
 @prefix ev: <https://game.example/ev#> .
 
 rc:player a rc:Resident .
-rc:world rc:contentVersion 4 .
+rc:world rc:contentVersion 5 .
 rc:player rc:atPlace rc:camp .
 rc:player rc:coin rc:c01 .
 rc:player rc:coin rc:c02 .
@@ -33,6 +33,9 @@ rc:workshop a rc:Workshop .
 rc:workshop rc:name "Community workshop" .
 rc:workshop rc:status "offline" .
 rc:workshop rc:powerWatts 0 .
+rc:communicationsMast a rc:Relay .
+rc:communicationsMast rc:name "Kestrel communications mast" .
+rc:communicationsMast rc:status "offline" .
 
 rc:solarProject a rc:CommunityProject .
 rc:solarProject rc:name "Workshop solar upgrade" .
