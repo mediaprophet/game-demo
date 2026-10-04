@@ -10,6 +10,7 @@
 
 #![cfg(target_arch = "wasm32")]
 
+mod acts_frame;
 mod asset_catalog;
 
 use std::collections::BTreeMap;
@@ -18,7 +19,10 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-pub const QUALIADB_PINNED_REVISION: &str = "32ef0175";
+/// Qualia tip this shell is built against. `0006a07d` added SRD1 and the
+/// null-adapter limits guard. `44b63433` gives the WebGL2 lit path the same
+/// sky clear as WebGPU, so a late adapter is not a black frame.
+pub const QUALIADB_PINNED_REVISION: &str = "44b63433";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
@@ -206,19 +210,28 @@ pub fn scene_build(
     pump_online: bool,
     orchard_active: bool,
     vibe_scene: &str,
+    party: &str,
+    active_place: &str,
+    place_time: f32,
 ) -> Result<JsValue, JsValue> {
     use qualia_core_db::container_10d::provenance_section::ProvenanceSidecar;
     use qualia_core_db::render::assets::Mesh;
-    use qualia_core_db::render::compile_10d::compile_mesh_to_10d_with_provenance;
+    use qualia_core_db::render::compile_10d::compile_mesh_to_10d_with_surface_reading;
     use qualia_core_db::render::scene_primitives::{
-        assemble_into, portal_point, recipe_write, Primitive,
+        assemble_into, recipe_write, Primitive,
     };
     use qualia_core_db::specialized_libs::computational_geometry::geometry_workspace::{
         Cancellation, GeometryWorkspace,
     };
 
-    fn organ(recipe: &asset_catalog::AssetRecipe) -> Result<(Mesh, JsValue), JsValue> {
-        let (mesh, source, mime) = if let Some(spec) = &recipe.parametric {
+    fn organ(
+        recipe: &asset_catalog::AssetRecipe,
+        shift_x: f32,
+        place_name: &str,
+        place_source: &str,
+        place_time: f32,
+    ) -> Result<(Mesh, JsValue), JsValue> {
+        let (mut mesh, mesh_source, mime) = if let Some(spec) = &recipe.parametric {
             let mesh = spec
                 .compile()
                 .map_err(|e| JsValue::from_str(&format!("parametric geometry: {e}")))?;
@@ -252,20 +265,35 @@ pub fn scene_build(
                 min: receipt.min,
                 max: receipt.max,
             };
-            let mut source = vec![0u8; 6 + parts.len() * 25];
-            recipe_write(parts, &mut source)
-                .map_err(|e| JsValue::from_str(&format!("scene recipe: {e:?}")))?;
-            (
-                mesh,
-                source,
-                "application/vnd.qualia.scene-primitives;version=1",
-            )
+            let (source, mime) = if let Some(src) = &recipe.vibe_source {
+                (
+                    src.as_bytes().to_vec(),
+                    "application/vnd.qualia.part-record;version=1",
+                )
+            } else {
+                let mut source = vec![0u8; 6 + parts.len() * 25];
+                recipe_write(parts, &mut source)
+                    .map_err(|e| JsValue::from_str(&format!("scene recipe: {e:?}")))?;
+                (
+                    source,
+                    "application/vnd.qualia.scene-primitives;version=1",
+                )
+            };
+            (mesh, source, mime)
         };
+        if shift_x != 0.0 {
+            for p in &mut mesh.positions {
+                p[0] += shift_x;
+            }
+            mesh.min[0] += shift_x;
+            mesh.max[0] += shift_x;
+        }
         // The scene is original authored data with no external reuse grant.
         // This records that status; it does not alter the QualiaDB licence.
         let provenance =
-            ProvenanceSidecar::new(source, mime, "All rights reserved (licence not assigned)");
-        let bytes = compile_mesh_to_10d_with_provenance(&mesh, Some(&provenance))
+            ProvenanceSidecar::new(mesh_source, mime, "All rights reserved (licence not assigned)");
+        let reading = asset_catalog::surface_reading(recipe, &mesh);
+        let bytes = compile_mesh_to_10d_with_surface_reading(&mesh, Some(&provenance), &reading)
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
         let obj = js_sys::Object::new();
         js_sys::Reflect::set(&obj, &"id".into(), &JsValue::from_str(recipe.id))?;
@@ -277,6 +305,29 @@ pub fn scene_build(
         for (key, value) in ["r", "g", "b", "a"].iter().zip(recipe.color) {
             js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
         }
+        // Colour is a spectrum reading on the part, not a baked texture swap.
+        js_sys::Reflect::set(&obj, &"baked_texture".into(), &JsValue::from_bool(false))?;
+        if let Some(sig) = recipe.shell_signature {
+            js_sys::Reflect::set(&obj, &"signature".into(), &JsValue::from_str(sig))?;
+        }
+        if let Some(reading) = recipe.spectrum_reading {
+            js_sys::Reflect::set(&obj, &"reading".into(), &JsValue::from_str(reading))?;
+        }
+        js_sys::Reflect::set(&obj, &"baked_clip".into(), &JsValue::from_bool(false))?;
+        // Authored town-frame centre. The portal ignores these; the page aims
+        // the camera here when the upload keeps town coordinates.
+        let center = [
+            (mesh.min[0] + mesh.max[0]) * 0.5,
+            (mesh.min[1] + mesh.max[1]) * 0.5,
+            (mesh.min[2] + mesh.max[2]) * 0.5,
+        ];
+        for (key, value) in ["cx", "cy", "cz"].iter().zip(center) {
+            js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
+        }
+        // Place is the loaded source, not an x offset inside one box.
+        js_sys::Reflect::set(&obj, &"place".into(), &JsValue::from_str(place_name))?;
+        js_sys::Reflect::set(&obj, &"source".into(), &JsValue::from_str(place_source))?;
+        js_sys::Reflect::set(&obj, &"time".into(), &JsValue::from_f64(place_time as f64))?;
         Ok((mesh, obj.into()))
     }
 
@@ -301,8 +352,30 @@ pub fn scene_build(
     if !vibe_scene.trim().is_empty() {
         recipes.push(vibe_scene_recipe(vibe_scene).map_err(|e| JsValue::from_str(&e))?);
     }
+    recipes.extend(asset_catalog::participant_markers(party));
+    let active = if active_place == "saltwind" { "saltwind" } else { "kestrel" };
+    let source = if active == "saltwind" { "place:saltwind" } else { "place:kestrel" };
     for recipe in recipes {
-        let (mesh, obj) = organ(&recipe)?;
+        let anchor = asset_catalog::recipe_anchor_x(&recipe);
+        let person = recipe.id.starts_with("rc:participant/");
+        let salt_geom = !person && anchor > 10.5;
+        if active == "saltwind" && !person && !salt_geom {
+            continue;
+        }
+        if active == "kestrel" && salt_geom {
+            continue;
+        }
+        let shift = if salt_geom && active == "saltwind" { -16.0 } else { 0.0 };
+        let place = if person {
+            active
+        } else if salt_geom {
+            "saltwind"
+        } else if anchor > 6.5 {
+            "corridor"
+        } else {
+            "kestrel"
+        };
+        let (mesh, obj) = organ(&recipe, shift, place, source, place_time)?;
         for axis in 0..3 {
             min[axis] = min[axis].min(mesh.min[axis]);
             max[axis] = max[axis].max(mesh.max[axis]);
@@ -322,9 +395,10 @@ pub fn scene_build(
         [17.6, 0.8, 4.0],
     ];
     let mut nodes = Vec::with_capacity(places.len() * 10);
+    // Town metres, same frame as a preserved upload. A walker and a pick
+    // share that frame; they are not a normalised stage you aim at.
     for point in places {
-        let p = portal_point(min, max, point);
-        nodes.extend_from_slice(&[0.0, 0.0, 4.0, p[0], p[1], p[2], 0.0, 1.0, 0.7, 0.5]);
+        nodes.extend_from_slice(&[0.0, 0.0, 4.0, point[0], point[1], point[2], 0.0, 1.0, 0.7, 0.5]);
     }
     let tensor = tensor_buffer_build(&nodes)?;
     let result = js_sys::Object::new();
@@ -335,17 +409,52 @@ pub fn scene_build(
         &js_sys::Uint8Array::from(tensor.as_slice()),
     )?;
     let tiles = js_sys::Array::new();
-    for (id, center) in [("kestrel", [0.0, 0.0, 0.0]), ("saltwind", [16.0, 0.0, 0.0])] {
-        let p = portal_point(min, max, center);
-        let tile = js_sys::Object::new();
-        js_sys::Reflect::set(&tile, &"id".into(), &JsValue::from_str(id))?;
-        for (key, value) in ["x", "y", "z"].iter().zip(p) {
-            js_sys::Reflect::set(&tile, &(*key).into(), &JsValue::from_f64(value as f64))?;
-        }
-        tiles.push(&tile);
+    let tile = js_sys::Object::new();
+    js_sys::Reflect::set(&tile, &"id".into(), &JsValue::from_str(active))?;
+    for (key, value) in ["x", "y", "z"].iter().zip([0.0_f32, 0.0, 0.0]) {
+        js_sys::Reflect::set(&tile, &(*key).into(), &JsValue::from_f64(value as f64))?;
     }
+    tiles.push(&tile);
     js_sys::Reflect::set(&result, &"tiles".into(), &tiles)?;
+    js_sys::Reflect::set(&result, &"source".into(), &JsValue::from_str(source))?;
+    js_sys::Reflect::set(&result, &"time".into(), &JsValue::from_f64(place_time as f64))?;
+    let _bounds = (min, max);
     Ok(result.into())
+}
+
+/// Posed figure vertices for the participants in `party`, same order and
+/// topology as the `.10d` just sealed. The page writes these every frame
+/// so a walk is the part changing, not a scene reload.
+#[wasm_bindgen]
+pub fn participant_poses(party: &str) -> Vec<f32> {
+    let mut out = Vec::new();
+    for recipe in asset_catalog::participant_markers(party) {
+        if let Some(spec) = &recipe.parametric {
+            if let Ok(mesh) = spec.compile() {
+                for p in mesh.positions {
+                    out.extend_from_slice(&p);
+                }
+            }
+        }
+    }
+    out
+}
+
+/// Triangle count and silhouette span for the two cuts that must read apart.
+#[wasm_bindgen]
+pub fn figure_audit() -> String {
+    let a = asset_catalog::participant_markers("0,0,0.8,0.4,0.2,0,0,0,0,0");
+    let b = asset_catalog::participant_markers("0,0,0.3,0.4,0.6,1,0,1.2,0,1");
+    let ma = a[0].parametric.as_ref().unwrap().compile().unwrap();
+    let mb = b[0].parametric.as_ref().unwrap().compile().unwrap();
+    format!(
+        "tris {} height {:.2} width {:.2} vs width {:.2} box-parts {}",
+        ma.triangle_count(),
+        ma.max[1] - ma.min[1],
+        ma.max[0] - ma.min[0],
+        mb.max[0] - mb.min[0],
+        a[0].parts.len()
+    )
 }
 
 // --- Portal: WebGPU scene ingest, frame, semantic pick ---
@@ -360,11 +469,36 @@ pub struct GamePortal {
     inner: qualia_core_db::QualiaPortal,
 }
 
-/// Arm the WebGPU path. Await once before constructing the portal; on
-/// `false`/throw the portal keeps its canvas2d (tier-1) fallback.
+/// Arm the WebGPU path. Await once before constructing the portal.
+/// `true` means a device is stashed and the next tick can present the lit
+/// mesh (shade + depth). `false` means WebGPU did not answer — the page
+/// should arm WebGL2 on a fresh canvas. That path uses the same mesh, the
+/// same sun, and a depth buffer. It is not the flat proof picture.
+/// If [`webgpu_canvas_claimed`] is true, replace the canvas first.
 #[wasm_bindgen]
 pub async fn init_webgpu(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
     qualia_core_db::render::portal::portal_init_webgpu(canvas).await
+}
+
+/// Stop a late WebGPU init from being adopted. Call this when the page
+/// timeout wins, then replace the canvas if [`webgpu_canvas_claimed`].
+#[wasm_bindgen]
+pub fn abort_webgpu_init() {
+    qualia_core_db::render::portal::portal_abort_webgpu();
+}
+
+/// Lit present when WebGPU does not answer. Same mesh, same sun, depth test.
+/// Call on a canvas that does not already have a context, before `GamePortal::new`.
+#[wasm_bindgen]
+pub fn init_webgl2(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
+    qualia_core_db::render::portal::portal_init_webgl2(canvas)
+}
+
+/// True when init took the canvas's WebGPU context. The proof tick needs a
+/// new element; solid fill on that element is not occlusion and not lit.
+#[wasm_bindgen]
+pub fn webgpu_canvas_claimed() -> bool {
+    qualia_core_db::render::portal::portal_webgpu_canvas_claimed()
 }
 
 #[wasm_bindgen]
@@ -390,7 +524,7 @@ impl GamePortal {
         self.inner.load_body_organs_colored(organs)
     }
 
-    /// Render tier: 0 = no webgpu, 1 = canvas2d fallback, 2 = GPU path.
+    /// Render tier: 0 = proof canvas (no depth buffer), 2 = lit WebGPU present.
     pub fn tier(&self) -> u8 {
         self.inner.tier()
     }
@@ -437,6 +571,18 @@ impl GamePortal {
 
     pub fn set_sky_preset(&mut self, preset: u32) {
         self.inner.set_sky_preset(preset);
+    }
+
+    /// Leave the next scene upload in authored town coordinates instead of
+    /// the portal orbit frame. One camera then aims at that mesh.
+    pub fn set_preserve_authored_frame(&mut self, on: bool) {
+        self.inner.set_preserve_authored_frame(on);
+    }
+
+    /// Overwrite one figure's vertices in the resident mesh. Same topology
+    /// as the sealed `.10d`. Does not reload the town.
+    pub fn write_part_vertices(&mut self, start: u32, xyz: &[f32]) {
+        self.inner.write_part_vertices(start, xyz);
     }
 }
 
@@ -519,12 +665,16 @@ impl GameSession {
             }
         }
         events.sort_by_key(|(n, _)| *n);
-        Ok(GameSession {
+        let mut session = GameSession {
             lines,
             actions,
             events: events.into_iter().map(|(_, id)| id).collect(),
             seq,
-        })
+        };
+        // The canal clock is a fact in the world, not a page-side guess.
+        // Reloaded documents are corrected to the same rule replay uses.
+        session.sync_canal_clock();
+        Ok(session)
     }
 
     /// Current world document as N3 text (includes `ev:` event lines).
@@ -604,11 +754,42 @@ impl GameSession {
             .push(format!("ev:e{seq} ev:action \"{action_id}\" ."));
         self.lines.push(format!("ev:e{seq} ev:seq {seq} ."));
         self.events.push(action.id.clone());
+        self.sync_canal_clock();
         let mut o = js_sys::Object::new();
         set(&mut o, "ok", JsValue::TRUE);
         set(&mut o, "action", JsValue::from_str(&action.id));
         set(&mut o, "seq", JsValue::from_f64(seq as f64));
         o.into()
+    }
+
+    /// Day five (four recorded rests) raises the canal. The bridge may
+    /// already be passable; high water stays a fact either way. No-op when
+    /// the seed has no canal subject, so the rule cannot invent one.
+    fn sync_canal_clock(&mut self) {
+        let has_canal = self.lines.iter().any(|line| {
+            let mut tokens = line.split_whitespace();
+            tokens.next() == Some("rc:canal") && tokens.next() == Some("rc:tide")
+        });
+        if !has_canal {
+            return;
+        }
+        let turns = self
+            .lines
+            .iter()
+            .filter(|line| {
+                let mut tokens = line.split_whitespace();
+                tokens.next() == Some("rc:player") && tokens.next() == Some("rc:turn")
+            })
+            .count();
+        let tide = if turns >= 4 { "high" } else { "low" };
+        let written = format!("rc:canal rc:tide \"{tide}\" .");
+        for line in &mut self.lines {
+            let mut tokens = line.split_whitespace();
+            if tokens.next() == Some("rc:canal") && tokens.next() == Some("rc:tide") {
+                *line = written.clone();
+                break;
+            }
+        }
     }
 
     fn remove_matching(&mut self, spec: &RemoveSpec, limit: usize) {
@@ -711,6 +892,71 @@ fn eval_vibe(src: &str, session: Option<&GameSession>) -> Result<vibe::Value, St
             "trade_route_open".into(),
             vibe::Value::Bool(has("rc:community", "rc:finale", "\"trade\"")),
         );
+        let bare = |s: &str, p: &str| -> String {
+            session
+                .lines
+                .iter()
+                .find_map(|line| {
+                    let mut tokens = line.split_whitespace();
+                    if tokens.next() == Some(s) && tokens.next() == Some(p) {
+                        tokens
+                            .next()
+                            .map(|token| token.trim_end_matches('.').trim_matches('"').to_string())
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or_default()
+        };
+        let litres = bare("rc:waterTank", "rc:waterLitres")
+            .parse::<i64>()
+            .unwrap_or(0);
+        world.insert("canal_tide".into(), vibe::Value::String(bare("rc:canal", "rc:tide")));
+        world.insert(
+            "bridge_status".into(),
+            vibe::Value::String(bare("rc:bridge", "rc:status")),
+        );
+        world.insert(
+            "water_status".into(),
+            vibe::Value::String(bare("rc:waterTank", "rc:status")),
+        );
+        world.insert("water_litres".into(), vibe::Value::I64(litres));
+        world.insert(
+            "wallet_instrument".into(),
+            vibe::Value::String(if has(
+                "rc:scenarioWallet",
+                "rc:instrumentOn",
+                "rc:sessionHandle",
+            ) {
+                "rc:scenarioWallet".into()
+            } else {
+                String::new()
+            }),
+        );
+        world.insert(
+            "treasury_instrument".into(),
+            vibe::Value::String(
+                if has(
+                    "rc:committeeTreasury",
+                    "rc:instrumentOn",
+                    "rc:sessionHandle",
+                ) && has("rc:committeeTreasury", "rc:ownedBy", "rc:committee")
+                {
+                    "rc:committeeTreasury".into()
+                } else {
+                    String::new()
+                },
+            ),
+        );
+        // Coins remain the scenario credits the gates already count. The
+        // wallet and treasury are instruments on the session handle, not
+        // the player and not a spendable player balance.
+        world.insert(
+            "instruments_on_player".into(),
+            vibe::Value::Bool(
+                has("rc:player", "a", "rc:Wallet") || has("rc:player", "a", "rc:Treasury"),
+            ),
+        );
         env.vars.insert("world".into(), vibe::Value::Record(world));
     }
     vibe::eval_cell(src, &mut host, &mut env).map_err(|e| e.to_string())
@@ -792,6 +1038,8 @@ fn vibe_scene_recipe(src: &str) -> Result<asset_catalog::AssetRecipe, String> {
         parametric: Some(shape),
         color,
         vibe_source: Some(src.to_string()),
+        shell_signature: None,
+        spectrum_reading: None,
     })
 }
 

@@ -3,8 +3,9 @@ resolver = "2"
 members = ["crates/rolling-commons-shell"]
 
 [workspace.dependencies]
-# Full local QualiaDB engine. The verified checkout revision is recorded in
-# docs/planning/15-living-qualiadb-capability-ledger.md and docs/adr/0001.
+# Full local QualiaDB engine. Verified checkout: tag v0.0.40.11 (19e2abe).
+# Recorded in docs/planning/15-living-qualiadb-capability-ledger.md and docs/adr/0001.
+# Receipt is not paint; canvas soft-rise waits on visual confirm.
 qualia-core-db = { path = "../qualiaDB/crates/qualia-core-db", default-features = false }
 
 # Versions must match the qualiaDB workspace pins (wasm-bindgen is ABI-exact).

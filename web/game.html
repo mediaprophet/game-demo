@@ -83,7 +83,7 @@
   .panel { border-color:#e6d6b8; border-radius:20px; padding:18px;
     box-shadow:0 9px 24px #3e584d1a,inset 0 1px #ffffff; }
   .panel h2 { font-size:21px; }
-  .scene-shell { border:7px solid #fff8e9; border-radius:25px; background:#172f3b;
+  .scene-shell { border:7px solid #fff8e9; border-radius:25px; background:#f3c48a;
     box-shadow:0 14px 31px #38524b38,0 0 0 1px #bfc9b8; }
   .scene-label { padding:9px 14px; border:2px solid #fff4d4; border-radius:13px;
     background:#fff3ddec; box-shadow:0 4px 12px #101d1e55; }
@@ -136,15 +136,23 @@
 </header>
 <main>
   <div class="world-column">
-    <nav class="territory-nav" aria-label="Territories">
-      <button id="tile-kestrel" aria-current="true">01 · Kestrel Flats</button>
-      <button id="tile-saltwind" aria-current="false">02 · Saltwind Reach</button>
-      <button id="sky-preset" aria-label="Change Qualia sky preset">☀ Daylight</button>
+    <nav class="territory-nav" aria-label="People and place">
+      <button id="tile-kestrel" aria-current="true" type="button">Here · Kestrel Flats</button>
+      <button id="tile-saltwind" aria-current="false" type="button">Saltwind — walk there</button>
+      <label class="muted" for="roster">People</label>
+      <select id="roster" aria-label="Fictional participants"></select>
+      <button id="follow-person" type="button">Follow</button>
+      <button id="direct-person" type="button">Direct</button>
+      <input id="person-name" maxlength="32" placeholder="Name a person" aria-label="Name the new fictional participant">
+      <button id="create-person" type="button">New person</button>
+      <button id="walk-road" type="button">Their next step</button>
+      <span id="direct-mark" class="muted"></span>
+      <button id="sky-preset" aria-label="Change Qualia sky preset">◒ Golden hour</button>
     </nav>
     <div class="scene-shell">
       <canvas id="scene" width="960" height="600" aria-label="QualiaDB three-dimensional view of Kestrel Flats"></canvas>
       <div class="scene-label"><span class="eyebrow" id="territory-step">Territory 01</span><strong id="territory-name">Kestrel Flats</strong></div>
-      <div class="scene-help">Choose a territory · Drag to orbit · Wheel to zoom · Click a site to inspect</div>
+      <div class="scene-help">Keys move the one person you direct · others keep their own step · drag to orbit</div>
       <div class="scene-victory" id="scene-victory" hidden></div>
     </div>
     <div id="resource-bar" class="resource-bar" aria-label="World resources"></div>
@@ -154,6 +162,7 @@
   <div class="side-column">
     <div class="panel dispatch"><span class="eyebrow" id="dispatch-step">Field dispatch</span>
       <h2 id="dispatch-title">A town waiting to work</h2><p id="dispatch-copy"></p>
+      <p class="muted" id="dispatch-facts"></p>
       <div class="campaign-meter" aria-label="Campaign progress"><span id="campaign-fill"></span></div>
       <div class="campaign-count" id="campaign-count"></div>
       <button id="dispatch-action"></button>
@@ -169,12 +178,13 @@
       <button id="save">Save (OPFS)</button><button id="load">Load</button>
       <button id="replay">Replay tape</button><button id="new-game">New campaign</button>
       <span id="persist" class="muted"></span>
+      <span class="muted">Original meshes. Licence not assigned — in the .10d record, not on the mesh.</span>
     </div>
     <details class="panel">
       <summary>VibeScript workbench</summary>
-      <div class="muted">Pure cells read a world snapshot or propose a catalogued order. Scene cells compile through Qualia geometry into a provenance-bearing .10d mesh.</div>
+      <div class="muted">Read <code>world</code> (day, coins, labour_ready, canal_tide, bridge_status, water_status, water_litres, wallet_instrument, treasury_instrument, instruments_on_player). An order cell returns one catalogue id and still goes through the rules. A scene cell is one sphere or cylinder; compile seals a .10d mesh. None of these paint the canvas.</div>
       <h3>World query</h3>
-      <input class="vibe-input" id="vibe-src" value="= world.coins" aria-label="VibeScript world query">
+      <input class="vibe-input" id="vibe-src" value="= world" aria-label="VibeScript world query">
       <button id="vibe-run">Query world</button>
       <output class="vibe-result" id="vibe-result"></output>
       <h3>Propose an order</h3>
@@ -227,7 +237,11 @@ const state = () => ({
   online: values('rc:workshop','rc:status').includes('"online"'),
   upgrades: values('rc:swag','rc:upgrade').length,
   waterOnline: values('rc:waterTank','rc:status').includes('"online"'),
+  waterLitres: Number(String(values('rc:waterTank','rc:waterLitres')[0]||'0').replace(/"/g,''))||0,
+  waterStatus: String(values('rc:waterTank','rc:status')[0]||'offline').replace(/"/g,''),
   gardenActive: values('rc:garden','rc:status').includes('"growing"'),
+  canalTide: values('rc:canal','rc:tide').includes('"high"') ? 'high' : 'low',
+  bridgeStatus: String(values('rc:bridge','rc:status')[0]||'broken').replace(/"/g,''),
   bridgeOpen: values('rc:bridge','rc:status').includes('"passable"'),
   bridgeBraced: values('rc:bridge','rc:bracedBy').length > 0,
   pumpOnline: values('rc:windPump','rc:status').includes('"online"'),
@@ -300,64 +314,346 @@ const PLACES = [
   'rc:bridge', 'rc:windPump', 'rc:orchard',
 ];
 // ---------- portal ----------
-const canvas = $('scene');
-try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
-const portal = new m.GamePortal(canvas);
-let skyPreset=1;
+const FIRST_PAINT = new URLSearchParams(location.search).has('firstpaint');
+const params = new URLSearchParams(location.search);
+// Lit path is the default. WebGPU when it answers. If it does not, WebGL2
+// draws the same mesh with the same sun and a depth buffer. Flat proof
+// triangles are not a phone look. ?webgpu=0 skips straight to that lit path.
+const SKIP_WEBGPU = params.get('webgpu') === '0';
+function liveCanvas() { return document.getElementById('scene'); }
+function replaceSceneCanvas() {
+  const old = liveCanvas();
+  const fresh = old.cloneNode(false);
+  old.replaceWith(fresh);
+  return fresh;
+}
+let gpuOk = false;
+let glLit = false;
+function armLitFallback(why) {
+  try { m.abort_webgpu_init(); } catch (_) {}
+  if (m.webgpu_canvas_claimed && m.webgpu_canvas_claimed()) replaceSceneCanvas();
+  try {
+    glLit = m.init_webgl2(liveCanvas()) === true;
+  } catch (e) {
+    glLit = false;
+    note('lit present did not arm: ' + String(e).slice(0, 80));
+  }
+  if (!glLit && why) note(why);
+}
+if (!SKIP_WEBGPU && navigator.gpu) {
+  try {
+    const attempt = m.init_webgpu(liveCanvas());
+    const gate = await Promise.race([
+      attempt.then(ok => ok === true ? 'ok' : 'miss').catch(() => 'miss'),
+      new Promise(resolve => setTimeout(() => resolve('timeout'), 22000)),
+    ]);
+    if (gate === 'ok') {
+      gpuOk = true;
+    } else {
+      armLitFallback('');
+    }
+  } catch(e) {
+    armLitFallback('webgpu init: ' + String(e).slice(0, 80));
+  }
+} else {
+  armLitFallback('');
+}
+
+const portal = new m.GamePortal(liveCanvas());
+function tierLabel() {
+  const tier = portal.tier();
+  // Lit means shade + depth on the real mesh. WebGPU is tier 2. WebGL2 is
+  // the same sun and the same depth when the adapter does not answer.
+  // Never call the flat proof picture the look.
+  if ((tier >= 2 && gpuOk) || glLit) return 'lit · depth';
+  return 'waiting on the lit frame';
+}
+let skyPreset=2;
 portal.set_sky_preset(skyPreset);
 $('sky-preset').onclick = () => {
   skyPreset=skyPreset===3?1:skyPreset+1;
   portal.set_sky_preset(skyPreset);
   $('sky-preset').textContent=['','☀ Daylight','◒ Golden hour','☾ Moonlight'][skyPreset];
 };
-$('tier').textContent = 'render tier ' + portal.tier();
+$('tier').textContent = tierLabel();
 
-let camYaw=0.6, camPitch=0.42, camZoom=1.8;
-let territory='kestrel', tileCenters={};
+let camYaw=0.45, camPitch=0.72, camZoom=FIRST_PAINT?4:13;
+// Each entry is one fictional participant. Not a likeness, not a chatbot,
+// not a who-kind. Supply and trafficking are acts. No-housing is a condition.
+const ROSTER_SOFT = 24;
+const PEOPLE_SEED=[
+  {id:'p0', name:'Ada', place:'kestrel', x:2.2, z:-1.4, story:'Walking the workshop round.', need:'the workshop', claims:[], shape:0, color:[0.72,0.48,0.32], day:1, carry:0, yaw:0.6, phase:1.1,
+    route:[[3.2,-2.4],[-1.6,0.8],[1.4,2.2]]},
+  {id:'p1', name:'Sol', place:'kestrel', x:-0.4, z:1.6, story:'Standing the supply act. Hard light stays on that act.', need:'the road', claims:['act.illegal_drug_supply'], shape:1, color:[0.32,0.36,0.44], day:1, carry:0, yaw:2.2, phase:0.2,
+    route:[[-0.2,1.5],[-0.8,1.9],[-0.5,1.3]]},
+  {id:'p2', name:'Nia', place:'kestrel', x:-3.4, z:-3.1, story:'Lost the business. Carries a bundle to the garden. Whole person, not a wrecked body.', need:'the garden beds', claims:['condition.lost_business'], shape:4, color:[0.62,0.56,0.38], day:1, carry:1, yaw:-0.4, phase:0.4,
+    route:[[-3.8,-3.4],[-2.4,-2.8],[-4.2,-2.2]]},
+  {id:'p3', name:'Ren', place:'kestrel', x:-2.1, z:-2.5, story:'Keeping the stall. Arms up when the awning needs a peg.', need:'the market', claims:[], shape:3, color:[0.55,0.32,0.28], day:1, carry:0, yaw:1.1, phase:0.7,
+    route:[[-2.2,-2.7],[-1.5,-3.1],[-2.6,-3.0]]},
+];
+let party=PEOPLE_SEED.map(p=>({...p, claims:[...p.claims], route:p.route.map(q=>q.slice()), step:0, phase:p.phase||0, yaw:p.yaw||0, carry:p.carry||0}));
+let followId='p0', directId='p0';
+let walkTarget=null;
+let meshMark=null;
+const walkKeys=new Set();
+let tankAim=null;
+let partSpans=[];
+const placeClock={kestrel:0, saltwind:48};
+const who=id=>party.find(p=>p.id===id)||party[0];
+function viewPlace(){ return who(followId).place || 'kestrel'; }
+function lightOf(p){
+  try {
+    const frame=toObj(m.acts_frame_eval('human', JSON.stringify(p.claims||[])));
+    return frame.light||'none';
+  } catch(_) { return 'none'; }
+}
+function lightCode(p){
+  const light=lightOf(p);
+  if (light==='villain') return 1;
+  if (light==='halo') return 2;
+  return 0;
+}
+function placeOfPerson(p){ return p.place==='saltwind'?'saltwind':'kestrel'; }
+function stoodPlace(){ return viewPlace(); }
+function partyRecord(){
+  return party.filter(p=>placeOfPerson(p)===viewPlace()).map(p=>[
+    p.x.toFixed(3), p.z.toFixed(3), p.color[0], p.color[1], p.color[2],
+    p.shape, p.id===directId?1:0, p.phase.toFixed(3), p.yaw.toFixed(3), lightCode(p), p.carry?1:0
+  ].join(',')).join(';');
+}
+function paintRoster(){
+  const sel=$('roster');
+  const keep=sel.value||followId;
+  sel.replaceChildren();
+  for (const p of party) {
+    const o=document.createElement('option');
+    o.value=p.id;
+    const where=p.place==='saltwind'?'Saltwind':'Kestrel';
+    o.textContent=`${p.name} · ${where}`;
+    sel.appendChild(o);
+  }
+  sel.value=party.some(p=>p.id===keep)?keep:followId;
+  const d=who(directId);
+  const hard=lightCode(d)===1?' · hard light on the act':'';
+  $('direct-mark').textContent=`Directing ${d.name} · their day ${d.day} · ${d.need}${hard}`;
+}
 function applyCam(){
   try {
-    const p=tileCenters[territory];
-    if (p) portal.set_camera_target(camYaw, camPitch, camZoom, p.x, p.y, p.z);
-    else portal.set_camera(camYaw, camPitch, camZoom);
+    if (FIRST_PAINT && tankAim) {
+      portal.set_camera_target(camYaw, camPitch, camZoom, tankAim.x, tankAim.y, tankAim.z);
+      return;
+    }
+    const p=who(followId);
+    portal.set_camera_target(camYaw, camPitch, camZoom, p.x, 1.5, p.z);
   } catch(e) { note(`camera: ${String(e).slice(0,80)}`); }
 }
-for (const id of ['kestrel','saltwind']) {
-  $('tile-'+id).onclick = () => { territory=id; refresh(); };
+function ownTarget(p){
+  const pt=p.route[p.step % p.route.length];
+  return {x:pt[0], z:pt[1]};
 }
+function xLimits(p){
+  if (p.id===directId) return p.place==='saltwind' ? [-7.1, 6.4] : [-6.4, 9.05];
+  return [-5.2, 5.2];
+}
+function stepOthers(dt){
+  let moved=false;
+  const step=1.15*(dt/1000);
+  for (const p of party) {
+    if (p.id===directId) continue;
+    const n=ownTarget(p);
+    const dx=n.x-p.x, dz=n.z-p.z;
+    const dist=Math.hypot(dx,dz);
+    if (dist<0.35) { p.step++; p.day++; moved=true; continue; }
+    const [lo,hi]=xLimits(p);
+    const nx=Math.max(lo, Math.min(hi, p.x + dx/dist*step));
+    const nz=Math.max(-5.5, Math.min(5.5, p.z + dz/dist*step));
+    if (Math.hypot(nx-p.x, nz-p.z)>0.0001) p.yaw=Math.atan2(nx-p.x, nz-p.z);
+    p.phase+=dist>0.35?step*3.4:0.4*(dt/1000);
+    p.x=nx; p.z=nz;
+    moved=true;
+  }
+  return moved;
+}
+function stepWalker(dt){
+  const p=who(directId);
+  let dx=0, dz=0;
+  if (walkKeys.has('KeyW')||walkKeys.has('ArrowUp')) dz -= 1;
+  if (walkKeys.has('KeyS')||walkKeys.has('ArrowDown')) dz += 1;
+  if (walkKeys.has('KeyA')||walkKeys.has('ArrowLeft')) dx -= 1;
+  if (walkKeys.has('KeyD')||walkKeys.has('ArrowRight')) dx += 1;
+  if (walkTarget && walkTarget.id===p.id) {
+    dx += walkTarget.x - p.x;
+    dz += walkTarget.z - p.z;
+    if (Math.hypot(walkTarget.x-p.x, walkTarget.z-p.z) < 0.35) walkTarget=null;
+  }
+  const [lo,hi]=xLimits(p);
+  if (!dx && !dz) { p.phase+=0.35*(dt/1000); return false; }
+  const len=Math.hypot(dx,dz)||1;
+  const step=2.1*(dt/1000);
+  const nx=Math.max(lo, Math.min(hi, p.x + dx/len*step));
+  const nz=Math.max(-5.5, Math.min(5.5, p.z + dz/len*step));
+  p.yaw=Math.atan2(nx-p.x, nz-p.z);
+  p.phase+=step*3.6;
+  p.x=nx; p.z=nz;
+  return true;
+}
+function crossPlace(p){
+  if (p.id!==directId) return false;
+  if (p.place!=='saltwind' && p.x>8.7) {
+    p.place='saltwind'; p.x=-6.15; p.z=0.4; walkTarget=null;
+    note(`${p.name} walked onto Saltwind Reach. Own source place:saltwind, own time. Not the far end of Kestrel.`);
+    return true;
+  }
+  if (p.place==='saltwind' && p.x<-6.7) {
+    p.place='kestrel'; p.x=8.15; p.z=0.4; walkTarget=null;
+    note(`${p.name} walked back onto Kestrel Flats. Own source place:kestrel.`);
+    return true;
+  }
+  return false;
+}
+addEventListener('keydown', e=>{
+  if (e.target && (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')) return;
+  if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) {
+    walkKeys.add(e.code); e.preventDefault();
+  }
+});
+addEventListener('keyup', e=>walkKeys.delete(e.code));
+$('follow-person').onclick=()=>{
+  followId=$('roster').value;
+  note(`Camera on ${who(followId).name}. ${who(followId).story}`);
+  paintRoster(); refresh();
+};
+$('direct-person').onclick=()=>{
+  directId=$('roster').value;
+  walkTarget=null;
+  note(`Only ${who(directId).name} takes direction. The others keep their own step.`);
+  paintRoster();
+};
+function nameHash(s){ let h=2166136261; for (const c of s) h=Math.imul(h^c.charCodeAt(0), 16777619)>>>0; return h; }
+$('create-person').onclick=()=>{
+  const name=($('person-name').value||'').trim();
+  if (!name) { note('Name them. A person is not a slot and not a kind.'); return; }
+  if (party.length>=ROSTER_SOFT) { note('Soft roster is 24 so each figure stays readable. Not a two-name wall.'); return; }
+  if (party.some(p=>p.name.toLowerCase()===name.toLowerCase())) { note('That name is already in the world.'); return; }
+  const h=nameHash(name);
+  const shape=h%6;
+  const place=viewPlace();
+  const span=place==='saltwind'?4.2:3.6;
+  const route=[];
+  for (let i=0;i<3;i++) {
+    const x=((h>>(i*8))%100)/100*span*2-span;
+    const z=((h>>(i*8+4))%100)/100*5-2.5;
+    route.push([x,z]);
+  }
+  const id='p'+party.length+'-'+h.toString(16).slice(0,4);
+  const color=[0.35+((h>>0)%50)/100, 0.32+((h>>8)%50)/100, 0.28+((h>>16)%40)/100];
+  party.push({id, name, place, x:route[0][0], z:route[0][1], story:`${name} keeps their own day.`, need:'their own ground', claims:[], shape, color, day:1, carry:0, route, step:0, phase:(h%7)/3, yaw:(h%12)/2, });
+  followId=id; directId=id;
+  $('person-name').value='';
+  note(`${name} is a fictional participant. Not a who-kind. Their figure is their own cut.`);
+  paintRoster(); refresh();
+};
+$('walk-road').onclick=()=>{
+  const p=who(directId);
+  const n=ownTarget(p);
+  walkTarget={id:p.id, x:n.x, z:n.z};
+  note(`${p.name}'s next step only. The others do not take it.`);
+};
+$('tile-kestrel').onclick=()=>note('Kestrel is a place underfoot, not a camera button.');
+$('tile-saltwind').onclick=()=>{
+  const there=party.some(p=>p.place==='saltwind');
+  if (!there) note('Saltwind is not loaded. Someone has to walk the crossing.');
+  else note('Saltwind is its own place because someone walked there. Follow them to stand in it.');
+};
+paintRoster();
 
 let sceneMeshes = 0;
+let sceneOrganCount = 0;
 let sceneSource = '';
+let builtKey = '';
+function structureKey(st){
+  return [viewPlace(), party.map(p=>`${p.id}:${p.place}:${p.shape}`).join('|'),
+    st.upgrades, st.parts.length, st.online|0, st.approved|0, st.waterOnline|0, st.gardenActive|0,
+    st.bridgeOpen|0, st.bridgeBraced|0, st.canalTide, st.pumpOnline|0, st.orchardActive|0, sceneSource].join('~');
+}
+function posePeople(){
+  if (!partSpans.length) return;
+  const xyz=m.participant_poses(partyRecord());
+  let o=0;
+  for (const span of partSpans) {
+    const n=span.vertex_count*3;
+    const slice=xyz.subarray(o, o+n);
+    if (slice.length!==n) return;
+    portal.write_part_vertices(span.vertex_start, slice);
+    o+=n;
+  }
+}
 function rebuild() {
   const st = state();
+  const here = viewPlace();
   const scene = m.scene_build(st.upgrades, st.parts.length, st.online, st.approved,
-    st.waterOnline, st.gardenActive, st.bridgeOpen, st.bridgeBraced, st.day>4,
-    st.pumpOnline, st.orchardActive, sceneSource);
-  tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
-  const receipt = toObj(portal.load_scene(scene.organs));
+    st.waterOnline, st.gardenActive, st.bridgeOpen, st.bridgeBraced, st.canalTide==='high',
+    st.pumpOnline, st.orchardActive, sceneSource, partyRecord(), here, placeClock[here]||0);
+  sceneOrganCount = scene.organs.length;
+  const organs = FIRST_PAINT
+    ? [...scene.organs].filter(o => o.id==='rc:asset/water-tank').slice(0,1)
+    : [...scene.organs];
+  const chosen = organs.length ? organs : [...scene.organs].slice(0,1);
+  portal.set_preserve_authored_frame(true);
+  const receipt = toObj(portal.load_scene(chosen));
+  partSpans = (receipt.parts||[]).filter(s => String(s.id||'').startsWith('rc:participant/'));
   sceneMeshes = receipt.organs_loaded;
-  if (sceneMeshes !== scene.organs.length)
-    throw new Error(`QualiaDB refused ${scene.organs.length-sceneMeshes} scene meshes`);
-  portal.upload_tensor(scene.tensor);
+  if (sceneMeshes !== chosen.length)
+    throw new Error(`QualiaDB refused ${chosen.length-sceneMeshes} scene meshes`);
+  if (FIRST_PAINT) {
+    const o = chosen[0];
+    tankAim = {x:o.cx, y:o.cy, z:o.cz};
+  } else {
+    portal.upload_tensor(scene.tensor);
+  }
+  builtKey = structureKey(st);
   applyCam();
   return st;
 }
 
-// rAF render loop — tick drives GPU pick readback too
+// rAF starts after the first load_scene (see below). A tick before the mesh
+// exists used to miss the WebGPU body and fall through to a 2d context.
 let last=performance.now(), tickErrorShown=false;
-(function loop(t){
-  try { portal.tick(canvas, Math.min(50, t-last)); }
-  catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
-  last=t; requestAnimationFrame(loop);
-})(last);
+function startRenderLoop(){
+  (function loop(t){
+    const dt=Math.min(50, t-last);
+    try {
+      const moved=FIRST_PAINT?false:(stepWalker(dt)|stepOthers(dt));
+      let crossed=false;
+      if (!FIRST_PAINT) {
+        for (const q of party) if (crossPlace(q)) crossed=true;
+        placeClock[viewPlace()] = (placeClock[viewPlace()]||0) + dt/1000;
+      }
+      if (crossed) refresh();
+      else if (!FIRST_PAINT) posePeople();
+      if (moved) applyCam();
+      if (((t/200)|0) !== ((last/200)|0)) $('tier').textContent = tierLabel();
+      portal.tick(liveCanvas(), dt);
+    }
+    catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
+    last=t; requestAnimationFrame(loop);
+  })(last);
+}
 
 // orbit + pick
 let drag=null;
-canvas.addEventListener('pointerdown', e=>{ drag={x:e.clientX,y:e.clientY,moved:false}; canvas.setPointerCapture(e.pointerId); });
-canvas.addEventListener('pointermove', e=>{ if(!drag) return;
+const sceneShell = document.querySelector('.scene-shell');
+sceneShell.addEventListener('pointerdown', e=>{
+  const canvas = liveCanvas();
+  if (e.target !== canvas) return;
+  drag={x:e.clientX,y:e.clientY,moved:false}; canvas.setPointerCapture(e.pointerId);
+});
+sceneShell.addEventListener('pointermove', e=>{ if(!drag) return;
   if (Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>4) drag.moved=true;
   if (drag.moved){ camYaw+=(e.movementX||0)*0.008; camPitch=Math.max(-1.2,Math.min(1.4,camPitch+(e.movementY||0)*0.006)); applyCam(); }});
-canvas.addEventListener('pointerup', e=>{
-  if (drag && !drag.moved){
+sceneShell.addEventListener('pointerup', e=>{
+  const canvas = liveCanvas();
+  if (drag && !drag.moved && e.target === canvas){
     const r=canvas.getBoundingClientRect();
     portal.queue_pick(
       (e.clientX-r.left)*canvas.width/r.width,
@@ -373,7 +669,10 @@ canvas.addEventListener('pointerup', e=>{
   }
   drag=null;
 });
-canvas.addEventListener('wheel', e=>{ e.preventDefault(); camZoom=Math.max(1.2,Math.min(20,camZoom*Math.exp(e.deltaY*0.001))); applyCam(); }, {passive:false});
+sceneShell.addEventListener('wheel', e=>{
+  if (e.target !== liveCanvas()) return;
+  e.preventDefault(); camZoom=Math.max(1.2,Math.min(20,camZoom*Math.exp(e.deltaY*0.001))); applyCam();
+}, {passive:false});
 
 function inspect(s){
   $('why').style.display='block';
@@ -385,11 +684,16 @@ function inspect(s){
 // ---------- HUD ----------
 function refresh() {
   const st = rebuild();
-  const saltwind=territory==='saltwind';
+  const here=stoodPlace();
+  const saltwind=here==='saltwind';
   const lead=campaignLead(st);
   $('day').textContent=`Day ${st.day}`;
-  $('tide').textContent=st.bridgeOpen?'Crossing secured':st.day<=4?`Low tide · ${5-st.day} day${st.day===4?'':'s'} left`:'High tide · extra work';
-  $('tide').classList.toggle('tide-high',!st.bridgeOpen&&st.day>4);
+  const tideWord = st.canalTide==='high' ? 'High canal' : 'Low canal';
+  const bridgeWord = st.bridgeOpen ? 'bridge passable' : st.bridgeBraced ? 'bridge braced' : 'bridge broken';
+  $('tide').textContent=st.bridgeOpen?`${tideWord} · ${bridgeWord}`:
+    st.canalTide==='high'?`${tideWord} · ${bridgeWord}`:
+    `${tideWord} · ${5-st.day} day${st.day===4?'':'s'} to the rise · ${bridgeWord}`;
+  $('tide').classList.toggle('tide-high', st.canalTide==='high' && !st.bridgeOpen);
   $('dispatch-step').textContent=st.finale?'Campaign complete':`Field dispatch · Day ${st.day}`;
   $('dispatch-title').textContent=lead.title;
   $('dispatch-copy').textContent=lead.copy;
@@ -397,10 +701,26 @@ function refresh() {
     st.bridgeOpen,st.pumpOnline,st.orchardActive];
   const done=milestones.filter(Boolean).length;
   $('campaign-fill').style.width=`${Math.round(done/7*100)}%`;
-  $('campaign-count').textContent=`${done} of 7 community projects working`;
+  $('campaign-count').textContent=st.finale
+    ? `${done} of 7 projects in service · ending recorded`
+    : `${done} of 7 projects in service · ending still open`;
+  $('dispatch-facts').textContent=
+    `Day ${st.day} · ${st.labour?'labour ready':'labour spent'} · ${st.coins} coins · ${st.canalTide} canal · bridge ${st.bridgeStatus}${st.bridgeBraced&&!st.bridgeOpen?' · supports braced':''} · tank ${st.waterStatus} ${st.waterLitres} L`;
+  if (!st.finale && !lead.action && st.orchardActive) {
+    const gap = (items) => items.filter(Boolean).join(', ') || 'nothing else';
+    const commons = gap([st.upgrades>0?null:'a shelter upgrade', st.gardenActive?null:'the garden', st.coins>=4?null:'4 coins', st.labour?null:'a labour']);
+    const trade = gap([st.bridgeOpen?null:'the bridge', st.pumpOnline?null:'the pump', st.coins>=2?null:'2 coins', st.labour?null:'a labour']);
+    $('dispatch-copy').textContent = `${lead.copy} Commons still needs ${commons}. Trade still needs ${trade}.`;
+  }
   $('dispatch-action').textContent=lead.label;
   $('dispatch-action').onclick=()=>{
-    territory=lead.territory;
+    if (lead.territory==='saltwind' && who(directId).place!=='saltwind') {
+      const one=who(directId);
+      if (one.place!=='kestrel') { note('They are not on the Kestrel crossing.'); return; }
+      walkTarget={id:one.id, x:8.95, z:one.z};
+      note(`Only ${one.name} is sent across. The others keep their own step.`);
+      return;
+    }
     if (lead.action) tryAction(lead.action);
     else { refresh(); (st.finale?$('scene'):$('finale-panel')).scrollIntoView({behavior:'smooth',block:'center'}); }
   };
@@ -410,16 +730,19 @@ function refresh() {
     '<strong>The commons are open</strong><span>Shared water, food and shelter became a place to gather.</span>':
     '<strong>The canal is connected</strong><span>The first boat carries a harvest to neighbouring communities.</span>')+
     `<span>Day ${st.day} · ${done}/7 projects working · ${st.coins} coins in reserve</span>`;
-  $('tile-kestrel').setAttribute('aria-current', String(!saltwind));
-  $('tile-saltwind').setAttribute('aria-current', String(saltwind));
-  $('territory-step').textContent=saltwind?'Territory 02':'Territory 01';
-  $('territory-name').textContent=saltwind?'Saltwind Reach':'Kestrel Flats';
+  const placeWord=here==='saltwind'?'Saltwind Reach':'Kestrel Flats';
+  $('territory-step').textContent=here==='saltwind'?'Saltwind · own time':'Kestrel · own time';
+  $('territory-name').textContent=`${placeWord} · t ${(placeClock[here]||0).toFixed(1)}`;
+  $('tile-kestrel').textContent=here==='kestrel'?'Here · Kestrel Flats':'Kestrel Flats';
+  $('tile-kestrel').setAttribute('aria-current', String(here==='kestrel'));
+  $('tile-saltwind').textContent=party.some(p=>p.place==='saltwind')?(here==='saltwind'?'Here · Saltwind Reach':'Saltwind Reach'):'Saltwind — walk there';
+  $('tile-saltwind').setAttribute('aria-current', String(here==='saltwind'));
   $('chapter-label').textContent=saltwind?'Campaign · Chapter 2':'Campaign · Chapter 1';
   $('chapter-title').textContent=saltwind?'Cross the canal':'Restore the commons';
   $('chapter-detail').textContent=saltwind?
     'Reconnect the crossing, bring the wind pump online and plant the orchard.':
     'Make a workable shelter and bring the shared workshop, water and garden into use.';
-  canvas.setAttribute('aria-label',`QualiaDB three-dimensional view of ${saltwind?'Saltwind Reach':'Kestrel Flats'}`);
+  liveCanvas().setAttribute('aria-label',`QualiaDB three-dimensional view of ${saltwind?'Saltwind Reach':'Kestrel Flats'}`);
   const resource = (label,value,cls='') => `<div class="resource"><span>${label}</span><strong class="${cls}">${value}</strong></div>`;
   $('resource-bar').innerHTML = resource('Coins',st.coins) +
     resource('Labour',st.labour?'Ready':'Spent',st.labour?'status-good':'status-warn') +
@@ -432,9 +755,9 @@ function refresh() {
       resource('Garden',st.gardenActive?'Growing':'Dry',st.gardenActive?'status-good':'status-warn'));
   const objective = (title,detail,done) => `<div class="objective ${done?'done':''}"><div><b>${title}</b><small>${detail}</small></div><span class="check">${done?'✓':'○'}</span></div>`;
   $('objectives').innerHTML = saltwind ?
-    objective('Reconnect the crossing',st.bridgeOpen?'Bridge passable':st.day<=4?
-      `Low tide until day 4 · ${st.waterOnline?'crew can work':'restore Kestrel water first'}`:
-      st.bridgeBraced?'Supports braced · finish next workday':'High tide · brace supports or hire a crew',st.bridgeOpen) +
+    objective('Reconnect the crossing',st.bridgeOpen?`Bridge passable · ${st.canalTide} canal`:st.canalTide==='low'?
+      `Low canal until day 4 · ${st.waterOnline?'crew can work':'restore Kestrel water first'}`:
+      st.bridgeBraced?'Supports braced · finish next workday':'High canal · brace supports or hire a crew',st.bridgeOpen) +
     objective('Commission the wind pump',st.pumpOnline?'Pump running':'Needs bridge and powered workshop',st.pumpOnline) +
     objective('Plant the orchard',st.orchardActive?'Fruit growing':'Needs the wind pump',st.orchardActive) :
     objective('Improve your shelter',`${st.upgrades} upgrade${st.upgrades===1?'':'s'} made`,st.upgrades>0) +
@@ -457,7 +780,8 @@ function refresh() {
     finalePanel.querySelectorAll('[data-finale]').forEach(b=>b.onclick=()=>tryAction(b.dataset.finale));
   }
   $('inspector').innerHTML = saltwind ? `<h2>Saltwind Reach</h2><dl>
-    <dt>Crossing</dt><dd>${st.bridgeOpen?'Bridge restored':'Bridge is broken'}</dd>
+    <dt>Crossing</dt><dd>${st.bridgeOpen?'Bridge restored':st.bridgeBraced?'Supports braced, deck still open':'Bridge is broken'}</dd>
+    <dt>Canal</dt><dd>${st.canalTide==='high'?'High water recorded':'Low water recorded'}</dd>
     <dt>Water</dt><dd>${st.pumpOnline?'Wind pump commissioned':'Pump awaiting crew'}</dd>
     <dt>Harvest</dt><dd>${st.orchardActive?'Orchard growing':'Orchard not planted'}</dd>
   </dl>` : `<h2>Community overview</h2><dl>
@@ -465,7 +789,8 @@ function refresh() {
     <dt>Inventory</dt><dd>${st.held.map(short).join(', ')||'No parts held'}</dd>
     <dt>Solar project</dt><dd>${st.parts.length}/2 parts installed · ${st.approved?'endorsed':'awaiting committee'}</dd>
     <dt>Shelter</dt><dd>${st.upgrades} improvement${st.upgrades===1?'':'s'}</dd>
-    <dt>Shared water</dt><dd>${st.waterOnline?'200 L available':'Tank needs repair'}</dd>
+    <dt>Shared water</dt><dd>${st.waterOnline?`${st.waterLitres} L available`:'Tank needs repair'}</dd>
+    <dt>Canal</dt><dd>${st.canalTide==='high'?'High water':'Low water'} · bridge ${st.bridgeStatus}</dd>
   </dl>`;
   const box = $('actions'); box.querySelectorAll('button').forEach(b=>b.remove());
   box.querySelectorAll('.action-group').forEach(g=>g.remove());
@@ -508,7 +833,9 @@ function refresh() {
     p.textContent='The campaign has an ending. Explore the map, replay your choices or begin a new campaign.';
     box.appendChild(p);
   }
-  $('tier').textContent = `QualiaPortal tier ${portal.tier()} · 2 territories · ${sceneMeshes} .10d meshes`;
+  $('tier').textContent = FIRST_PAINT
+    ? `${tierLabel()} · first-paint path · ${sceneMeshes} organ loaded`
+    : `${tierLabel()} · 2 territories · ${sceneMeshes} .10d meshes`;
 }
 
 function tryAction(id) {
@@ -528,7 +855,11 @@ function tryAction(id) {
       launchTradeRoute:'The first trade boat sets out.',endTurn:'The crew rests. A new day begins.'
     };
     note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
-    if (id==='openCommons'||id==='launchTradeRoute') territory='saltwind';
+    if ((id==='openCommons'||id==='launchTradeRoute') && who(directId).place!=='saltwind') {
+      const one=who(directId);
+      walkTarget={id:one.id, x:8.95, z:one.z};
+      note(`Only ${one.name} is sent across. That order is not everyone's.`);
+    }
     refresh(); return;
   }
   const rep = toObj(r.report||{});
@@ -564,7 +895,7 @@ $('save').onclick = async () => {
 $('load').onclick = async () => {
   const b = await m.world_load('rc-save.n3');
   const saved = new TextDecoder().decode(b);
-  if (!saved.includes('rc:world rc:contentVersion 4 .')) {
+  if (!saved.includes('rc:world rc:contentVersion 5 .')) {
     $('persist').textContent = 'older save needs a Qualia Q42 migration';
     return;
   }
@@ -579,7 +910,8 @@ $('replay').onclick = () => {
 };
 $('new-game').onclick = () => {
   session = new m.GameSession(SEED, ACTIONS);
-  territory='kestrel';
+  party=PEOPLE_SEED.map(p=>({...p, claims:[...p.claims], route:p.route.map(q=>q.slice()), step:0, phase:p.phase||0, yaw:p.yaw||0, carry:p.carry||0}));
+  followId='p0'; directId='p0'; walkTarget=null; meshMark=null; partSpans=[];
   $('why').style.display='none';
   $('persist').textContent='new campaign started; save when ready';
   refresh(); note('A new campaign begins at Kestrel Flats.');
@@ -599,7 +931,7 @@ $('vibe-preview').onclick = () => {
   sceneSource = $('vibe-scene').value;
   try {
     refresh();
-    $('vibe-scene-result').textContent = `Qualia geometry compiled; ${sceneMeshes} .10d meshes loaded. Source embedded in provenance.`;
+    $('vibe-scene-result').textContent = `Scene cell compiled to .10d (${sceneMeshes} mesh${sceneMeshes===1?'':'es'} loaded, source in provenance). This is a receipt, not a painted frame.`;
   } catch (e) {
     sceneSource = previous;
     $('vibe-scene-result').textContent = String(e);
@@ -608,7 +940,10 @@ $('vibe-preview').onclick = () => {
 };
 
 refresh();
-note('slice ready — tier ' + portal.tier());
+startRenderLoop();
+note(FIRST_PAINT
+  ? 'first-paint path armed — water tank in town frame, camera on that mesh'
+  : 'slice ready — ' + tierLabel());
 
 // Scripted acceptance playthrough for headless verification (?selftest).
 if (new URLSearchParams(location.search).has('selftest')) {
@@ -620,9 +955,10 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST Vibe world query: ${query.ok && query.value===12 ? 'PASS' : 'FAIL'}`);
   const scriptBlock = toObj(testSession.vibe_propose('= "startGarden"'));
   note(`TEST Vibe blocked order: ${scriptBlock.ok===false ? 'PASS' : 'FAIL'}`);
-  const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, VIBE_SCENE);
-  note(`TEST Vibe scene asset: ${scriptAsset.organs.length===sceneMeshes+1 ? 'PASS' : 'FAIL'}`);
-  note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=115 ? 'PASS' : 'FAIL'}`);
+  const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, VIBE_SCENE, '');
+  note(`TEST Vibe scene asset: ${scriptAsset.organs.length===sceneOrganCount-party.length+1 ? 'PASS' : 'FAIL'}`);
+  note(`TEST places in the build: ${sceneOrganCount>=115 ? 'PASS' : 'FAIL'}`);
+  note(`TEST saltwind is a separate place: ${party.every(p=>p.place!=='saltwind') && viewPlace()==='kestrel' ? 'PASS' : 'FAIL'}`);
   const expect = (name, id, wantOk) => {
     const r = toObj(testSession.propose(id));
     note(`TEST ${name}: ${id} ${r.ok===wantOk?'PASS':'FAIL'}`);
@@ -700,6 +1036,68 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const paidBuilt=toObj(paid.s.propose('restoreBridgeLateCoins'));
   const noBracingAfter=toObj(paid.s.propose('braceBridge'));
   note(`TEST high-tide paid route: ${paid.ready&&paidBuilt.ok&&!noBracingAfter.ok?'PASS':'FAIL'}`);
+  const opening = new m.GameSession(SEED, ACTIONS);
+  const tide0 = toObj(opening.vibe_query('= world.canal_tide'));
+  note(`TEST canal starts low: ${tide0.ok && tide0.value==='low' ? 'PASS' : 'FAIL'}`);
+  const bridge0 = toObj(opening.vibe_query('= world.bridge_status'));
+  note(`TEST bridge starts broken: ${bridge0.ok && bridge0.value==='broken' ? 'PASS' : 'FAIL'}`);
+  const litres0 = toObj(opening.vibe_query('= world.water_litres'));
+  note(`TEST tank starts empty: ${litres0.ok && litres0.value===0 ? 'PASS' : 'FAIL'}`);
+  const wallet = toObj(opening.vibe_query('= world.wallet_instrument'));
+  const treasury = toObj(opening.vibe_query('= world.treasury_instrument'));
+  const onPlayer = toObj(opening.vibe_query('= world.instruments_on_player'));
+  note(`TEST handle instruments: ${wallet.ok && wallet.value==='rc:scenarioWallet' && treasury.ok && treasury.value==='rc:committeeTreasury' && onPlayer.ok && onPlayer.value===false ? 'PASS' : 'FAIL'}`);
+  const clock = new m.GameSession(SEED, ACTIONS);
+  let clockOk = true;
+  for (let i=0;i<3;i++) {
+    clockOk = clockOk && toObj(clock.propose('improveShelterLabour')).ok && toObj(clock.propose('endTurn')).ok;
+  }
+  const after3 = toObj(clock.vibe_query('= world.canal_tide'));
+  clockOk = clockOk && toObj(clock.propose('improveShelterLabour')).ok && toObj(clock.propose('endTurn')).ok;
+  const after4 = toObj(clock.vibe_query('= world.canal_tide'));
+  const clockWorld = clock.world();
+  const clockRep = toObj(m.session_replay(SEED, ACTIONS, toObj(clock.events())));
+  note(`TEST canal clock: ${clockOk && after3.ok && after3.value==='low' && after4.ok && after4.value==='high' && clockWorld.includes('rc:canal rc:tide "high" .') && clockRep.diverged_at===null && clockRep.world===clockWorld ? 'PASS' : 'FAIL'}`);
+  const lateTide = toObj(late.s.vibe_query('= world.canal_tide'));
+  note(`TEST high-tide world fact: ${lateTide.ok && lateTide.value==='high' ? 'PASS' : 'FAIL'}`);
+  const frame = (kind, claims) => toObj(m.acts_frame_eval(kind, JSON.stringify(claims)));
+  const poverty = frame('human', ['condition.poverty']);
+  note(`TEST acts frame: poverty alone custody false light none: ${poverty.custody===false && poverty.light==='none' && poverty.drug_inference===false ? 'PASS' : 'FAIL'}`);
+  const wealth = frame('human', ['condition.wealth']);
+  note(`TEST acts frame: wealth alone custody false light none: ${wealth.custody===false && wealth.light==='none' ? 'PASS' : 'FAIL'}`);
+  const noHousing = frame('human', ['condition.no_housing']);
+  note(`TEST acts frame: no_housing alone no villain no custody no drug inference: ${noHousing.custody===false && noHousing.light==='none' && noHousing.drug_inference===false && noHousing.look!=='junkie' ? 'PASS' : 'FAIL'}`);
+  const injury = frame('human', ['condition.injury', 'condition.no_medication']);
+  note(`TEST acts frame: injury and no medication are conditions not guilt: ${injury.custody===false && injury.light==='none' && injury.drug_inference===false ? 'PASS' : 'FAIL'}`);
+  const cell = frame('human', ['act.violence_against_person']);
+  note(`TEST acts frame: human warranting act custody true: ${cell.custody===true && cell.light==='villain' ? 'PASS' : 'FAIL'}`);
+  const company = frame('company', ['act.violence_against_person']);
+  note(`TEST acts frame: company same act custody false: ${company.custody===false ? 'PASS' : 'FAIL'}`);
+  const kind = frame('human', ['act.kindness']);
+  note(`TEST acts frame: human kindness halo no custody: ${kind.light==='halo' && kind.custody===false ? 'PASS' : 'FAIL'}`);
+  const supply = frame('human', ['act.illegal_drug_supply']);
+  note(`TEST acts frame: drug supply is an act not a housing look: ${supply.custody===true && supply.light==='villain' && supply.drug_inference===true ? 'PASS' : 'FAIL'}`);
+  const traffic = frame('human', ['act.trafficking']);
+  note(`TEST acts frame: trafficking is an act not a who-kind: ${traffic.custody===true && traffic.light==='villain' && traffic.drug_inference===false ? 'PASS' : 'FAIL'}`);
+  const userKind = frame('user', ['condition.no_housing']);
+  note(`TEST acts frame: user is not a who-kind: ${userKind.custody===false && userKind.light==='none' ? 'PASS' : 'FAIL'}`);
+  note(`TEST figure audit: ${m.figure_audit()}`);
+  const housedSupply = frame('human', ['condition.no_housing', 'act.illegal_drug_supply']);
+  note(`TEST acts frame: cell does not infer drug act from no housing: ${housedSupply.custody===true && housedSupply.reason==='act.illegal_drug_supply' && noHousing.drug_inference===false ? 'PASS' : 'FAIL'}`);
+  const pathways = [
+    'condition.cannot_afford_child',
+    'condition.spent_caring_for_relative',
+    'condition.lost_business',
+    'condition.returned_from_war',
+    'condition.unhappy_relationship_mortgage_stuck'
+  ];
+  for (const id of pathways) {
+    const r = frame('human', [id]);
+    const kept = Array.isArray(r.pathways) && r.pathways.length===1 && r.pathways[0]===id;
+    note(`TEST acts frame: ${id} alone no custody no villain pathway kept: ${r.custody===false && r.light==='none' && r.look!=='junkie' && r.drug_inference===false && kept ? 'PASS' : 'FAIL'}`);
+  }
+  const silhouette = frame('human', ['look.homeless_silhouette']);
+  note(`TEST acts frame: homeless silhouette that hides the path is refused: ${silhouette.custody===false && silhouette.light==='none' && silhouette.look==='none' && (!silhouette.pathways || silhouette.pathways.length===0) ? 'PASS' : 'FAIL'}`);
   note('SUMMARY done');
 }
 </script>
