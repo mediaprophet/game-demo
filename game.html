@@ -997,7 +997,7 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const firstMesh=scriptAsset.organs[0].bytes;
   const hasSurfaceReading=firstMesh.some((v,i,a)=>v===83&&a[i+1]===82&&a[i+2]===68&&a[i+3]===49);
   note(`TEST Qualia SRD1 surface reading: ${hasSurfaceReading?'PASS':'FAIL'}`);
-  note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=119 ? 'PASS' : 'FAIL'}`);
+  note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=135 ? 'PASS' : 'FAIL'}`);
   note(`TEST site markers: ${placePositions.length===PLACES.length && PLACE_MARKERS.length===PLACES.length && placePositions.every(p=>[p.x,p.y,p.z].every(Number.isFinite)) ? 'PASS' : 'FAIL'}`);
   try {
     const packResponse=await fetch('./assets/maslows-challenge-scenes.hmc');
