@@ -32,6 +32,9 @@ open a local commons with a harvest gathering, or outfit a trade boat for
 neighbouring settlements. The two endings have different requirements and
 consequences in the saved, replayable world. The interface shows a field
 dispatch, project progress, relevant orders, day count and a result screen.
+Selecting a coloured world marker now focuses its site and opens contextual
+orders there. The in-game dispatch highlights its next suggested order and can
+locate that order's site. QualiaDB rules validate every order from either path.
 
 The Kestrel Flats scene compiles original town geometry through QualiaDB
 computational geometry, provenance-bearing `.10d` containers, and the full

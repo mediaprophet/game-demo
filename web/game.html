@@ -317,6 +317,34 @@ const PLACE_MARKERS = [
   ['Garden','food','#78b66c'],['Crossing','route','#c6a260'],
   ['Wind power','energy','#67b8bd'],['Orchard','food','#78b66c'],
 ];
+// Site ownership is presentation data. GameSession remains the order authority.
+const SITE_ACTIONS = [
+  ['improveShelterCoins','improveShelterLabour'],
+  ['salvagePanel','salvageInverter'],
+  ['buyPanel','buyInverter'],
+  ['contributePanel','contributeInverter','switchPowerOn','fulfilWorkshopOrder'],
+  ['requestApproval'],
+  ['repairTankCoins','repairTankLabour'],
+  ['startGarden'],
+  ['restoreBridge','braceBridge','restoreBridgeLateLabour','restoreBridgeLateCoins'],
+  ['raiseWindPump'],
+  ['plantOrchard','openCommons','launchTradeRoute'],
+];
+const siteForAction = id => SITE_ACTIONS.findIndex(ids=>ids.includes(id));
+function siteBrief(index,st){
+  switch(index){
+    case 0:return ['SHELTER',st.upgrades?'A safer place to rest.':'Patch the shelter with materials or a crew shift.'];
+    case 1:return ['SALVAGE YARD','Recover solar parts here without spending coins. Work uses the crew for the day.'];
+    case 2:return ['MARKET',`Buy parts immediately. ${st.coins} coins remain for later projects.`];
+    case 3:return ['WORKSHOP',st.online?'Power is on. Take a paid repair order to fund the next project.':`${st.parts.length}/2 solar parts fitted; ${st.approved?'council endorsement secured':'council endorsement needed'}.`];
+    case 4:return ['COUNCIL',st.approved?'The solar project has public approval.':'Present installed parts to seek approval for shared power.'];
+    case 5:return ['SHARED WATER',st.waterOnline?'The cistern is supplying Kestrel Flats.':'Repair the cistern with parts or a crew shift.'];
+    case 6:return ['GARDEN',st.gardenActive?'Food is growing in the first beds.':'Plant once shared water is flowing.'];
+    case 7:return ['CANAL CROSSING',st.bridgeOpen?'The route to Saltwind is open.':st.day<=4?'Low tide makes the bridge easier to repair.':'High tide demands bracing or a specialist crew.'];
+    case 8:return ['WIND PUMP',st.pumpOnline?'The pump supplies Saltwind Reach.':'An open bridge and powered workshop are needed.'];
+    default:return ['ORCHARD',st.orchardActive?'Harvest is ready for a commons or trade route.':'Bring the wind pump online, then plant the orchard.'];
+  }
+}
 // ---------- portal ----------
 const canvas = $('scene');
 canvas.width = Math.max(600, window.innerWidth);
@@ -473,14 +501,25 @@ canvas.addEventListener('wheel', e=>{
 }, {passive:false});
 
 function inspect(s){
-  const siteIndex=PLACES.indexOf(s);if(siteIndex>=0)focusSite(siteIndex);
+  const siteIndex=PLACES.indexOf(s);
+  if(siteIndex<0)return;
+  const siteTerritory=siteIndex>=7?'saltwind':'kestrel';
+  focusSite(siteIndex);
+  if(territory!==siteTerritory){territory=siteTerritory;refresh();}
+  const st=state();
+  const [title,brief]=siteBrief(siteIndex,st);
+  const available=new Set([...$('actions').querySelectorAll('button[data-action]')]
+    .map(b=>b.dataset.action));
+  if(siteIndex===9&&st.orchardActive&&!st.finale){
+    available.add('openCommons');available.add('launchTradeRoute');
+  }
+  hudSiteActions=SITE_ACTIONS[siteIndex].filter(id=>available.has(id));
+  if(!st.labour&&available.has('endTurn')&&!st.finale)hudSiteActions.push('endTurn');
   $('why').style.display='block';
   $('why').innerHTML = `<b>${short(s)}</b><dl>` +
     triples().filter(t=>t.s===s).map(t=>`<dt>${short(t.p)}</dt><dd>${short(t.o)}</dd>`).join('') +
     `</dl>`;
-  hudSiteLines=[short(s),...triples().filter(t=>t.s===s)
-    .map(t=>`${short(t.p)}: ${short(t.o)}`)];
-  hudSiteActions=[];
+  hudSiteLines=[title,brief,`QUALIA NODE  ${short(s)}`];
   hudPage='site'; renderHud();
 }
 
@@ -523,13 +562,22 @@ function renderHud() {
       line+=(line?' ':'')+word;
     }
     if(line){label(line,right+14,y,panelW-28,19);y+=19;}
-    y+=8;
+    y+=9;
+    if(lead.action){
+      button(`action:${lead.action}`,`▶ ${lead.label}`,right+13,y,panelW-26,36);y+=43;
+      const site=siteForAction(lead.action);
+      if(site>=0){button(`focus:${site}`,`◎ Find ${PLACE_MARKERS[site][0]}`,right+13,y,panelW-26,30);y+=38;}
+    }else if(st.orchardActive&&!st.finale){
+      button('focus:9','◎ Explore the orchard',right+13,y,panelW-26,34);y+=42;
+    }
+    label('OTHER AVAILABLE ORDERS',right+14,y,panelW-28,21);y+=26;
     const actions=[...$('actions').querySelectorAll('button[data-action]')]
-      .map(b=>({id:b.dataset.action,text:b.textContent}));
+      .map(b=>({id:b.dataset.action,text:b.textContent}))
+      .filter(a=>a.id!==lead.action);
     if(st.orchardActive&&!st.finale) actions.push(
       {id:'openCommons',text:'Host the commons gathering'},
       {id:'launchTradeRoute',text:'Launch the trade route'});
-    const available=Math.max(2,Math.floor((H-y-173)/40));
+    const available=Math.max(0,Math.floor((H-158-y-34)/40)+1);
     hudOrderOffset=Math.min(hudOrderOffset,Math.max(0,actions.length-available));
     actions.slice(hudOrderOffset,hudOrderOffset+available).forEach(a=>{
       button(`action:${a.id}`,a.text,right+13,y,panelW-26,34);y+=40;
@@ -554,7 +602,7 @@ function renderHud() {
     const entries=[...$('log').children].slice(0,Math.floor((H-y-120)/31));
     entries.forEach(el=>{label(el.textContent.slice(0,38),right+14,y);y+=30;});
   } else if(hudPage==='site') {
-    label('SITE INSPECTOR',right+14,y);y+=35;
+    label(focusedPlace===null?'ORDER DETAILS':'SITE ORDERS',right+14,y);y+=35;
     const lines=hudSiteLines.length ? hudSiteLines :
       [territory==='saltwind'?'Saltwind Reach':'Community overview',
         `Workshop: ${st.online?'powered':'offline'}`,
@@ -568,11 +616,11 @@ function renderHud() {
       if(y>H-170)break;
     }
     if(hudSiteActions.length){
-      y=Math.max(y+9,H-150);
-      hudSiteActions.slice(0,2).forEach(id=>{
+      y+=8;
+      hudSiteActions.slice(0,Math.max(0,Math.floor((H-77-y)/39))).forEach(id=>{
         const title=catalog.find(a=>a.id===id)?.label||id;
         button(`action:${id}`,title,right+14,y,panelW-28,34);y+=39;});
-    }
+    }else if(focusedPlace!==null)label('No orders here yet. Check the campaign goals.',right+14,y+12,panelW-28,40);
   } else if(hudPage==='script') {
     label('VIBESCRIPT CONSOLE',right+14,y);y+=37;
     label('Qualia world queries and authored scenes',right+14,y);y+=37;
@@ -611,6 +659,7 @@ function renderHud() {
 
 function handleHudAction(id){
   if(id.startsWith('place:')){inspect(PLACES[Number(id.slice(6))]);return;}
+  if(id.startsWith('focus:')){inspect(PLACES[Number(id.slice(6))]);return;}
   if(id==='camera:in'||id==='camera:out'){
     camGoal=null;zoomGoal=null;
     camZoom=Math.max(0.55,Math.min(20,camZoom*(id==='camera:in'?0.75:1.33)));

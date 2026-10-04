@@ -31,6 +31,14 @@ occluded, or edge-clamped) before adding dense worlds. It should also offer a ge
 camera transition API so applications can request target/zoom easing without their own
 frame interpolation. Keep both in Qualia Portal/HUD rather than a game-only renderer.
 
+The game maps each semantic marker to its available project orders. Selecting
+a marker focuses the camera, describes the site's current condition, and shows
+relevant actions in the Qualia HUD. The field dispatch can locate the site for
+its suggested next order. These presentation mappings use the existing Qualia
+`GameSession`; blocked orders still return Qualia's rule explanation and
+accepted orders enter the same replay tape. Both desktop and compact HUD
+layouts were checked in the browser.
+
 ## Current art direction
 
 Aim for a warm, readable, stylized strategy world with distinct silhouettes and rich colour.
