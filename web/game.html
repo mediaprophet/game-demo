@@ -388,6 +388,8 @@ const PEOPLE_SEED=[
     route:[[-0.2,1.5],[-0.8,1.9],[-0.5,1.3]]},
   {id:'p2', name:'Nia', place:'kestrel', x:-3.4, z:-3.1, story:'Lost the business. Carries a bundle to the garden. Whole person, not a wrecked body.', need:'the garden beds', claims:['condition.lost_business'], shape:4, color:[0.62,0.56,0.38], day:1, carry:1, yaw:-0.4, phase:0.4,
     route:[[-3.8,-3.4],[-2.4,-2.8],[-4.2,-2.2]]},
+  {id:'p3', name:'Ren', place:'kestrel', x:-2.1, z:-2.5, story:'Keeping the stall. Arms up when the awning needs a peg.', need:'the market', claims:[], shape:3, color:[0.55,0.32,0.28], day:1, carry:0, yaw:1.1, phase:0.7,
+    route:[[-2.2,-2.7],[-1.5,-3.1],[-2.6,-3.0]]},
 ];
 let party=PEOPLE_SEED.map(p=>({...p, claims:[...p.claims], route:p.route.map(q=>q.slice()), step:0, phase:p.phase||0, yaw:p.yaw||0, carry:p.carry||0}));
 let followId='p0', directId='p0';
