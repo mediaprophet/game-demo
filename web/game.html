@@ -355,7 +355,7 @@ hudCanvas.height = canvas.height;
 try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
 const portal = new m.GamePortal(canvas);
 const hud = new m.GameHud(hudCanvas);
-let hudPage='orders', hudOrderOffset=0, hudScriptResult='';
+let hudPage='orders', hudOrderOffset=0, hudScriptResult='', resultMessage='';
 let hudSiteLines=[], hudSiteActions=[];
 window.addEventListener('resize',()=>{
   const w=Math.max(600,window.innerWidth), h=Math.max(540,window.innerHeight);
@@ -451,7 +451,7 @@ canvas.addEventListener('pointerdown', e=>{
   const py=(e.clientY-r.top)*canvas.height/r.height;
   drag={x:e.clientX,y:e.clientY,moved:false,hudAction:id,
     pan:e.shiftKey||e.button===1,
-    blockWorld:py<58||py>canvas.height-58||px>(canvas.width<900?canvas.width-290:canvas.width-358)};
+    blockWorld:hudPage==='result'||py<58||py>canvas.height-58||px>(canvas.width<900?canvas.width-290:canvas.width-358)};
   canvas.setPointerCapture(e.pointerId);
 });
 canvas.addEventListener('pointermove', e=>{ if(!drag) return;
@@ -549,7 +549,8 @@ function renderHud() {
   label(focusedPlace===null?'MAP VIEW':PLACE_MARKERS[focusedPlace][0].toUpperCase(),18,114,180,23);
   panel(right,66,panelW,H-128);
   label(territory==='saltwind'?'SALTWIND REACH':'KESTREL FLATS',right+12,75,panelW-24,26);
-  const tabs=['orders','goals','journal','site','system'];
+  const tabs=st.finale?['result','goals','journal','site','system']:
+    ['orders','goals','journal','site','system'];
   const tabW=(panelW-24)/tabs.length;
   tabs.forEach((tab,i)=>button(`page:${tab}`,tab.toUpperCase(),right+12+i*tabW,108,tabW-3,29));
   let y=148;
@@ -586,8 +587,8 @@ function renderHud() {
       button('orders:prev','▲ Earlier orders',right+13,H-158,(panelW-30)/2,30);
       button('orders:next','▼ More orders',right+18+(panelW-30)/2,H-158,(panelW-30)/2,30);
     }
-  } else if(hudPage==='goals') {
-    label(territory==='saltwind'?'CROSS THE CANAL':'RESTORE THE COMMONS',right+14,y);y+=34;
+  } else if(hudPage==='goals'||hudPage==='result') {
+    label(hudPage==='result'?'CAMPAIGN RECORD':territory==='saltwind'?'CROSS THE CANAL':'RESTORE THE COMMONS',right+14,y);y+=34;
     const goals=territory==='saltwind' ? [
       ['Crossing',st.bridgeOpen],['Wind pump',st.pumpOnline],['Orchard',st.orchardActive]
     ] : [['Shelter',st.upgrades>0],['Workshop',st.online],['Shared water',st.waterOnline],['Garden',st.gardenActive]];
@@ -654,12 +655,30 @@ function renderHud() {
     `WORKSHOP  ${st.online?'ON':'OFF'}`,`WATER  ${st.waterOnline?'FLOWING':'DRY'}`,
     `GARDEN  ${st.gardenActive?'GROWING':'DRY'}`];
   stats.forEach((s,i)=>label(s,18+i*(W-36)/5,H-47,(W-36)/5,25));
+  if(st.finale&&hudPage==='result'){
+    const width=Math.min(480,right-34), x=Math.max(14,(right-width)/2);
+    const top=Math.max(125,(H-286)/2);
+    panel(x,top,width,286);
+    label('CAMPAIGN COMPLETE',x+18,top+15,width-36,25);
+    label(st.finale==='"commons"'?'THE COMMONS ARE OPEN':'THE CANAL IS CONNECTED',x+18,top+48,width-36,28);
+    label(st.finale==='"commons"'?'The harvest belongs to the community.':'The first trade boat carries the harvest onward.',x+18,top+81,width-36,25);
+    const done=[st.upgrades>0,st.online,st.waterOnline,st.gardenActive,
+      st.bridgeOpen,st.pumpOnline,st.orchardActive].filter(Boolean).length;
+    label(`DAY ${st.day}  ·  ${done}/7 PROJECTS  ·  ${st.coins} COINS`,x+18,top+108,width-36,23);
+    button('result:explore','Explore the map',x+18,top+140,width-36,31);
+    button('result:replay','Verify replay',x+18,top+177,width-36,31);
+    button('result:new','Start a new campaign',x+18,top+214,width-36,31);
+    if(resultMessage)label(resultMessage,x+18,top+254,width-36,18);
+  }
   hud.set_document_json(JSON.stringify({items}));
 }
 
 function handleHudAction(id){
   if(id.startsWith('place:')){inspect(PLACES[Number(id.slice(6))]);return;}
   if(id.startsWith('focus:')){inspect(PLACES[Number(id.slice(6))]);return;}
+  if(id==='result:explore'){hudPage='goals';renderHud();return;}
+  if(id==='result:replay'){resultMessage=verifyReplay()?'Replay matches every event.':'Replay diverged.';renderHud();return;}
+  if(id==='result:new'){$('new-game').click();return;}
   if(id==='camera:in'||id==='camera:out'){
     camGoal=null;zoomGoal=null;
     camZoom=Math.max(0.55,Math.min(20,camZoom*(id==='camera:in'?0.75:1.33)));
@@ -853,7 +872,10 @@ function tryAction(id) {
       launchTradeRoute:'The first trade boat sets out.',endTurn:'The crew rests. A new day begins.'
     };
     note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
-    if (id==='openCommons'||id==='launchTradeRoute') territory='saltwind';
+    if (id==='openCommons'||id==='launchTradeRoute'){
+      territory='saltwind';hudPage='result';resultMessage='';
+      focusedPlace=null;focusTerritory('saltwind');
+    }
     refresh(); return;
   }
   const rep = toObj(r.report||{});
@@ -902,17 +924,23 @@ $('load').onclick = async () => {
     return;
   }
   session = new m.GameSession(saved, ACTIONS);
+  hudPage=state().finale?'result':'orders';resultMessage='';
+  focusedPlace=null;
+  if(state().finale){territory='saltwind';focusTerritory('saltwind');}
   refresh(); $('persist').textContent = 'loaded'; renderHud();
 };
-$('replay').onclick = () => {
+function verifyReplay() {
   const ids = toObj(session.events());
   const r = toObj(m.session_replay(SEED, ACTIONS, ids));
   const same = r.diverged_at === null && r.world === session.world();
   note(`replay ${same ? 'reproduced world byte-for-byte' : 'DIVERGED at '+r.diverged_at}`);
-};
+  return same;
+}
+$('replay').onclick = () => {verifyReplay();renderHud();};
 $('new-game').onclick = () => {
   session = new m.GameSession(SEED, ACTIONS);
-  territory='kestrel';
+  territory='kestrel';hudPage='orders';resultMessage='';
+  focusedPlace=null;focusTerritory('kestrel',true);
   $('why').style.display='none';
   $('persist').textContent='new campaign started; save when ready';
   refresh(); note('A new campaign begins at Kestrel Flats.');

@@ -39,6 +39,12 @@ its suggested next order. These presentation mappings use the existing Qualia
 accepted orders enter the same replay tape. Both desktop and compact HUD
 layouts were checked in the browser.
 
+Either campaign ending now opens a Qualia HUD result panel over the map. It
+reports the chosen outcome and campaign totals, offers replay verification,
+and lets the player explore or begin again. A completed trade-route playthrough
+was rendered in the browser; its replay matched the world byte for byte, and
+the new-campaign control reset the world and camera to Kestrel Flats.
+
 ## Current art direction
 
 Aim for a warm, readable, stylized strategy world with distinct silhouettes and rich colour.

@@ -35,6 +35,8 @@ dispatch, project progress, relevant orders, day count and a result screen.
 Selecting a coloured world marker now focuses its site and opens contextual
 orders there. The in-game dispatch highlights its next suggested order and can
 locate that order's site. QualiaDB rules validate every order from either path.
+Completing either ending opens an in-game campaign record with the outcome,
+project count, replay verification, and a new-campaign control.
 
 The Kestrel Flats scene compiles original town geometry through QualiaDB
 computational geometry, provenance-bearing `.10d` containers, and the full
