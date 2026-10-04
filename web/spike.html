@@ -34,9 +34,10 @@ const record = (name, pass, detail="") => {
 
 const tInit0 = performance.now();
 let m;
+const WASM_BUILD = 'f95bd5cbe7de11de';
 try {
-  m = await import('./pkg/rolling_commons_shell.js');
-  await m.default();
+  m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
+  await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 } catch (e) {
   log("FAIL: module load — " + e);
   throw e;
@@ -154,7 +155,7 @@ try {
 
 // Spike 7: measurements
 try {
-  const resp = await fetch('./pkg/rolling_commons_shell_bg.wasm');
+  const resp = await fetch(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`);
   const buf = await resp.arrayBuffer();
   log(`wasm size: ${(buf.byteLength/1024/1024).toFixed(2)} MiB`);
   if (performance.memory) {

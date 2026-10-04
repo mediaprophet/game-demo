@@ -74,4 +74,12 @@ const packDir = join(root, 'web', 'assets');
 await mkdir(packDir, { recursive: true });
 const packPath = join(packDir, 'maslows-challenge-scenes.hmc');
 await writeFile(packPath, Buffer.from(pack));
+const buildId = manifest.wasm.sha256.slice(0, 16);
+for (const page of ['game.html', 'spike.html']) {
+  const pagePath = join(root, 'web', page);
+  const html = await readFile(pagePath, 'utf8');
+  const marker = /const WASM_BUILD = '[0-9a-f]{16}';/;
+  if (!marker.test(html)) throw new Error(`${page}: missing WASM build marker`);
+  await writeFile(pagePath, html.replace(marker, `const WASM_BUILD = '${buildId}';`));
+}
 console.log(`Exported ${manifest.assets.length} distinct .10d assets across ${scenes.length} scene states and Qualia HMC ${relative(root, packPath)}`);
