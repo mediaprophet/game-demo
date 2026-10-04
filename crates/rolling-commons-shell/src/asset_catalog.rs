@@ -1095,76 +1095,12 @@ pub fn kestrel_flats(
             ParametricRecipe::Sphere {
                 center,
                 radius,
-                latitude: 8,
-                longitude: 12,
+                latitude: 16,
+                longitude: 24,
             },
         ));
     }
-    // Four tiny residents make the town feel inhabited. Each body part is a
-    // stable semantic asset so future Qualia animation clips can replace it.
-    for (body_id, head_id, feet_id, x, z, coat) in [
-        (
-            "rc:asset/resident-ada-coat",
-            "rc:asset/resident-ada-head",
-            "rc:asset/resident-ada-boots",
-            -2.2,
-            1.8,
-            [0.95, 0.35, 0.38, 1.0],
-        ),
-        (
-            "rc:asset/resident-bo-coat",
-            "rc:asset/resident-bo-head",
-            "rc:asset/resident-bo-boots",
-            1.0,
-            0.4,
-            [0.35, 0.66, 0.85, 1.0],
-        ),
-        (
-            "rc:asset/resident-cam-coat",
-            "rc:asset/resident-cam-head",
-            "rc:asset/resident-cam-boots",
-            -2.0,
-            -2.0,
-            [0.91, 0.67, 0.29, 1.0],
-        ),
-        (
-            "rc:asset/resident-dev-coat",
-            "rc:asset/resident-dev-head",
-            "rc:asset/resident-dev-boots",
-            3.5,
-            -0.6,
-            [0.62, 0.46, 0.83, 1.0],
-        ),
-    ] {
-        scene.push(parametric(
-            body_id,
-            coat,
-            ParametricRecipe::Sphere {
-                center: [x, 0.55, z],
-                radius: 0.28,
-                latitude: 8,
-                longitude: 12,
-            },
-        ));
-        scene.push(parametric(
-            head_id,
-            [0.94, 0.68, 0.47, 1.0],
-            ParametricRecipe::Sphere {
-                center: [x, 1.04, z],
-                radius: 0.23,
-                latitude: 8,
-                longitude: 12,
-            },
-        ));
-        scene.push(asset(
-            feet_id,
-            [0.31, 0.35, 0.47, 1.0],
-            vec![
-                block([x - 0.12, 0.16, z], [0.14, 0.32, 0.17]),
-                block([x + 0.12, 0.16, z], [0.14, 0.32, 0.17]),
-            ],
-        ));
-    }
+    // People are the fictional participants, not sphere residents.
     // Bright flowering planters mark the shared hall and garden route.
     for (id, center, color) in [
         (
@@ -1397,162 +1333,214 @@ fn merge_at(parts: &[Mesh], center: [f32; 3]) -> Mesh {
     }
 }
 
-/// Models that have to read apart with no label. Each is a lathe, a wheel,
-/// a sphere, or a cylinder. None of them is a box and none borrows the tank.
-fn compile_rig(center: [f32; 3], kind: u32, span: f32) -> Result<Mesh, String> {
-    const LOW: &[[f32; 2]] = &[
-        [0.0, -0.22],
-        [0.58, -0.24],
-        [0.62, 0.02],
-        [0.22, 0.2],
-        [0.0, 0.24],
-    ];
-    const CAB: &[[f32; 2]] = &[
-        [0.0, -0.12],
-        [0.46, -0.08],
-        [0.5, 0.16],
-        [0.18, 0.28],
-        [0.0, 0.3],
-    ];
-    const TALL: &[[f32; 2]] = &[
-        [0.0, -0.42],
-        [0.5, -0.44],
-        [0.52, 0.28],
-        [0.4, 0.46],
-        [0.0, 0.48],
-    ];
-    const LONG: &[[f32; 2]] = &[
-        [0.0, -0.4],
-        [0.48, -0.42],
-        [0.5, 0.32],
-        [0.46, 0.4],
-        [0.0, 0.42],
-    ];
-    const ROUND: &[[f32; 2]] = &[
-        [0.0, -0.36],
-        [0.42, -0.3],
-        [0.5, 0.0],
-        [0.4, 0.32],
-        [0.0, 0.38],
-    ];
-    const BELL: &[[f32; 2]] = &[
-        [0.0, 0.72],
-        [0.18, 0.55],
-        [0.55, 0.22],
-        [0.92, 0.02],
-        [1.05, -0.08],
-    ];
+/// One coloured piece. The tint is the surface reading for every vertex
+/// of that piece, before a small position wobble so it is not one albedo.
+struct TintMesh {
+    mesh: Mesh,
+    tint: [f32; 4],
+}
+
+fn slab(w: f32, h: f32, d: f32, at: [f32; 3]) -> Result<Mesh, String> {
+    let body = authoring::box_mesh(w, h, d).map_err(|e| e.to_string())?;
+    Ok(authoring::transform_mesh(
+        &body,
+        &authoring::translation(f64::from(at[0]), f64::from(at[1]), f64::from(at[2])),
+    ))
+}
+
+fn tint(mesh: Mesh, tint: [f32; 4]) -> TintMesh {
+    TintMesh { mesh, tint }
+}
+
+const GLASS: [f32; 4] = [0.45, 0.68, 0.78, 1.0];
+const RUBBER: [f32; 4] = [0.07, 0.07, 0.08, 1.0];
+const LAMP: [f32; 4] = [0.98, 0.90, 0.45, 1.0];
+
+fn wheels(radius: f32, tube: f32, spots: &[[f32; 3]]) -> Result<Vec<TintMesh>, String> {
+    let mut out = Vec::with_capacity(spots.len());
+    for at in spots {
+        out.push(tint(wheel(radius, tube, *at)?, RUBBER));
+    }
+    Ok(out)
+}
+
+/// Bodies are slabs with a glass band and lamps, not a spun lump.
+/// Wheels stay toruses. Kinds have to read apart with no label.
+const BELL_FLY: &[[f32; 2]] = &[
+    [0.0, 0.72],
+    [0.18, 0.55],
+    [0.55, 0.22],
+    [0.92, 0.02],
+    [1.05, -0.08],
+];
+
+fn rig_pieces(kind: u32, span: f32) -> Result<Vec<TintMesh>, String> {
     let span = span.max(0.6);
-    let parts: Vec<Mesh> = match kind {
-        // Low car: short cabin, four small wheels.
-        0 => vec![
-            lathe(LOW, 28, [1.7, 0.55, 0.72], [0.0, 0.28, 0.0])?,
-            lathe(CAB, 24, [0.72, 0.42, 0.6], [-0.05, 0.48, 0.0])?,
-            wheel(0.2, 0.055, [0.55, 0.2, 0.34])?,
-            wheel(0.2, 0.055, [0.55, 0.2, -0.34])?,
-            wheel(0.2, 0.055, [-0.55, 0.2, 0.34])?,
-            wheel(0.2, 0.055, [-0.55, 0.2, -0.34])?,
-        ],
-        // Four-wheel drive: higher body, bigger wheels, spare on the back.
-        1 => vec![
-            lathe(LOW, 28, [1.65, 0.7, 0.82], [0.0, 0.48, 0.0])?,
-            lathe(CAB, 24, [0.7, 0.48, 0.72], [-0.08, 0.78, 0.0])?,
-            wheel(0.3, 0.08, [0.52, 0.3, 0.42])?,
-            wheel(0.3, 0.08, [0.52, 0.3, -0.42])?,
-            wheel(0.3, 0.08, [-0.5, 0.3, 0.42])?,
-            wheel(0.3, 0.08, [-0.5, 0.3, -0.42])?,
-            wheel(0.22, 0.05, [-0.85, 0.7, 0.0])?,
-        ],
-        // Van: tall cabin the whole length, not a car with a hat.
-        2 => vec![
-            lathe(TALL, 28, [2.15, 1.25, 0.95], [0.0, 0.72, 0.0])?,
-            wheel(0.24, 0.06, [0.72, 0.24, 0.46])?,
-            wheel(0.24, 0.06, [0.72, 0.24, -0.46])?,
-            wheel(0.24, 0.06, [-0.72, 0.24, 0.46])?,
-            wheel(0.24, 0.06, [-0.72, 0.24, -0.46])?,
-        ],
-        // Bus: longer and taller than the van, three axles, a row of windows.
-        3 => {
+    let parts = match kind {
+        0 => {
+            let body = [0.72, 0.16, 0.14, 1.0];
             let mut v = vec![
-                lathe(LONG, 32, [3.4, 1.5, 1.05], [0.0, 0.85, 0.0])?,
-                wheel(0.28, 0.07, [1.15, 0.28, 0.52])?,
-                wheel(0.28, 0.07, [1.15, 0.28, -0.52])?,
-                wheel(0.28, 0.07, [-0.15, 0.28, 0.52])?,
-                wheel(0.28, 0.07, [-0.15, 0.28, -0.52])?,
-                wheel(0.28, 0.07, [-1.2, 0.28, 0.52])?,
-                wheel(0.28, 0.07, [-1.2, 0.28, -0.52])?,
+                tint(slab(1.70, 0.32, 0.78, [0.05, 0.40, 0.0])?, body),
+                tint(slab(0.78, 0.34, 0.70, [-0.12, 0.70, 0.0])?, body),
+                tint(slab(0.70, 0.22, 0.02, [-0.12, 0.72, 0.36])?, GLASS),
+                tint(slab(0.70, 0.22, 0.02, [-0.12, 0.72, -0.36])?, GLASS),
+                tint(slab(0.02, 0.22, 0.62, [0.28, 0.72, 0.0])?, GLASS),
+                tint(ball(0.06, [0.88, 0.42, 0.28])?, LAMP),
+                tint(ball(0.06, [0.88, 0.42, -0.28])?, LAMP),
             ];
-            for i in 0..5 {
-                let x = -1.3 + i as f32 * 0.55;
-                v.push(ball(0.1, [x, 1.15, 0.5])?);
-            }
+            v.extend(wheels(0.20, 0.055, &[
+                [0.55, 0.20, 0.40],
+                [0.55, 0.20, -0.40],
+                [-0.55, 0.20, 0.40],
+                [-0.55, 0.20, -0.40],
+            ])?);
             v
         }
-        // Camper van: van height plus a pod on the roof. Not the passenger van.
-        4 => vec![
-            lathe(TALL, 28, [2.25, 1.15, 0.98], [0.0, 0.7, 0.0])?,
-            lathe(CAB, 20, [1.1, 0.28, 0.7], [-0.15, 1.35, 0.0])?,
-            wheel(0.24, 0.06, [0.7, 0.24, 0.48])?,
-            wheel(0.24, 0.06, [0.7, 0.24, -0.48])?,
-            wheel(0.24, 0.06, [-0.75, 0.24, 0.48])?,
-            wheel(0.24, 0.06, [-0.75, 0.24, -0.48])?,
-        ],
-        // Trailer: low shell, a hitch, two wheels. No cab.
-        5 => vec![
-            lathe(LOW, 24, [1.9, 0.5, 0.85], [0.15, 0.42, 0.0])?,
-            tube(0.04, 0.7, [-0.95, 0.32, 0.0], std::f64::consts::FRAC_PI_2)?,
-            wheel(0.2, 0.05, [0.35, 0.2, 0.4])?,
-            wheel(0.2, 0.05, [0.35, 0.2, -0.4])?,
-        ],
-        // Caravan: taller rounded shell than the trailer, a door ring, no engine.
-        6 => vec![
-            lathe(ROUND, 28, [2.5, 1.15, 1.0], [0.1, 0.7, 0.0])?,
-            tube(0.035, 0.45, [-1.25, 0.4, 0.0], std::f64::consts::FRAC_PI_2)?,
-            wheel(0.22, 0.055, [0.45, 0.22, 0.48])?,
-            wheel(0.22, 0.055, [0.45, 0.22, -0.48])?,
-            wheel(0.22, 0.055, [-0.35, 0.22, 0.48])?,
-            wheel(0.22, 0.055, [-0.35, 0.22, -0.48])?,
-            authoring::transform_mesh(
-                &authoring::torus(0.28, 0.04, 16, 8).map_err(|e| e.to_string())?,
-                &authoring::mat_mul(
-                    &authoring::translation(0.15, 0.55, 0.48),
-                    &authoring::rotation_x(std::f64::consts::FRAC_PI_2),
-                ),
-            ),
-        ],
-        // Solar: a tilted cell on a post. A part on the rig, not a vehicle.
+        1 => {
+            let body = [0.28, 0.36, 0.18, 1.0];
+            let mut v = vec![
+                tint(slab(1.65, 0.42, 0.86, [0.0, 0.58, 0.0])?, body),
+                tint(slab(0.72, 0.38, 0.78, [-0.10, 0.92, 0.0])?, body),
+                tint(slab(0.02, 0.24, 0.66, [0.26, 0.94, 0.0])?, GLASS),
+                tint(slab(0.64, 0.22, 0.02, [-0.10, 0.94, 0.40])?, GLASS),
+                tint(wheel(0.22, 0.05, [-0.95, 0.72, 0.0])?, RUBBER),
+                tint(ball(0.07, [0.84, 0.62, 0.32])?, LAMP),
+                tint(ball(0.07, [0.84, 0.62, -0.32])?, LAMP),
+            ];
+            v.extend(wheels(0.30, 0.08, &[
+                [0.52, 0.30, 0.48],
+                [0.52, 0.30, -0.48],
+                [-0.50, 0.30, 0.48],
+                [-0.50, 0.30, -0.48],
+            ])?);
+            v
+        }
+        2 => {
+            let body = [0.90, 0.88, 0.80, 1.0];
+            let mut v = vec![
+                tint(slab(2.20, 1.05, 0.95, [0.0, 0.78, 0.0])?, body),
+                tint(slab(0.70, 0.28, 0.02, [0.35, 1.05, 0.48])?, GLASS),
+                tint(slab(0.70, 0.28, 0.02, [0.35, 1.05, -0.48])?, GLASS),
+                tint(slab(0.02, 0.32, 0.70, [1.10, 1.02, 0.0])?, GLASS),
+                tint(ball(0.07, [1.12, 0.55, 0.32])?, LAMP),
+                tint(ball(0.07, [1.12, 0.55, -0.32])?, LAMP),
+            ];
+            v.extend(wheels(0.24, 0.06, &[
+                [0.72, 0.24, 0.50],
+                [0.72, 0.24, -0.50],
+                [-0.72, 0.24, 0.50],
+                [-0.72, 0.24, -0.50],
+            ])?);
+            v
+        }
+        3 => {
+            let body = [0.93, 0.74, 0.16, 1.0];
+            let mut v = vec![
+                tint(slab(3.50, 1.25, 1.05, [0.0, 0.90, 0.0])?, body),
+                tint(slab(2.40, 0.28, 0.02, [0.15, 1.20, 0.53])?, GLASS),
+                tint(slab(2.40, 0.28, 0.02, [0.15, 1.20, -0.53])?, GLASS),
+                tint(slab(0.02, 0.40, 0.80, [1.74, 1.05, 0.0])?, GLASS),
+            ];
+            v.extend(wheels(0.28, 0.07, &[
+                [1.15, 0.28, 0.56],
+                [1.15, 0.28, -0.56],
+                [-0.15, 0.28, 0.56],
+                [-0.15, 0.28, -0.56],
+                [-1.20, 0.28, 0.56],
+                [-1.20, 0.28, -0.56],
+            ])?);
+            v
+        }
+        4 => {
+            let body = [0.20, 0.48, 0.55, 1.0];
+            let pod = [0.85, 0.82, 0.70, 1.0];
+            let mut v = vec![
+                tint(slab(2.25, 1.00, 0.98, [0.0, 0.74, 0.0])?, body),
+                tint(slab(1.20, 0.22, 0.78, [-0.10, 1.32, 0.0])?, pod),
+                tint(slab(0.80, 0.22, 0.02, [0.20, 1.00, 0.50])?, GLASS),
+                tint(slab(0.02, 0.28, 0.70, [1.12, 0.95, 0.0])?, GLASS),
+            ];
+            v.extend(wheels(0.24, 0.06, &[
+                [0.70, 0.24, 0.52],
+                [0.70, 0.24, -0.52],
+                [-0.75, 0.24, 0.52],
+                [-0.75, 0.24, -0.52],
+            ])?);
+            v
+        }
+        5 => {
+            let body = [0.55, 0.34, 0.18, 1.0];
+            let mut v = vec![
+                tint(slab(1.80, 0.42, 0.85, [0.15, 0.48, 0.0])?, body),
+                tint(tube(0.04, 0.70, [-0.95, 0.32, 0.0], std::f64::consts::FRAC_PI_2)?, [0.25, 0.25, 0.27, 1.0]),
+            ];
+            v.extend(wheels(0.20, 0.05, &[
+                [0.35, 0.20, 0.46],
+                [0.35, 0.20, -0.46],
+            ])?);
+            v
+        }
+        6 => {
+            let body = [0.86, 0.82, 0.68, 1.0];
+            let door = [0.45, 0.32, 0.20, 1.0];
+            let mut v = vec![
+                tint(slab(2.40, 1.05, 1.00, [0.10, 0.72, 0.0])?, body),
+                tint(slab(0.90, 0.16, 0.90, [0.10, 1.28, 0.0])?, [0.72, 0.40, 0.22, 1.0]),
+                tint(slab(0.36, 0.70, 0.02, [0.20, 0.62, 0.51])?, door),
+                tint(tube(0.035, 0.45, [-1.20, 0.40, 0.0], std::f64::consts::FRAC_PI_2)?, [0.3, 0.3, 0.32, 1.0]),
+            ];
+            v.extend(wheels(0.22, 0.055, &[
+                [0.45, 0.22, 0.54],
+                [0.45, 0.22, -0.54],
+                [-0.35, 0.22, 0.54],
+                [-0.35, 0.22, -0.54],
+            ])?);
+            v
+        }
         7 => vec![
-            tube(0.03, 0.55, [0.0, 0.28, 0.0], 0.0)?,
-            authoring::transform_mesh(
-                &authoring::cylinder(0.42, 0.03, 20).map_err(|e| e.to_string())?,
-                &authoring::mat_mul(
-                    &authoring::translation(0.0, 0.62, 0.0),
+            tint(tube(0.03, 0.55, [0.0, 0.28, 0.0], 0.0)?, [0.35, 0.35, 0.38, 1.0]),
+            tint(
+                authoring::transform_mesh(
+                    &authoring::cylinder(0.42, 0.03, 20).map_err(|e| e.to_string())?,
                     &authoring::mat_mul(
-                        &authoring::rotation_x(0.7),
-                        &authoring::scale(1.15, 1.0, 0.7),
+                        &authoring::translation(0.0, 0.62, 0.0),
+                        &authoring::mat_mul(
+                            &authoring::rotation_x(0.7),
+                            &authoring::scale(1.15, 1.0, 0.7),
+                        ),
                     ),
                 ),
+                [0.08, 0.16, 0.42, 1.0],
             ),
         ],
-        // Battery: a squat can and two posts. Not a panel and not a van.
         8 => vec![
-            tube(0.16, 0.28, [0.0, 0.16, 0.0], 0.0)?,
-            tube(0.03, 0.08, [-0.06, 0.34, 0.0], 0.0)?,
-            tube(0.03, 0.08, [0.06, 0.34, 0.0], 0.0)?,
+            tint(tube(0.16, 0.28, [0.0, 0.16, 0.0], 0.0)?, [0.18, 0.19, 0.22, 1.0]),
+            tint(tube(0.03, 0.08, [-0.06, 0.34, 0.0], 0.0)?, [0.75, 0.18, 0.14, 1.0]),
+            tint(tube(0.03, 0.08, [0.06, 0.34, 0.0], 0.0)?, [0.20, 0.55, 0.28, 1.0]),
         ],
-        // Inverter: a low finned housing, shorter than the battery is tall.
         9 => vec![
-            lathe(LOW, 20, [0.42, 0.16, 0.22], [0.0, 0.1, 0.0])?,
-            tube(0.015, 0.18, [0.0, 0.16, 0.0], std::f64::consts::FRAC_PI_2)?,
+            tint(slab(0.46, 0.16, 0.28, [0.0, 0.12, 0.0])?, [0.55, 0.56, 0.58, 1.0]),
+            tint(tube(0.015, 0.18, [0.0, 0.16, 0.0], std::f64::consts::FRAC_PI_2)?, [0.3, 0.3, 0.32, 1.0]),
+            tint(ball(0.025, [0.16, 0.18, 0.10])?, LAMP),
         ],
-        // Shelter: a cover you can walk under, with two posts marking the way in.
-        _ => vec![
-            lathe(BELL, 32, [span, span, span], [0.0, 0.0, 0.0])?,
-            tube(0.04, 0.7, [0.55 * span, 0.35, 0.72 * span], 0.0)?,
-            tube(0.04, 0.7, [-0.55 * span, 0.35, 0.72 * span], 0.0)?,
-        ],
+        _ => {
+            let canvas = [0.72, 0.55, 0.32, 1.0];
+            let post = [0.35, 0.24, 0.14, 1.0];
+            vec![
+                tint(lathe(BELL_FLY, 32, [span, span, span], [0.0, 0.0, 0.0])?, canvas),
+                tint(tube(0.04, 0.70, [0.55 * span, 0.35, 0.72 * span], 0.0)?, post),
+                tint(tube(0.04, 0.70, [-0.55 * span, 0.35, 0.72 * span], 0.0)?, post),
+            ]
+        }
     };
-    Ok(merge_at(&parts, center))
+    Ok(parts)
+}
+
+/// Models that have to read apart with no label. None borrows the tank.
+fn compile_rig(center: [f32; 3], kind: u32, span: f32) -> Result<Mesh, String> {
+    let parts = rig_pieces(kind, span)?;
+    let meshes: Vec<Mesh> = parts.into_iter().map(|p| p.mesh).collect();
+    Ok(merge_at(&meshes, center))
 }
 
 /// First authored batch. Each part has its own silhouette, signature, colour
@@ -1646,15 +1634,15 @@ fn authored_camp() -> Vec<AssetRecipe> {
     ));
     // Parts on the rig, not the rig. No wheels.
     out.push(signed(
-        parametric("rc:asset/solar-panel", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-5.5, 0.0, z - 1.7], kind: 7, span: 1.0 }),
+        parametric("rc:asset/solar-panel", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-6.3, 0.0, 3.15], kind: 7, span: 1.0 }),
         "did:webizen:game:solar-cell-v1", "Solar panel cell", 0.08, 0.70, 1.90, 0.02,
     ));
     out.push(signed(
-        parametric("rc:asset/battery", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-4.55, 0.0, z - 1.7], kind: 8, span: 1.0 }),
+        parametric("rc:asset/battery", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-5.35, 0.0, 3.15], kind: 8, span: 1.0 }),
         "did:webizen:game:battery-pack-v1", "Battery pack housing", 0.15, 0.40, 1.45, 0.06,
     ));
     out.push(signed(
-        parametric("rc:asset/inverter", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-4.1, 0.0, z - 1.7], kind: 9, span: 1.0 }),
+        parametric("rc:asset/inverter", [1.0, 1.0, 1.0, 1.0], ParametricRecipe::Rig { center: [-4.55, 0.0, 3.15], kind: 9, span: 1.0 }),
         "did:webizen:game:inverter-housing-v1", "Inverter housing", 0.18, 0.35, 1.50, 0.07,
     ));
     // Fictional participant. No face, no data likeness.
@@ -1935,6 +1923,81 @@ pub fn saltwind_reach(
     scene
 }
 
+fn wobble(tint: [f32; 4], p: [f32; 3], amount: f32) -> [f32; 4] {
+    let n = (p[0] * 12.7 + p[1] * 7.3 + p[2] * 5.1).sin() * amount;
+    let m = (p[0] * 3.1 - p[2] * 4.4).cos() * amount * 0.5;
+    [
+        (tint[0] + n).clamp(0.0, 1.0),
+        (tint[1] + m).clamp(0.0, 1.0),
+        (tint[2] + n * 0.4).clamp(0.0, 1.0),
+        tint[3],
+    ]
+}
+
+fn paint_figure(mesh: &Mesh, kind: u32, cloth: [f32; 4]) -> Vec<[f32; 4]> {
+    let skin = match kind % 6 {
+        0 => [0.72, 0.50, 0.36, 1.0],
+        1 => [0.40, 0.28, 0.20, 1.0],
+        2 => [0.86, 0.70, 0.55, 1.0],
+        3 => [0.55, 0.36, 0.26, 1.0],
+        4 => [0.78, 0.58, 0.42, 1.0],
+        _ => [0.48, 0.34, 0.26, 1.0],
+    };
+    let hair = [skin[0] * 0.35, skin[1] * 0.28, skin[2] * 0.22, 1.0];
+    let pants = [
+        (cloth[0] * 0.55).clamp(0.0, 1.0),
+        (cloth[1] * 0.5).clamp(0.0, 1.0),
+        (cloth[2] * 0.5).clamp(0.0, 1.0),
+        1.0,
+    ];
+    let span = (mesh.max[1] - mesh.min[1]).max(0.001);
+    mesh.positions
+        .iter()
+        .map(|p| {
+            let t = (p[1] - mesh.min[1]) / span;
+            let tint = if t > 0.93 {
+                hair
+            } else if t > 0.78 {
+                skin
+            } else if t > 0.42 {
+                cloth
+            } else {
+                pants
+            };
+            wobble(tint, *p, 0.04)
+        })
+        .collect()
+}
+
+/// Per-vertex SRD1 reading. One organ albedo is not this.
+pub fn surface_reading(recipe: &AssetRecipe, mesh: &Mesh) -> Vec<[f32; 4]> {
+    if let Some(ParametricRecipe::Figure { kind, .. }) = &recipe.parametric {
+        return paint_figure(mesh, *kind, recipe.color);
+    }
+    if let Some(ParametricRecipe::Rig { kind, span, .. }) = &recipe.parametric {
+        if let Ok(parts) = rig_pieces(*kind, *span) {
+            let mut colors = Vec::new();
+            for part in parts {
+                for v in &part.mesh.positions {
+                    colors.push(wobble(part.tint, *v, 0.045));
+                }
+            }
+            if colors.len() == mesh.positions.len() {
+                return colors;
+            }
+        }
+    }
+    let leafy = recipe.id.contains("canopy")
+        || recipe.id.contains("crown")
+        || recipe.id.contains("tree");
+    let ground = recipe.id.contains("ground") || recipe.id.contains("grass") || recipe.id.contains("verge");
+    let amount = if leafy { 0.12 } else if ground { 0.08 } else { 0.05 };
+    mesh.positions
+        .iter()
+        .map(|p| wobble(recipe.color, *p, amount))
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2042,5 +2105,32 @@ mod tests {
         let moved = a.positions.iter().zip(b.positions.iter()).filter(|(p, q)| (p[2] - q[2]).abs() > 0.08).count();
         assert!(moved > 20, "phase moves limbs, not a rigid box");
         assert!(figs[0].parts.is_empty(), "no box parts");
+    }
+
+    #[test]
+    fn surface_reading_is_not_one_flat_albedo() {
+        let scene = kestrel_flats(0, 0, false, false, false, false);
+        let car = scene.iter().find(|a| a.id == "rc:asset/car").unwrap();
+        let mesh = car.parametric.as_ref().unwrap().compile().unwrap();
+        let reading = surface_reading(car, &mesh);
+        assert_eq!(reading.len(), mesh.vertex_count());
+        let q = |c: [f32; 4]| {
+            (
+                (c[0] * 16.0) as u8,
+                (c[1] * 16.0) as u8,
+                (c[2] * 16.0) as u8,
+            )
+        };
+        let mut kinds = std::collections::BTreeSet::new();
+        for sample in &reading {
+            kinds.insert(q(*sample));
+        }
+        assert!(kinds.len() > 3, "car reading collapsed {}", kinds.len());
+        let fig = participant_markers("0,0,0.8,0.3,0.2,0,0,0,0,0");
+        let fm = fig[0].parametric.as_ref().unwrap().compile().unwrap();
+        let fr = surface_reading(&fig[0], &fm);
+        assert_eq!(fr.len(), fm.positions.len());
+        assert!(fr.iter().any(|c| c[0] > 0.6), "skin or cloth must read");
+        assert!(fr.iter().any(|c| (c[0] - fr[0][0]).abs() > 0.08), "figure is not one albedo");
     }
 }

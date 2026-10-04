@@ -83,7 +83,7 @@
   .panel { border-color:#e6d6b8; border-radius:20px; padding:18px;
     box-shadow:0 9px 24px #3e584d1a,inset 0 1px #ffffff; }
   .panel h2 { font-size:21px; }
-  .scene-shell { border:7px solid #fff8e9; border-radius:25px; background:#172f3b;
+  .scene-shell { border:7px solid #fff8e9; border-radius:25px; background:#f3c48a;
     box-shadow:0 14px 31px #38524b38,0 0 0 1px #bfc9b8; }
   .scene-label { padding:9px 14px; border:2px solid #fff4d4; border-radius:13px;
     background:#fff3ddec; box-shadow:0 4px 12px #101d1e55; }
@@ -147,7 +147,7 @@
       <button id="create-person" type="button">New person</button>
       <button id="walk-road" type="button">Their next step</button>
       <span id="direct-mark" class="muted"></span>
-      <button id="sky-preset" aria-label="Change Qualia sky preset">☀ Daylight</button>
+      <button id="sky-preset" aria-label="Change Qualia sky preset">◒ Golden hour</button>
     </nav>
     <div class="scene-shell">
       <canvas id="scene" width="960" height="600" aria-label="QualiaDB three-dimensional view of Kestrel Flats"></canvas>
@@ -368,7 +368,7 @@ function tierLabel() {
   if ((tier >= 2 && gpuOk) || glLit) return 'lit · depth';
   return 'waiting on the lit frame';
 }
-let skyPreset=1;
+let skyPreset=2;
 portal.set_sky_preset(skyPreset);
 $('sky-preset').onclick = () => {
   skyPreset=skyPreset===3?1:skyPreset+1;

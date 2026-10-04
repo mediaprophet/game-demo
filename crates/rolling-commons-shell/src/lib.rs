@@ -19,11 +19,10 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-/// `36248f4c` presents the lit mesh (shade + depth + shell colour) when
-/// WebGPU answers. If that present does not arrive, WebGL2 draws the same
-/// mesh with the same sun and a depth buffer. Flat proof triangles are not
-/// the phone picture.
-pub const QUALIADB_PINNED_REVISION: &str = "36248f4c";
+/// Qualia tip this shell is built against. `0006a07d` added SRD1 and the
+/// null-adapter limits guard. `44b63433` gives the WebGL2 lit path the same
+/// sky clear as WebGPU, so a late adapter is not a black frame.
+pub const QUALIADB_PINNED_REVISION: &str = "44b63433";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
@@ -217,7 +216,7 @@ pub fn scene_build(
 ) -> Result<JsValue, JsValue> {
     use qualia_core_db::container_10d::provenance_section::ProvenanceSidecar;
     use qualia_core_db::render::assets::Mesh;
-    use qualia_core_db::render::compile_10d::compile_mesh_to_10d_with_provenance;
+    use qualia_core_db::render::compile_10d::compile_mesh_to_10d_with_surface_reading;
     use qualia_core_db::render::scene_primitives::{
         assemble_into, recipe_write, Primitive,
     };
@@ -293,7 +292,8 @@ pub fn scene_build(
         // This records that status; it does not alter the QualiaDB licence.
         let provenance =
             ProvenanceSidecar::new(mesh_source, mime, "All rights reserved (licence not assigned)");
-        let bytes = compile_mesh_to_10d_with_provenance(&mesh, Some(&provenance))
+        let reading = asset_catalog::surface_reading(recipe, &mesh);
+        let bytes = compile_mesh_to_10d_with_surface_reading(&mesh, Some(&provenance), &reading)
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
         let obj = js_sys::Object::new();
         js_sys::Reflect::set(&obj, &"id".into(), &JsValue::from_str(recipe.id))?;
