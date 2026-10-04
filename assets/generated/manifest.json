@@ -4,7 +4,7 @@
   "sourceRecipes": "crates/rolling-commons-shell/src/asset_catalog.rs",
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "578a04ebbdd9c1d2a2dc38c9d97637bc558cc82276e56d1aeffd5f8062196eb7"
+    "sha256": "dfdaffadc50c4319f6aebea6708c4032c9373307208ab57500283ffc2df2a4d1"
   },
   "assets": [
     {
