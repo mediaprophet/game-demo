@@ -4,7 +4,7 @@
   "sourceRecipes": "crates/rolling-commons-shell/src/asset_catalog.rs",
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "dfdaffadc50c4319f6aebea6708c4032c9373307208ab57500283ffc2df2a4d1"
+    "sha256": "cdc6628f5d1b45733f8aa1e12a81f35f09e2389b012b8d8dd93b1bec76d50512"
   },
   "assets": [
     {
@@ -12,6 +12,18 @@
       "file": "10d/barn-door--1f77c943a0a6.10d",
       "bytes": 596,
       "sha256": "1f77c943a0a6cc97dca3a1d0f107fc9994bc932eaf30d7e55de0b5e7d861c26d"
+    },
+    {
+      "id": "rc:asset/barn-eaves",
+      "file": "10d/barn-eaves--829c293afab4.10d",
+      "bytes": 948,
+      "sha256": "829c293afab45644d589387b6fc54f14c5f4c42a79eb73fdfbcb60fb4d615d8c"
+    },
+    {
+      "id": "rc:asset/barn-roof",
+      "file": "10d/barn-roof--e4c62e5ad061.10d",
+      "bytes": 552,
+      "sha256": "e4c62e5ad0614360b072234e7084e1f5a0088c8878f961bdab94dfb09a6d2e7c"
     },
     {
       "id": "rc:asset/barn-trim",
@@ -207,9 +219,9 @@
     },
     {
       "id": "rc:asset/community-hall",
-      "file": "10d/community-hall--955a1b8cdb2f.10d",
-      "bytes": 1040,
-      "sha256": "955a1b8cdb2f56b59dda6484c32516fd66a4636bb0271aa83da58cf3d4c40cb9"
+      "file": "10d/community-hall--5fcb82d0311c.10d",
+      "bytes": 772,
+      "sha256": "5fcb82d0311ca23716267f91661a6e8161c9718691f8617cf52f058337f656ad"
     },
     {
       "id": "rc:asset/energy-battery",
@@ -318,6 +330,12 @@
       "file": "10d/hall-facade--3264814c6c67.10d",
       "bytes": 948,
       "sha256": "3264814c6c67a8a2175a9d316cdf65d49219d91919c68af090c6ac27f4b6e7eb"
+    },
+    {
+      "id": "rc:asset/hall-roof",
+      "file": "10d/hall-roof--f79c8f03a606.10d",
+      "bytes": 684,
+      "sha256": "f79c8f03a6062b6bbbf94403aa59f25a6a5b87ed2f01ff97f787f3a3de015dc0"
     },
     {
       "id": "rc:asset/hall-windows",
@@ -585,9 +603,9 @@
     },
     {
       "id": "rc:asset/saltwind-barn",
-      "file": "10d/saltwind-barn--65306fef5b1e.10d",
-      "bytes": 728,
-      "sha256": "65306fef5b1e9cfb7b49fdb138c97ac7814d212f28d86c9b618b418a39a33611"
+      "file": "10d/saltwind-barn--c11a3c1bc823.10d",
+      "bytes": 596,
+      "sha256": "c11a3c1bc823d8b21b9e21937830bfdccf14632a96764471748556c05bb74d76"
     },
     {
       "id": "rc:asset/saltwind-footpaths",
@@ -879,15 +897,15 @@
     },
     {
       "id": "rc:asset/workshop",
-      "file": "10d/workshop--174fc005c764.10d",
-      "bytes": 1040,
-      "sha256": "174fc005c764e54482c41db1f02e50a78827572ed366add732c02555b5487514"
+      "file": "10d/workshop--6bac03ca260b.10d",
+      "bytes": 772,
+      "sha256": "6bac03ca260b50808808320a3ccf1e77fd13a147d9a9b4349dd1320839bc5515"
     },
     {
       "id": "rc:asset/workshop",
-      "file": "10d/workshop--c9e3f7d82d0e.10d",
-      "bytes": 1040,
-      "sha256": "c9e3f7d82d0e5cd1ba6dc11b61ac42e5987c7ea0f0f34469e9c2a315101c615d"
+      "file": "10d/workshop--7b0fd9d98348.10d",
+      "bytes": 772,
+      "sha256": "7b0fd9d983486b5e2f7f3865ab7d7d5fbf2f789601e12827301bb0218c1e13ee"
     },
     {
       "id": "rc:asset/workshop-chimney",
@@ -902,10 +920,22 @@
       "sha256": "bfb20b3f976a79b093b1d2584ed713ccd2b71d1e883b189e656a5f27bf73eb83"
     },
     {
+      "id": "rc:asset/workshop-fascia",
+      "file": "10d/workshop-fascia--952dc36b3183.10d",
+      "bytes": 1304,
+      "sha256": "952dc36b318370ec0010e8c817f020e2e07fa6f4f3e09bd56341ef8a4f2cd5a5"
+    },
+    {
+      "id": "rc:asset/workshop-roof",
+      "file": "10d/workshop-roof--6d5f86a6e18b.10d",
+      "bytes": 684,
+      "sha256": "6d5f86a6e18b75e952d5d91c10d2b0c4c7a47cd33a62aad560bf505cc97528e1"
+    },
+    {
       "id": "rc:asset/workshop-roof-panels",
-      "file": "10d/workshop-roof-panels--968783e2c352.10d",
-      "bytes": 772,
-      "sha256": "968783e2c3526ebe5023c427464c403d5fb71c6402ea8081682b1fb47dd51c30"
+      "file": "10d/workshop-roof-panels--a78b9c8bd22f.10d",
+      "bytes": 948,
+      "sha256": "a78b9c8bd22fd00e2cb9e13b939439e2e33116051593463a8ba984027f8628b8"
     },
     {
       "id": "rc:asset/workshop-sign",
@@ -972,11 +1002,31 @@
         },
         {
           "id": "rc:asset/workshop",
-          "file": "10d/workshop--c9e3f7d82d0e.10d",
+          "file": "10d/workshop--7b0fd9d98348.10d",
           "rgba": [
             0.9300000071525574,
             0.6499999761581421,
             0.4099999964237213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-roof",
+          "file": "10d/workshop-roof--6d5f86a6e18b.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.3400000035762787,
+            0.25,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-fascia",
+          "file": "10d/workshop-fascia--952dc36b3183.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.41999998688697815,
+            0.46000000834465027,
             1
           ]
         },
@@ -1122,10 +1172,20 @@
         },
         {
           "id": "rc:asset/community-hall",
-          "file": "10d/community-hall--955a1b8cdb2f.10d",
+          "file": "10d/community-hall--5fcb82d0311c.10d",
           "rgba": [
             0.9900000095367432,
             0.7799999713897705,
+            0.5400000214576721,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/hall-roof",
+          "file": "10d/hall-roof--f79c8f03a606.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.49000000953674316,
             0.5400000214576721,
             1
           ]
@@ -1202,11 +1262,11 @@
         },
         {
           "id": "rc:asset/workshop-roof-panels",
-          "file": "10d/workshop-roof-panels--968783e2c352.10d",
+          "file": "10d/workshop-roof-panels--a78b9c8bd22f.10d",
           "rgba": [
-            0.18000000715255737,
-            0.27000001072883606,
             0.3199999928474426,
+            0.2800000011920929,
+            0.3100000023841858,
             1
           ]
         },
@@ -2042,11 +2102,31 @@
         },
         {
           "id": "rc:asset/saltwind-barn",
-          "file": "10d/saltwind-barn--65306fef5b1e.10d",
+          "file": "10d/saltwind-barn--c11a3c1bc823.10d",
           "rgba": [
             0.9200000166893005,
             0.49000000953674316,
             0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-roof",
+          "file": "10d/barn-roof--e4c62e5ad061.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.5099999904632568,
+            0.550000011920929,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-eaves",
+          "file": "10d/barn-eaves--829c293afab4.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.5299999713897705,
             1
           ]
         },
@@ -2277,11 +2357,31 @@
         },
         {
           "id": "rc:asset/workshop",
-          "file": "10d/workshop--c9e3f7d82d0e.10d",
+          "file": "10d/workshop--7b0fd9d98348.10d",
           "rgba": [
             0.9300000071525574,
             0.6499999761581421,
             0.4099999964237213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-roof",
+          "file": "10d/workshop-roof--6d5f86a6e18b.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.3400000035762787,
+            0.25,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-fascia",
+          "file": "10d/workshop-fascia--952dc36b3183.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.41999998688697815,
+            0.46000000834465027,
             1
           ]
         },
@@ -2437,10 +2537,20 @@
         },
         {
           "id": "rc:asset/community-hall",
-          "file": "10d/community-hall--955a1b8cdb2f.10d",
+          "file": "10d/community-hall--5fcb82d0311c.10d",
           "rgba": [
             0.9900000095367432,
             0.7799999713897705,
+            0.5400000214576721,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/hall-roof",
+          "file": "10d/hall-roof--f79c8f03a606.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.49000000953674316,
             0.5400000214576721,
             1
           ]
@@ -2517,11 +2627,11 @@
         },
         {
           "id": "rc:asset/workshop-roof-panels",
-          "file": "10d/workshop-roof-panels--968783e2c352.10d",
+          "file": "10d/workshop-roof-panels--a78b9c8bd22f.10d",
           "rgba": [
-            0.18000000715255737,
-            0.27000001072883606,
             0.3199999928474426,
+            0.2800000011920929,
+            0.3100000023841858,
             1
           ]
         },
@@ -3377,11 +3487,31 @@
         },
         {
           "id": "rc:asset/saltwind-barn",
-          "file": "10d/saltwind-barn--65306fef5b1e.10d",
+          "file": "10d/saltwind-barn--c11a3c1bc823.10d",
           "rgba": [
             0.9200000166893005,
             0.49000000953674316,
             0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-roof",
+          "file": "10d/barn-roof--e4c62e5ad061.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.5099999904632568,
+            0.550000011920929,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-eaves",
+          "file": "10d/barn-eaves--829c293afab4.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.5299999713897705,
             1
           ]
         },
@@ -3612,11 +3742,31 @@
         },
         {
           "id": "rc:asset/workshop",
-          "file": "10d/workshop--174fc005c764.10d",
+          "file": "10d/workshop--6bac03ca260b.10d",
           "rgba": [
             0.9900000095367432,
             0.7699999809265137,
             0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-roof",
+          "file": "10d/workshop-roof--6d5f86a6e18b.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.3400000035762787,
+            0.25,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-fascia",
+          "file": "10d/workshop-fascia--952dc36b3183.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.41999998688697815,
+            0.46000000834465027,
             1
           ]
         },
@@ -3772,10 +3922,20 @@
         },
         {
           "id": "rc:asset/community-hall",
-          "file": "10d/community-hall--955a1b8cdb2f.10d",
+          "file": "10d/community-hall--5fcb82d0311c.10d",
           "rgba": [
             0.9900000095367432,
             0.7799999713897705,
+            0.5400000214576721,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/hall-roof",
+          "file": "10d/hall-roof--f79c8f03a606.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.49000000953674316,
             0.5400000214576721,
             1
           ]
@@ -3852,11 +4012,11 @@
         },
         {
           "id": "rc:asset/workshop-roof-panels",
-          "file": "10d/workshop-roof-panels--968783e2c352.10d",
+          "file": "10d/workshop-roof-panels--a78b9c8bd22f.10d",
           "rgba": [
-            0.18000000715255737,
-            0.27000001072883606,
             0.3199999928474426,
+            0.2800000011920929,
+            0.3100000023841858,
             1
           ]
         },
@@ -4712,11 +4872,31 @@
         },
         {
           "id": "rc:asset/saltwind-barn",
-          "file": "10d/saltwind-barn--65306fef5b1e.10d",
+          "file": "10d/saltwind-barn--c11a3c1bc823.10d",
           "rgba": [
             0.9200000166893005,
             0.49000000953674316,
             0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-roof",
+          "file": "10d/barn-roof--e4c62e5ad061.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.5099999904632568,
+            0.550000011920929,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-eaves",
+          "file": "10d/barn-eaves--829c293afab4.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.5299999713897705,
             1
           ]
         },
@@ -4947,11 +5127,31 @@
         },
         {
           "id": "rc:asset/workshop",
-          "file": "10d/workshop--174fc005c764.10d",
+          "file": "10d/workshop--6bac03ca260b.10d",
           "rgba": [
             0.9900000095367432,
             0.7699999809265137,
             0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-roof",
+          "file": "10d/workshop-roof--6d5f86a6e18b.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.3400000035762787,
+            0.25,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-fascia",
+          "file": "10d/workshop-fascia--952dc36b3183.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.41999998688697815,
+            0.46000000834465027,
             1
           ]
         },
@@ -5107,10 +5307,20 @@
         },
         {
           "id": "rc:asset/community-hall",
-          "file": "10d/community-hall--955a1b8cdb2f.10d",
+          "file": "10d/community-hall--5fcb82d0311c.10d",
           "rgba": [
             0.9900000095367432,
             0.7799999713897705,
+            0.5400000214576721,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/hall-roof",
+          "file": "10d/hall-roof--f79c8f03a606.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.49000000953674316,
             0.5400000214576721,
             1
           ]
@@ -5187,11 +5397,11 @@
         },
         {
           "id": "rc:asset/workshop-roof-panels",
-          "file": "10d/workshop-roof-panels--968783e2c352.10d",
+          "file": "10d/workshop-roof-panels--a78b9c8bd22f.10d",
           "rgba": [
-            0.18000000715255737,
-            0.27000001072883606,
             0.3199999928474426,
+            0.2800000011920929,
+            0.3100000023841858,
             1
           ]
         },
@@ -6047,11 +6257,31 @@
         },
         {
           "id": "rc:asset/saltwind-barn",
-          "file": "10d/saltwind-barn--65306fef5b1e.10d",
+          "file": "10d/saltwind-barn--c11a3c1bc823.10d",
           "rgba": [
             0.9200000166893005,
             0.49000000953674316,
             0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-roof",
+          "file": "10d/barn-roof--e4c62e5ad061.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.5099999904632568,
+            0.550000011920929,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-eaves",
+          "file": "10d/barn-eaves--829c293afab4.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.5299999713897705,
             1
           ]
         },
@@ -6282,11 +6512,31 @@
         },
         {
           "id": "rc:asset/workshop",
-          "file": "10d/workshop--174fc005c764.10d",
+          "file": "10d/workshop--6bac03ca260b.10d",
           "rgba": [
             0.9900000095367432,
             0.7699999809265137,
             0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-roof",
+          "file": "10d/workshop-roof--6d5f86a6e18b.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.3400000035762787,
+            0.25,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-fascia",
+          "file": "10d/workshop-fascia--952dc36b3183.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.41999998688697815,
+            0.46000000834465027,
             1
           ]
         },
@@ -6442,10 +6692,20 @@
         },
         {
           "id": "rc:asset/community-hall",
-          "file": "10d/community-hall--955a1b8cdb2f.10d",
+          "file": "10d/community-hall--5fcb82d0311c.10d",
           "rgba": [
             0.9900000095367432,
             0.7799999713897705,
+            0.5400000214576721,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/hall-roof",
+          "file": "10d/hall-roof--f79c8f03a606.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.49000000953674316,
             0.5400000214576721,
             1
           ]
@@ -6522,11 +6782,11 @@
         },
         {
           "id": "rc:asset/workshop-roof-panels",
-          "file": "10d/workshop-roof-panels--968783e2c352.10d",
+          "file": "10d/workshop-roof-panels--a78b9c8bd22f.10d",
           "rgba": [
-            0.18000000715255737,
-            0.27000001072883606,
             0.3199999928474426,
+            0.2800000011920929,
+            0.3100000023841858,
             1
           ]
         },
@@ -7392,11 +7652,31 @@
         },
         {
           "id": "rc:asset/saltwind-barn",
-          "file": "10d/saltwind-barn--65306fef5b1e.10d",
+          "file": "10d/saltwind-barn--c11a3c1bc823.10d",
           "rgba": [
             0.9200000166893005,
             0.49000000953674316,
             0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-roof",
+          "file": "10d/barn-roof--e4c62e5ad061.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.5099999904632568,
+            0.550000011920929,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-eaves",
+          "file": "10d/barn-eaves--829c293afab4.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.5299999713897705,
             1
           ]
         },
@@ -7627,11 +7907,31 @@
         },
         {
           "id": "rc:asset/workshop",
-          "file": "10d/workshop--174fc005c764.10d",
+          "file": "10d/workshop--6bac03ca260b.10d",
           "rgba": [
             0.9900000095367432,
             0.7699999809265137,
             0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-roof",
+          "file": "10d/workshop-roof--6d5f86a6e18b.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.3400000035762787,
+            0.25,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-fascia",
+          "file": "10d/workshop-fascia--952dc36b3183.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.41999998688697815,
+            0.46000000834465027,
             1
           ]
         },
@@ -7787,10 +8087,20 @@
         },
         {
           "id": "rc:asset/community-hall",
-          "file": "10d/community-hall--955a1b8cdb2f.10d",
+          "file": "10d/community-hall--5fcb82d0311c.10d",
           "rgba": [
             0.9900000095367432,
             0.7799999713897705,
+            0.5400000214576721,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/hall-roof",
+          "file": "10d/hall-roof--f79c8f03a606.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.49000000953674316,
             0.5400000214576721,
             1
           ]
@@ -7867,11 +8177,11 @@
         },
         {
           "id": "rc:asset/workshop-roof-panels",
-          "file": "10d/workshop-roof-panels--968783e2c352.10d",
+          "file": "10d/workshop-roof-panels--a78b9c8bd22f.10d",
           "rgba": [
-            0.18000000715255737,
-            0.27000001072883606,
             0.3199999928474426,
+            0.2800000011920929,
+            0.3100000023841858,
             1
           ]
         },
@@ -8737,11 +9047,31 @@
         },
         {
           "id": "rc:asset/saltwind-barn",
-          "file": "10d/saltwind-barn--65306fef5b1e.10d",
+          "file": "10d/saltwind-barn--c11a3c1bc823.10d",
           "rgba": [
             0.9200000166893005,
             0.49000000953674316,
             0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-roof",
+          "file": "10d/barn-roof--e4c62e5ad061.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.5099999904632568,
+            0.550000011920929,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-eaves",
+          "file": "10d/barn-eaves--829c293afab4.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.5299999713897705,
             1
           ]
         },
@@ -8972,11 +9302,31 @@
         },
         {
           "id": "rc:asset/workshop",
-          "file": "10d/workshop--174fc005c764.10d",
+          "file": "10d/workshop--6bac03ca260b.10d",
           "rgba": [
             0.9900000095367432,
             0.7699999809265137,
             0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-roof",
+          "file": "10d/workshop-roof--6d5f86a6e18b.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.3400000035762787,
+            0.25,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-fascia",
+          "file": "10d/workshop-fascia--952dc36b3183.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.41999998688697815,
+            0.46000000834465027,
             1
           ]
         },
@@ -9132,10 +9482,20 @@
         },
         {
           "id": "rc:asset/community-hall",
-          "file": "10d/community-hall--955a1b8cdb2f.10d",
+          "file": "10d/community-hall--5fcb82d0311c.10d",
           "rgba": [
             0.9900000095367432,
             0.7799999713897705,
+            0.5400000214576721,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/hall-roof",
+          "file": "10d/hall-roof--f79c8f03a606.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.49000000953674316,
             0.5400000214576721,
             1
           ]
@@ -9212,11 +9572,11 @@
         },
         {
           "id": "rc:asset/workshop-roof-panels",
-          "file": "10d/workshop-roof-panels--968783e2c352.10d",
+          "file": "10d/workshop-roof-panels--a78b9c8bd22f.10d",
           "rgba": [
-            0.18000000715255737,
-            0.27000001072883606,
             0.3199999928474426,
+            0.2800000011920929,
+            0.3100000023841858,
             1
           ]
         },
@@ -10082,11 +10442,31 @@
         },
         {
           "id": "rc:asset/saltwind-barn",
-          "file": "10d/saltwind-barn--65306fef5b1e.10d",
+          "file": "10d/saltwind-barn--c11a3c1bc823.10d",
           "rgba": [
             0.9200000166893005,
             0.49000000953674316,
             0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-roof",
+          "file": "10d/barn-roof--e4c62e5ad061.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.5099999904632568,
+            0.550000011920929,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-eaves",
+          "file": "10d/barn-eaves--829c293afab4.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.5299999713897705,
             1
           ]
         },
@@ -10327,11 +10707,31 @@
         },
         {
           "id": "rc:asset/workshop",
-          "file": "10d/workshop--c9e3f7d82d0e.10d",
+          "file": "10d/workshop--7b0fd9d98348.10d",
           "rgba": [
             0.9300000071525574,
             0.6499999761581421,
             0.4099999964237213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-roof",
+          "file": "10d/workshop-roof--6d5f86a6e18b.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.3400000035762787,
+            0.25,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-fascia",
+          "file": "10d/workshop-fascia--952dc36b3183.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.41999998688697815,
+            0.46000000834465027,
             1
           ]
         },
@@ -10477,10 +10877,20 @@
         },
         {
           "id": "rc:asset/community-hall",
-          "file": "10d/community-hall--955a1b8cdb2f.10d",
+          "file": "10d/community-hall--5fcb82d0311c.10d",
           "rgba": [
             0.9900000095367432,
             0.7799999713897705,
+            0.5400000214576721,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/hall-roof",
+          "file": "10d/hall-roof--f79c8f03a606.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.49000000953674316,
             0.5400000214576721,
             1
           ]
@@ -10557,11 +10967,11 @@
         },
         {
           "id": "rc:asset/workshop-roof-panels",
-          "file": "10d/workshop-roof-panels--968783e2c352.10d",
+          "file": "10d/workshop-roof-panels--a78b9c8bd22f.10d",
           "rgba": [
-            0.18000000715255737,
-            0.27000001072883606,
             0.3199999928474426,
+            0.2800000011920929,
+            0.3100000023841858,
             1
           ]
         },
@@ -11397,11 +11807,31 @@
         },
         {
           "id": "rc:asset/saltwind-barn",
-          "file": "10d/saltwind-barn--65306fef5b1e.10d",
+          "file": "10d/saltwind-barn--c11a3c1bc823.10d",
           "rgba": [
             0.9200000166893005,
             0.49000000953674316,
             0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-roof",
+          "file": "10d/barn-roof--e4c62e5ad061.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.5099999904632568,
+            0.550000011920929,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-eaves",
+          "file": "10d/barn-eaves--829c293afab4.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.5299999713897705,
             1
           ]
         },

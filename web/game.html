@@ -211,7 +211,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = 'dfdaffadc50c4319';
+const WASM_BUILD = 'cdc6628f5d1b4573';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 $('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
@@ -398,7 +398,7 @@ function focusTerritory(id, immediate=false){
 }
 function focusSite(index){
   const p=placePositions[index];if(!p)return;
-  focusedPlace=index;zoomGoal=1.02;camGoal=framedTarget(p,zoomGoal);
+  focusedPlace=index;zoomGoal=0.83;camGoal=framedTarget(p,zoomGoal);
 }
 for (const id of ['kestrel','saltwind']) {
   $('tile-'+id).onclick = () => { territory=id;focusTerritory(id);refresh(); };
@@ -872,6 +872,11 @@ function tryAction(id) {
       launchTradeRoute:'The first trade boat sets out.',endTurn:'The crew rests. A new day begins.'
     };
     note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
+    const actionSite=siteForAction(id);
+    if(actionSite>=0){
+      territory=actionSite>=7?'saltwind':'kestrel';
+      focusSite(actionSite);
+    }
     if (id==='openCommons'||id==='launchTradeRoute'){
       territory='saltwind';hudPage='result';resultMessage='';
       focusedPlace=null;focusTerritory('saltwind');
@@ -907,6 +912,12 @@ function tryAction(id) {
     ...(rep.results||[]).slice(0,2).map(v=>`${short(String(v.result_path))}: ${v.message}`),
     'Try next:'];
   hudSiteActions=suggestions;
+  const actionSite=siteForAction(id);
+  if(actionSite>=0){
+    const siteTerritory=actionSite>=7?'saltwind':'kestrel';
+    if(territory!==siteTerritory){territory=siteTerritory;refresh();}
+    focusSite(actionSite);
+  }
   hudPage='site'; renderHud();
 }
 
@@ -986,13 +997,14 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const firstMesh=scriptAsset.organs[0].bytes;
   const hasSurfaceReading=firstMesh.some((v,i,a)=>v===83&&a[i+1]===82&&a[i+2]===68&&a[i+3]===49);
   note(`TEST Qualia SRD1 surface reading: ${hasSurfaceReading?'PASS':'FAIL'}`);
-  note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=115 ? 'PASS' : 'FAIL'}`);
+  note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=119 ? 'PASS' : 'FAIL'}`);
   note(`TEST site markers: ${placePositions.length===PLACES.length && PLACE_MARKERS.length===PLACES.length && placePositions.every(p=>[p.x,p.y,p.z].every(Number.isFinite)) ? 'PASS' : 'FAIL'}`);
   try {
     const packResponse=await fetch('./assets/maslows-challenge-scenes.hmc');
     if(!packResponse.ok)throw new Error(`HTTP ${packResponse.status}`);
     const packBytes=new Uint8Array(await packResponse.arrayBuffer());
-    note(`TEST Qualia HMC game assets: ${m.verify_game_hmc(packBytes)===154?'PASS':'FAIL'}`);
+    // 158 distinct .10d variants plus the scene manifest, all verified by Qualia.
+    note(`TEST Qualia HMC game assets: ${m.verify_game_hmc(packBytes)===159?'PASS':'FAIL'}`);
     packBytes[64]^=1;
     let tamperRejected=false;
     try { m.verify_game_hmc(packBytes); } catch(_) { tamperRejected=true; }

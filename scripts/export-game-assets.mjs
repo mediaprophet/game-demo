@@ -1,8 +1,8 @@
 // Export game-owned .10d assets from the exact Qualia WASM build used by the page.
 // Run after scripts/build-game.ps1. The manifest is deterministic and lives with the game.
 import { createHash } from 'node:crypto';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { dirname, join, relative, resolve } from 'node:path';
+import { readFile, writeFile, mkdir, readdir, unlink } from 'node:fs/promises';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import init, { pack_game_hmc, scene_build, verify_game_hmc } from '../web/pkg/rolling_commons_shell.js';
 
@@ -29,7 +29,7 @@ const assets = new Map();
 const scenes = [];
 for (const [name, args] of cases) {
   const scene = scene_build(...args);
-  if (!Array.isArray(scene.organs) || scene.organs.length < 100) {
+  if (!Array.isArray(scene.organs) || scene.organs.length < 119) {
     throw new Error(`${name}: unexpected Qualia scene receipt`);
   }
   const entries = [];
@@ -81,5 +81,15 @@ for (const page of ['game.html', 'spike.html']) {
   const marker = /const WASM_BUILD = '[0-9a-f]{16}';/;
   if (!marker.test(html)) throw new Error(`${page}: missing WASM build marker`);
   await writeFile(pagePath, html.replace(marker, `const WASM_BUILD = '${buildId}';`));
+}
+// The directory contains generated exports only. Keep it aligned with the
+// verified manifest so old variants cannot masquerade as current game assets.
+const assetRoot = resolve(out);
+const currentFiles = new Set(manifest.assets.map(asset => basename(asset.file)));
+for (const entry of await readdir(assetRoot, { withFileTypes: true })) {
+  if (!entry.isFile() || !entry.name.endsWith('.10d') || currentFiles.has(entry.name)) continue;
+  const stalePath = resolve(assetRoot, entry.name);
+  if (dirname(stalePath) !== assetRoot) throw new Error(`Asset outside export directory: ${stalePath}`);
+  await unlink(stalePath);
 }
 console.log(`Exported ${manifest.assets.length} distinct .10d assets across ${scenes.length} scene states and Qualia HMC ${relative(root, packPath)}`);

@@ -35,6 +35,8 @@ dispatch, project progress, relevant orders, day count and a result screen.
 Selecting a coloured world marker now focuses its site and opens contextual
 orders there. The in-game dispatch highlights its next suggested order and can
 locate that order's site. QualiaDB rules validate every order from either path.
+Accepted and blocked orders focus the affected site, keeping visible model
+changes and rule explanations beside the player's decision.
 Completing either ending opens an in-game campaign record with the outcome,
 project count, replay verification, and a new-campaign control.
 
@@ -48,13 +50,14 @@ garden once water is available.
 The page also exposes VibeScript cells for live world snapshot queries,
 SHACL-gated order proposals, and a bounded scene asset that compiles through
 Qualia computational geometry to a provenance-bearing `.10d` mesh.
-Kestrel Flats has 91 always-present original `.10d` scene organs; the new
-Saltwind Reach tile adds 24 more plus state variants. The connected scene uses
+Kestrel Flats has 93 always-present original `.10d` scene organs; the
+Saltwind Reach tile adds 26 more plus state variants. The connected scene uses
 QualiaPortal's camera target and daylight sky APIs. State variants live in
 the game-owned catalog. Rounded assets use Qualia's computational
 geometry authoring and parametric CAD; all scene assets retain source
-provenance. These are detailed composition blockouts; finished materials,
-animation and HMC packs remain upstream gates.
+provenance. The workshop, hall and barn now have separately coloured gabled
+roofs and structural trim. These remain composition blockouts; finished
+materials, animation and canonical production HMC tooling remain upstream gates.
 
 The current two-territory build passes both campaign endings and replay
 self-tests. The full Qualia WebGPU canvas now renders on the published game;

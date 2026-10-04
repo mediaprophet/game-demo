@@ -38,6 +38,8 @@ its suggested next order. These presentation mappings use the existing Qualia
 `GameSession`; blocked orders still return Qualia's rule explanation and
 accepted orders enter the same replay tape. Both desktop and compact HUD
 layouts were checked in the browser.
+Accepted and blocked orders now focus their affected site so model changes
+and rule explanations are visible where the player acted.
 
 Either campaign ending now opens a Qualia HUD result panel over the map. It
 reports the chosen outcome and campaign totals, offers replay verification,
@@ -56,6 +58,12 @@ planks, pump blades, and boat rail give major sites clearer silhouettes. This is
 iteration, not a claim of finished production art. The game now emits Qualia's
 per-vertex `.10d` surface reading (`SRD1`) for deterministic colour variation,
 preserving the public compiler and provenance path.
+
+The next building pass splits the workshop, community hall and Saltwind barn
+into distinct wall and gabled-roof assets and adds workshop facade and barn
+eave details. The selected-site camera frames the buildings more closely.
+All five new asset variants were built by Qualia and packaged into the
+game-owned HMC; the scene remains stylized blockout art.
 
 ## Quality work still needed
 
