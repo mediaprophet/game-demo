@@ -1,0 +1,16 @@
+{
+  "name": "rolling-commons-shell",
+  "type": "module",
+  "description": "Maslows Challenge WASM game shell — thin bindings over the full QualiaDB engine",
+  "version": "0.0.1",
+  "files": [
+    "rolling_commons_shell_bg.wasm",
+    "rolling_commons_shell.js",
+    "rolling_commons_shell.d.ts"
+  ],
+  "main": "rolling_commons_shell.js",
+  "types": "rolling_commons_shell.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

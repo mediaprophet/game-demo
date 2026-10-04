@@ -910,6 +910,16 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST Qualia SRD1 surface reading: ${hasSurfaceReading?'PASS':'FAIL'}`);
   note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=115 ? 'PASS' : 'FAIL'}`);
   note(`TEST site markers: ${placePositions.length===PLACES.length && PLACE_MARKERS.length===PLACES.length && placePositions.every(p=>[p.x,p.y,p.z].every(Number.isFinite)) ? 'PASS' : 'FAIL'}`);
+  try {
+    const packResponse=await fetch('./assets/maslows-challenge-scenes.hmc');
+    if(!packResponse.ok)throw new Error(`HTTP ${packResponse.status}`);
+    const packBytes=new Uint8Array(await packResponse.arrayBuffer());
+    note(`TEST Qualia HMC game assets: ${m.verify_game_hmc(packBytes)===154?'PASS':'FAIL'}`);
+    packBytes[64]^=1;
+    let tamperRejected=false;
+    try { m.verify_game_hmc(packBytes); } catch(_) { tamperRejected=true; }
+    note(`TEST Qualia HMC integrity: ${tamperRejected?'PASS':'FAIL'}`);
+  } catch(e) { note(`TEST Qualia HMC game assets: FAIL ${String(e)}`); }
   const expect = (name, id, wantOk) => {
     const r = toObj(testSession.propose(id));
     note(`TEST ${name}: ${id} ${r.ok===wantOk?'PASS':'FAIL'}`);
