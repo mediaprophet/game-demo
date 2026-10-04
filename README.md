@@ -51,13 +51,12 @@ geometry authoring and parametric CAD; all scene assets retain source
 provenance. These are detailed composition blockouts; finished materials,
 animation and HMC packs remain upstream gates.
 
-The current two-territory build loads 115 Qualia `.10d` meshes and passes both
-campaign endings and replay self-tests. Browser visual acceptance is **blocked**: the full
-Qualia WebGPU canvas remains black even with one accepted mesh. The exact
-reproduction and generic Qualia renderer fix are recorded in
-[QG-12](docs/planning/19-qualiadb-upstream-gate-work-orders.md); this repository
-keeps using the full Qualia engine and treats QualiaDB as read-only.
+The current two-territory build passes both campaign endings and replay
+self-tests. The full Qualia WebGPU canvas now renders on the published game;
+[QG-12](docs/planning/19-qualiadb-upstream-gate-work-orders.md) records the
+earlier renderer gate and its reproduction.
 
+Check out QualiaDB beside this repository at the commit in [`qualia.ref`](qualia.ref).
 Build with `scripts/build-game.ps1` to produce the full Qualia WASM package in
 `web/pkg/`, the game's `.10d` asset snapshots in `assets/generated/`, and a
 Qualia QBDL/HMC pack in `web/assets/maslows-challenge-scenes.hmc`.
@@ -66,6 +65,11 @@ scene states and exported containers; QualiaDB owns the generic compiler and
 renderer. Serve `web/` with a local HTTP server and open its root URL. `web/game.html?selftest`
 runs the scripted action, scene, VibeScript, and replay checks; `web/spike.html`
 retains the earlier capability spike.
+
+The [game Pages workflow](.github/workflows/game-pages.yml) checks out the
+pinned full QualiaDB engine as a sibling, builds the WASM game shell, exports
+and verifies the game-owned `.10d`/HMC pack, and deploys `web/` from `main`.
+GitHub Pages must use **GitHub Actions** as its build source for that deployment.
 
 The current action session still holds N3 text in the game shell. A mutable
 Q42 graph session, game-scoped VibeScript capabilities, HMC packaging, and
@@ -140,6 +144,7 @@ The planning set is the current source of truth:
 - [Asset production catalog](docs/planning/18-asset-production-catalog.md)
 - [QualiaDB upstream gate work orders](docs/planning/19-qualiadb-upstream-gate-work-orders.md)
 - [Current game build and QualiaDB needs](docs/planning/20-current-game-build-and-qualiadb-needs.md)
+- [QualiaDB refactor build gates](docs/planning/21-refactor-build-gates.md)
 - QualiaDB platform completion brief (sibling repository:
   `docs/work-in-progress/qualia-capability-demonstration-program.md`)
 - [Technical architecture](docs/planning/02-technical-architecture.md)

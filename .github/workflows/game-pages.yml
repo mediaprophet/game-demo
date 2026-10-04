@@ -1,0 +1,102 @@
+name: Build and publish Maslows Challenge
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: game-pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: game-demo
+    steps:
+      - name: Checkout game
+        uses: actions/checkout@v5
+        with:
+          path: game-demo
+          persist-credentials: false
+
+      - name: Read pinned QualiaDB revision
+        id: qualia
+        run: echo "sha=$(cat qualia.ref)" >> "$GITHUB_OUTPUT"
+
+      # Both checkouts must be siblings: Cargo path dependencies resolve through
+      # ../qualiaDB. The pin prevents branch drift from changing game builds.
+      - name: Checkout full QualiaDB engine
+        uses: actions/checkout@v5
+        with:
+          repository: mediaprophet/qualiaDB
+          ref: ${{ steps.qualia.outputs.sha }}
+          path: qualiaDB
+          persist-credentials: false
+
+      - name: Verify QualiaDB revision
+        run: test "$(git -C ../qualiaDB rev-parse HEAD)" = "$(cat qualia.ref)"
+
+      - name: Install Rust and WASM target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            game-demo/target
+          key: game-wasm-${{ hashFiles('game-demo/Cargo.lock', 'game-demo/qualia.ref') }}
+          restore-keys: game-wasm-
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack --locked --version 0.13.1
+
+      - name: Check full engine game shell
+        run: cargo check --workspace --target wasm32-unknown-unknown --locked
+
+      - name: Build game WASM
+        run: wasm-pack build crates/rolling-commons-shell --target web --out-dir ../../web/pkg --release
+
+      - name: Export and verify Qualia assets
+        run: |
+          rm -f web/pkg/.gitignore
+          node scripts/export-game-assets.mjs
+          test -s web/pkg/rolling_commons_shell_bg.wasm
+          test -s web/assets/maslows-challenge-scenes.hmc
+          test -s assets/generated/manifest.json
+          touch web/.nojekyll
+
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: game-demo/web
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy game
+        id: deployment
+        uses: actions/deploy-pages@v5

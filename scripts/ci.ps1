@@ -1,4 +1,4 @@
-# Maslows Challenge — Phase 0 CI commands (Windows host).
+# Maslows Challenge — local CI commands (Windows host).
 # Usage: scripts\ci.ps1 [-Step all|fmt|check|test|wasm|assets]
 param([string]$Step = "all")
 
@@ -12,24 +12,28 @@ function Fmt {
 
 function Check {
     # Full QualiaDB WASM profile, including render and inference compilation.
-    cargo check --workspace --target wasm32-unknown-unknown
+    cargo check --workspace --target wasm32-unknown-unknown --locked
+    if ($LASTEXITCODE -ne 0) { throw 'WASM check failed' }
 }
 
 function Tests {
-    cargo test --workspace --target wasm32-unknown-unknown --no-run
+    cargo test --workspace --target wasm32-unknown-unknown --no-run --locked
+    if ($LASTEXITCODE -ne 0) { throw 'WASM test compile failed' }
 }
 
 function Wasm {
-    wasm-pack build crates/rolling-commons-shell --target web --out-dir ../../web/pkg --release
+    & (Join-Path $PSScriptRoot 'build-game.ps1')
+    if ($LASTEXITCODE -ne 0) { throw 'game build failed' }
 }
 
 function Assets {
-    # Placeholder for .10d/HMC pack validation (QG-01/QG-02 fixtures land here).
-    if (Test-Path packs) {
-        Write-Host "packs/: asset validation pending QG-01/QG-02"
-    } else {
-        Write-Host "no packs/ directory yet — nothing to validate"
+    foreach ($file in @('assets/generated/manifest.json', 'web/assets/maslows-challenge-scenes.hmc', 'web/pkg/rolling_commons_shell_bg.wasm')) {
+        $path = Join-Path $root $file
+        if (-not (Test-Path -LiteralPath $path) -or (Get-Item -LiteralPath $path).Length -eq 0) {
+            throw "Missing game build output: $file"
+        }
     }
+    Write-Host 'Qualia game assets and HMC present'
 }
 
 switch ($Step) {

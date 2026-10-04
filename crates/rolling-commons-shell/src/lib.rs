@@ -17,13 +17,13 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlCanvasElement;
 
-/// QualiaDB revision checked for this game pass. Cargo still uses a sibling
-/// path dependency; verify the checkout before calling any build reproducible.
-pub const QUALIADB_PINNED_REVISION: &str = "0006a07d+local-hud";
+/// Full QualiaDB engine revision used by the reproducible game build.
+/// The sibling checkout is verified by scripts/build-game.ps1 and CI.
+pub const QUALIADB_PINNED_REVISION: &str = include_str!("../../../qualia.ref");
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
-    QUALIADB_PINNED_REVISION.to_string()
+    QUALIADB_PINNED_REVISION.trim().to_string()
 }
 
 /// Package intact game assets through Qualia's transparent QBDL/HMC writer.
