@@ -217,6 +217,16 @@ pub fn kestrel_flats(
         vec![
             block([3.2, 0.8, -2.2], [2.4, 1.6, 1.8]),
             roof([3.2, 1.6, -2.2], [2.65, 0.5, 2.05]),
+            block([4.62, 0.49, -2.47], [0.9, 0.98, 1.15]),
+            roof([4.62, 0.98, -2.47], [1.12, 0.32, 1.36]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-chimney",
+        [0.69, 0.34, 0.28, 1.0],
+        vec![
+            block([2.34, 2.02, -2.64], [0.38, 1.08, 0.38]),
+            block([2.34, 2.57, -2.64], [0.51, 0.11, 0.51]),
         ],
     ));
     scene.push(asset(
@@ -362,6 +372,18 @@ pub fn kestrel_flats(
         vec![
             block([0.0, 0.65, -5.25], [2.2, 1.3, 1.2]),
             roof([0.0, 1.3, -5.25], [2.45, 0.55, 1.45]),
+            block([0.0, 1.77, -5.25], [0.86, 0.96, 0.82]),
+            roof([0.0, 2.27, -5.25], [1.03, 0.42, 1.0]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/hall-bell-tower",
+        [0.66, 0.36, 0.28, 1.0],
+        vec![
+            block([-0.24, 1.82, -4.82], [0.14, 0.44, 0.05]),
+            block([0.24, 1.82, -4.82], [0.14, 0.44, 0.05]),
+            block([0.0, 2.08, -4.82], [0.63, 0.09, 0.05]),
+            block([0.0, 2.45, -5.25], [1.08, 0.11, 1.06]),
         ],
     ));
     scene.push(asset(
@@ -728,13 +750,24 @@ pub fn kestrel_flats(
             },
         ));
     }
-    // Four tiny residents make the town feel inhabited. Each body part is a
-    // stable semantic asset so future Qualia animation clips can replace it.
-    for (body_id, head_id, feet_id, x, z, coat) in [
+    // Distinct, rounded character silhouettes. Separate limbs, faces and hair
+    // retain semantic identities for later Qualia animation clips.
+    const COAT_PROFILE: &[[f32; 2]] = &[
+        [0.0, -0.34],
+        [0.23, -0.34],
+        [0.34, -0.20],
+        [0.30, 0.15],
+        [0.19, 0.35],
+        [0.0, 0.35],
+    ];
+    for (body_id, head_id, feet_id, arm_id, face_id, hair_id, x, z, coat) in [
         (
             "rc:asset/resident-ada-coat",
             "rc:asset/resident-ada-head",
             "rc:asset/resident-ada-boots",
+            "rc:asset/resident-ada-arms",
+            "rc:asset/resident-ada-face",
+            "rc:asset/resident-ada-hair",
             -2.2,
             1.8,
             [0.95, 0.35, 0.38, 1.0],
@@ -743,6 +776,9 @@ pub fn kestrel_flats(
             "rc:asset/resident-bo-coat",
             "rc:asset/resident-bo-head",
             "rc:asset/resident-bo-boots",
+            "rc:asset/resident-bo-arms",
+            "rc:asset/resident-bo-face",
+            "rc:asset/resident-bo-hair",
             1.0,
             0.4,
             [0.35, 0.66, 0.85, 1.0],
@@ -751,6 +787,9 @@ pub fn kestrel_flats(
             "rc:asset/resident-cam-coat",
             "rc:asset/resident-cam-head",
             "rc:asset/resident-cam-boots",
+            "rc:asset/resident-cam-arms",
+            "rc:asset/resident-cam-face",
+            "rc:asset/resident-cam-hair",
             -2.0,
             -2.0,
             [0.91, 0.67, 0.29, 1.0],
@@ -759,6 +798,9 @@ pub fn kestrel_flats(
             "rc:asset/resident-dev-coat",
             "rc:asset/resident-dev-head",
             "rc:asset/resident-dev-boots",
+            "rc:asset/resident-dev-arms",
+            "rc:asset/resident-dev-face",
+            "rc:asset/resident-dev-hair",
             3.5,
             -0.6,
             [0.62, 0.46, 0.83, 1.0],
@@ -767,11 +809,10 @@ pub fn kestrel_flats(
         scene.push(parametric(
             body_id,
             coat,
-            ParametricRecipe::Sphere {
-                center: [x, 0.55, z],
-                radius: 0.28,
-                latitude: 8,
-                longitude: 12,
+            ParametricRecipe::Revolve {
+                center: [x, 0.58, z],
+                profile: COAT_PROFILE,
+                segments: 16,
             },
         ));
         scene.push(parametric(
@@ -791,6 +832,32 @@ pub fn kestrel_flats(
                 block([x - 0.12, 0.16, z], [0.14, 0.32, 0.17]),
                 block([x + 0.12, 0.16, z], [0.14, 0.32, 0.17]),
             ],
+        ));
+        scene.push(asset(
+            arm_id,
+            coat,
+            vec![
+                block([x - 0.35, 0.65, z], [0.16, 0.48, 0.19]),
+                block([x + 0.35, 0.65, z], [0.16, 0.48, 0.19]),
+            ],
+        ));
+        scene.push(asset(
+            face_id,
+            [0.12, 0.21, 0.26, 1.0],
+            vec![
+                block([x - 0.085, 1.07, z + 0.215], [0.035, 0.045, 0.025]),
+                block([x + 0.085, 1.07, z + 0.215], [0.035, 0.045, 0.025]),
+            ],
+        ));
+        scene.push(parametric(
+            hair_id,
+            [0.20, 0.22, 0.24, 1.0],
+            ParametricRecipe::Sphere {
+                center: [x, 1.23, z - 0.035],
+                radius: 0.22,
+                latitude: 8,
+                longitude: 12,
+            },
         ));
     }
     // Bright flowering planters mark the shared hall and garden route.
@@ -950,11 +1017,33 @@ pub fn saltwind_reach(
     scene.push(asset(
         "rc:asset/bridge-rails",
         [0.92, 0.75, 0.48, 1.0],
-        vec![
-            block([8.0, 0.42, -0.28], [2.6, 0.08, 0.09]),
-            block([8.0, 0.42, 1.27], [2.6, 0.08, 0.09]),
-        ],
+        if bridge_open {
+            vec![
+                block([8.0, 0.42, -0.28], [2.6, 0.08, 0.09]),
+                block([8.0, 0.42, 1.27], [2.6, 0.08, 0.09]),
+                block([6.85, 0.24, -0.28], [0.10, 0.48, 0.10]),
+                block([9.15, 0.24, -0.28], [0.10, 0.48, 0.10]),
+                block([6.85, 0.24, 1.27], [0.10, 0.48, 0.10]),
+                block([9.15, 0.24, 1.27], [0.10, 0.48, 0.10]),
+            ]
+        } else {
+            vec![
+                block([7.18, 0.42, -0.28], [0.70, 0.08, 0.09]),
+                block([8.82, 0.42, -0.28], [0.70, 0.08, 0.09]),
+                block([7.18, 0.42, 1.27], [0.70, 0.08, 0.09]),
+                block([8.82, 0.42, 1.27], [0.70, 0.08, 0.09]),
+            ]
+        },
     ));
+    if bridge_open {
+        scene.push(asset(
+            "rc:asset/bridge-deck-planks",
+            [0.96, 0.77, 0.51, 1.0],
+            (-5..=5)
+                .map(|i| block([8.0 + i as f32 * 0.20, 0.225, 0.5], [0.16, 0.035, 1.43]))
+                .collect(),
+        ));
+    }
     if bridge_braced && !bridge_open {
         scene.push(asset(
             "rc:asset/bridge-bracing",
@@ -1038,6 +1127,10 @@ pub fn saltwind_reach(
         vec![
             block([19.0, 2.82, -1.46], [0.16, 2.1, 0.09]),
             block([19.0, 2.82, -1.46], [2.1, 0.16, 0.09]),
+            block([19.0, 3.62, -1.42], [0.48, 0.47, 0.06]),
+            block([19.0, 2.02, -1.42], [0.48, 0.47, 0.06]),
+            block([18.20, 2.82, -1.42], [0.47, 0.48, 0.06]),
+            block([19.80, 2.82, -1.42], [0.47, 0.48, 0.06]),
         ],
     ));
     scene.push(asset(
@@ -1072,6 +1165,17 @@ pub fn saltwind_reach(
         vec![
             block([8.0, 0.13, 3.8], [0.86, 0.25, 1.85]),
             block([8.0, 0.35, 3.8], [0.09, 0.5, 0.09]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/canal-boat-rail",
+        [0.98, 0.82, 0.56, 1.0],
+        vec![
+            block([7.54, 0.29, 3.8], [0.07, 0.12, 1.92]),
+            block([8.46, 0.29, 3.8], [0.07, 0.12, 1.92]),
+            block([8.0, 0.28, 2.86], [0.98, 0.12, 0.08]),
+            block([8.0, 0.28, 4.74], [0.98, 0.12, 0.08]),
+            block([8.0, 0.32, 4.24], [0.80, 0.08, 0.22]),
         ],
     ));
     scene.push(asset(

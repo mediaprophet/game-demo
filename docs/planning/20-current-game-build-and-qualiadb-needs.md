@@ -1,12 +1,25 @@
 # Current Game Build and QualiaDB Needs
 
-Status: living implementation note, 2026-10-04. The QualiaDB checkout is
-**read-only for this game-development pass** at the project owner's request.
-The game may consume existing public Qualia APIs and add game-owned content,
-bindings and presentation. Any missing general capability is recorded here
-for the QualiaDB development agent; it is not rebuilt privately in the game.
+Status: living implementation note, 2026-10-04. The owner authorized one
+generic upstream QualiaDB update for the in-viewport HUD. Other generic
+engine gaps remain work orders; game-specific replacements are not acceptable.
 
 ## Game work in this pass
+
+**In-game HUD and visible WebGPU pass (2026-10-04):** The upstream QualiaDB
+renderer fixes through `0006a07d` resolved the black WebGPU viewport reported
+below. A fresh full-engine WASM
+build displays both territories at Portal tier 2. The game now puts visible
+player controls on a generic Qualia canvas HUD instead of visible HTML panels;
+the browser page still contains an invisible legacy data view pending removal.
+The game added distinct resident body parts, workshop and hall silhouettes,
+bridge states, pump blades, and boat rails through Qualia geometry and `.10d`.
+The final browser self-test passed all 47 checks, including the Qualia `SRD1`
+surface reading, and live HUD order, rejection, and
+VibeScript interactions worked. Semantic tensor nodes remain visually projected
+as bright square markers even after the ambient field is disabled; Qualia needs
+a generic independent projector-visibility control that preserves picking.
+See [the HUD and art pass](21-ingame-interface-and-asset-quality.md).
 
 **Canal tide scenario pass (2026-10-04):** Day four is the last day for the
 simple bridge repair. Starting on day five, a player can brace the supports
@@ -19,8 +32,8 @@ bracing. Save content version is 4; earlier N3 saves require an explicit
 Qualia Q42 migration. The rebuilt browser package passed 46 campaign checks.
 In a manual day-five route, bracing increased the accepted mesh count from
 116 to 117; finishing returned it to 116. OPFS reload preserved the day-six
-crossing and replay reproduced the world byte-for-byte. The full renderer
-visibility gate QG-12 remains open: mesh receipt changes are not proof of
+crossing and replay reproduced the world byte-for-byte. At that point the full renderer
+visibility gate QG-12 remained open: mesh receipt changes were not proof of
 visible pixels. Concurrent uncommitted renderer work was present in the
 QualiaDB checkout after this package build; it was not changed or claimed
 as verified by this game pass.
@@ -40,8 +53,8 @@ VibeScript world projection includes the day, paid order and final outcome.
 The rules still pass through Qualia's SHACL path; the DOM guidance is only
 presentation. Browser tests passed both endings (43 checks), then a manual
 trade-route playthrough, OPFS reload and byte-for-byte replay. The WebGPU
-viewport remains black, so this is a playable **rules/UI** level whose 3D
-visual acceptance is still blocked by QG-12.
+viewport was black at that point, so this was a playable **rules/UI** level whose 3D
+visual acceptance awaited QG-12. The 2026-10-04 HUD pass above supersedes that status.
 
 Kestrel Flats now has two connected, rule-gated infrastructure objectives:
 restore the workshop's solar power, then repair the shared water tank and
@@ -107,10 +120,10 @@ commit `0300525b` defined `list_hmc_bundle_entries_wasm` twice in
 The Qualia development agent removed the duplicate in commit `32ef0175` while
 this pass was underway. The game shell's `wasm32-unknown-unknown` check and
 release WASM build pass against that clean checkout.
-The QualiaDB checkout remains read-only for this task. Preserve the one tested
+Preserve the one tested
 HMC ABI in an upstream commit before pinning a reproducible game build.
 
-**Current blocking visual proof:** The rebuilt browser package accepts all
+**Historical QG-12 visual proof, now resolved by the later renderer fix series:** The earlier browser package accepted all
 115 always-present `.10d` organs across Kestrel Flats and Saltwind Reach at
 Portal tier 2. Its self-test passes the new bridge, pump, orchard and replay
 sequence. Yet the WebGPU canvas is entirely black, including after changing
@@ -121,7 +134,7 @@ path. See QG-12 in the [upstream gate work orders](19-qualiadb-upstream-gate-wor
 for the reproduction and required generic conformance fixture. This game pass
 does not substitute another renderer or silently treat upload as visual proof.
 
-## Read-only QualiaDB audit: next generic needs
+## QualiaDB audit: next generic needs
 
 This table records **observed integration gaps or proofs to run**, not an
 assertion that another agent has not implemented them. The QualiaDB checkout
@@ -136,7 +149,7 @@ and the game's [detailed gate work orders](19-qualiadb-upstream-gate-work-orders
 | Continuous deterministic simulation | New generic `simulation/fixed_tick.rs` exists; game still uses discrete action proposals. | Verify canonical simultaneous-command ordering, Q42/rule validation, no dropped receipts, native/WASM replay and budget; expose the accepted public bridge and integrate one worker/project task. |
 | RTS camera, group selection and navigation | QualiaPortal now exposes camera target/pan and the game uses territory focus; semantic pick remains single target. Generic deterministic navigation is present in source but not yet integrated in this game. | Verify world hit, selection sets, commands and route/navigation service in the public WASM surface. Prove at least 100 entities, changing obstacles and semantic IDs across zoom/LOD before adding a private game implementation. |
 | Finished assets and content packs | 115 game-owned computational-geometry blockouts compile to `.10d` through Qualia; current page loads meshes at runtime. Core HMC bundle APIs exist; canonical pack selection and asset manifest browser proof remain open. | Reproducible Qualia source → validated `.10d`/Q42 → canonical HMC → offline browser load, with licence/digest/LOD/semantic picks. Then replace blockouts one family at a time. |
-| WebGPU scene visibility and finished surfaces | The full Portal accepts 115 meshes but renders an entirely black canvas, even with one accepted cube-like organ. Sky presets and lighting APIs exist at `32ef0175`; their visible result is unproven. The older package showed pale blockouts. No game-facing texture, material, shadow or LOD contract has been demonstrated. | First fix the generic accepted-opaque-cube browser visual regression with pixel and occlusion proof in Qualia. Then verify or expose material/texture bindings, light, shadow, sky and LOD through full WASM Portal and `.10d`/HMC; prove a reusable non-game scene before calling art finished. |
+| WebGPU scene visibility and finished surfaces | QG-12's black viewport was resolved by the upstream renderer fix series through `0006a07d`; full Portal tier 2 visibly renders the game scene. The current models remain primitive, shading is dim, and tensor projectors show bright square markers. No finished texture, material, shadow, or LOD contract has been demonstrated in the game. | Add a generic projector-visibility control that keeps semantic pick buffers active. Verify reusable material/texture bindings, light, shadow, sky, and LOD through full WASM Portal and `.10d`/HMC before calling art finished. |
 | Animation | Static `.10d` meshes render; a stored rig/clip-to-Portal contract has not been demonstrated in the game. | Versioned `.10d` animation format and browser playback/replay for person, vehicle and facility actions. |
 | Audio in normal play | `qualia-audio`, core audio DSP and Portal acoustic APIs already exist; the game has no sound cues or music yet. | Expose/integrate existing Qualia Audio for authored cues, ambience, spatial playback, captions, volume and replay-once policy in `wasm-full`. Do not create a second audio engine. |
 | VibeScript as game authoring language | Game now evaluates world snapshot queries, SHACL-gated action ids and one authored `.10d` asset from a Vibe cell. The world projection still reads the temporary N3 session, scene records are limited to two primitives, and diagnostic/result types are game-specific. | Public, generic Vibe host over durable Q42 with typed read-only graph queries, typed command proposals and receipts, a bounded scene authoring schema, capability grants, provenance, and clear diagnostics. Demonstrate non-game use and migrate this adapter away with the N3 session. |

@@ -18,7 +18,7 @@ use web_sys::HtmlCanvasElement;
 
 /// QualiaDB revision checked for this game pass. Cargo still uses a sibling
 /// path dependency; verify the checkout before calling any build reproducible.
-pub const QUALIADB_PINNED_REVISION: &str = "32ef0175";
+pub const QUALIADB_PINNED_REVISION: &str = "0006a07d+local-hud";
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
@@ -209,7 +209,7 @@ pub fn scene_build(
 ) -> Result<JsValue, JsValue> {
     use qualia_core_db::container_10d::provenance_section::ProvenanceSidecar;
     use qualia_core_db::render::assets::Mesh;
-    use qualia_core_db::render::compile_10d::compile_mesh_to_10d_with_provenance;
+    use qualia_core_db::render::compile_10d::compile_mesh_to_10d_with_surface_reading;
     use qualia_core_db::render::scene_primitives::{
         assemble_into, portal_point, recipe_write, Primitive,
     };
@@ -265,7 +265,40 @@ pub fn scene_build(
         // This records that status; it does not alter the QualiaDB licence.
         let provenance =
             ProvenanceSidecar::new(source, mime, "All rights reserved (licence not assigned)");
-        let bytes = compile_mesh_to_10d_with_provenance(&mesh, Some(&provenance))
+        // The current Qualia .10d SRD1 section preserves authored colour on
+        // each vertex. A deterministic palette reading gives broad surfaces
+        // gentle height/position variation without a game-specific format.
+        let landscape = recipe.id.contains("ground")
+            || recipe.id.contains("grass")
+            || recipe.id.contains("hill")
+            || recipe.id.contains("bed");
+        let foliage = recipe.id.contains("crown")
+            || recipe.id.contains("canopy")
+            || recipe.id.contains("shoot")
+            || recipe.id.contains("flower");
+        let span_y = (mesh.max[1] - mesh.min[1]).max(0.01);
+        let reading: Vec<[f32; 4]> = mesh
+            .positions
+            .iter()
+            .map(|p| {
+                let elevation = ((p[1] - mesh.min[1]) / span_y).clamp(0.0, 1.0);
+                let ripple = (p[0] * 1.17 + p[2] * 0.63).sin() * 0.055
+                    + (p[0] * 0.31 - p[2] * 1.09).cos() * 0.035;
+                let gain = if landscape {
+                    0.94 + ripple * 1.5
+                } else {
+                    0.91 + elevation * 0.14 + ripple
+                };
+                let green = if foliage || landscape { 1.04 } else { 1.0 };
+                [
+                    (recipe.color[0] * gain).clamp(0.0, 1.0),
+                    (recipe.color[1] * gain * green).clamp(0.0, 1.0),
+                    (recipe.color[2] * gain).clamp(0.0, 1.0),
+                    recipe.color[3],
+                ]
+            })
+            .collect();
+        let bytes = compile_mesh_to_10d_with_surface_reading(&mesh, Some(&provenance), &reading)
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
         let obj = js_sys::Object::new();
         js_sys::Reflect::set(&obj, &"id".into(), &JsValue::from_str(recipe.id))?;
@@ -322,9 +355,15 @@ pub fn scene_build(
         [17.6, 0.8, 4.0],
     ];
     let mut nodes = Vec::with_capacity(places.len() * 10);
+    let site_positions = js_sys::Array::new();
     for point in places {
         let p = portal_point(min, max, point);
         nodes.extend_from_slice(&[0.0, 0.0, 4.0, p[0], p[1], p[2], 0.0, 1.0, 0.7, 0.5]);
+        let site = js_sys::Object::new();
+        for (key, value) in ["x", "y", "z"].iter().zip(p) {
+            js_sys::Reflect::set(&site, &(*key).into(), &JsValue::from_f64(value as f64))?;
+        }
+        site_positions.push(&site);
     }
     let tensor = tensor_buffer_build(&nodes)?;
     let result = js_sys::Object::new();
@@ -345,10 +384,45 @@ pub fn scene_build(
         tiles.push(&tile);
     }
     js_sys::Reflect::set(&result, &"tiles".into(), &tiles)?;
+    js_sys::Reflect::set(&result, &"places".into(), &site_positions)?;
     Ok(result.into())
 }
 
 // --- Portal: WebGPU scene ingest, frame, semantic pick ---
+
+/// Qualia's generic in-viewport HUD. Game rules remain in `GameSession`.
+#[wasm_bindgen]
+pub struct GameHud {
+    inner: qualia_core_db::render::hud::QualiaHud,
+}
+
+#[wasm_bindgen]
+impl GameHud {
+    #[wasm_bindgen(constructor)]
+    pub fn new(canvas: HtmlCanvasElement) -> Result<GameHud, JsValue> {
+        Ok(Self {
+            inner: qualia_core_db::render::hud::QualiaHud::new(canvas)?,
+        })
+    }
+
+    pub fn set_document_json(&mut self, json: &str) -> Result<(), JsValue> {
+        self.inner.set_document_json(json)
+    }
+
+    pub fn set_camera_target(&mut self, yaw: f32, pitch: f32, zoom: f32, x: f32, y: f32, z: f32) {
+        self.inner.set_camera_target(yaw, pitch, zoom, x, y, z);
+    }
+
+    pub fn hit_test(&mut self, x: f64, y: f64) -> String {
+        self.inner.hit_test(x, y)
+    }
+    pub fn focus_next(&mut self, reverse: bool) -> String {
+        self.inner.focus_next(reverse)
+    }
+    pub fn focused_action(&self) -> String {
+        self.inner.focused_action()
+    }
+}
 
 /// Thin shell over `QualiaPortal` — the QualiaDB browser render surface.
 /// A canvas is supplied by the page; all ingest/pick goes through the engine.
@@ -404,7 +478,10 @@ impl GamePortal {
     /// semantic node set. Also drives `last_tensor`, which the CPU pick
     /// fallback reads when WebGPU is unavailable.
     pub fn upload_tensor(&mut self, bytes: &[u8]) -> Result<(), JsValue> {
-        self.inner.upload_tensor_buffer(bytes)
+        self.inner.upload_tensor_buffer(bytes)?;
+        // Retain pickable semantic nodes without the bright debug particle field.
+        self.inner.set_ambient_enabled(false);
+        Ok(())
     }
 
     /// Queue a pick at canvas pixel (x, y). CPU fallback resolves
@@ -437,6 +514,14 @@ impl GamePortal {
 
     pub fn set_sky_preset(&mut self, preset: u32) {
         self.inner.set_sky_preset(preset);
+        // Storybook strategy art needs legible shadow faces at overview scale.
+        let (sun, intensity, ambient) = match preset {
+            2 => ([0.85, 0.25, 0.45], 1.50, 0.70),
+            3 => ([0.20, 0.40, 0.80], 0.95, 0.48),
+            _ => ([0.45, 0.85, 0.35], 1.60, 0.82),
+        };
+        self.inner
+            .set_lighting(sun[0], sun[1], sun[2], intensity, ambient);
     }
 }
 

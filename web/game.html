@@ -127,6 +127,15 @@
   .scene-victory span { display:block; margin-top:3px; }
   .order-hint { margin-top:3px; font-size:11px; font-weight:400; color:#684b3e; }
   .action-group button { line-height:1.25; }
+  /* The browser page is only a host. Playable menus are painted by Qualia in the viewport. */
+  body { margin:0; overflow:hidden; background:#10252e; }
+  header, .territory-nav, .side-column, #resource-bar, #inspector,
+  .world-column > .panel, .scene-label, .scene-help, .scene-victory { display:none !important; }
+  main, .world-column { display:block; padding:0; margin:0; max-width:none; }
+  .scene-shell { width:100vw; height:100vh; border:0; border-radius:0; box-shadow:none; }
+  #scene, #game-hud { position:absolute; inset:0; width:100%; height:100%; max-height:none;
+    border:0; border-radius:0; display:block; }
+  #game-hud { z-index:2; pointer-events:none; }
 </style>
 </head>
 <body>
@@ -143,6 +152,7 @@
     </nav>
     <div class="scene-shell">
       <canvas id="scene" width="960" height="600" aria-label="QualiaDB three-dimensional view of Kestrel Flats"></canvas>
+      <canvas id="game-hud" width="960" height="600" tabindex="0" aria-label="Maslows Challenge in-game menu and world controls"></canvas>
       <div class="scene-label"><span class="eyebrow" id="territory-step">Territory 01</span><strong id="territory-name">Kestrel Flats</strong></div>
       <div class="scene-help">Choose a territory · Drag to orbit · Wheel to zoom · Click a site to inspect</div>
       <div class="scene-victory" id="scene-victory" hidden></div>
@@ -299,10 +309,31 @@ const PLACES = [
   'rc:waterTank', 'rc:garden',
   'rc:bridge', 'rc:windPump', 'rc:orchard',
 ];
+const PLACE_MARKERS = [
+  ['Shelter','home','#de815b'],['Salvage','salvage','#ca9070'],
+  ['Market','trade','#e4ad54'],['Workshop','industry','#8198ce'],
+  ['Council','civic','#b886cf'],['Water','water','#51b8d5'],
+  ['Garden','food','#78b66c'],['Crossing','route','#c6a260'],
+  ['Wind power','energy','#67b8bd'],['Orchard','food','#78b66c'],
+];
 // ---------- portal ----------
 const canvas = $('scene');
+canvas.width = Math.max(600, window.innerWidth);
+canvas.height = Math.max(540, window.innerHeight);
+const hudCanvas = $('game-hud');
+hudCanvas.width = canvas.width;
+hudCanvas.height = canvas.height;
 try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
 const portal = new m.GamePortal(canvas);
+const hud = new m.GameHud(hudCanvas);
+let hudPage='orders', hudOrderOffset=0, hudScriptResult='';
+let hudSiteLines=[], hudSiteActions=[];
+window.addEventListener('resize',()=>{
+  const w=Math.max(600,window.innerWidth), h=Math.max(540,window.innerHeight);
+  if(w===canvas.width&&h===canvas.height)return;
+  canvas.width=w;canvas.height=h;hudCanvas.width=w;hudCanvas.height=h;
+  applyCam();renderHud();
+});
 let skyPreset=1;
 portal.set_sky_preset(skyPreset);
 $('sky-preset').onclick = () => {
@@ -312,17 +343,36 @@ $('sky-preset').onclick = () => {
 };
 $('tier').textContent = 'render tier ' + portal.tier();
 
-let camYaw=0.6, camPitch=0.42, camZoom=1.8;
-let territory='kestrel', tileCenters={};
+let camYaw=0.6, camPitch=0.42, camZoom=canvas.width<900?1.9:1.45;
+let camTarget=null, camGoal=null, zoomGoal=null, focusedPlace=null;
+let territory='kestrel', tileCenters={}, placePositions=[];
 function applyCam(){
   try {
-    const p=tileCenters[territory];
-    if (p) portal.set_camera_target(camYaw, camPitch, camZoom, p.x, p.y, p.z);
+    if (camTarget) {
+      portal.set_camera_target(camYaw, camPitch, camZoom,camTarget.x,camTarget.y,camTarget.z);
+      hud.set_camera_target(camYaw, camPitch, camZoom,camTarget.x,camTarget.y,camTarget.z);
+    }
     else portal.set_camera(camYaw, camPitch, camZoom);
   } catch(e) { note(`camera: ${String(e).slice(0,80)}`); }
 }
+function framedTarget(p,zoom){
+  const panelWidth=canvas.width<900?290:358;
+  const shift=panelWidth*zoom*Math.tan(Math.PI/8)/canvas.height;
+  return {x:p.x+Math.cos(camYaw)*shift,y:p.y,z:p.z-Math.sin(camYaw)*shift};
+}
+function focusTerritory(id, immediate=false){
+  const p=tileCenters[id]; if(!p)return;
+  focusedPlace=null;
+  zoomGoal=canvas.width<900?1.85:1.55;
+  camGoal=framedTarget(p,zoomGoal);
+  if(immediate){camTarget={...camGoal};camZoom=zoomGoal;camGoal=null;zoomGoal=null;applyCam();}
+}
+function focusSite(index){
+  const p=placePositions[index];if(!p)return;
+  focusedPlace=index;zoomGoal=1.02;camGoal=framedTarget(p,zoomGoal);
+}
 for (const id of ['kestrel','saltwind']) {
-  $('tile-'+id).onclick = () => { territory=id; refresh(); };
+  $('tile-'+id).onclick = () => { territory=id;focusTerritory(id);refresh(); };
 }
 
 let sceneMeshes = 0;
@@ -333,11 +383,14 @@ function rebuild() {
     st.waterOnline, st.gardenActive, st.bridgeOpen, st.bridgeBraced, st.day>4,
     st.pumpOnline, st.orchardActive, sceneSource);
   tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
+  placePositions=scene.places;
   const receipt = toObj(portal.load_scene(scene.organs));
   sceneMeshes = receipt.organs_loaded;
   if (sceneMeshes !== scene.organs.length)
     throw new Error(`QualiaDB refused ${scene.organs.length-sceneMeshes} scene meshes`);
   portal.upload_tensor(scene.tensor);
+  if(!camTarget)focusTerritory(territory,true);
+  else if(focusedPlace!==null)focusSite(focusedPlace);
   applyCam();
   return st;
 }
@@ -345,6 +398,15 @@ function rebuild() {
 // rAF render loop — tick drives GPU pick readback too
 let last=performance.now(), tickErrorShown=false;
 (function loop(t){
+  if(camGoal){
+    const k=Math.min(1,Math.max(0.04,(t-last)*0.007));
+    for(const axis of ['x','y','z'])camTarget[axis]+=(camGoal[axis]-camTarget[axis])*k;
+    camZoom+=(zoomGoal-camZoom)*k;
+    if(Math.abs(camZoom-zoomGoal)<0.005&&['x','y','z'].every(a=>Math.abs(camTarget[a]-camGoal[a])<0.001)){
+      camTarget=camGoal;camZoom=zoomGoal;camGoal=null;zoomGoal=null;
+    }
+    applyCam();
+  }
   try { portal.tick(canvas, Math.min(50, t-last)); }
   catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
   last=t; requestAnimationFrame(loop);
@@ -352,16 +414,41 @@ let last=performance.now(), tickErrorShown=false;
 
 // orbit + pick
 let drag=null;
-canvas.addEventListener('pointerdown', e=>{ drag={x:e.clientX,y:e.clientY,moved:false}; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointerdown', e=>{
+  const r=canvas.getBoundingClientRect();
+  const id=hud.hit_test((e.clientX-r.left)*canvas.width/r.width,
+    (e.clientY-r.top)*canvas.height/r.height);
+  const px=(e.clientX-r.left)*canvas.width/r.width;
+  const py=(e.clientY-r.top)*canvas.height/r.height;
+  drag={x:e.clientX,y:e.clientY,moved:false,hudAction:id,
+    pan:e.shiftKey||e.button===1,
+    blockWorld:py<58||py>canvas.height-58||px>(canvas.width<900?canvas.width-290:canvas.width-358)};
+  canvas.setPointerCapture(e.pointerId);
+});
 canvas.addEventListener('pointermove', e=>{ if(!drag) return;
+  if(drag.hudAction||drag.blockWorld)return;
   if (Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>4) drag.moved=true;
-  if (drag.moved){ camYaw+=(e.movementX||0)*0.008; camPitch=Math.max(-1.2,Math.min(1.4,camPitch+(e.movementY||0)*0.006)); applyCam(); }});
+  if (drag.moved){
+    camGoal=null;zoomGoal=null;
+    if(drag.pan){camTarget.x-=(e.movementX||0)*0.0015;camTarget.z+=(e.movementY||0)*0.0015;}
+    else{camYaw+=(e.movementX||0)*0.008;
+      camPitch=Math.max(-1.2,Math.min(1.4,camPitch+(e.movementY||0)*0.006));}
+    applyCam(); }});
 canvas.addEventListener('pointerup', e=>{
+  if(drag?.hudAction){
+    if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)<18)
+      handleHudAction(drag.hudAction);
+    drag=null;return;
+  }
+  if(drag?.blockWorld){drag=null;return;}
   if (drag && !drag.moved){
     const r=canvas.getBoundingClientRect();
+    const px=(e.clientX-r.left)*canvas.width/r.width;
+    const py=(e.clientY-r.top)*canvas.height/r.height;
+    const hudAction=hud.hit_test(px,py);
+    if (hudAction) { handleHudAction(hudAction); drag=null; return; }
     portal.queue_pick(
-      (e.clientX-r.left)*canvas.width/r.width,
-      (e.clientY-r.top)*canvas.height/r.height,
+      px, py,
       canvas.width, canvas.height);
     const readPick = (tries) => {
       const i=portal.poll_pick();
@@ -373,16 +460,200 @@ canvas.addEventListener('pointerup', e=>{
   }
   drag=null;
 });
-canvas.addEventListener('wheel', e=>{ e.preventDefault(); camZoom=Math.max(1.2,Math.min(20,camZoom*Math.exp(e.deltaY*0.001))); applyCam(); }, {passive:false});
+canvas.addEventListener('wheel', e=>{
+  e.preventDefault();
+  const r=canvas.getBoundingClientRect();
+  const px=(e.clientX-r.left)*canvas.width/r.width;
+  if(px>(canvas.width<900?canvas.width-290:canvas.width-358)&&hudPage==='orders'){
+    hudOrderOffset=Math.max(0,hudOrderOffset+(e.deltaY>0?2:-2));renderHud();return;
+  }
+  camGoal=null;zoomGoal=null;
+  camZoom=Math.max(0.55,Math.min(20,camZoom*Math.exp(e.deltaY*0.001)));applyCam();
+}, {passive:false});
 
 function inspect(s){
+  const siteIndex=PLACES.indexOf(s);if(siteIndex>=0)focusSite(siteIndex);
   $('why').style.display='block';
   $('why').innerHTML = `<b>${short(s)}</b><dl>` +
     triples().filter(t=>t.s===s).map(t=>`<dt>${short(t.p)}</dt><dd>${short(t.o)}</dd>`).join('') +
     `</dl>`;
+  hudSiteLines=[short(s),...triples().filter(t=>t.s===s)
+    .map(t=>`${short(t.p)}: ${short(t.o)}`)];
+  hudSiteActions=[];
+  hudPage='site'; renderHud();
 }
 
 // ---------- HUD ----------
+function renderHud() {
+  const st=state(), W=hudCanvas.width, H=hudCanvas.height;
+  const compact=W<900;
+  const right=compact?W-290:W-358, panelW=W-right-12;
+  const items=[];
+  const put=(kind,id,text,x,y,w,h,value=0,disabled=false)=>
+    items.push({kind,id,text:String(text),x,y,w,h,value,disabled});
+  const panel=(x,y,w,h)=>put('panel','','',x,y,w,h);
+  const label=(text,x,y,w=300,h=23)=>put('label','',String(text).slice(0,70),x,y,w,h);
+  const button=(id,text,x,y,w,h=34)=>put('button',id,String(text).slice(0,44),x,y,w,h);
+  placePositions.forEach((p,i)=>{
+    const [text,icon,color]=PLACE_MARKERS[i];
+    items.push({kind:'marker',id:`place:${i}`,text,x:p.x,y:p.y,z:p.z,w:32,h:32,icon,color});
+  });
+  panel(0,0,W,58);
+  label(compact?'MASLOWS CHALLENGE':'MASLOWS CHALLENGE  ·  AN SDGs GAME',18,10,compact?245:410,25);
+  label(`DAY ${st.day}  ·  ${st.bridgeOpen?'CROSSING OPEN':st.day<=4?'LOW TIDE':'HIGH TIDE'}`,18,32,420,20);
+  button('territory:kestrel','Kestrel Flats',compact?W-220:right-275,12,compact?103:128,34);
+  button('territory:saltwind','Saltwind Reach',compact?W-111:right-139,12,compact?103:128,34);
+  button('camera:in','+',18,75,36,34);
+  button('camera:out','−',58,75,36,34);
+  button('camera:fit','⌂',98,75,36,34);
+  label(focusedPlace===null?'MAP VIEW':PLACE_MARKERS[focusedPlace][0].toUpperCase(),18,114,180,23);
+  panel(right,66,panelW,H-128);
+  label(territory==='saltwind'?'SALTWIND REACH':'KESTREL FLATS',right+12,75,panelW-24,26);
+  const tabs=['orders','goals','journal','site','system'];
+  const tabW=(panelW-24)/tabs.length;
+  tabs.forEach((tab,i)=>button(`page:${tab}`,tab.toUpperCase(),right+12+i*tabW,108,tabW-3,29));
+  let y=148;
+  if(hudPage==='orders') {
+    const lead=campaignLead(st);
+    label(lead.title,right+14,y,panelW-28); y+=26;
+    const words=lead.copy.split(' '); let line='';
+    for(const word of words){
+      if((line+' '+word).length>40){label(line,right+14,y,panelW-28,19);y+=19;line='';}
+      line+=(line?' ':'')+word;
+    }
+    if(line){label(line,right+14,y,panelW-28,19);y+=19;}
+    y+=8;
+    const actions=[...$('actions').querySelectorAll('button[data-action]')]
+      .map(b=>({id:b.dataset.action,text:b.textContent}));
+    if(st.orchardActive&&!st.finale) actions.push(
+      {id:'openCommons',text:'Host the commons gathering'},
+      {id:'launchTradeRoute',text:'Launch the trade route'});
+    const available=Math.max(2,Math.floor((H-y-173)/40));
+    hudOrderOffset=Math.min(hudOrderOffset,Math.max(0,actions.length-available));
+    actions.slice(hudOrderOffset,hudOrderOffset+available).forEach(a=>{
+      button(`action:${a.id}`,a.text,right+13,y,panelW-26,34);y+=40;
+    });
+    if(actions.length>available){
+      button('orders:prev','▲ Earlier orders',right+13,H-158,(panelW-30)/2,30);
+      button('orders:next','▼ More orders',right+18+(panelW-30)/2,H-158,(panelW-30)/2,30);
+    }
+  } else if(hudPage==='goals') {
+    label(territory==='saltwind'?'CROSS THE CANAL':'RESTORE THE COMMONS',right+14,y);y+=34;
+    const goals=territory==='saltwind' ? [
+      ['Crossing',st.bridgeOpen],['Wind pump',st.pumpOnline],['Orchard',st.orchardActive]
+    ] : [['Shelter',st.upgrades>0],['Workshop',st.online],['Shared water',st.waterOnline],['Garden',st.gardenActive]];
+    for(const [name,done] of goals){label(`${done?'✓':'○'}  ${name}`,right+18,y);y+=33;}
+    y+=12;label('COMMUNITY PROGRESS',right+14,y);y+=29;
+    const done=[st.upgrades>0,st.online,st.waterOnline,st.gardenActive,
+      st.bridgeOpen,st.pumpOnline,st.orchardActive].filter(Boolean).length;
+    put('meter','','',right+14,y,panelW-28,14,done/7);
+    label(`${done} OF 7 PROJECTS`,right+14,y+20);
+  } else if(hudPage==='journal') {
+    label('EVENT JOURNAL',right+14,y);y+=33;
+    const entries=[...$('log').children].slice(0,Math.floor((H-y-120)/31));
+    entries.forEach(el=>{label(el.textContent.slice(0,38),right+14,y);y+=30;});
+  } else if(hudPage==='site') {
+    label('SITE INSPECTOR',right+14,y);y+=35;
+    const lines=hudSiteLines.length ? hudSiteLines :
+      [territory==='saltwind'?'Saltwind Reach':'Community overview',
+        `Workshop: ${st.online?'powered':'offline'}`,
+        `Water: ${st.waterOnline?'flowing':'dry'}`,
+        `Bridge: ${st.bridgeOpen?'open':'broken'}`];
+    for(const entry of lines){
+      const words=String(entry).replace(/\s+/g,' ').trim().split(' ');let line='';
+      for(const word of words){if((line+' '+word).length>37){label(line,right+14,y);y+=22;line='';}
+        line+=(line?' ':'')+word;if(y>H-180)break;}
+      if(line&&y<H-170){label(line,right+14,y);y+=26;}
+      if(y>H-170)break;
+    }
+    if(hudSiteActions.length){
+      y=Math.max(y+9,H-150);
+      hudSiteActions.slice(0,2).forEach(id=>{
+        const title=catalog.find(a=>a.id===id)?.label||id;
+        button(`action:${id}`,title,right+14,y,panelW-28,34);y+=39;});
+    }
+  } else if(hudPage==='script') {
+    label('VIBESCRIPT CONSOLE',right+14,y);y+=37;
+    label('Qualia world queries and authored scenes',right+14,y);y+=37;
+    for(const [id,title] of [['query','Query world coins'],
+      ['recommend','Propose field dispatch order'],
+      ['preview','Compile beacon .10d asset']]){
+      button(`script:${id}`,title,right+14,y,panelW-28,37);y+=47;}
+    label('RESULT',right+14,y+8);y+=40;
+    const words=hudScriptResult.split(' ');let line='';
+    for(const word of words){if((line+' '+word).length>39){label(line,right+14,y);y+=24;line='';}
+      line+=(line?' ':'')+word;if(y>H-180)break;}
+    if(line&&y<H-160)label(line,right+14,y);
+    button('page:system','Back to system',right+14,H-171,panelW-28,35);
+  } else {
+    label('CAMPAIGN AND VIEW',right+14,y);y+=38;
+    const rowH=compact?31:37, rowStep=compact?36:45;
+    for(const [id,title] of [['save','Save campaign'],['load','Load campaign'],
+      ['replay','Replay decisions'],['new-game','New campaign'],['sky-preset','Change sky']]){
+      button(`utility:${id}`,title,right+14,y,panelW-28,rowH);y+=rowStep;}
+    button('page:script','VibeScript console',right+14,y,panelW-28,rowH);y+=rowStep;
+    label(`QUALIA PORTAL  ·  TIER ${portal.tier()}`,right+14,y+15);
+    label(`${sceneMeshes} VERIFIED .10d MESHES`,right+14,y+43);
+    if(y+71<H-75)label($('persist').textContent,right+14,y+71,panelW-28);
+    if(y+99<H-75)label('Drag orbit · Shift drag pan · Wheel zoom',right+14,y+99,panelW-28);
+  }
+  panel(0,H-58,W,58);
+  const stats=compact ? [`COINS ${st.coins}`,`CREW ${st.labour?'READY':'REST'}`,
+    `POWER ${st.online?'ON':'OFF'}`,`WATER ${st.waterOnline?'ON':'DRY'}`,
+    `FOOD ${st.gardenActive?'ON':'DRY'}`] :
+    [`COINS  ${st.coins}`,`CREW  ${st.labour?'READY':'RESTING'}`,
+    `WORKSHOP  ${st.online?'ON':'OFF'}`,`WATER  ${st.waterOnline?'FLOWING':'DRY'}`,
+    `GARDEN  ${st.gardenActive?'GROWING':'DRY'}`];
+  stats.forEach((s,i)=>label(s,18+i*(W-36)/5,H-47,(W-36)/5,25));
+  hud.set_document_json(JSON.stringify({items}));
+}
+
+function handleHudAction(id){
+  if(id.startsWith('place:')){inspect(PLACES[Number(id.slice(6))]);return;}
+  if(id==='camera:in'||id==='camera:out'){
+    camGoal=null;zoomGoal=null;
+    camZoom=Math.max(0.55,Math.min(20,camZoom*(id==='camera:in'?0.75:1.33)));
+    applyCam();return;
+  }
+  if(id==='camera:fit'){focusTerritory(territory);renderHud();return;}
+  if(id.startsWith('territory:')){
+    territory=id.slice(10);focusTerritory(territory);refresh();return;}
+  if(id.startsWith('page:')){hudPage=id.slice(5);renderHud();return;}
+  if(id.startsWith('action:')){tryAction(id.slice(7));return;}
+  if(id.startsWith('script:')){
+    const command=id.slice(7);
+    if(command==='query'){
+      const result=toObj(session.vibe_query('= world.coins'));
+      hudScriptResult=result.ok?`World coins: ${result.value}`:String(result.error);
+    }else if(command==='recommend'){
+      const action=campaignLead(state()).action;
+      if(action){
+        const result=toObj(session.vibe_propose(`= "${action}"`));
+        hudScriptResult=result.ok?`Proposed ${action}; event ${result.seq}`:
+          `Order blocked: ${String(result.explain||result.error||action)}`;
+        if(result.ok)refresh();
+      }else hudScriptResult='No dispatch order remains.';
+    }else if(command==='preview'){
+      sceneSource=VIBE_SCENE.trim();
+      try{refresh();hudScriptResult=`Qualia compiled beacon asset; ${sceneMeshes} .10d meshes loaded.`;}
+      catch(e){hudScriptResult=String(e);}
+    }
+    renderHud();return;
+  }
+  if(id==='orders:prev'||id==='orders:next'){
+    hudOrderOffset=Math.max(0,hudOrderOffset+(id==='orders:next'?4:-4));renderHud();return;
+  }
+  if(id.startsWith('utility:')){$(id.slice(8)).click();renderHud();}
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Tab'){e.preventDefault();hud.focus_next(e.shiftKey);}
+  if((e.key==='Enter'||e.key===' ')&&hud.focused_action()){
+    e.preventDefault();handleHudAction(hud.focused_action());
+  }
+  const pan={ArrowLeft:[-0.08,0],ArrowRight:[0.08,0],
+    ArrowUp:[0,-0.08],ArrowDown:[0,0.08]}[e.key];
+  if(pan){e.preventDefault();camGoal=null;zoomGoal=null;camTarget.x+=pan[0];camTarget.z+=pan[1];applyCam();}
+});
 function refresh() {
   const st = rebuild();
   const saltwind=territory==='saltwind';
@@ -498,6 +769,7 @@ function refresh() {
     for (const id of ids) {
       const a = catalog.find(x=>x.id===id); if (!a) continue;
       const b = document.createElement('button');
+      b.dataset.action = id;
       b.textContent = a.label; b.onclick = () => tryAction(a.id);
       section.appendChild(b);
     }
@@ -509,12 +781,15 @@ function refresh() {
     box.appendChild(p);
   }
   $('tier').textContent = `QualiaPortal tier ${portal.tier()} · 2 territories · ${sceneMeshes} .10d meshes`;
+  renderHud();
 }
 
 function tryAction(id) {
   const r = toObj(session.propose(id));
   if (r.ok) {
     $('why').style.display='none';
+    hudSiteLines=[];hudSiteActions=[];
+    if(hudPage==='site')hudPage='orders';
     const eventCopy={
       repairTankLabour:'The tank is flowing again.',repairTankCoins:'New fittings brought the tank back online.',
       startGarden:'The first garden beds are planted.',switchPowerOn:'The workshop lights come on.',
@@ -555,21 +830,29 @@ function tryAction(id) {
     <details><summary class="muted">Show rule details</summary><ul>${rows}</ul></details>`;
   $('why').querySelectorAll('[data-suggestion]').forEach(b=>b.onclick=()=>tryAction(b.dataset.suggestion));
   note(`BLOCKED ${id}: ${rows.replace(/<[^>]+>/g,'').slice(0,120)}`);
+  hudSiteLines=['That order cannot go ahead yet',
+    r.explain||'Its requirements are not met.',
+    ...(rep.results||[]).slice(0,2).map(v=>`${short(String(v.result_path))}: ${v.message}`),
+    'Try next:'];
+  hudSiteActions=suggestions;
+  hudPage='site'; renderHud();
 }
 
 $('save').onclick = async () => {
   await m.world_save('rc-save.n3', new TextEncoder().encode(session.world()));
   $('persist').textContent = 'saved';
+  renderHud();
 };
 $('load').onclick = async () => {
   const b = await m.world_load('rc-save.n3');
   const saved = new TextDecoder().decode(b);
   if (!saved.includes('rc:world rc:contentVersion 4 .')) {
     $('persist').textContent = 'older save needs a Qualia Q42 migration';
+    renderHud();
     return;
   }
   session = new m.GameSession(saved, ACTIONS);
-  refresh(); $('persist').textContent = 'loaded';
+  refresh(); $('persist').textContent = 'loaded'; renderHud();
 };
 $('replay').onclick = () => {
   const ids = toObj(session.events());
@@ -622,7 +905,11 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST Vibe blocked order: ${scriptBlock.ok===false ? 'PASS' : 'FAIL'}`);
   const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, VIBE_SCENE);
   note(`TEST Vibe scene asset: ${scriptAsset.organs.length===sceneMeshes+1 ? 'PASS' : 'FAIL'}`);
+  const firstMesh=scriptAsset.organs[0].bytes;
+  const hasSurfaceReading=firstMesh.some((v,i,a)=>v===83&&a[i+1]===82&&a[i+2]===68&&a[i+3]===49);
+  note(`TEST Qualia SRD1 surface reading: ${hasSurfaceReading?'PASS':'FAIL'}`);
   note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=115 ? 'PASS' : 'FAIL'}`);
+  note(`TEST site markers: ${placePositions.length===PLACES.length && PLACE_MARKERS.length===PLACES.length && placePositions.every(p=>[p.x,p.y,p.z].every(Number.isFinite)) ? 'PASS' : 'FAIL'}`);
   const expect = (name, id, wantOk) => {
     const r = toObj(testSession.propose(id));
     note(`TEST ${name}: ${id} ${r.ok===wantOk?'PASS':'FAIL'}`);
