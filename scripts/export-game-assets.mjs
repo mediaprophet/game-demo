@@ -15,14 +15,15 @@ const out = join(root, 'assets', 'generated', '10d');
 await mkdir(out, { recursive: true });
 const beacon = (await readFile(join(root, 'web', 'fixtures', 'community-beacon.vibe'), 'utf8')).trim();
 const cases = [
-  ['opening', [0, 0, false, false, false, false, false, false, false, false, false, '']],
-  ['early-progress', [1, 1, false, true, true, true, false, false, false, false, false, '']],
-  ['workshop-online', [1, 2, true, true, true, true, false, false, false, false, false, '']],
-  ['high-tide', [1, 2, true, true, true, true, false, false, true, false, false, '']],
-  ['braced-crossing', [1, 2, true, true, true, true, false, true, true, false, false, '']],
-  ['bridge-open', [1, 2, true, true, true, true, true, true, true, false, false, '']],
-  ['thriving', [2, 2, true, true, true, true, true, true, true, true, true, '']],
-  ['vibe-beacon', [0, 0, false, false, false, false, false, false, false, false, false, beacon]],
+  ['opening', [0, 0, false, false, false, false, false, false, false, false, false, false, '']],
+  ['early-progress', [1, 1, false, true, true, true, false, false, false, false, false, false, '']],
+  ['workshop-online', [1, 2, true, true, true, true, false, false, false, false, false, false, '']],
+  ['signal-online', [1, 2, true, true, true, true, true, false, false, false, false, false, '']],
+  ['high-tide', [1, 2, true, true, true, true, false, false, false, true, false, false, '']],
+  ['braced-crossing', [1, 2, true, true, true, true, false, false, true, true, false, false, '']],
+  ['bridge-open', [1, 2, true, true, true, true, false, true, true, true, false, false, '']],
+  ['thriving', [2, 2, true, true, true, true, true, true, true, true, true, true, '']],
+  ['vibe-beacon', [0, 0, false, false, false, false, false, false, false, false, false, false, beacon]],
 ];
 
 const assets = new Map();
@@ -72,6 +73,7 @@ if (verify_game_hmc(pack) !== manifest.assets.length + 1) {
 }
 const packDir = join(root, 'web', 'assets');
 await mkdir(packDir, { recursive: true });
+await writeFile(join(packDir, 'manifest.json'), manifestText);
 const packPath = join(packDir, 'maslows-challenge-scenes.hmc');
 await writeFile(packPath, Buffer.from(pack));
 const buildId = manifest.wasm.sha256.slice(0, 16);

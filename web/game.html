@@ -211,7 +211,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = 'cdc6628f5d1b4573';
+const WASM_BUILD = '0f651bcca7b4fabe';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 $('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
@@ -239,6 +239,8 @@ const state = () => ({
   upgrades: values('rc:swag','rc:upgrade').length,
   waterOnline: values('rc:waterTank','rc:status').includes('"online"'),
   gardenActive: values('rc:garden','rc:status').includes('"growing"'),
+  signalOnline: values('rc:communicationsMast','rc:status').includes('"online"'),
+  remoteOrderDelivered: values('rc:communicationsMast','rc:deliveredOrder').length > 0,
   bridgeOpen: values('rc:bridge','rc:status').includes('"passable"'),
   bridgeBraced: values('rc:bridge','rc:bracedBy').length > 0,
   pumpOnline: values('rc:windPump','rc:status').includes('"online"'),
@@ -267,6 +269,9 @@ const STORY = {
   raiseWindPump: 'Use the powered workshop and open crossing to bring the wind pump back to life.',
   plantOrchard: 'The pump is ready. Plant Saltwind’s orchard for a lasting harvest.',
   fulfilWorkshopOrder: 'The workshop can take one paid repair order. It is a way to fund shared supplies.',
+  connectMastLabour: 'Repair the communications mast with a crew shift. Once connected, distant neighbours can send work to the workshop.',
+  connectMastCoins: 'Buy replacement transmitter parts to connect the mast today without using the crew. The remote contract will pay later.',
+  fulfilRemoteOrder: 'The connected mast brings a distant repair contract. Complete it for four coins to fund your final community choice.',
   endTurn: 'Your crew has spent its work for today. Rest and begin again tomorrow.',
 };
 function campaignLead(st) {
@@ -300,6 +305,18 @@ function campaignLead(st) {
     label:st.labour?'Commission the wind pump':'Rest for tomorrow',action:st.labour?'raiseWindPump':'endTurn',territory:'saltwind'};
   if (!st.orchardActive) return {title:'Plant for the future',copy:STORY.plantOrchard,
     label:st.labour?'Plant the orchard':'Rest for tomorrow',action:st.labour?'plantOrchard':'endTurn',territory:'saltwind'};
+  if (st.coins<4 && st.orderDelivered && !st.signalOnline) {
+    const action=st.labour?'connectMastLabour':st.coins>=3?'connectMastCoins':'endTurn';
+    return {title:'Find another source of supplies',copy:STORY[action]||STORY.endTurn,
+      label:action==='endTurn'?'Rest for tomorrow':catalog.find(a=>a.id===action)?.label||'Connect the mast',
+      action,territory:'kestrel'};
+  }
+  if (st.coins<4 && st.signalOnline && !st.remoteOrderDelivered) {
+    const action=st.labour?'fulfilRemoteOrder':'endTurn';
+    return {title:'Use the new connection',copy:STORY[action],
+      label:action==='endTurn'?'Rest for tomorrow':catalog.find(a=>a.id===action)?.label||'Deliver contract',
+      action,territory:'kestrel'};
+  }
   return {title:'Choose what the town becomes',copy:'The essentials now work. Host a local harvest gathering or launch a canal trade route. Each ending asks for a different commitment.',
     label:'Choose an ending below',action:null,territory:'saltwind'};
 }
@@ -308,7 +325,7 @@ function campaignLead(st) {
 const PLACES = [
   'rc:camp', 'rc:scrapyard', 'rc:market', 'rc:workshop', 'rc:committee',
   'rc:waterTank', 'rc:garden',
-  'rc:bridge', 'rc:windPump', 'rc:orchard',
+  'rc:bridge', 'rc:windPump', 'rc:orchard', 'rc:communicationsMast',
 ];
 const PLACE_MARKERS = [
   ['Shelter','home','#de815b'],['Salvage','salvage','#ca9070'],
@@ -316,6 +333,7 @@ const PLACE_MARKERS = [
   ['Council','civic','#b886cf'],['Water','water','#51b8d5'],
   ['Garden','food','#78b66c'],['Crossing','route','#c6a260'],
   ['Wind power','energy','#67b8bd'],['Orchard','food','#78b66c'],
+  ['Signal mast','communications','#69c6b0'],
 ];
 // Site ownership is presentation data. GameSession remains the order authority.
 const SITE_ACTIONS = [
@@ -329,6 +347,7 @@ const SITE_ACTIONS = [
   ['restoreBridge','braceBridge','restoreBridgeLateLabour','restoreBridgeLateCoins'],
   ['raiseWindPump'],
   ['plantOrchard','openCommons','launchTradeRoute'],
+  ['connectMastLabour','connectMastCoins','fulfilRemoteOrder'],
 ];
 const siteForAction = id => SITE_ACTIONS.findIndex(ids=>ids.includes(id));
 function siteBrief(index,st){
@@ -342,7 +361,8 @@ function siteBrief(index,st){
     case 6:return ['GARDEN',st.gardenActive?'Food is growing in the first beds.':'Plant once shared water is flowing.'];
     case 7:return ['CANAL CROSSING',st.bridgeOpen?'The route to Saltwind is open.':st.day<=4?'Low tide makes the bridge easier to repair.':'High tide demands bracing or a specialist crew.'];
     case 8:return ['WIND PUMP',st.pumpOnline?'The pump supplies Saltwind Reach.':'An open bridge and powered workshop are needed.'];
-    default:return ['ORCHARD',st.orchardActive?'Harvest is ready for a commons or trade route.':'Bring the wind pump online, then plant the orchard.'];
+    case 9:return ['ORCHARD',st.orchardActive?'Harvest is ready for a commons or trade route.':'Bring the wind pump online, then plant the orchard.'];
+    default:return ['SIGNAL MAST',st.signalOnline?st.remoteOrderDelivered?'The remote repair contract is complete.':'The link is live. A remote repair contract awaits.':'Power the workshop, then reconnect the mast by labour or purchased parts.'];
   }
 }
 // ---------- portal ----------
@@ -409,7 +429,7 @@ let sceneSource = '';
 function rebuild() {
   const st = state();
   const scene = m.scene_build(st.upgrades, st.parts.length, st.online, st.approved,
-    st.waterOnline, st.gardenActive, st.bridgeOpen, st.bridgeBraced, st.day>4,
+    st.waterOnline, st.gardenActive, st.signalOnline, st.bridgeOpen, st.bridgeBraced, st.day>4,
     st.pumpOnline, st.orchardActive, sceneSource);
   tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
   placePositions=scene.places;
@@ -503,7 +523,7 @@ canvas.addEventListener('wheel', e=>{
 function inspect(s){
   const siteIndex=PLACES.indexOf(s);
   if(siteIndex<0)return;
-  const siteTerritory=siteIndex>=7?'saltwind':'kestrel';
+  const siteTerritory=siteIndex>=7&&siteIndex<=9?'saltwind':'kestrel';
   focusSite(siteIndex);
   if(territory!==siteTerritory){territory=siteTerritory;refresh();}
   const st=state();
@@ -591,7 +611,7 @@ function renderHud() {
     label(hudPage==='result'?'CAMPAIGN RECORD':territory==='saltwind'?'CROSS THE CANAL':'RESTORE THE COMMONS',right+14,y);y+=34;
     const goals=territory==='saltwind' ? [
       ['Crossing',st.bridgeOpen],['Wind pump',st.pumpOnline],['Orchard',st.orchardActive]
-    ] : [['Shelter',st.upgrades>0],['Workshop',st.online],['Shared water',st.waterOnline],['Garden',st.gardenActive]];
+    ] : [['Shelter',st.upgrades>0],['Workshop',st.online],['Shared water',st.waterOnline],['Garden',st.gardenActive],['Signal mast (optional)',st.signalOnline]];
     for(const [name,done] of goals){label(`${done?'✓':'○'}  ${name}`,right+18,y);y+=33;}
     y+=12;label('COMMUNITY PROGRESS',right+14,y);y+=29;
     const done=[st.upgrades>0,st.online,st.waterOnline,st.gardenActive,
@@ -769,7 +789,8 @@ function refresh() {
       resource('Orchard',st.orchardActive?'Growing':'Dry',st.orchardActive?'status-good':'status-warn') :
       resource('Workshop',st.online?'Powered':'Offline',st.online?'status-good':'status-warn') +
       resource('Water',st.waterOnline?'Flowing':'Offline',st.waterOnline?'status-good':'status-warn') +
-      resource('Garden',st.gardenActive?'Growing':'Dry',st.gardenActive?'status-good':'status-warn'));
+      resource('Garden',st.gardenActive?'Growing':'Dry',st.gardenActive?'status-good':'status-warn') +
+      resource('Signal',st.signalOnline?'Connected':'Offline',st.signalOnline?'status-good':'status-warn'));
   const objective = (title,detail,done) => `<div class="objective ${done?'done':''}"><div><b>${title}</b><small>${detail}</small></div><span class="check">${done?'✓':'○'}</span></div>`;
   $('objectives').innerHTML = saltwind ?
     objective('Reconnect the crossing',st.bridgeOpen?'Bridge passable':st.day<=4?
@@ -780,7 +801,8 @@ function refresh() {
     objective('Improve your shelter',`${st.upgrades} upgrade${st.upgrades===1?'':'s'} made`,st.upgrades>0) +
     objective('Power the workshop',`${st.parts.length}/2 parts · ${st.approved?'endorsed':'approval pending'}`,st.online) +
     objective('Restore shared water',st.waterOnline?'Tank operational':'Repair by buying or salvaging',st.waterOnline) +
-    objective('Start the garden',st.gardenActive?'Beds planted':'Needs water and labour',st.gardenActive);
+    objective('Start the garden',st.gardenActive?'Beds planted':'Needs water and labour',st.gardenActive) +
+    objective('Connect the signal mast (optional)',st.signalOnline?'Remote work available':'Needs workshop power · labour or 3 coins',st.signalOnline);
   const finalePanel=$('finale-panel');
   finalePanel.hidden=!st.orchardActive || !!st.finale;
   if (!finalePanel.hidden) {
@@ -806,6 +828,7 @@ function refresh() {
     <dt>Solar project</dt><dd>${st.parts.length}/2 parts installed · ${st.approved?'endorsed':'awaiting committee'}</dd>
     <dt>Shelter</dt><dd>${st.upgrades} improvement${st.upgrades===1?'':'s'}</dd>
     <dt>Shared water</dt><dd>${st.waterOnline?'200 L available':'Tank needs repair'}</dd>
+    <dt>Signal mast</dt><dd>${st.signalOnline?st.remoteOrderDelivered?'Connected · contract delivered':'Connected · contract available':'Offline'}</dd>
   </dl>`;
   const box = $('actions'); box.querySelectorAll('button').forEach(b=>b.remove());
   box.querySelectorAll('.action-group').forEach(g=>g.remove());
@@ -829,6 +852,8 @@ function refresh() {
     ['Shelter',st.upgrades>0?[]:['improveShelterCoins','improveShelterLabour']],
     ['Water and food',st.waterOnline ? st.gardenActive?[]:['startGarden'] : ['repairTankCoins','repairTankLabour']],
     ['Workshop work',st.online&&!st.orderDelivered?['fulfilWorkshopOrder']:[]],
+    ['Signal mast',st.online ? st.signalOnline ? st.remoteOrderDelivered?[]:['fulfilRemoteOrder'] :
+      ['connectMastLabour','connectMastCoins'] : []],
     ['Crew',st.labour?[]:['endTurn']],
   ];
   for (const [heading,ids] of groups) {
@@ -868,13 +893,16 @@ function tryAction(id) {
       restoreBridgeLateCoins:'The canal crew reopens the bridge.',
       raiseWindPump:'The wind pump begins to turn.',plantOrchard:'The orchard is planted.',
       fulfilWorkshopOrder:'The repair order is delivered. Three coins earned.',
+      connectMastLabour:'The mast is connected by the local crew.',
+      connectMastCoins:'The purchased parts bring the mast online.',
+      fulfilRemoteOrder:'The remote repair contract is delivered. Four coins earned.',
       openCommons:'The commons opens with a harvest gathering.',
       launchTradeRoute:'The first trade boat sets out.',endTurn:'The crew rests. A new day begins.'
     };
     note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
     const actionSite=siteForAction(id);
     if(actionSite>=0){
-      territory=actionSite>=7?'saltwind':'kestrel';
+      territory=actionSite>=7&&actionSite<=9?'saltwind':'kestrel';
       focusSite(actionSite);
     }
     if (id==='openCommons'||id==='launchTradeRoute'){
@@ -914,7 +942,7 @@ function tryAction(id) {
   hudSiteActions=suggestions;
   const actionSite=siteForAction(id);
   if(actionSite>=0){
-    const siteTerritory=actionSite>=7?'saltwind':'kestrel';
+    const siteTerritory=actionSite>=7&&actionSite<=9?'saltwind':'kestrel';
     if(territory!==siteTerritory){territory=siteTerritory;refresh();}
     focusSite(actionSite);
   }
@@ -926,10 +954,18 @@ $('save').onclick = async () => {
   $('persist').textContent = 'saved';
   renderHud();
 };
+function migrateSavedWorld(saved) {
+  if (saved.includes('rc:world rc:contentVersion 5 .')) return saved;
+  if (!saved.includes('rc:world rc:contentVersion 4 .')) return null;
+  return saved.replace('rc:world rc:contentVersion 4 .','rc:world rc:contentVersion 5 .').trimEnd() +
+    '\nrc:communicationsMast a rc:Relay .' +
+    '\nrc:communicationsMast rc:name "Kestrel communications mast" .' +
+    '\nrc:communicationsMast rc:status "offline" .\n';
+}
 $('load').onclick = async () => {
   const b = await m.world_load('rc-save.n3');
-  const saved = new TextDecoder().decode(b);
-  if (!saved.includes('rc:world rc:contentVersion 4 .')) {
+  const saved = migrateSavedWorld(new TextDecoder().decode(b));
+  if (!saved) {
     $('persist').textContent = 'older save needs a Qualia Q42 migration';
     renderHud();
     return;
@@ -985,6 +1021,10 @@ note('slice ready — tier ' + portal.tier());
 // Scripted acceptance playthrough for headless verification (?selftest).
 if (new URLSearchParams(location.search).has('selftest')) {
   const testSession = new m.GameSession(SEED, ACTIONS);
+  const versionFour=SEED.replace('rc:world rc:contentVersion 5 .','rc:world rc:contentVersion 4 .')
+    .split('\n').filter(line=>!line.startsWith('rc:communicationsMast ')).join('\n');
+  const migrated=migrateSavedWorld(versionFour);
+  note(`TEST prior save migration: ${migrated?.includes('rc:communicationsMast a rc:Relay .')&&migrated.includes('rc:world rc:contentVersion 5 .')?'PASS':'FAIL'}`);
   note(`TEST scene: ${sceneMeshes > 0 ? 'PASS' : 'FAIL'}`);
   const vibe = toObj(m.vibe_eval_cell('= 1 + 2'));
   note(`TEST VibeScript: ${vibe.ok && String(vibe.value)==='3' ? 'PASS' : 'FAIL'}`);
@@ -992,7 +1032,7 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST Vibe world query: ${query.ok && query.value===12 ? 'PASS' : 'FAIL'}`);
   const scriptBlock = toObj(testSession.vibe_propose('= "startGarden"'));
   note(`TEST Vibe blocked order: ${scriptBlock.ok===false ? 'PASS' : 'FAIL'}`);
-  const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, VIBE_SCENE);
+  const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, false, VIBE_SCENE);
   note(`TEST Vibe scene asset: ${scriptAsset.organs.length===sceneMeshes+1 ? 'PASS' : 'FAIL'}`);
   const firstMesh=scriptAsset.organs[0].bytes;
   const hasSurfaceReading=firstMesh.some((v,i,a)=>v===83&&a[i+1]===82&&a[i+2]===68&&a[i+3]===49);
@@ -1003,8 +1043,8 @@ if (new URLSearchParams(location.search).has('selftest')) {
     const packResponse=await fetch('./assets/maslows-challenge-scenes.hmc');
     if(!packResponse.ok)throw new Error(`HTTP ${packResponse.status}`);
     const packBytes=new Uint8Array(await packResponse.arrayBuffer());
-    // 158 distinct .10d variants plus the scene manifest, all verified by Qualia.
-    note(`TEST Qualia HMC game assets: ${m.verify_game_hmc(packBytes)===159?'PASS':'FAIL'}`);
+    const manifest=await (await fetch('./assets/manifest.json')).json();
+    note(`TEST Qualia HMC game assets: ${m.verify_game_hmc(packBytes)===manifest.assets.length+1?'PASS':'FAIL'}`);
     packBytes[64]^=1;
     let tamperRejected=false;
     try { m.verify_game_hmc(packBytes); } catch(_) { tamperRejected=true; }
@@ -1065,6 +1105,29 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST trade ending: ${tradeResults.every(r=>r.ok)&&tradeWorld.includes('rc:community rc:finale "trade" .')?'PASS':'FAIL'}`);
   const tradeReplay=toObj(m.session_replay(SEED,ACTIONS,toObj(tradeSession.events())));
   note(`TEST trade replay: ${tradeReplay.diverged_at===null&&tradeReplay.world===tradeWorld?'PASS':'FAIL'}`);
+  const signalStart=()=>{
+    const s=new m.GameSession(SEED,ACTIONS);
+    const receipts=['buyInverter','salvagePanel','endTurn','contributeInverter',
+      'contributePanel','requestApproval','switchPowerOn'].map(id=>toObj(s.propose(id)));
+    return {s,ready:receipts.every(r=>r.ok)};
+  };
+  const signalPaid=signalStart();
+  const paidConnection=toObj(signalPaid.s.propose('connectMastCoins'));
+  const cannotReconnect=toObj(signalPaid.s.propose('connectMastLabour'));
+  const remotePaid=toObj(signalPaid.s.propose('fulfilRemoteOrder'));
+  const remoteDuplicate=toObj(signalPaid.s.propose('fulfilRemoteOrder'));
+  const signalWorld=signalPaid.s.world();
+  note(`TEST signal coin route and remote contract: ${signalPaid.ready&&paidConnection.ok&&!cannotReconnect.ok&&remotePaid.ok&&!remoteDuplicate.ok&&signalWorld.includes('rc:communicationsMast rc:status "online" .')?'PASS':'FAIL'}`);
+  const signalReplay=toObj(m.session_replay(SEED,ACTIONS,toObj(signalPaid.s.events())));
+  note(`TEST signal replay: ${signalReplay.diverged_at===null&&signalReplay.world===signalWorld?'PASS':'FAIL'}`);
+  const signalLabour=signalStart();
+  const labourConnection=toObj(signalLabour.s.propose('connectMastLabour'));
+  const remoteBeforeRest=toObj(signalLabour.s.propose('fulfilRemoteOrder'));
+  const signalRest=toObj(signalLabour.s.propose('endTurn'));
+  const remoteAfterRest=toObj(signalLabour.s.propose('fulfilRemoteOrder'));
+  note(`TEST signal labour route: ${signalLabour.ready&&labourConnection.ok&&!remoteBeforeRest.ok&&signalRest.ok&&remoteAfterRest.ok?'PASS':'FAIL'}`);
+  const signalScene=m.scene_build(1,2,true,true,true,true,true,false,false,false,false,false,'');
+  note(`TEST connected mast geometry: ${signalScene.organs.some(o=>o.id==='rc:asset/mast-signal')?'PASS':'FAIL'}`);
   const lateStart=()=>{
     const s=new m.GameSession(SEED,ACTIONS);
     const receipts=[toObj(s.propose('repairTankCoins'))];

@@ -6,6 +6,19 @@ engine gaps remain work orders; game-specific replacements are not acceptable.
 
 ## Game work in this pass
 
+**Communications and contract pass (2026-10-04):** The Kestrel mast is now a
+playable optional project. Once workshop power is online, a player can spend
+one work shift or three coins to connect it. A connected mast unlocks a single
+remote repair order that pays four coins toward either finale. Qualia's SHACL
+path validates both routes and the payout, with deterministic replay. The
+commissioned mast adds a rounded signal head compiled through Qualia geometry
+into the game-owned `.10d`/HMC package. Saved content version 4 worlds acquire
+an offline mast on load and continue as version 5. The full WASM browser build
+passed 55 scripted checks; the game asset export contains 160 distinct `.10d`
+variants across nine scene states. QualiaDB was not changed in this pass. The
+generic HUD still needs a communications icon; see the HUD work order in
+[the interface note](21-ingame-interface-and-asset-quality.md).
+
 **In-game HUD and visible WebGPU pass (2026-10-04):** The upstream QualiaDB
 renderer fixes through `0006a07d` resolved the black WebGPU viewport reported
 below. A fresh full-engine WASM

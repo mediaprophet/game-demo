@@ -164,6 +164,7 @@ pub fn kestrel_flats(
     approved: bool,
     water_online: bool,
     garden_active: bool,
+    signal_online: bool,
 ) -> Vec<AssetRecipe> {
     const TANK_PROFILE: &[[f32; 2]] = &[
         [0.0, -0.66],
@@ -428,9 +429,21 @@ pub fn kestrel_flats(
     ));
     scene.push(asset(
         "rc:asset/mast-node",
-        [0.25, 0.48, 0.52, 1.0],
+        if signal_online { [0.24, 0.84, 0.64, 1.0] } else { [0.25, 0.48, 0.52, 1.0] },
         vec![block([5.75, 2.55, 5.3], [0.26, 0.32, 0.26])],
     ));
+    if signal_online {
+        scene.push(parametric(
+            "rc:asset/mast-signal",
+            [0.42, 0.98, 0.72, 1.0],
+            ParametricRecipe::Sphere {
+                center: [5.75, 2.83, 5.3],
+                radius: 0.19,
+                latitude: 12,
+                longitude: 18,
+            },
+        ));
+    }
     // Landscape and architectural detail remain game-owned source recipes.
     // The rounded forms below use Qualia's authoring and parametric CAD APIs.
     scene.push(asset(

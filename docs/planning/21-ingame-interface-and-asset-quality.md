@@ -30,6 +30,9 @@ policy. Qualia should expose a reusable projected-annotation policy (always visi
 occluded, or edge-clamped) before adding dense worlds. It should also offer a generic
 camera transition API so applications can request target/zoom easing without their own
 frame interpolation. Keep both in Qualia Portal/HUD rather than a game-only renderer.
+The new communications marker uses the HUD's fallback glyph because the generic
+icon set has no communications symbol yet. Add a reusable communications icon
+to Qualia HUD and verify it in the game and a non-game consumer.
 
 The game maps each semantic marker to its available project orders. Selecting
 a marker focuses the camera, describes the site's current condition, and shows

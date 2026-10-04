@@ -313,6 +313,61 @@
               "rc:player rc:coin rc:earned{seq}c ."]
     },
     {
+      "id": "connectMastLabour",
+      "label": "Repair the signal mast (1 labour)",
+      "explain": "Use a crew shift to reconnect the mast once the workshop has power. This opens a remote repair contract.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Relay", "path": "rc:commissionedBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:communicationsMast", "p": "rc:status"}],
+      "add": ["rc:communicationsMast rc:status \"online\" .",
+              "rc:communicationsMast rc:commissionedBy rc:player ."]
+    },
+    {
+      "id": "connectMastCoins",
+      "label": "Buy mast parts and reconnect it (3 coins)",
+      "explain": "Purchase the missing transmitter parts and connect the mast without using today's crew shift.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:coin",
+         "constraints": [{"kind": "minCount", "num": 3}]},
+        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Relay", "path": "rc:commissionedBy",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 3}],
+      "removeAll": [{"s": "rc:communicationsMast", "p": "rc:status"}],
+      "add": ["rc:communicationsMast rc:status \"online\" .",
+              "rc:communicationsMast rc:commissionedBy rc:player ."]
+    },
+    {
+      "id": "fulfilRemoteOrder",
+      "label": "Deliver the remote repair contract (+4 coins, 1 labour)",
+      "explain": "With the workshop powered and the signal mast connected, take one distant community's repair order.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Relay", "path": "rc:commissionedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Relay", "path": "rc:deliveredOrder",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:communicationsMast rc:deliveredOrder rc:remoteOrder{seq} .",
+              "rc:player rc:coin rc:signal{seq}a .",
+              "rc:player rc:coin rc:signal{seq}b .",
+              "rc:player rc:coin rc:signal{seq}c .",
+              "rc:player rc:coin rc:signal{seq}d ."]
+    },
+    {
       "id": "openCommons",
       "label": "Open the commons with a harvest gathering (4 coins, 1 labour)",
       "explain": "Celebrate a safe local food and water network. Needs a repaired shelter, the garden, the orchard and four coins for shared supplies.",

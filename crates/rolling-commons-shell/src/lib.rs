@@ -267,6 +267,7 @@ pub fn scene_build(
     approved: bool,
     water_online: bool,
     garden_active: bool,
+    signal_online: bool,
     bridge_open: bool,
     bridge_braced: bool,
     high_tide: bool,
@@ -390,6 +391,7 @@ pub fn scene_build(
         approved,
         water_online,
         garden_active,
+        signal_online,
     );
     recipes.extend(asset_catalog::saltwind_reach(
         bridge_open,
@@ -420,6 +422,7 @@ pub fn scene_build(
         [8.0, 0.4, 0.5],
         [19.0, 1.2, -2.0],
         [17.6, 0.8, 4.0],
+        [5.75, 2.1, 5.3],
     ];
     let mut nodes = Vec::with_capacity(places.len() * 10);
     let site_positions = js_sys::Array::new();

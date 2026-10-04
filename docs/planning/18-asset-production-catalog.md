@@ -48,12 +48,15 @@ These counts come from the current `opening` scene in the generated manifest;
 the older planning estimates did not include later environment and character
 organs.
 
-The current asset export contains 158 distinct `.10d` variants across eight
+The current asset export contains 160 distinct `.10d` variants across nine
 scene states in the game-owned HMC pack. A focused building pass separates the
 workshop, hall and barn roofs from their walls, adds facade and eave detail,
 and makes the roof colours readable at strategy zoom. The Qualia camera now
 frames selected sites closer. These improvements were inspected in the full
 WebGPU game, and still need finished materials and richer authored models.
+The connected communications mast adds a rounded signal head and a distinct
+status colour. Its recipe stays game-owned; Qualia computational geometry and
+the `.10d` compiler produce the packaged asset.
 
 ## Asset families and build order
 

@@ -22,6 +22,12 @@ Maslows Challenge opens with a practical choice: spend the town's twelve coins
 to move quickly, or spend workdays salvaging and repairing so cash remains
 for later. Rest restores one day's labour. Powering the workshop unlocks one
 paid repair order, so the player can recover funds for the final project.
+The workshop can also reconnect the communications mast by spending a crew
+shift or three coins. That link unlocks one remote repair contract worth four
+coins. The mast changes visibly when commissioned, and the contract joins the
+validated action and replay record.
+Saved version-four campaign worlds acquire the offline mast when loaded, so
+existing progress can continue with the new orders.
 Kestrel Flats leads across the canal to Saltwind Reach. The player repairs a
 crossing, commissions a pump and plants an orchard. The canal rises after day
 four: a quick bridge repair is no longer possible, so a late player must
