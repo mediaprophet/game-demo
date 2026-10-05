@@ -15,6 +15,13 @@ pub enum ParametricRecipe {
         height: f32,
         segments: u32,
     },
+    /// A woody stem between two points. Qualia builds and transforms the cylinder.
+    Stem {
+        start: [f32; 3],
+        end: [f32; 3],
+        radius: f32,
+        segments: u32,
+    },
     Sphere {
         center: [f32; 3],
         radius: f32,
@@ -57,6 +64,28 @@ impl ParametricRecipe {
                 *center,
                 authoring::cylinder(*radius, *height, *segments).map_err(|e| e.to_string())?,
             ),
+            Self::Stem { start, end, radius, segments } => {
+                let delta = [end[0] - start[0], end[1] - start[1], end[2] - start[2]];
+                let length = (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]).sqrt();
+                if length < 0.001 { return Err("stem endpoints coincide".into()); }
+                let y = [delta[0] / length, delta[1] / length, delta[2] / length];
+                let horizontal = (y[0] * y[0] + y[1] * y[1]).sqrt();
+                let x = if horizontal < 0.001 { [1.0, 0.0, 0.0] }
+                        else { [y[1] / horizontal, -y[0] / horizontal, 0.0] };
+                let z = [x[1] * y[2] - x[2] * y[1],
+                         x[2] * y[0] - x[0] * y[2],
+                         x[0] * y[1] - x[1] * y[0]];
+                let rotation = [
+                    [x[0] as f64, x[1] as f64, x[2] as f64, 0.0],
+                    [y[0] as f64, y[1] as f64, y[2] as f64, 0.0],
+                    [z[0] as f64, z[1] as f64, z[2] as f64, 0.0],
+                    [0.0, 0.0, 0.0, 1.0],
+                ];
+                let mesh = authoring::cylinder(*radius, length, *segments).map_err(|e| e.to_string())?;
+                let midpoint = [(start[0] + end[0]) * 0.5, (start[1] + end[1]) * 0.5,
+                                (start[2] + end[2]) * 0.5];
+                (midpoint, authoring::transform_mesh(&mesh, &rotation))
+            },
             Self::Sphere {
                 center,
                 radius,
@@ -661,6 +690,40 @@ pub fn kestrel_flats(
                 })
                 .collect(),
         ));
+        for (id, x, z, hue) in [
+            ("rc:asset/veggie-leaves-kale-a", -4.70, -4.20, [0.22, 0.52, 0.26, 1.0]),
+            ("rc:asset/veggie-leaves-kale-b", -3.02, -4.20, [0.31, 0.62, 0.32, 1.0]),
+            ("rc:asset/veggie-leaves-chard-a", -4.70, -3.30, [0.40, 0.65, 0.34, 1.0]),
+            ("rc:asset/veggie-leaves-chard-b", -3.02, -3.30, [0.28, 0.55, 0.31, 1.0]),
+        ] {
+            scene.push(parametric(id, hue, ParametricRecipe::Ellipsoid {
+                center: [x, 0.42, z], radii: [0.66, 0.20, 0.28],
+                latitude: 7, longitude: 11,
+            }));
+        }
+        for (id, x, z) in [
+            ("rc:asset/veggie-pumpkin-a", -5.13, -4.20),
+            ("rc:asset/veggie-pumpkin-b", -4.08, -4.20),
+            ("rc:asset/veggie-pumpkin-c", -3.57, -3.30),
+        ] {
+            scene.push(parametric(id, [0.93, 0.49, 0.20, 1.0], ParametricRecipe::Ellipsoid {
+                center: [x, 0.36, z], radii: [0.17, 0.14, 0.16],
+                latitude: 7, longitude: 10,
+            }));
+        }
+    }
+    // The herb border is present before the player plants the vegetable beds.
+    for (id, x, z, hue) in [
+        ("rc:asset/herb-rosemary-a", -5.46, -4.95, [0.36, 0.57, 0.46, 1.0]),
+        ("rc:asset/herb-rosemary-b", -4.82, -4.95, [0.42, 0.63, 0.49, 1.0]),
+        ("rc:asset/herb-sage-a", -4.14, -4.95, [0.53, 0.67, 0.57, 1.0]),
+        ("rc:asset/herb-sage-b", -3.47, -4.95, [0.46, 0.62, 0.55, 1.0]),
+        ("rc:asset/herb-thyme", -2.80, -4.95, [0.36, 0.59, 0.39, 1.0]),
+    ] {
+        scene.push(parametric(id, hue, ParametricRecipe::Ellipsoid {
+            center: [x, 0.25, z], radii: [0.23, 0.20, 0.19],
+            latitude: 7, longitude: 10,
+        }));
     }
     scene.push(asset(
         "rc:asset/hall-facade",
@@ -720,39 +783,29 @@ pub fn kestrel_flats(
             longitude: 10,
         },
     ));
-    for (id, center) in [
-        ("rc:asset/tree-trunk-nw", [-6.15, 0.85, -5.5]),
-        ("rc:asset/tree-trunk-ne", [6.1, 0.85, -5.2]),
-        ("rc:asset/tree-trunk-sw", [-6.1, 0.85, 5.2]),
-        ("rc:asset/tree-trunk-se", [6.1, 0.85, 4.8]),
+    // Eucalypts need a pale, slightly leaning trunk, open fork and fine
+    // blue-green leaf masses. Keep the established tree IDs for scene picks.
+    for (trunk_id, crown_id, fork_id, bark_id, x, z, lean, tint) in [
+        ("rc:asset/tree-trunk-nw", "rc:asset/tree-crown-nw", "rc:asset/gum-fork-nw", "rc:asset/gum-bark-nw", -6.15, -5.5, -0.22, [0.34, 0.57, 0.52, 1.0]),
+        ("rc:asset/tree-trunk-ne", "rc:asset/tree-crown-ne", "rc:asset/gum-fork-ne", "rc:asset/gum-bark-ne", 6.1, -5.2, 0.25, [0.40, 0.64, 0.54, 1.0]),
+        ("rc:asset/tree-trunk-sw", "rc:asset/tree-crown-sw", "rc:asset/gum-fork-sw", "rc:asset/gum-bark-sw", -6.1, 5.2, -0.26, [0.38, 0.59, 0.50, 1.0]),
+        ("rc:asset/tree-trunk-se", "rc:asset/tree-crown-se", "rc:asset/gum-fork-se", "rc:asset/gum-bark-se", 6.1, 4.8, 0.21, [0.35, 0.61, 0.55, 1.0]),
     ] {
-        scene.push(parametric(
-            id,
-            [0.56, 0.32, 0.19, 1.0],
-            ParametricRecipe::Cylinder {
-                center,
-                radius: 0.17,
-                height: 1.7,
-                segments: 8,
-            },
-        ));
-    }
-    for (id, center) in [
-        ("rc:asset/tree-crown-nw", [-6.15, 2.02, -5.5]),
-        ("rc:asset/tree-crown-ne", [6.1, 2.02, -5.2]),
-        ("rc:asset/tree-crown-sw", [-6.1, 2.02, 5.2]),
-        ("rc:asset/tree-crown-se", [6.1, 2.02, 4.8]),
-    ] {
-        scene.push(parametric(
-            id,
-            [0.25, 0.65, 0.34, 1.0],
-            ParametricRecipe::Sphere {
-                center,
-                radius: 0.79,
-                latitude: 7,
-                longitude: 10,
-            },
-        ));
+        scene.push(parametric(trunk_id, [0.83, 0.79, 0.67, 1.0], ParametricRecipe::Stem {
+            start: [x, 0.02, z], end: [x + lean, 2.00, z - 0.12], radius: 0.16, segments: 9,
+        }));
+        scene.push(parametric(fork_id, [0.72, 0.65, 0.52, 1.0], ParametricRecipe::Stem {
+            start: [x + lean * 0.70, 1.43, z - 0.08],
+            end: [x + lean + 0.68, 2.52, z + 0.26], radius: 0.105, segments: 8,
+        }));
+        scene.push(parametric(bark_id, [0.61, 0.48, 0.36, 1.0], ParametricRecipe::Stem {
+            start: [x + lean * 0.28, 0.55, z - 0.02],
+            end: [x + lean * 0.45, 0.96, z - 0.04], radius: 0.169, segments: 9,
+        }));
+        scene.push(parametric(crown_id, tint, ParametricRecipe::Ellipsoid {
+            center: [x + lean, 2.75, z - 0.14], radii: [0.78, 0.36, 0.58],
+            latitude: 8, longitude: 12,
+        }));
     }
     for (id, center) in [
         ("rc:asset/salvage-drum-a", [5.35, 0.38, 3.65]),
@@ -825,61 +878,85 @@ pub fn kestrel_flats(
             "rc:asset/canopy-nw-a",
             [-6.48, 2.16, -5.40],
             0.58,
-            [0.34, 0.75, 0.36, 1.0],
+            [0.43, 0.67, 0.57, 1.0],
         ),
         (
             "rc:asset/canopy-nw-b",
             [-5.83, 2.31, -5.62],
             0.56,
-            [0.53, 0.81, 0.38, 1.0],
+            [0.57, 0.73, 0.59, 1.0],
         ),
         (
             "rc:asset/canopy-ne-a",
             [5.75, 2.22, -5.13],
             0.59,
-            [0.36, 0.76, 0.48, 1.0],
+            [0.40, 0.64, 0.55, 1.0],
         ),
         (
             "rc:asset/canopy-ne-b",
             [6.45, 2.30, -5.28],
             0.55,
-            [0.61, 0.84, 0.42, 1.0],
+            [0.58, 0.75, 0.61, 1.0],
         ),
         (
             "rc:asset/canopy-sw-a",
             [-6.48, 2.20, 5.28],
             0.56,
-            [0.36, 0.74, 0.44, 1.0],
+            [0.43, 0.65, 0.54, 1.0],
         ),
         (
             "rc:asset/canopy-sw-b",
             [-5.85, 2.29, 5.05],
             0.59,
-            [0.60, 0.82, 0.39, 1.0],
+            [0.57, 0.72, 0.58, 1.0],
         ),
         (
             "rc:asset/canopy-se-a",
             [5.76, 2.17, 4.74],
             0.58,
-            [0.37, 0.73, 0.38, 1.0],
+            [0.39, 0.64, 0.52, 1.0],
         ),
         (
             "rc:asset/canopy-se-b",
             [6.44, 2.26, 4.88],
             0.56,
-            [0.58, 0.81, 0.37, 1.0],
+            [0.53, 0.72, 0.59, 1.0],
         ),
     ] {
         scene.push(parametric(
             id,
             color,
-            ParametricRecipe::Sphere {
-                center,
-                radius,
-                latitude: 8,
-                longitude: 12,
+            ParametricRecipe::Ellipsoid {
+                center: [center[0], center[1] + 0.38, center[2]],
+                radii: [radius, radius * 0.60, radius * 0.84],
+                latitude: 8, longitude: 12,
             },
         ));
+    }
+    // Narrow pendent sprays keep the eucalypts distinct from the round fruit
+    // trees and stay visible in the territory camera.
+    for (id, center, color) in [
+        ("rc:asset/gum-spray-nw-west", [-6.77, 2.44, -5.38], [0.30, 0.56, 0.48, 1.0]),
+        ("rc:asset/gum-spray-nw-east", [-5.52, 2.56, -5.54], [0.48, 0.69, 0.54, 1.0]),
+        ("rc:asset/gum-spray-ne-west", [5.50, 2.48, -5.12], [0.34, 0.59, 0.52, 1.0]),
+        ("rc:asset/gum-spray-ne-east", [6.76, 2.57, -5.26], [0.50, 0.71, 0.59, 1.0]),
+        ("rc:asset/gum-spray-sw-west", [-6.75, 2.43, 5.26], [0.33, 0.56, 0.49, 1.0]),
+        ("rc:asset/gum-spray-sw-east", [-5.48, 2.52, 5.02], [0.51, 0.70, 0.56, 1.0]),
+        ("rc:asset/gum-spray-se-west", [5.49, 2.43, 4.75], [0.33, 0.57, 0.48, 1.0]),
+        ("rc:asset/gum-spray-se-east", [6.76, 2.52, 4.87], [0.49, 0.70, 0.56, 1.0]),
+    ] {
+        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
+            center, radii: [0.22, 0.47, 0.23], latitude: 8, longitude: 10,
+        }));
+    }
+    for (id, center, color) in [
+        ("rc:asset/wattle-bloom-nw", [-5.45, 0.46, -5.87], [0.96, 0.76, 0.28, 1.0]),
+        ("rc:asset/wattle-bloom-sw", [-5.48, 0.43, 5.82], [0.94, 0.70, 0.25, 1.0]),
+        ("rc:asset/wattle-bloom-ne", [5.47, 0.41, -5.80], [0.98, 0.79, 0.31, 1.0]),
+    ] {
+        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
+            center, radii: [0.30, 0.12, 0.20], latitude: 7, longitude: 10,
+        }));
     }
     // Distinct, rounded character silhouettes. Separate limbs, faces and hair
     // retain semantic identities for later Qualia animation clips.
@@ -1131,6 +1208,37 @@ pub fn saltwind_reach(
     ] {
         scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
             center, radii, latitude: 7, longitude: 12,
+        }));
+    }
+    for (trunk_id, branch_id, crown_id, crown_side_id, x, z, lean) in [
+        ("rc:asset/saltwind-gum-west-trunk", "rc:asset/saltwind-gum-west-branch", "rc:asset/saltwind-gum-west-crown", "rc:asset/saltwind-gum-west-leaves", 10.6, -5.7, -0.32),
+        ("rc:asset/saltwind-gum-east-trunk", "rc:asset/saltwind-gum-east-branch", "rc:asset/saltwind-gum-east-crown", "rc:asset/saltwind-gum-east-leaves", 22.15, 5.68, 0.29),
+    ] {
+        scene.push(parametric(trunk_id, [0.82, 0.79, 0.69, 1.0], ParametricRecipe::Stem {
+            start: [x, 0.02, z], end: [x + lean, 2.30, z - 0.16],
+            radius: 0.17, segments: 9,
+        }));
+        scene.push(parametric(branch_id, [0.69, 0.62, 0.52, 1.0], ParametricRecipe::Stem {
+            start: [x + lean * 0.70, 1.65, z - 0.10],
+            end: [x + lean + 0.77, 2.77, z + 0.29], radius: 0.10, segments: 8,
+        }));
+        scene.push(parametric(crown_id, [0.37, 0.60, 0.53, 1.0], ParametricRecipe::Ellipsoid {
+            center: [x + lean, 3.03, z - 0.20], radii: [0.95, 0.42, 0.66],
+            latitude: 8, longitude: 12,
+        }));
+        scene.push(parametric(crown_side_id, [0.56, 0.72, 0.60, 1.0], ParametricRecipe::Ellipsoid {
+            center: [x + lean + 0.74, 2.88, z + 0.20], radii: [0.71, 0.34, 0.57],
+            latitude: 8, longitude: 12,
+        }));
+    }
+    for (id, center, color) in [
+        ("rc:asset/saltwind-gum-west-spray-a", [9.96, 2.66, -5.89], [0.32, 0.55, 0.50, 1.0]),
+        ("rc:asset/saltwind-gum-west-spray-b", [11.13, 2.75, -5.47], [0.52, 0.69, 0.58, 1.0]),
+        ("rc:asset/saltwind-gum-east-spray-a", [21.60, 2.63, 5.53], [0.33, 0.56, 0.51, 1.0]),
+        ("rc:asset/saltwind-gum-east-spray-b", [22.87, 2.72, 5.85], [0.53, 0.70, 0.60, 1.0]),
+    ] {
+        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
+            center, radii: [0.25, 0.50, 0.23], latitude: 8, longitude: 10,
         }));
     }
     scene.push(asset(
@@ -1446,14 +1554,23 @@ pub fn saltwind_reach(
             ).collect(),
         ));
     }
-    scene.push(asset(
-        "rc:asset/saltwind-lavender-field",
-        [0.56, 0.52, 0.73, 1.0],
-        [-5.25_f32, -4.85, -4.45].into_iter().flat_map(|z|
-            (0..8).map(move |i| block([13.4 + i as f32 * 0.32, 0.14, z],
-                [0.14, 0.22, 0.13]))
-        ).collect(),
-    ));
+    for (id, z, color) in [
+        ("rc:asset/lavender-row-back", -5.25, [0.57, 0.47, 0.73, 1.0]),
+        ("rc:asset/lavender-row-mid", -4.85, [0.66, 0.55, 0.79, 1.0]),
+        ("rc:asset/lavender-row-front", -4.45, [0.51, 0.46, 0.70, 1.0]),
+    ] {
+        scene.push(asset(id, [0.32, 0.55, 0.35, 1.0],
+            (0..8).map(|i| block([13.4 + i as f32 * 0.32, 0.14, z],
+                [0.055, 0.28, 0.055])).collect()));
+        let flower_id = match id {
+            "rc:asset/lavender-row-back" => "rc:asset/lavender-bloom-back",
+            "rc:asset/lavender-row-mid" => "rc:asset/lavender-bloom-mid",
+            _ => "rc:asset/lavender-bloom-front",
+        };
+        scene.push(asset(flower_id, color, (0..8).map(|i| {
+            block([13.4 + i as f32 * 0.32, 0.34, z], [0.16, 0.17, 0.15])
+        }).collect()));
+    }
     for (id, center, radii, color) in [
         ("rc:asset/saltwind-windbreak-a", [21.80, 0.32, -2.50], [0.52, 0.36, 0.68], [0.31, 0.62, 0.39, 1.0]),
         ("rc:asset/saltwind-windbreak-b", [21.94, 0.34, -0.90], [0.49, 0.37, 0.60], [0.27, 0.59, 0.36, 1.0]),

@@ -81,6 +81,16 @@ across ten scene states. Browser inspection confirmed both territories and the
 surface materials, shadows, character animation and the bright projector
 squares still prevent a finished visual result.
 
+The botanical iteration changes the generic round trees into gum-inspired
+forms with pale leaning stems, forks, flattened blue-green foliage and hanging
+leaf sprays. It also adds flowering wattle, herbs, planted vegetables and a
+lavender bed. Both full-engine territory views and a closer Kestrel camera view
+were checked in the browser; the 60-check campaign self-test passed. The
+opening scene has 222 organs and the game HMC has 262 variants. Foliage still
+needs authored leaf silhouettes, bark and flower surfaces, growth states and
+LOD. These are game-art tasks where the current Qualia asset path suffices;
+any missing generic renderer or `.10d` capability remains upstream work.
+
 ## Quality work still needed
 
 1. Inspect both rendered territories after the WebGPU depth and occlusion fix. Tune camera,
