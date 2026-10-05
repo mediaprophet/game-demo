@@ -1979,6 +1979,12 @@ export function stit_brought_about_wasm(val: any): any;
  */
 export function tensor_buffer_build(nodes_flat: Float32Array): Uint8Array;
 
+/**
+ * Camera presentation sample in source-world metres, from the same authored
+ * height function used to generate the Qualia terrain patches.
+ */
+export function terrain_height_world(x: number, z: number): number;
+
 export function thermodynamics_mcmc(input_json: string): string;
 
 /**
@@ -2272,6 +2278,7 @@ export interface InitOutput {
     readonly scene_build: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number) => [number, number, number];
     readonly session_replay: (a: number, b: number, c: number, d: number, e: any) => [number, number, number];
     readonly tensor_buffer_build: (a: number, b: number) => [number, number, number, number];
+    readonly terrain_height_world: (a: number, b: number) => number;
     readonly verify_game_hmc: (a: number, b: number) => [number, number, number];
     readonly vibe_eval_cell: (a: number, b: number) => any;
     readonly vibe_invoke: (a: number, b: number, c: number, d: number) => any;

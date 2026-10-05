@@ -86,10 +86,19 @@ forms with pale leaning stems, forks, flattened blue-green foliage and hanging
 leaf sprays. It also adds flowering wattle, herbs, planted vegetables and a
 lavender bed. Both full-engine territory views and a closer Kestrel camera view
 were checked in the browser; the 60-check campaign self-test passed. The
-opening scene has 222 organs and the game HMC has 262 variants. Foliage still
+opening scene had 222 organs and the game HMC had 262 variants in that pass. Foliage still
 needs authored leaf silhouettes, bark and flower surfaces, growth states and
 LOD. These are game-art tasks where the current Qualia asset path suffices;
 any missing generic renderer or `.10d` capability remains upstream work.
+
+The terrain pass adds two procedurally shaped northern highland tiles and a
+creek valley through Qualia's geospatial heightfield mesh builder. Map,
+Survey and Walk are in-game HUD controls. Walk samples the same game-owned
+height function through WASM and moves the Qualia camera at eye height with
+WASD and drag-to-look. Its HUD hides the orders panel so the view has usable
+width on compact screens. The current pack has 274 `.10d` variants, with 234
+organs in the opening scene. Browser checks passed 61/61. Ground collision,
+navigation, streaming, terrain LOD and biome asset placement are still open.
 
 ## Quality work still needed
 

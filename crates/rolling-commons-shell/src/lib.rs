@@ -11,6 +11,7 @@
 #![cfg(target_arch = "wasm32")]
 
 mod asset_catalog;
+mod terrain;
 
 use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
@@ -337,7 +338,9 @@ pub fn scene_build(
         // The current Qualia .10d SRD1 section preserves authored colour on
         // each vertex. A deterministic palette reading gives broad surfaces
         // gentle height/position variation without a game-specific format.
-        let landscape = recipe.id.contains("ground")
+        let terrain_surface = recipe.id.contains("terrain-");
+        let landscape = terrain_surface
+            || recipe.id.contains("ground")
             || recipe.id.contains("grass")
             || recipe.id.contains("hill")
             || recipe.id.contains("bed");
@@ -358,9 +361,11 @@ pub fn scene_build(
                 } else {
                     0.91 + elevation * 0.14 + ripple
                 };
-                let green = if foliage || landscape { 1.04 } else { 1.0 };
+                let green = if terrain_surface { 1.07 - elevation * 0.24 }
+                    else if foliage || landscape { 1.04 } else { 1.0 };
+                let red = if terrain_surface { 1.0 + elevation * 0.18 } else { 1.0 };
                 [
-                    (recipe.color[0] * gain).clamp(0.0, 1.0),
+                    (recipe.color[0] * gain * red).clamp(0.0, 1.0),
                     (recipe.color[1] * gain * green).clamp(0.0, 1.0),
                     (recipe.color[2] * gain).clamp(0.0, 1.0),
                     recipe.color[3],
@@ -402,6 +407,7 @@ pub fn scene_build(
         orchard_active,
         orchard_harvested,
     ));
+    recipes.extend(asset_catalog::northern_highlands());
     if !vibe_scene.trim().is_empty() {
         recipes.push(vibe_scene_recipe(vibe_scene).map_err(|e| JsValue::from_str(&e))?);
     }
@@ -446,7 +452,11 @@ pub fn scene_build(
         &js_sys::Uint8Array::from(tensor.as_slice()),
     )?;
     let tiles = js_sys::Array::new();
-    for (id, center) in [("kestrel", [0.0, 0.0, 0.0]), ("saltwind", [16.0, 0.0, 0.0])] {
+    for (id, center) in [
+        ("kestrel", [0.0, 0.0, 0.0]),
+        ("saltwind", [16.0, 0.0, 0.0]),
+        ("highlands", [8.0, 0.0, -14.0]),
+    ] {
         let p = portal_point(min, max, center);
         let tile = js_sys::Object::new();
         js_sys::Reflect::set(&tile, &"id".into(), &JsValue::from_str(id))?;
@@ -456,8 +466,31 @@ pub fn scene_build(
         tiles.push(&tile);
     }
     js_sys::Reflect::set(&result, &"tiles".into(), &tiles)?;
+    let center = js_sys::Object::new();
+    let center_world = [
+        (min[0] + max[0]) * 0.5,
+        (min[1] + max[1]) * 0.5,
+        (min[2] + max[2]) * 0.5,
+    ];
+    for (key, value) in ["x", "y", "z"].iter().zip(center_world) {
+        js_sys::Reflect::set(&center, &(*key).into(), &JsValue::from_f64(value as f64))?;
+    }
+    let span = (0..3).map(|axis| max[axis] - min[axis]).fold(1e-6_f32, f32::max);
+    js_sys::Reflect::set(&result, &"worldCenter".into(), &center)?;
+    js_sys::Reflect::set(&result, &"worldScale".into(), &JsValue::from_f64((1.6 / span) as f64))?;
     js_sys::Reflect::set(&result, &"places".into(), &site_positions)?;
     Ok(result.into())
+}
+
+/// Camera presentation sample in source-world metres, from the same authored
+/// height function used to generate the Qualia terrain patches.
+#[wasm_bindgen]
+pub fn terrain_height_world(x: f32, z: f32) -> f32 {
+    if (-7.0..=23.0).contains(&x) && (-21.0..=-7.0).contains(&z) {
+        terrain::height(x, z)
+    } else {
+        0.0
+    }
 }
 
 // --- Portal: WebGPU scene ingest, frame, semantic pick ---

@@ -41,14 +41,14 @@ browser pack loading, and complete state/animation packaging are not yet proven.
 Saltwind Reach adds 73 always-present organs on a second connected land tile:
 canal, bridge, roads, barn, market, quay, boat, wind pump and orchard. Bridge,
 pump and fruit variants follow the SHACL-validated project states. The full
-map is 222 persistent `.10d` organs before conditional variants. Qualia's
+settlement map is 222 persistent `.10d` organs before conditional variants. Qualia's
 public camera target and sky preset APIs provide territory navigation and
 daylight presentation in the full WASM game.
 These counts come from the current `opening` scene in the generated manifest;
 the older planning estimates did not include later environment and character
 organs.
 
-The current asset export contains 262 distinct `.10d` variants across ten
+The current asset export contains 274 distinct `.10d` variants across ten
 scene states in the game-owned HMC pack. The latest landscape pass adds layered
 earth skirts, rounded meadow mounds, shrubs, canal reeds and ripples, shore
 stones, orchard furrows and crop rows, lavender, windbreaks, and accents on the
@@ -67,6 +67,15 @@ computational geometry and the established `.10d` provenance and HMC path.
 At strategy zoom these are legible plant families, not yet species-accurate
 models. The next asset stage needs authored leaf, bark and flower geometry,
 growth and seasonal variants, and LOD with browser performance evidence.
+
+Two northern highland tiles now join the settlements. A deterministic
+game-authored height function provides Qualia's DEM terrain mesh builder with
+17-by-17 samples per tile. Its western and eastern ridges flank a two-metre
+creek corridor, which continues the canal visually. The resulting meshes,
+soil bases, creek, stones and shrubs are sealed as 12 game-owned `.10d`
+organs. The opening scene has 234 organs. The highland tiles are currently
+scenery for camera exploration; buildability, paths, biome distribution,
+streaming and level-of-detail evidence remain future production work.
 The connected communications mast adds a rounded signal head and a distinct
 status colour. Its recipe stays game-owned; Qualia computational geometry and
 the `.10d` compiler produce the packaged asset.

@@ -9,6 +9,7 @@ use qualia_core_db::specialized_libs::computational_geometry::{authoring, parame
 /// builds the mesh before the shared `.10d` compiler seals it.
 #[derive(Debug, Clone)]
 pub enum ParametricRecipe {
+    TerrainPatch { center_x: f32, center_z: f32 },
     Cylinder {
         center: [f32; 3],
         radius: f32,
@@ -55,6 +56,8 @@ impl ParametricRecipe {
 
     pub fn compile(&self) -> Result<Mesh, String> {
         let (center, mesh) = match self {
+            Self::TerrainPatch { center_x, center_z } =>
+                ([0.0, 0.0, 0.0], crate::terrain::patch(*center_x, *center_z)),
             Self::Cylinder {
                 center,
                 radius,
@@ -1672,6 +1675,49 @@ pub fn saltwind_reach(
                 ))
             }).collect(),
         ));
+    }
+    scene
+}
+
+/// Two deterministic heightfield tiles create a northern ridge with a low
+/// crossing. They are exploration scenery rather than a second game engine.
+pub fn northern_highlands() -> Vec<AssetRecipe> {
+    let mut scene = Vec::with_capacity(20);
+    for (id, base_id, x, color) in [
+        ("rc:asset/terrain-west-ridge", "rc:asset/ridge-west-earth", 0.0,
+         [0.45, 0.72, 0.40, 1.0]),
+        ("rc:asset/terrain-east-ridge", "rc:asset/ridge-east-earth", 16.0,
+         [0.48, 0.70, 0.42, 1.0]),
+    ] {
+        scene.push(asset(base_id, [0.47, 0.34, 0.26, 1.0],
+            vec![block([x, -0.27, -14.0], [14.0, 0.50, 14.0])]));
+        scene.push(parametric(id, color, ParametricRecipe::TerrainPatch {
+            center_x: x, center_z: -14.0,
+        }));
+    }
+    scene.push(asset("rc:asset/highland-creek", [0.28, 0.63, 0.73, 1.0],
+        vec![block([8.0, 0.025, -14.0], [2.0, 0.07, 14.0])]));
+    for (id, x, z, radii) in [
+        ("rc:asset/ridge-boulder-west", -4.9, -13.9, [0.49, 0.36, 0.61]),
+        ("rc:asset/ridge-boulder-east", 19.8, -16.6, [0.61, 0.39, 0.46]),
+        ("rc:asset/valley-boulder", 8.9, -17.6, [0.39, 0.25, 0.45]),
+    ] {
+        scene.push(parametric(id, [0.60, 0.57, 0.48, 1.0],
+            ParametricRecipe::Ellipsoid {
+                center: [x, crate::terrain::height(x, z) + radii[1] - 0.02, z],
+                radii, latitude: 8, longitude: 12,
+            }));
+    }
+    for (id, x, z, color) in [
+        ("rc:asset/ridge-shrub-west-a", -4.2, -17.4, [0.26, 0.55, 0.38, 1.0]),
+        ("rc:asset/ridge-shrub-west-b", 1.9, -12.4, [0.37, 0.62, 0.42, 1.0]),
+        ("rc:asset/ridge-shrub-east-a", 14.1, -17.2, [0.29, 0.56, 0.39, 1.0]),
+        ("rc:asset/ridge-shrub-east-b", 19.1, -11.6, [0.40, 0.64, 0.43, 1.0]),
+    ] {
+        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
+            center: [x, crate::terrain::height(x, z) + 0.28, z],
+            radii: [0.46, 0.28, 0.42], latitude: 8, longitude: 12,
+        }));
     }
     scene
 }

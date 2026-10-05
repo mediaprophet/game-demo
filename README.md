@@ -60,7 +60,9 @@ The page also exposes VibeScript cells for live world snapshot queries,
 SHACL-gated order proposals, and a bounded scene asset that compiles through
 Qualia computational geometry to a provenance-bearing `.10d` mesh.
 Kestrel Flats has 149 always-present original `.10d` scene organs; the
-Saltwind Reach tile adds 73 more plus state variants. The connected scene uses
+Saltwind Reach tile adds 73 more plus state variants. Two generated northern
+highland tiles add 12 terrain, creek, rock and shrub organs, for 234 in the
+opening scene. The connected scene uses
 QualiaPortal's camera target and daylight sky APIs. State variants live in
 the game-owned catalog. Rounded assets use Qualia's computational
 geometry authoring and parametric CAD; all scene assets retain source
@@ -77,10 +79,16 @@ produce, and a distinct lavender patch. The planting is authored in the game
 repository and compiled and rendered by Qualia; it remains stylized geometry
 rather than botanically detailed foliage.
 
-The current two-territory build passes both campaign endings and replay
+The four-tile build passes both campaign endings and replay
 self-tests. The full Qualia WebGPU canvas now renders on the published game;
 [QG-12](docs/planning/19-qualiadb-upstream-gate-work-orders.md) records the
 earlier renderer gate and its reproduction.
+
+The in-game Qualia HUD offers Map, Survey and ground-level Walk cameras.
+Select Highlands to inspect the generated ridge and creek valley; in Walk,
+drag to look and use WASD to move (Shift to run). The terrain mesh comes from
+Qualia's geospatial heightfield builder. Camera position and ground height are
+presentation state and do not change the campaign or replay.
 
 Check out QualiaDB beside this repository at the commit in [`qualia.ref`](qualia.ref).
 Build with `scripts/build-game.ps1` to produce the full Qualia WASM package in

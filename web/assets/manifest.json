@@ -4,7 +4,7 @@
   "sourceRecipes": "crates/rolling-commons-shell/src/asset_catalog.rs",
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "4b4233de0a10c851a274e0ff286b22187e38dd23488f1cc8bf036be4ffde30ce"
+    "sha256": "90d0f6ec91cbdc4c690bfef7219692f9cfd5995a5cdc47c6fb32c4626be95579"
   },
   "assets": [
     {
@@ -584,6 +584,12 @@
       "sha256": "380768f5dcade74505fca282cced5412372778dd3aff9ff7a0f460e853cdcb45"
     },
     {
+      "id": "rc:asset/highland-creek",
+      "file": "10d/highland-creek--92db6b8fbdf7.10d",
+      "bytes": 596,
+      "sha256": "92db6b8fbdf7ebfc6006ba8244f1a5a5b4fc455894510fc523061050eb1d8c21"
+    },
+    {
       "id": "rc:asset/hill-east",
       "file": "10d/hill-east--76dc4802e6f8.10d",
       "bytes": 3080,
@@ -998,6 +1004,54 @@
       "sha256": "abfc860d5e5aa8a2304564de1978f45c94ad46515eec563c7b7f1d740d395609"
     },
     {
+      "id": "rc:asset/ridge-boulder-east",
+      "file": "10d/ridge-boulder-east--856b725697d7.10d",
+      "bytes": 2480,
+      "sha256": "856b725697d76df24775040a6747548bde61a738b91bda7438c65e08c6b318f6"
+    },
+    {
+      "id": "rc:asset/ridge-boulder-west",
+      "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+      "bytes": 2480,
+      "sha256": "5b347a5621a6ea74735fa54956a46ac8b83290b0d82d66abb2cdb082112bdd2d"
+    },
+    {
+      "id": "rc:asset/ridge-east-earth",
+      "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+      "bytes": 596,
+      "sha256": "1b7f73ae5c40925af648ff43fd7c666528fc8e02feadfe479951adb331233d69"
+    },
+    {
+      "id": "rc:asset/ridge-shrub-east-a",
+      "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+      "bytes": 2480,
+      "sha256": "de86ef3934a144c62a21fe18ae29e356abcd6fddebd6f2605a689ad150233b54"
+    },
+    {
+      "id": "rc:asset/ridge-shrub-east-b",
+      "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+      "bytes": 2480,
+      "sha256": "178bc7269dc1614a8a680de62d3a2057467ab4c4663c83d17456c84a6a94774e"
+    },
+    {
+      "id": "rc:asset/ridge-shrub-west-a",
+      "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+      "bytes": 2480,
+      "sha256": "2a4533e61ed701d5e22168e09cb51f4165e2a6dd50f97b58b9f28a889a95375c"
+    },
+    {
+      "id": "rc:asset/ridge-shrub-west-b",
+      "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+      "bytes": 2480,
+      "sha256": "872cb9a4cdf87342527f3f49b0ae0707e95bab276c0c722ab23c98b7edd8a72b"
+    },
+    {
+      "id": "rc:asset/ridge-west-earth",
+      "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+      "bytes": 596,
+      "sha256": "87a9cd35792dad2738c78dc5c6c1607e9dc89cf18bf2f601654dcb787f3f579b"
+    },
+    {
       "id": "rc:asset/road-markings",
       "file": "10d/road-markings--9418ff03194a.10d",
       "bytes": 1480,
@@ -1298,6 +1352,18 @@
       "sha256": "cbb69dce66cb81df8f166dcdfec6559e50303e9a01c186046d01237fb056e88c"
     },
     {
+      "id": "rc:asset/terrain-east-ridge",
+      "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+      "bytes": 6452,
+      "sha256": "9f97917bba6c9f342cd9b377cb70ebfe7d3f6c7a2b133c7a18d2196bfe10d0b8"
+    },
+    {
+      "id": "rc:asset/terrain-west-ridge",
+      "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+      "bytes": 6448,
+      "sha256": "0406c1f87e2628f88675492b34d20395658beed3b100bbeeb9793afed548b4ec"
+    },
+    {
       "id": "rc:asset/tree-crown-ne",
       "file": "10d/tree-crown-ne--41e0be46024d.10d",
       "bytes": 2480,
@@ -1350,6 +1416,12 @@
       "file": "10d/utility-cable--99a823ae5744.10d",
       "bytes": 772,
       "sha256": "99a823ae5744085e0efd0d9678262b5cfd5332c558b010852d69dd3a06a9c284"
+    },
+    {
+      "id": "rc:asset/valley-boulder",
+      "file": "10d/valley-boulder--ac706c5218de.10d",
+      "bytes": 2480,
+      "sha256": "ac706c5218dead705d29334431732fcff6d8831d2bb3f1ba224529bf832fdb30"
     },
     {
       "id": "rc:asset/van-trim",
@@ -3803,6 +3875,126 @@
             0.3400000035762787,
             1
           ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
+            1
+          ]
         }
       ]
     },
@@ -6128,6 +6320,126 @@
             0.3400000035762787,
             1
           ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
+            1
+          ]
         }
       ]
     },
@@ -8451,6 +8763,126 @@
             0.28999999165534973,
             0.6200000047683716,
             0.3400000035762787,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
             1
           ]
         }
@@ -10788,6 +11220,126 @@
             0.3400000035762787,
             1
           ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
+            1
+          ]
         }
       ]
     },
@@ -13111,6 +13663,126 @@
             0.28999999165534973,
             0.6200000047683716,
             0.3400000035762787,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
             1
           ]
         }
@@ -15448,6 +16120,126 @@
             0.3400000035762787,
             1
           ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
+            1
+          ]
         }
       ]
     },
@@ -17781,6 +18573,126 @@
             0.28999999165534973,
             0.6200000047683716,
             0.3400000035762787,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
             1
           ]
         }
@@ -20146,6 +21058,126 @@
             0.9800000190734863,
             0.3799999952316284,
             0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
             1
           ]
         }
@@ -22523,6 +23555,126 @@
             0.23000000417232513,
             1
           ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
+            1
+          ]
         }
       ]
     },
@@ -24746,6 +25898,126 @@
             0.28999999165534973,
             0.6200000047683716,
             0.3400000035762787,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-west-earth",
+          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-west-ridge",
+          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "rgba": [
+            0.44999998807907104,
+            0.7200000286102295,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-east-earth",
+          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.3400000035762787,
+            0.25999999046325684,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/terrain-east-ridge",
+          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "rgba": [
+            0.47999998927116394,
+            0.699999988079071,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/highland-creek",
+          "file": "10d/highland-creek--92db6b8fbdf7.10d",
+          "rgba": [
+            0.2800000011920929,
+            0.6299999952316284,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-west",
+          "file": "10d/ridge-boulder-west--5b347a5621a6.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-boulder-east",
+          "file": "10d/ridge-boulder-east--856b725697d7.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/valley-boulder",
+          "file": "10d/valley-boulder--ac706c5218de.10d",
+          "rgba": [
+            0.6000000238418579,
+            0.5699999928474426,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-a",
+          "file": "10d/ridge-shrub-west-a--2a4533e61ed7.10d",
+          "rgba": [
+            0.25999999046325684,
+            0.550000011920929,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-west-b",
+          "file": "10d/ridge-shrub-west-b--872cb9a4cdf8.10d",
+          "rgba": [
+            0.3700000047683716,
+            0.6200000047683716,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-a",
+          "file": "10d/ridge-shrub-east-a--de86ef3934a1.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.5600000023841858,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ridge-shrub-east-b",
+          "file": "10d/ridge-shrub-east-b--178bc7269dc1.10d",
+          "rgba": [
+            0.4000000059604645,
+            0.6399999856948853,
+            0.4300000071525574,
             1
           ]
         },

@@ -38,6 +38,7 @@ export const rules_load_n3: (a: number, b: number) => any;
 export const scene_build: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number) => [number, number, number];
 export const session_replay: (a: number, b: number, c: number, d: number, e: any) => [number, number, number];
 export const tensor_buffer_build: (a: number, b: number) => [number, number, number, number];
+export const terrain_height_world: (a: number, b: number) => number;
 export const verify_game_hmc: (a: number, b: number) => [number, number, number];
 export const vibe_eval_cell: (a: number, b: number) => any;
 export const vibe_invoke: (a: number, b: number, c: number, d: number) => any;
