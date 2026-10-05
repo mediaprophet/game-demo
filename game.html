@@ -212,7 +212,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '90d0f6ec91cbdc4c';
+const WASM_BUILD = '522f6ddc18e48838';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 $('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
@@ -436,8 +436,8 @@ function placeWalkCamera(){
 function setCameraMode(mode){
   cameraMode=mode;camGoal=null;zoomGoal=null;
   if(mode==='walk'){
-    const start={kestrel:[-1.5,2.3],saltwind:[16.0,2.6],highlands:[1.5,-15.3]}[territory];
-    walk={x:start[0],z:start[1]};camPitch=territory==='highlands'?0.25:0.17;
+    const start={kestrel:[-3.2,-3.3],saltwind:[16.0,2.6],highlands:[1.5,-15.3]}[territory];
+    walk={x:start[0],z:start[1]};camPitch=territory==='highlands'?0.25:0.48;
     camYaw=territory==='highlands'?-1.1:0.6;
     placeWalkCamera();
   }else{
@@ -451,7 +451,7 @@ function focusTerritory(id, immediate=false){
   const p=tileCenters[id]; if(!p)return;
   focusedPlace=null;
   if(cameraMode==='walk'){
-    const start={kestrel:[-1.5,2.3],saltwind:[16.0,2.6],highlands:[1.5,-15.3]}[id];
+    const start={kestrel:[-3.2,-3.3],saltwind:[16.0,2.6],highlands:[1.5,-15.3]}[id];
     walk={x:start[0],z:start[1]};placeWalkCamera();return;
   }
   zoomGoal=cameraMode==='survey'?0.94:

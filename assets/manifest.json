@@ -4,7 +4,7 @@
   "sourceRecipes": "crates/rolling-commons-shell/src/asset_catalog.rs",
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "90d0f6ec91cbdc4c690bfef7219692f9cfd5995a5cdc47c6fb32c4626be95579"
+    "sha256": "522f6ddc18e48838df3744bf18bcbce0417de35606b1118b80ae23c7b656cc19"
   },
   "assets": [
     {
@@ -368,6 +368,108 @@
       "sha256": "d8c84afbcd15b4658e6c712732fd8f74e01dd668c4ce6bb0f848a34cba219fc8"
     },
     {
+      "id": "rc:asset/garden-ant-mound",
+      "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+      "bytes": 3100,
+      "sha256": "571191cfbc5dfe5b34f6c1973c3545396a45cbdf4e4aba5ff43463111c089d11"
+    },
+    {
+      "id": "rc:asset/garden-ant-scout",
+      "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+      "bytes": 8840,
+      "sha256": "7d536aaab52b8dbfece88870ebf11a7afa640fb1654286c386f9ff3674cc04fe"
+    },
+    {
+      "id": "rc:asset/garden-ant-scout-eyes",
+      "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+      "bytes": 4368,
+      "sha256": "132983cb023efb5a67b7778d2b35218f6010c3f450fa4f432d781c7946a0e65e"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-a",
+      "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+      "bytes": 8840,
+      "sha256": "09bcf837ed94ff7c073c03eb0b25cf3320948760c62a3a64d5703e44739c3a46"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-a-eyes",
+      "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+      "bytes": 4368,
+      "sha256": "fc5e7b27f92720f8a42a50c375c168f314931720796a3a40fe84ca72634850ef"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-b",
+      "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+      "bytes": 8840,
+      "sha256": "594a97433b853fc976912f3569038053e52a124fafa48313d7876ab1491ad5cf"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-b-eyes",
+      "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+      "bytes": 4368,
+      "sha256": "9ea5c1de9d3e54441bbc219fdbaa682a59e974429878c01aa1be867ff3058da7"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-c",
+      "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+      "bytes": 8840,
+      "sha256": "fb797af3f3cd0b398afdc3d3b6716b95f22fff54076f1f5223c5e660ed3429c1"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-c-eyes",
+      "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+      "bytes": 4368,
+      "sha256": "6c7d5ef3df971aa9afe31dbc42c04640901d7e059f18d2479af1b5ee6a700141"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-d",
+      "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+      "bytes": 8840,
+      "sha256": "8e301424faf5fabbda9f4a40a1bdfe65b8648c2aa3fc55e9a4347473d7c8688e"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-d-eyes",
+      "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+      "bytes": 4368,
+      "sha256": "8ffc67c92fb5036256de093a1e7b06340f796230236332626694f4d2a3978672"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-e",
+      "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+      "bytes": 8840,
+      "sha256": "5b5e75946bed3f114359d3864ffa95e58d66a8e9a13b62b5b0298072f9f68482"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-e-eyes",
+      "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+      "bytes": 4368,
+      "sha256": "041da9de0db34f61e15f58e621da9ef11adbaa6bdebe4de5ff2be606ddcdb6db"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-f",
+      "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+      "bytes": 8840,
+      "sha256": "37084974ab42402f4cb1c1372b8bf8605ddbc7f58cdbc94322f9662f49a5118e"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-f-eyes",
+      "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+      "bytes": 4368,
+      "sha256": "6bf6f8d86fea577b8ba9325b22fbf35498ea873e938c6214f61de54d1b6d19d3"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-g",
+      "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+      "bytes": 8840,
+      "sha256": "5a193c65acc984e46a6b9a11b2214cce34c1ab1f1a55e123413da72392613ee2"
+    },
+    {
+      "id": "rc:asset/garden-ant-worker-g-eyes",
+      "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+      "bytes": 4368,
+      "sha256": "a46791719275280a70b922b6ea116eebdd746ef075670de42761c30ea762ad8b"
+    },
+    {
       "id": "rc:asset/garden-beds",
       "file": "10d/garden-beds--68ead96d6e50.10d",
       "bytes": 1128,
@@ -405,9 +507,9 @@
     },
     {
       "id": "rc:asset/ground",
-      "file": "10d/ground--082f7d142357.10d",
-      "bytes": 596,
-      "sha256": "082f7d1423573565eae34d8d088f9e8c60b33b1326e4f80fa954500cf28d950a"
+      "file": "10d/ground--86b619014005.10d",
+      "bytes": 23652,
+      "sha256": "86b61901400549813424f82f65312a6b4752cee3042b6391c595b447c3b11430"
     },
     {
       "id": "rc:asset/gum-bark-ne",
@@ -603,9 +705,9 @@
     },
     {
       "id": "rc:asset/kestrel-earth-skirt",
-      "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+      "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
       "bytes": 596,
-      "sha256": "6395ae83b773d44100478bdac94568867910cc10ee844a187a3965e875cf1152"
+      "sha256": "04f2995c693b2fb8eed7c96133704f8aaf9273655d951362a584d2ac01b3954e"
     },
     {
       "id": "rc:asset/kestrel-meadow-east",
@@ -711,9 +813,15 @@
     },
     {
       "id": "rc:asset/main-road",
-      "file": "10d/main-road--26de8380118a.10d",
-      "bytes": 772,
-      "sha256": "26de8380118a4e6819f0355536530c4fd18cc39b008be9cb74d784c3bb176680"
+      "file": "10d/main-road--be58633fdd03.10d",
+      "bytes": 1332,
+      "sha256": "be58633fdd038d2a4b88694c90d86c8424a40080a53e407442ed88794ac59722"
+    },
+    {
+      "id": "rc:asset/main-road-workshop-spur",
+      "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+      "bytes": 1336,
+      "sha256": "7b86f8627c74323214a91362cb8958c2dd51ff0542871fe2153ab30f5ae8fbff"
     },
     {
       "id": "rc:asset/market-canopy",
@@ -1017,9 +1125,9 @@
     },
     {
       "id": "rc:asset/ridge-east-earth",
-      "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+      "file": "10d/ridge-east-earth--679399d828e4.10d",
       "bytes": 596,
-      "sha256": "1b7f73ae5c40925af648ff43fd7c666528fc8e02feadfe479951adb331233d69"
+      "sha256": "679399d828e4e4d91006afd5d7d3150cad9a0c798bd0b3e82f4075a4c747e36a"
     },
     {
       "id": "rc:asset/ridge-shrub-east-a",
@@ -1047,9 +1155,9 @@
     },
     {
       "id": "rc:asset/ridge-west-earth",
-      "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+      "file": "10d/ridge-west-earth--d87da74519e0.10d",
       "bytes": 596,
-      "sha256": "87a9cd35792dad2738c78dc5c6c1607e9dc89cf18bf2f601654dcb787f3f579b"
+      "sha256": "d87da74519e02a31581bb810b35ad5bfe25b7b8a9530aa0cdfba17aa9b1a2132"
     },
     {
       "id": "rc:asset/road-markings",
@@ -1065,9 +1173,9 @@
     },
     {
       "id": "rc:asset/saltwind-earth-skirt",
-      "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+      "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
       "bytes": 596,
-      "sha256": "9003a939343a9456f4b7e86276048071c97f65bf133cb44f963333808304b45d"
+      "sha256": "4b744f30df2589b219e0a87d3cc4bba9c7a96c766ec933d0752ac17f0737d431"
     },
     {
       "id": "rc:asset/saltwind-footpaths",
@@ -1077,9 +1185,9 @@
     },
     {
       "id": "rc:asset/saltwind-ground",
-      "file": "10d/saltwind-ground--a34f8febb4f7.10d",
-      "bytes": 596,
-      "sha256": "a34f8febb4f71395a30aafbd73e3e9efe63a59929589c5c1d5b89c16e2d59277"
+      "file": "10d/saltwind-ground--f11464d0cc49.10d",
+      "bytes": 23652,
+      "sha256": "f11464d0cc4927cac63b731909b39eccb79cbe7757873a61dc2714d59685315e"
     },
     {
       "id": "rc:asset/saltwind-gum-east-branch",
@@ -1155,9 +1263,9 @@
     },
     {
       "id": "rc:asset/saltwind-main-road",
-      "file": "10d/saltwind-main-road--1d54db61411b.10d",
-      "bytes": 772,
-      "sha256": "1d54db61411be609244e0991d2a40aa869f42c52051e1fb29b1fd91c19c7ce0f"
+      "file": "10d/saltwind-main-road--ae4acb663d75.10d",
+      "bytes": 1332,
+      "sha256": "ae4acb663d75a311a76de7cecd43b5daa2f73beecf511fc164d1a4134af73c1f"
     },
     {
       "id": "rc:asset/saltwind-market",
@@ -1206,6 +1314,12 @@
       "file": "10d/saltwind-quay--146291ce4b7d.10d",
       "bytes": 772,
       "sha256": "146291ce4b7d2ec37b0f66d14153e58c8bad01b7c1005785cfd0500b7fcb5fc4"
+    },
+    {
+      "id": "rc:asset/saltwind-road-orchard-spur",
+      "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+      "bytes": 1336,
+      "sha256": "d184e8459236f9665cd0db6d5aa2463bac844811b345b15598571d3527576d73"
     },
     {
       "id": "rc:asset/saltwind-shrub-barn",
@@ -1353,15 +1467,15 @@
     },
     {
       "id": "rc:asset/terrain-east-ridge",
-      "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+      "file": "10d/terrain-east-ridge--d9d433eca362.10d",
       "bytes": 6452,
-      "sha256": "9f97917bba6c9f342cd9b377cb70ebfe7d3f6c7a2b133c7a18d2196bfe10d0b8"
+      "sha256": "d9d433eca3629691549cacad0cf82d17a2fa07d37d608a2cdd25ec814c7b2e89"
     },
     {
       "id": "rc:asset/terrain-west-ridge",
-      "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+      "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
       "bytes": 6448,
-      "sha256": "0406c1f87e2628f88675492b34d20395658beed3b100bbeeb9793afed548b4ec"
+      "sha256": "b3c9e669423be2ec27751b8bb7b1824db6be681ea3c43cc1db026a893aa8ed0d"
     },
     {
       "id": "rc:asset/tree-crown-ne",
@@ -1658,7 +1772,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -1668,7 +1782,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -1678,11 +1792,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -2243,6 +2367,176 @@
             0.36000001430511475,
             0.5899999737739563,
             0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
             1
           ]
         },
@@ -3148,7 +3442,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -3158,7 +3452,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -3448,11 +3742,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -3878,7 +4182,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -3888,7 +4192,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -3898,7 +4202,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -3908,7 +4212,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
@@ -4003,7 +4307,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -4013,7 +4317,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -4023,11 +4327,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -4692,6 +5006,176 @@
           ]
         },
         {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/hall-facade",
           "file": "10d/hall-facade--3264814c6c67.10d",
           "rgba": [
@@ -5593,7 +6077,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -5603,7 +6087,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -5893,11 +6377,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -6323,7 +6817,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -6333,7 +6827,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -6343,7 +6837,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -6353,7 +6847,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
@@ -6448,7 +6942,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -6458,7 +6952,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -6468,11 +6962,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -7137,6 +7641,176 @@
           ]
         },
         {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/hall-facade",
           "file": "10d/hall-facade--3264814c6c67.10d",
           "rgba": [
@@ -8038,7 +8712,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -8048,7 +8722,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -8338,11 +9012,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -8768,7 +9452,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -8778,7 +9462,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -8788,7 +9472,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -8798,7 +9482,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
@@ -8893,7 +9577,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -8903,7 +9587,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -8913,11 +9597,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -9592,6 +10286,176 @@
           ]
         },
         {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/hall-facade",
           "file": "10d/hall-facade--3264814c6c67.10d",
           "rgba": [
@@ -10493,7 +11357,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -10503,7 +11367,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -10793,11 +11657,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -11223,7 +12097,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -11233,7 +12107,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -11243,7 +12117,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -11253,7 +12127,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
@@ -11348,7 +12222,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -11358,7 +12232,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -11368,11 +12242,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -12033,6 +12917,176 @@
             0.36000001430511475,
             0.5899999737739563,
             0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
             1
           ]
         },
@@ -12938,7 +13992,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -12948,7 +14002,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -13238,11 +14292,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -13668,7 +14732,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -13678,7 +14742,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -13688,7 +14752,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -13698,7 +14762,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
@@ -13793,7 +14857,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -13803,7 +14867,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -13813,11 +14877,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -14478,6 +15552,176 @@
             0.36000001430511475,
             0.5899999737739563,
             0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
             1
           ]
         },
@@ -15383,7 +16627,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -15393,7 +16637,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -15693,11 +16937,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -16123,7 +17377,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -16133,7 +17387,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -16143,7 +17397,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -16153,7 +17407,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
@@ -16248,7 +17502,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -16258,7 +17512,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -16268,11 +17522,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -16933,6 +18197,176 @@
             0.36000001430511475,
             0.5899999737739563,
             0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
             1
           ]
         },
@@ -17838,7 +19272,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -17848,7 +19282,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -18148,11 +19582,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -18578,7 +20022,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -18588,7 +20032,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -18598,7 +20042,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -18608,7 +20052,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
@@ -18703,7 +20147,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -18713,7 +20157,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -18723,11 +20167,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -19402,6 +20856,176 @@
           ]
         },
         {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/hall-facade",
           "file": "10d/hall-facade--3264814c6c67.10d",
           "rgba": [
@@ -20303,7 +21927,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -20313,7 +21937,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -20613,11 +22237,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -21063,7 +22697,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -21073,7 +22707,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -21083,7 +22717,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -21093,7 +22727,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
@@ -21188,7 +22822,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -21198,7 +22832,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -21208,11 +22842,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -21883,6 +23527,176 @@
             0.36000001430511475,
             0.5899999737739563,
             0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
             1
           ]
         },
@@ -22788,7 +24602,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -22798,7 +24612,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -23098,11 +24912,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -23558,7 +25382,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -23568,7 +25392,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -23578,7 +25402,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -23588,7 +25412,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
@@ -23683,7 +25507,7 @@
       "assets": [
         {
           "id": "rc:asset/kestrel-earth-skirt",
-          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+          "file": "10d/kestrel-earth-skirt--04f2995c693b.10d",
           "rgba": [
             0.46000000834465027,
             0.3100000023841858,
@@ -23693,7 +25517,7 @@
         },
         {
           "id": "rc:asset/ground",
-          "file": "10d/ground--082f7d142357.10d",
+          "file": "10d/ground--86b619014005.10d",
           "rgba": [
             0.5799999833106995,
             0.8199999928474426,
@@ -23703,11 +25527,21 @@
         },
         {
           "id": "rc:asset/main-road",
-          "file": "10d/main-road--26de8380118a.10d",
+          "file": "10d/main-road--be58633fdd03.10d",
           "rgba": [
             0.7799999713897705,
             0.550000011920929,
             0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/main-road-workshop-spur",
+          "file": "10d/main-road-workshop-spur--7b86f8627c74.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.5600000023841858,
+            0.38999998569488525,
             1
           ]
         },
@@ -24268,6 +26102,176 @@
             0.36000001430511475,
             0.5899999737739563,
             0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-mound",
+          "file": "10d/garden-ant-mound--571191cfbc5d.10d",
+          "rgba": [
+            0.5699999928474426,
+            0.4000000059604645,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout",
+          "file": "10d/garden-ant-scout--7d536aaab52b.10d",
+          "rgba": [
+            0.3199999928474426,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-scout-eyes",
+          "file": "10d/garden-ant-scout-eyes--132983cb023e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a",
+          "file": "10d/garden-ant-worker-a--09bcf837ed94.10d",
+          "rgba": [
+            0.38999998569488525,
+            0.20999999344348907,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-a-eyes",
+          "file": "10d/garden-ant-worker-a-eyes--fc5e7b27f927.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b",
+          "file": "10d/garden-ant-worker-b--594a97433b85.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.17000000178813934,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-b-eyes",
+          "file": "10d/garden-ant-worker-b-eyes--9ea5c1de9d3e.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c",
+          "file": "10d/garden-ant-worker-c--fb797af3f3cd.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.1899999976158142,
+            0.12999999523162842,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-c-eyes",
+          "file": "10d/garden-ant-worker-c-eyes--6c7d5ef3df97.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d",
+          "file": "10d/garden-ant-worker-d--8e301424faf5.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.17000000178813934,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-d-eyes",
+          "file": "10d/garden-ant-worker-d-eyes--8ffc67c92fb5.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e",
+          "file": "10d/garden-ant-worker-e--5b5e75946bed.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.20000000298023224,
+            0.14000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-e-eyes",
+          "file": "10d/garden-ant-worker-e-eyes--041da9de0db3.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f",
+          "file": "10d/garden-ant-worker-f--37084974ab42.10d",
+          "rgba": [
+            0.30000001192092896,
+            0.1599999964237213,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-f-eyes",
+          "file": "10d/garden-ant-worker-f-eyes--6bf6f8d86fea.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g",
+          "file": "10d/garden-ant-worker-g--5a193c65acc9.10d",
+          "rgba": [
+            0.3499999940395355,
+            0.18000000715255737,
+            0.11999999731779099,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/garden-ant-worker-g-eyes",
+          "file": "10d/garden-ant-worker-g-eyes--a46791719275.10d",
+          "rgba": [
+            0.9700000286102295,
+            0.8799999952316284,
+            0.6700000166893005,
             1
           ]
         },
@@ -25173,7 +27177,7 @@
         },
         {
           "id": "rc:asset/saltwind-earth-skirt",
-          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+          "file": "10d/saltwind-earth-skirt--4b744f30df25.10d",
           "rgba": [
             0.5400000214576721,
             0.3799999952316284,
@@ -25183,7 +27187,7 @@
         },
         {
           "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "file": "10d/saltwind-ground--f11464d0cc49.10d",
           "rgba": [
             0.7300000190734863,
             0.8100000023841858,
@@ -25473,11 +27477,21 @@
         },
         {
           "id": "rc:asset/saltwind-main-road",
-          "file": "10d/saltwind-main-road--1d54db61411b.10d",
+          "file": "10d/saltwind-main-road--ae4acb663d75.10d",
           "rgba": [
             0.8899999856948853,
             0.7200000286102295,
             0.5,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-road-orchard-spur",
+          "file": "10d/saltwind-road-orchard-spur--d184e8459236.10d",
+          "rgba": [
+            0.8799999952316284,
+            0.7099999785423279,
+            0.5099999904632568,
             1
           ]
         },
@@ -25903,7 +27917,7 @@
         },
         {
           "id": "rc:asset/ridge-west-earth",
-          "file": "10d/ridge-west-earth--87a9cd35792d.10d",
+          "file": "10d/ridge-west-earth--d87da74519e0.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -25913,7 +27927,7 @@
         },
         {
           "id": "rc:asset/terrain-west-ridge",
-          "file": "10d/terrain-west-ridge--0406c1f87e26.10d",
+          "file": "10d/terrain-west-ridge--b3c9e669423b.10d",
           "rgba": [
             0.44999998807907104,
             0.7200000286102295,
@@ -25923,7 +27937,7 @@
         },
         {
           "id": "rc:asset/ridge-east-earth",
-          "file": "10d/ridge-east-earth--1b7f73ae5c40.10d",
+          "file": "10d/ridge-east-earth--679399d828e4.10d",
           "rgba": [
             0.4699999988079071,
             0.3400000035762787,
@@ -25933,7 +27947,7 @@
         },
         {
           "id": "rc:asset/terrain-east-ridge",
-          "file": "10d/terrain-east-ridge--9f97917bba6c.10d",
+          "file": "10d/terrain-east-ridge--d9d433eca362.10d",
           "rgba": [
             0.47999998927116394,
             0.699999988079071,
