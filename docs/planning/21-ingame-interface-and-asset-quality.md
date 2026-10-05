@@ -68,6 +68,19 @@ eave details. The selected-site camera frames the buildings more closely.
 All five new asset variants were built by Qualia and packaged into the
 game-owned HMC; the scene remains stylized blockout art.
 
+The next landscape pass adds earth skirts and rounded meadow mounds to both
+tiles. Kestrel gains shrubs, a striped market canopy, produce baskets, a hall
+banner and workshop entry accents. Saltwind gains canal reeds, water ripples,
+bank stones, orchard furrows and crop rows, lavender and windbreaks, plus
+awnings and details on its market, boat, barn and wind pump. Qualia geometry
+authoring builds the new ellipsoid and torus forms, the `.10d` compiler seals
+them with provenance, and the full Portal WASM renderer displays them. The
+opening scene now has 181 visible organs and the HMC has 214 distinct variants
+across ten scene states. Browser inspection confirmed both territories and the
+60-check campaign self-test passed. Shapes and colour separation improved;
+surface materials, shadows, character animation and the bright projector
+squares still prevent a finished visual result.
+
 ## Quality work still needed
 
 1. Inspect both rendered territories after the WebGPU depth and occlusion fix. Tune camera,

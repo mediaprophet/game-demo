@@ -68,7 +68,9 @@ const entries = await Promise.all(manifest.assets.map(async (asset) => ({
   key: asset.file,
   bytes: new Uint8Array(await readFile(join(root, 'assets', 'generated', asset.file))),
 })));
-const pack = pack_game_hmc(entries, manifestText);
+// Keep the checked-in manifest readable; pack the same data compactly so
+// growing scene catalogs stay within the game shell's bounded HMC input.
+const pack = pack_game_hmc(entries, JSON.stringify(manifest));
 if (verify_game_hmc(pack) !== manifest.assets.length + 1) {
   throw new Error('Qualia HMC reader rejected an entry');
 }

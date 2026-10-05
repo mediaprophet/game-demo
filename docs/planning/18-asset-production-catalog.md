@@ -20,15 +20,15 @@ QG-12/13/14. Do not approximate those engine features with page overlays.
 
 ## What exists today
 
-`crates/rolling-commons-shell/src/asset_catalog.rs` now produces 108
+`crates/rolling-commons-shell/src/asset_catalog.rs` now produces 125
 always-present original Kestrel Flats scene organs, with additional solar and
 garden variants. They cover terrain colour zones, paths, detailed buildings,
 market stock, garden soil and crops, a rounded tank, trees, lamps, salvage
 drums, vehicle detail, residents, flowers, background forms and infrastructure.
 The shell uses QualiaDB's bounded
 primitive assembler and its full computational-geometry authoring APIs:
-deterministic cylinders, spheres, tori, transforms and parametric profile
-revolution. Every organ is sealed through the Qualia `.10d` compiler with a
+deterministic cylinders, spheres, ellipsoids, tori, transforms and parametric
+profile revolution. Every organ is sealed through the Qualia `.10d` compiler with a
 game-owned source recipe and provenance sidecar, then rendered by full
 QualiaPortal. Stable `rc:asset/` IDs remain available. These are **detailed
 blockouts for composition and interaction testing**, not finished AAA art.
@@ -38,22 +38,24 @@ manifest. It verifies the pack with Qualia's reader. QG-01/02/14 remain the
 production gate: the canonical HMC variant, Q42 identity/rights manifest,
 browser pack loading, and complete state/animation packaging are not yet proven.
 
-Saltwind Reach adds 27 always-present organs on a second connected land tile:
+Saltwind Reach adds 56 always-present organs on a second connected land tile:
 canal, bridge, roads, barn, market, quay, boat, wind pump and orchard. Bridge,
 pump and fruit variants follow the SHACL-validated project states. The full
-map is 135 persistent `.10d` organs before conditional variants. Qualia's
+map is 181 persistent `.10d` organs before conditional variants. Qualia's
 public camera target and sky preset APIs provide territory navigation and
 daylight presentation in the full WASM game.
 These counts come from the current `opening` scene in the generated manifest;
 the older planning estimates did not include later environment and character
 organs.
 
-The current asset export contains 162 distinct `.10d` variants across ten
-scene states in the game-owned HMC pack. A focused building pass separates the
-workshop, hall and barn roofs from their walls, adds facade and eave detail,
-and makes the roof colours readable at strategy zoom. The Qualia camera now
-frames selected sites closer. These improvements were inspected in the full
-WebGPU game, and still need finished materials and richer authored models.
+The current asset export contains 214 distinct `.10d` variants across ten
+scene states in the game-owned HMC pack. The latest landscape pass adds layered
+earth skirts, rounded meadow mounds, shrubs, canal reeds and ripples, shore
+stones, orchard furrows and crop rows, lavender, windbreaks, and accents on the
+market, boat, pump, workshop, hall and barn. The earlier building pass separated
+the workshop, hall and barn roofs from their walls. These improvements were
+inspected in the full WebGPU game and still need finished materials and richer
+authored models.
 The connected communications mast adds a rounded signal head and a distinct
 status colour. Its recipe stays game-owned; Qualia computational geometry and
 the `.10d` compiler produce the packaged asset.

@@ -21,6 +21,12 @@ pub enum ParametricRecipe {
         latitude: u32,
         longitude: u32,
     },
+    Ellipsoid {
+        center: [f32; 3],
+        radii: [f32; 3],
+        latitude: u32,
+        longitude: u32,
+    },
     Torus {
         center: [f32; 3],
         major: f32,
@@ -60,6 +66,22 @@ impl ParametricRecipe {
                 *center,
                 authoring::uv_sphere(*radius, *latitude, *longitude).map_err(|e| e.to_string())?,
             ),
+            Self::Ellipsoid {
+                center,
+                radii,
+                latitude,
+                longitude,
+            } => {
+                let sphere = authoring::uv_sphere(1.0, *latitude, *longitude)
+                    .map_err(|e| e.to_string())?;
+                (
+                    *center,
+                    authoring::transform_mesh(
+                        &sphere,
+                        &authoring::scale(radii[0] as f64, radii[1] as f64, radii[2] as f64),
+                    ),
+                )
+            },
             Self::Torus {
                 center,
                 major,
@@ -174,10 +196,15 @@ pub fn kestrel_flats(
         [0.51, 0.61],
         [0.0, 0.61],
     ];
-    let mut scene = Vec::with_capacity(120);
+    let mut scene = Vec::with_capacity(160);
+    scene.push(asset(
+        "rc:asset/kestrel-earth-skirt",
+        [0.46, 0.31, 0.24, 1.0],
+        vec![block([0.0, -0.29, 0.0], [14.18, 0.43, 14.18])],
+    ));
     scene.push(asset(
         "rc:asset/ground",
-        [0.62, 0.78, 0.40, 1.0],
+        [0.58, 0.82, 0.43, 1.0],
         vec![block([0.0, -0.08, 0.0], [14.0, 0.16, 14.0])],
     ));
     scene.push(asset(
@@ -419,6 +446,14 @@ pub fn kestrel_flats(
         ],
     ));
     scene.push(asset(
+        "rc:asset/hall-banner",
+        [0.94, 0.47, 0.38, 1.0],
+        vec![
+            block([0.0, 1.76, -4.77], [0.35, 0.55, 0.04]),
+            block([0.0, 1.46, -4.76], [0.42, 0.09, 0.04]),
+        ],
+    ));
+    scene.push(asset(
         "rc:asset/communications-mast",
         [0.57, 0.58, 0.54, 1.0],
         vec![
@@ -448,7 +483,7 @@ pub fn kestrel_flats(
     // The rounded forms below use Qualia's authoring and parametric CAD APIs.
     scene.push(asset(
         "rc:asset/grass-verges",
-        [0.40, 0.70, 0.32, 1.0],
+        [0.36, 0.74, 0.39, 1.0],
         vec![
             block([-3.8, 0.012, 5.6], [4.0, 0.035, 1.35]),
             block([3.7, 0.012, 5.6], [4.5, 0.035, 1.35]),
@@ -456,6 +491,31 @@ pub fn kestrel_flats(
             block([4.0, 0.012, -6.2], [4.5, 0.035, 0.75]),
         ],
     ));
+    // Broad low mounds break up the rectangular turf without obscuring roads.
+    // Each is an authored ellipsoid from Qualia's sphere and transform APIs.
+    for (id, center, radii, color) in [
+        ("rc:asset/kestrel-meadow-nw", [-5.25, 0.025, -5.78], [1.35, 0.12, 0.65], [0.43, 0.78, 0.39, 1.0]),
+        ("rc:asset/kestrel-meadow-ne", [5.35, 0.025, -5.75], [1.38, 0.13, 0.67], [0.38, 0.73, 0.35, 1.0]),
+        ("rc:asset/kestrel-meadow-sw", [-5.37, 0.025, 5.72], [1.45, 0.13, 0.75], [0.40, 0.76, 0.36, 1.0]),
+        ("rc:asset/kestrel-meadow-se", [5.33, 0.025, 5.70], [1.42, 0.12, 0.72], [0.46, 0.80, 0.37, 1.0]),
+        ("rc:asset/kestrel-meadow-west", [-6.40, 0.025, 0.82], [0.51, 0.10, 1.12], [0.47, 0.77, 0.39, 1.0]),
+        ("rc:asset/kestrel-meadow-east", [6.37, 0.025, -0.55], [0.50, 0.09, 1.02], [0.41, 0.76, 0.37, 1.0]),
+    ] {
+        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
+            center, radii, latitude: 7, longitude: 12,
+        }));
+    }
+    for (id, center, radii, color) in [
+        ("rc:asset/kestrel-shrub-hall", [-1.23, 0.27, -4.27], [0.46, 0.28, 0.37], [0.20, 0.58, 0.31, 1.0]),
+        ("rc:asset/kestrel-shrub-workshop", [4.98, 0.31, -1.05], [0.55, 0.33, 0.39], [0.27, 0.64, 0.38, 1.0]),
+        ("rc:asset/kestrel-shrub-camp", [-4.61, 0.28, 3.75], [0.50, 0.30, 0.43], [0.25, 0.61, 0.33, 1.0]),
+        ("rc:asset/kestrel-shrub-garden", [-2.39, 0.22, -5.54], [0.43, 0.24, 0.38], [0.29, 0.68, 0.36, 1.0]),
+        ("rc:asset/kestrel-shrub-salvage", [6.42, 0.25, 2.26], [0.39, 0.27, 0.48], [0.23, 0.58, 0.34, 1.0]),
+    ] {
+        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
+            center, radii, latitude: 8, longitude: 12,
+        }));
+    }
     scene.push(asset(
         "rc:asset/footpaths",
         [0.94, 0.80, 0.59, 1.0],
@@ -501,6 +561,22 @@ pub fn kestrel_flats(
         [0.91, 0.64, 0.28, 1.0],
         vec![block([3.2, 1.49, -1.19], [0.9, 0.18, 0.045])],
     ));
+    scene.push(asset(
+        "rc:asset/workshop-entry-awning",
+        [0.22, 0.50, 0.58, 1.0],
+        vec![
+            roof([3.2, 1.66, -0.89], [1.70, 0.34, 0.78]),
+            block([3.2, 0.035, -0.62], [1.80, 0.07, 0.69]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-door-glow",
+        if online { [0.99, 0.80, 0.37, 1.0] } else { [0.34, 0.48, 0.53, 1.0] },
+        vec![
+            block([3.2, 1.05, -1.235], [0.54, 0.16, 0.035]),
+            block([3.2, 0.22, -1.235], [0.54, 0.09, 0.035]),
+        ],
+    ));
     if panels > 0 {
         scene.push(asset(
             "rc:asset/solar-cells",
@@ -524,6 +600,24 @@ pub fn kestrel_flats(
             block([-2.75, 1.35, -3.4], [0.45, 0.05, 1.5]),
             block([-1.88, 1.35, -3.4], [0.45, 0.05, 1.5]),
             block([-2.2, 1.17, -2.61], [2.1, 0.11, 0.09]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/market-canopy-cream",
+        [0.99, 0.89, 0.65, 1.0],
+        vec![
+            block([-3.18, 1.36, -3.4], [0.34, 0.07, 1.50]),
+            block([-2.32, 1.36, -3.4], [0.34, 0.07, 1.50]),
+            block([-1.45, 1.36, -3.4], [0.34, 0.07, 1.50]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/market-display-baskets",
+        [0.62, 0.37, 0.22, 1.0],
+        vec![
+            block([-2.74, 0.67, -2.60], [0.44, 0.20, 0.43]),
+            block([-2.08, 0.67, -2.60], [0.44, 0.20, 0.43]),
+            block([-1.43, 0.67, -2.60], [0.44, 0.20, 0.43]),
         ],
     ));
     scene.push(asset(
@@ -1018,12 +1112,27 @@ pub fn saltwind_reach(
     orchard_active: bool,
     orchard_harvested: bool,
 ) -> Vec<AssetRecipe> {
-    let mut scene = Vec::with_capacity(40);
+    let mut scene = Vec::with_capacity(78);
+    scene.push(asset(
+        "rc:asset/saltwind-earth-skirt",
+        [0.54, 0.38, 0.27, 1.0],
+        vec![block([16.0, -0.29, 0.0], [14.18, 0.43, 14.18])],
+    ));
     scene.push(asset(
         "rc:asset/saltwind-ground",
-        [0.72, 0.78, 0.47, 1.0],
+        [0.73, 0.81, 0.48, 1.0],
         vec![block([16.0, -0.08, 0.0], [14.0, 0.16, 14.0])],
     ));
+    for (id, center, radii, color) in [
+        ("rc:asset/saltwind-meadow-nw", [11.1, 0.02, -5.8], [1.55, 0.13, 0.70], [0.64, 0.77, 0.42, 1.0]),
+        ("rc:asset/saltwind-meadow-ne", [20.7, 0.02, -5.7], [1.58, 0.14, 0.76], [0.59, 0.75, 0.42, 1.0]),
+        ("rc:asset/saltwind-meadow-sw", [11.1, 0.02, 5.8], [1.50, 0.13, 0.69], [0.61, 0.79, 0.43, 1.0]),
+        ("rc:asset/saltwind-meadow-se", [20.7, 0.02, 5.7], [1.47, 0.12, 0.77], [0.65, 0.80, 0.40, 1.0]),
+    ] {
+        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
+            center, radii, latitude: 7, longitude: 12,
+        }));
+    }
     scene.push(asset(
         "rc:asset/channel",
         if high_tide {
@@ -1036,6 +1145,39 @@ pub fn saltwind_reach(
             [2.0, if high_tide { 0.20 } else { 0.08 }, 14.0],
         )],
     ));
+    scene.push(asset(
+        "rc:asset/canal-reeds",
+        [0.55, 0.72, 0.35, 1.0],
+        [-5.7, -4.4, -2.8, 2.1, 3.5, 5.2].into_iter().flat_map(|z| [
+            block([6.83, 0.22, z], [0.06, 0.44, 0.08]),
+            block([9.18, 0.22, z + 0.3], [0.06, 0.44, 0.08]),
+        ]).collect(),
+    ));
+    for (id, z, major) in [
+        ("rc:asset/canal-ripple-a", -5.0, 0.37),
+        ("rc:asset/canal-ripple-b", -2.7, 0.48),
+        ("rc:asset/canal-ripple-c", 2.3, 0.42),
+        ("rc:asset/canal-ripple-d", 5.3, 0.34),
+    ] {
+        scene.push(parametric(
+            id,
+            [0.69, 0.92, 0.91, 1.0],
+            ParametricRecipe::Torus {
+                center: [8.0, if high_tide { 0.16 } else { 0.0 }, z],
+                major, minor: 0.019, segments: 24, tube_segments: 6,
+            },
+        ));
+    }
+    for (id, center, radii) in [
+        ("rc:asset/canal-stone-a", [6.72, 0.08, -3.55], [0.29, 0.18, 0.39]),
+        ("rc:asset/canal-stone-b", [9.30, 0.08, -4.70], [0.34, 0.20, 0.31]),
+        ("rc:asset/canal-stone-c", [6.73, 0.08, 3.12], [0.25, 0.17, 0.36]),
+        ("rc:asset/canal-stone-d", [9.27, 0.08, 5.04], [0.37, 0.21, 0.28]),
+    ] {
+        scene.push(parametric(id, [0.77, 0.73, 0.60, 1.0], ParametricRecipe::Ellipsoid {
+            center, radii, latitude: 7, longitude: 10,
+        }));
+    }
     scene.push(asset(
         "rc:asset/bridge",
         if bridge_open {
@@ -1144,6 +1286,15 @@ pub fn saltwind_reach(
             block([16.47, 0.82, 2.31], [0.13, 1.5, 0.07]),
         ],
     ));
+    scene.push(asset(
+        "rc:asset/barn-hay-bales",
+        [0.94, 0.73, 0.36, 1.0],
+        vec![
+            block([13.83, 0.27, 2.06], [0.82, 0.50, 0.60]),
+            block([16.76, 0.27, 2.06], [0.82, 0.50, 0.60]),
+            block([13.83, 0.77, 2.06], [0.74, 0.47, 0.55]),
+        ],
+    ));
     scene.push(parametric(
         "rc:asset/wind-pump-tower",
         [0.96, 0.82, 0.61, 1.0],
@@ -1185,6 +1336,15 @@ pub fn saltwind_reach(
         ],
     ));
     scene.push(asset(
+        "rc:asset/wind-pump-vane",
+        [0.27, 0.54, 0.59, 1.0],
+        vec![
+            block([19.0, 3.49, -2.43], [0.10, 0.83, 0.10]),
+            block([19.37, 3.74, -2.43], [0.75, 0.08, 0.10]),
+            block([19.70, 3.84, -2.43], [0.17, 0.28, 0.10]),
+        ],
+    ));
+    scene.push(asset(
         "rc:asset/pump-trough",
         [0.32, 0.66, 0.73, 1.0],
         vec![block([19.0, 0.16, -0.8], [1.5, 0.3, 0.62])],
@@ -1201,6 +1361,15 @@ pub fn saltwind_reach(
         "rc:asset/saltwind-market-awning",
         [0.43, 0.71, 0.76, 1.0],
         vec![block([11.8, 1.28, -1.8], [2.15, 0.09, 0.8])],
+    ));
+    scene.push(asset(
+        "rc:asset/saltwind-market-stripes",
+        [0.99, 0.88, 0.62, 1.0],
+        vec![
+            block([11.14, 1.34, -1.8], [0.32, 0.07, 0.80]),
+            block([11.80, 1.34, -1.8], [0.32, 0.07, 0.80]),
+            block([12.46, 1.34, -1.8], [0.32, 0.07, 0.80]),
+        ],
     ));
     scene.push(asset(
         "rc:asset/saltwind-quay",
@@ -1230,6 +1399,25 @@ pub fn saltwind_reach(
         ],
     ));
     scene.push(asset(
+        "rc:asset/canal-boat-awning",
+        [0.96, 0.77, 0.48, 1.0],
+        vec![
+            roof([8.0, 0.81, 4.03], [0.89, 0.27, 0.92]),
+            block([7.62, 0.55, 3.67], [0.06, 0.54, 0.06]),
+            block([8.38, 0.55, 3.67], [0.06, 0.54, 0.06]),
+            block([7.62, 0.55, 4.39], [0.06, 0.54, 0.06]),
+            block([8.38, 0.55, 4.39], [0.06, 0.54, 0.06]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/canal-boat-hull-stripe",
+        [0.29, 0.64, 0.71, 1.0],
+        vec![
+            block([7.54, 0.15, 3.8], [0.025, 0.08, 1.64]),
+            block([8.46, 0.15, 3.8], [0.025, 0.08, 1.64]),
+        ],
+    ));
+    scene.push(asset(
         "rc:asset/orchard-beds",
         if orchard_active {
             [0.44, 0.69, 0.32, 1.0]
@@ -1241,6 +1429,40 @@ pub fn saltwind_reach(
             block([18.3, 0.10, 5.3], [3.5, 0.2, 1.2]),
         ],
     ));
+    scene.push(asset(
+        "rc:asset/orchard-furrows",
+        [0.68, 0.48, 0.30, 1.0],
+        [3.24_f32, 3.60, 3.96, 4.94, 5.30, 5.66].into_iter()
+            .map(|z| block([18.3, 0.215, z], [3.43, 0.055, 0.105]))
+            .collect(),
+    ));
+    if orchard_active {
+        scene.push(asset(
+            "rc:asset/orchard-crop-rows",
+            [0.29, 0.68, 0.34, 1.0],
+            [3.60_f32, 5.30].into_iter().flat_map(|z|
+                (0..9).map(move |i| block([16.79 + i as f32 * 0.37, 0.36, z],
+                    [0.16, 0.30, 0.21]))
+            ).collect(),
+        ));
+    }
+    scene.push(asset(
+        "rc:asset/saltwind-lavender-field",
+        [0.56, 0.52, 0.73, 1.0],
+        [-5.25_f32, -4.85, -4.45].into_iter().flat_map(|z|
+            (0..8).map(move |i| block([13.4 + i as f32 * 0.32, 0.14, z],
+                [0.14, 0.22, 0.13]))
+        ).collect(),
+    ));
+    for (id, center, radii, color) in [
+        ("rc:asset/saltwind-windbreak-a", [21.80, 0.32, -2.50], [0.52, 0.36, 0.68], [0.31, 0.62, 0.39, 1.0]),
+        ("rc:asset/saltwind-windbreak-b", [21.94, 0.34, -0.90], [0.49, 0.37, 0.60], [0.27, 0.59, 0.36, 1.0]),
+        ("rc:asset/saltwind-windbreak-c", [21.85, 0.31, 1.04], [0.56, 0.34, 0.63], [0.34, 0.64, 0.38, 1.0]),
+    ] {
+        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
+            center, radii, latitude: 8, longitude: 12,
+        }));
+    }
     for (trunk_id, crown_id, x, z, hue) in [
         (
             "rc:asset/orchard-tree-a-trunk",
@@ -1284,6 +1506,17 @@ pub fn saltwind_reach(
                 longitude: 12,
             },
         ));
+    }
+    for (id, center, radii, color) in [
+        ("rc:asset/orchard-canopy-a-lobe", [11.78, 2.23, 4.70], [0.64, 0.53, 0.60], [0.64, 0.81, 0.42, 1.0]),
+        ("rc:asset/orchard-canopy-b-lobe", [20.13, 2.26, 4.77], [0.63, 0.57, 0.56], [0.56, 0.78, 0.44, 1.0]),
+        ("rc:asset/orchard-canopy-c-lobe", [21.38, 2.20, -5.12], [0.65, 0.56, 0.57], [0.72, 0.84, 0.44, 1.0]),
+        ("rc:asset/saltwind-shrub-market", [12.93, 0.25, -3.67], [0.48, 0.28, 0.44], [0.31, 0.63, 0.38, 1.0]),
+        ("rc:asset/saltwind-shrub-barn", [17.02, 0.28, 4.25], [0.52, 0.31, 0.41], [0.29, 0.62, 0.34, 1.0]),
+    ] {
+        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
+            center, radii, latitude: 8, longitude: 12,
+        }));
     }
     if orchard_active && !orchard_harvested {
         scene.push(asset(

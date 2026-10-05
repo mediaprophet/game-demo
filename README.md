@@ -59,14 +59,17 @@ garden once water is available.
 The page also exposes VibeScript cells for live world snapshot queries,
 SHACL-gated order proposals, and a bounded scene asset that compiles through
 Qualia computational geometry to a provenance-bearing `.10d` mesh.
-Kestrel Flats has 108 always-present original `.10d` scene organs; the
-Saltwind Reach tile adds 27 more plus state variants. The connected scene uses
+Kestrel Flats has 125 always-present original `.10d` scene organs; the
+Saltwind Reach tile adds 56 more plus state variants. The connected scene uses
 QualiaPortal's camera target and daylight sky APIs. State variants live in
 the game-owned catalog. Rounded assets use Qualia's computational
 geometry authoring and parametric CAD; all scene assets retain source
-provenance. The workshop, hall and barn now have separately coloured gabled
-roofs and structural trim. These remain composition blockouts; finished
-materials, animation and canonical production HMC tooling remain upstream gates.
+provenance. Layered terrain, rounded meadows and shrubs, canal banks and
+ripples, orchard rows, and market and building accents give the two territories
+clearer shapes and colour at strategy zoom. The workshop, hall and barn have
+separately coloured gabled roofs and structural trim. These remain composition
+blockouts; finished materials, animation and canonical production HMC tooling
+remain upstream gates.
 
 The current two-territory build passes both campaign endings and replay
 self-tests. The full Qualia WebGPU canvas now renders on the published game;
