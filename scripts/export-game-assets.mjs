@@ -4,15 +4,13 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile, mkdir, readdir, unlink } from 'node:fs/promises';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import init, { pack_game_hmc, scene_build, verify_game_hmc } from '../web/pkg/rolling_commons_shell.js';
+import init, { pack_game_hmc, scene_build, set_art_style, verify_game_hmc } from '../web/pkg/rolling_commons_shell.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const wasmPath = join(root, 'web', 'pkg', 'rolling_commons_shell_bg.wasm');
 const wasm = await readFile(wasmPath);
 await init({ module_or_path: wasm });
 
-const out = join(root, 'assets', 'generated', '10d');
-await mkdir(out, { recursive: true });
 const beacon = (await readFile(join(root, 'web', 'fixtures', 'community-beacon.vibe'), 'utf8')).trim();
 const cases = [
   ['opening', [0, 0, false, false, false, false, false, false, false, false, false, false, false, '']],
@@ -27,6 +25,12 @@ const cases = [
   ['vibe-beacon', [0, 0, false, false, false, false, false, false, false, false, false, false, false, beacon]],
 ];
 
+for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight']]) {
+set_art_style(style);
+const styleRoot = style === 0 ? join(root, 'assets', 'generated') :
+  join(root, 'assets', 'generated', styleSlug);
+const out = join(styleRoot, '10d');
+await mkdir(out, { recursive: true });
 const assets = new Map();
 const scenes = [];
 for (const [name, args] of cases) {
@@ -55,6 +59,7 @@ for (const [name, args] of cases) {
 
 const manifest = {
   format: 'maslows-challenge-asset-export-v1',
+  artStyle: styleSlug,
   generator: 'scripts/export-game-assets.mjs',
   sourceRecipes: 'crates/rolling-commons-shell/src/asset_catalog.rs',
   wasm: { file: 'web/pkg/rolling_commons_shell_bg.wasm', sha256: createHash('sha256').update(wasm).digest('hex') },
@@ -62,11 +67,11 @@ const manifest = {
   scenes,
 };
 const manifestText = JSON.stringify(manifest, null, 2) + '\n';
-await writeFile(join(root, 'assets', 'generated', 'manifest.json'), manifestText);
+await writeFile(join(styleRoot, 'manifest.json'), manifestText);
 
 const entries = await Promise.all(manifest.assets.map(async (asset) => ({
   key: asset.file,
-  bytes: new Uint8Array(await readFile(join(root, 'assets', 'generated', asset.file))),
+  bytes: new Uint8Array(await readFile(join(styleRoot, asset.file))),
 })));
 // Keep the checked-in manifest readable; pack the same data compactly so
 // growing scene catalogs stay within the game shell's bounded HMC input.
@@ -76,17 +81,10 @@ if (verify_game_hmc(pack) !== manifest.assets.length + 1) {
 }
 const packDir = join(root, 'web', 'assets');
 await mkdir(packDir, { recursive: true });
-await writeFile(join(packDir, 'manifest.json'), manifestText);
-const packPath = join(packDir, 'maslows-challenge-scenes.hmc');
+await writeFile(join(packDir, style === 0 ? 'manifest.json' : `${styleSlug}-manifest.json`), manifestText);
+const packPath = join(packDir, style === 0 ? 'maslows-challenge-scenes.hmc' :
+  `maslows-challenge-${styleSlug}.hmc`);
 await writeFile(packPath, Buffer.from(pack));
-const buildId = manifest.wasm.sha256.slice(0, 16);
-for (const page of ['game.html', 'spike.html']) {
-  const pagePath = join(root, 'web', page);
-  const html = await readFile(pagePath, 'utf8');
-  const marker = /const WASM_BUILD = '[0-9a-f]{16}';/;
-  if (!marker.test(html)) throw new Error(`${page}: missing WASM build marker`);
-  await writeFile(pagePath, html.replace(marker, `const WASM_BUILD = '${buildId}';`));
-}
 // The directory contains generated exports only. Keep it aligned with the
 // verified manifest so old variants cannot masquerade as current game assets.
 const assetRoot = resolve(out);
@@ -97,4 +95,13 @@ for (const entry of await readdir(assetRoot, { withFileTypes: true })) {
   if (dirname(stalePath) !== assetRoot) throw new Error(`Asset outside export directory: ${stalePath}`);
   await unlink(stalePath);
 }
-console.log(`Exported ${manifest.assets.length} distinct .10d assets across ${scenes.length} scene states and Qualia HMC ${relative(root, packPath)}`);
+console.log(`Exported ${styleSlug}: ${manifest.assets.length} distinct .10d assets across ${scenes.length} scene states and Qualia HMC ${relative(root, packPath)}`);
+}
+const buildId = createHash('sha256').update(wasm).digest('hex').slice(0, 16);
+for (const page of ['game.html', 'spike.html']) {
+  const pagePath = join(root, 'web', page);
+  const html = await readFile(pagePath, 'utf8');
+  const marker = /const WASM_BUILD = '[0-9a-f]{16}';/;
+  if (!marker.test(html)) throw new Error(`${page}: missing WASM build marker`);
+  await writeFile(pagePath, html.replace(marker, `const WASM_BUILD = '${buildId}';`));
+}

@@ -1,5 +1,9 @@
 # In-game interface and asset quality
 
+The visual-quality reference is the animated-film finish of DreamWorks'
+*Antz*, not an ant theme. See
+[the visual direction and acceptance gate](22-animated-film-visual-direction.md).
+
 ## Architecture
 
 The visible player interface lives inside the world viewport. The browser hosts two canvases:

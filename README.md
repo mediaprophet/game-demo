@@ -74,6 +74,13 @@ separately coloured gabled roofs and structural trim. These remain composition
 blockouts; finished materials, animation and canonical production HMC tooling
 remain upstream gates.
 
+The in-game System panel offers two visual styles. Storybook keeps the bright
+original palette; Earthlight supplies a warmer, less saturated `.10d` surface
+reading and Qualia sky. The game exports a separate HMC for each style and
+remembers the player's presentation preference independently of campaign saves.
+The selectable style system is a foundation for the fuller animated-film art
+direction described in [the visual plan](docs/planning/22-animated-film-visual-direction.md).
+
 The botanical pass adds pale, branching gum trees with blue-green crowns and
 hanging foliage, flowering wattle, a herb border, planted vegetable leaves and
 produce, and a distinct lavender patch. The planting is authored in the game

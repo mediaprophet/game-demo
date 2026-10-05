@@ -15,6 +15,7 @@ mod ants;
 mod terrain;
 
 use std::collections::BTreeMap;
+use std::cell::Cell;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlCanvasElement;
@@ -22,6 +23,36 @@ use web_sys::HtmlCanvasElement;
 /// Full QualiaDB engine revision used by the reproducible game build.
 /// The sibling checkout is verified by scripts/build-game.ps1 and CI.
 pub const QUALIADB_PINNED_REVISION: &str = include_str!("../../../qualia.ref");
+
+thread_local! { static ART_STYLE: Cell<u8> = const { Cell::new(0) }; }
+
+/// Presentation preference only; world state and game rules are unchanged.
+#[wasm_bindgen]
+pub fn set_art_style(style: u8) {
+    ART_STYLE.with(|active| active.set(style.min(1)));
+}
+
+fn style_color(id: &str, color: [f32; 4], style: u8) -> [f32; 4] {
+    if style == 0 { return color; }
+    // Earthlight: a restrained earth/foliage colour script. The same Qualia
+    // geometry and `.10d` surface-reading path carries both styles.
+    let foliage = ["crown", "canopy", "foliage", "leaf", "shoot", "shrub", "herb",
+                   "grass", "wattle", "lavender", "orchard", "gum"].iter()
+        .any(|word| id.contains(word));
+    let earth = ["ground", "terrain", "earth", "road", "bank", "meadow", "hill"]
+        .iter().any(|word| id.contains(word));
+    let target = if foliage { [0.36, 0.52, 0.33] }
+        else if earth { [0.55, 0.43, 0.31] }
+        else { [0.65, 0.52, 0.40] };
+    let mix = if foliage || earth { 0.38 } else { 0.18 };
+    let luminance = color[0] * 0.25 + color[1] * 0.58 + color[2] * 0.17;
+    let mut result = color;
+    for axis in 0..3 {
+        let muted = luminance * 0.28 + color[axis] * 0.72;
+        result[axis] = (muted * (1.0 - mix) + target[axis] * mix).clamp(0.0, 1.0);
+    }
+    result
+}
 
 #[wasm_bindgen]
 pub fn pinned_qualiadb_revision() -> String {
@@ -411,6 +442,10 @@ pub fn scene_build(
     recipes.extend(asset_catalog::northern_highlands());
     if !vibe_scene.trim().is_empty() {
         recipes.push(vibe_scene_recipe(vibe_scene).map_err(|e| JsValue::from_str(&e))?);
+    }
+    let art_style = ART_STYLE.with(|active| active.get());
+    for recipe in &mut recipes {
+        recipe.color = style_color(recipe.id, recipe.color, art_style);
     }
     for recipe in recipes {
         let (mesh, obj) = organ(&recipe)?;

@@ -6,6 +6,16 @@ engine gaps remain work orders; game-specific replacements are not acceptable.
 
 ## Game work in this pass
 
+**Selectable visual style pass (2026-10-05):** The Qualia in-game System panel
+now selects Storybook or Earthlight. The latter uses a warmer game-authored
+palette in `.10d` surface readings and Qualia's golden-hour sky. The preference
+persists separately from campaign state, and the exporter writes one HMC per
+style. Gameplay and semantic IDs remain the same. This is an extensible style
+choice, not a claim that either palette alone achieves the requested animated
+film finish. See [the visual direction](22-animated-film-visual-direction.md)
+for model, material, lighting and motion acceptance checks. QualiaDB source
+was not changed for this pass.
+
 **Terrain silhouette and garden ant pass (2026-10-05):** Both settlement tops
 are now Qualia DEM meshes with a softened, sampled edge instead of flat block
 slabs. The two principal roads and their spurs use Qualia B-spline, offset and
