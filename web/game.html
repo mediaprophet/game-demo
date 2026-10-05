@@ -212,9 +212,13 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = 'bd9e94d624358205';
+const WASM_BUILD = 'bd9e94d624358205-characters-5';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
+const characters = await import(`./characters.mjs?v=${WASM_BUILD}`);
+const {CHARACTER_NAMES,CHARACTER_ARCS,CHARACTER_TRAITS,CHARACTER_PLACES,characterBio,
+  seedCharacters,activeCharacter,selectCharacter,createCharacter,moveCharacter,
+  nearbyRadius,walkSpeed,characterChapter,encodeCharacters,decodeCharacters}=characters;
 $('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
 
 const [SEED, ACTIONS, VIBE_SCENE] = await Promise.all(
@@ -223,6 +227,38 @@ const [SEED, ACTIONS, VIBE_SCENE] = await Promise.all(
 $('vibe-scene').value = VIBE_SCENE.trim();
 let session = new m.GameSession(SEED, ACTIONS);
 const catalog = JSON.parse(ACTIONS).actions;
+const SELFTEST=new URLSearchParams(location.search).has('selftest');
+let roster=seedCharacters(), characterReturnPage='orders', rosterOffset=0;
+let characterDraft={name:CHARACTER_NAMES[3],arc:'grower',trait:'observant',home:'kestrel'};
+let activeWalkSite=null;
+const playing=()=>activeCharacter(roster);
+const characterPlace=id=>CHARACTER_PLACES.find(p=>p.id===id);
+async function saveCharacters(){
+  if(SELFTEST)return;
+  await m.world_save('rc-characters.n3',new TextEncoder().encode(encodeCharacters(roster)));
+}
+async function loadCharacters(){
+  if(SELFTEST)return;
+  try {
+    const bytes=await m.world_load('rc-characters.n3');
+    roster=decodeCharacters(new TextDecoder().decode(bytes));
+    const prior={kestrel:[[-1.0,4.4],[7.0,-6.0]],saltwind:[[15.0,5.4],[21.2,5.8]],highlands:[[1.5,-15.3]]};
+    let migrated=false;
+    for(const c of roster.characters){
+      const old=prior[c.home]||[],place=characterPlace(c.home);
+      if(c.place===c.home&&old.some(p=>Math.hypot(c.x-p[0],c.z-p[1])<0.02)){
+        [c.x,c.z]=place.spawn;migrated=true;
+      }
+    }
+    if(migrated)try{await saveCharacters();}catch(e){note(`Character migration save: ${e}`);}
+  } catch { roster=seedCharacters(); }
+}
+let characterSaveTimer=null;
+function queueCharacterSave(){
+  if(SELFTEST)return;
+  clearTimeout(characterSaveTimer);
+  characterSaveTimer=setTimeout(()=>saveCharacters().catch(e=>note(`Character save: ${e}`)),1600);
+}
 
 // ---------- world doc → display facts (presentation only) ----------
 const triples = () => session.world().split('\n')
@@ -344,6 +380,20 @@ const PLACE_MARKERS = [
   ['Wind power','energy','#67b8bd'],['Orchard','food','#78b66c'],
   ['Signal mast','communications','#69c6b0'],
 ];
+const WORLD_SITES=[
+  {index:0,place:'kestrel',x:-3.0,z:2.6,label:'Shelter'},
+  {index:1,place:'kestrel',x:4.0,z:3.2,label:'Salvage yard'},
+  {index:2,place:'kestrel',x:-2.2,z:-3.4,label:'Market'},
+  {index:3,place:'kestrel',x:3.2,z:-2.2,label:'Workshop'},
+  {index:4,place:'kestrel',x:0.0,z:-0.6,label:'Council'},
+  {index:5,place:'kestrel',x:-5.0,z:-0.5,label:'Water tank'},
+  {index:6,place:'kestrel',x:-3.9,z:-3.8,label:'Garden'},
+  {index:7,place:'saltwind',x:8.0,z:0.5,label:'Canal crossing'},
+  {index:8,place:'saltwind',x:19.0,z:-2.0,label:'Wind pump'},
+  {index:9,place:'saltwind',x:17.6,z:4.0,label:'Orchard'},
+  {index:10,place:'kestrel',x:5.75,z:5.3,label:'Signal mast'},
+  {index:-1,place:'highlands',x:1.5,z:-15.3,label:'Ridge overlook'},
+];
 // Site ownership is presentation data. GameSession remains the order authority.
 const SITE_ACTIONS = [
   ['improveShelterCoins','improveShelterLabour'],
@@ -359,6 +409,19 @@ const SITE_ACTIONS = [
   ['connectMastLabour','connectMastCoins','fulfilRemoteOrder'],
 ];
 const siteForAction = id => SITE_ACTIONS.findIndex(ids=>ids.includes(id));
+function nearbyWorldSite(c=playing()){
+  let nearest=null,nearestDistance=Infinity;
+  for(const site of WORLD_SITES){
+    if(site.place!==c.place)continue;
+    const distance=Math.hypot(site.x-walk.x,site.z-walk.z);
+    if(distance<nearestDistance){nearest=site;nearestDistance=distance;}
+  }
+  return nearest&&nearestDistance<=nearbyRadius(c)?{...nearest,distance:nearestDistance}:null;
+}
+function cycleChoice(current,options){
+  const index=options.indexOf(current);
+  return options[(index+1+options.length)%options.length];
+}
 function siteBrief(index,st){
   switch(index){
     case 0:return ['SHELTER',st.upgrades?'A safer place to rest.':'Patch the shelter with materials or a crew shift.'];
@@ -441,9 +504,9 @@ function placeWalkCamera(){
 function setCameraMode(mode){
   cameraMode=mode;camGoal=null;zoomGoal=null;
   if(mode==='walk'){
-    const start={kestrel:[-3.2,-3.3],saltwind:[16.0,2.6],highlands:[1.5,-15.3]}[territory];
-    walk={x:start[0],z:start[1]};camPitch=territory==='highlands'?0.25:0.48;
-    camYaw=territory==='highlands'?-1.1:0.6;
+    const c=playing(), place=characterPlace(c.place);
+    territory=c.place;
+    walk={x:c.x,z:c.z};camPitch=place.pitch;camYaw=place.yaw;
     placeWalkCamera();
   }else{
     camPitch=mode==='survey'?0.16:0.42;
@@ -456,8 +519,10 @@ function focusTerritory(id, immediate=false){
   const p=tileCenters[id]; if(!p)return;
   focusedPlace=null;
   if(cameraMode==='walk'){
-    const start={kestrel:[-3.2,-3.3],saltwind:[16.0,2.6],highlands:[1.5,-15.3]}[id];
-    walk={x:start[0],z:start[1]};placeWalkCamera();return;
+    const c=playing(),place=characterPlace(id);
+    if(c.place!==id){moveCharacter(c,place.spawn[0],place.spawn[1],id);queueCharacterSave();}
+    walk={x:c.x,z:c.z};camPitch=place.pitch;camYaw=place.yaw;
+    placeWalkCamera();return;
   }
   zoomGoal=cameraMode==='survey'?0.94:
     id==='highlands'?1.25:canvas.width<900?1.85:1.55;
@@ -508,15 +573,19 @@ function selectArtStyle(next){
 // rAF render loop — tick drives GPU pick readback too
 let last=performance.now(), tickErrorShown=false;
 (function loop(t){
-  if(cameraMode==='walk'&&walkKeys.size){
+  if(cameraMode==='walk'&&walkKeys.size&&hudPage!=='walk-site'&&hudPage!=='characters'&&hudPage!=='character-create'){
     const dt=Math.min(0.05,Math.max(0,(t-last)/1000));
     const forward=(walkKeys.has('w')||walkKeys.has('arrowup')?1:0)
       -(walkKeys.has('s')||walkKeys.has('arrowdown')?1:0);
     const side=(walkKeys.has('d')?1:0)-(walkKeys.has('a')?1:0);
     if(forward||side){
-      const step=dt*(walkKeys.has('shift')?5.0:2.6)/Math.max(1,Math.hypot(forward,side));
+      const step=dt*walkSpeed(playing(),walkKeys.has('shift'))/Math.max(1,Math.hypot(forward,side));
       walk.x=Math.max(-6.6,Math.min(22.6,walk.x+step*(-Math.sin(camYaw)*forward+Math.cos(camYaw)*side)));
       walk.z=Math.max(-20.6,Math.min(6.6,walk.z+step*(-Math.cos(camYaw)*forward-Math.sin(camYaw)*side)));
+      const place=walk.z<-7?'highlands':walk.x>=8?'saltwind':'kestrel';
+      moveCharacter(playing(),walk.x,walk.z,place);
+      if(territory!==place){territory=place;renderHud();}
+      queueCharacterSave();
       placeWalkCamera();
     }
   }
@@ -631,8 +700,51 @@ function renderHud() {
   const put=(kind,id,text,x,y,w,h,value=0,disabled=false)=>
     items.push({kind,id,text:String(text),x,y,w,h,value,disabled});
   const panel=(x,y,w,h)=>put('panel','','',x,y,w,h);
-  const label=(text,x,y,w=300,h=23)=>put('label','',String(text).slice(0,70),x,y,w,h);
+  const label=(text,x,y,w=300,h=23)=>put('label','',String(text).slice(0,150),x,y,w,h);
   const button=(id,text,x,y,w,h=34)=>put('button',id,String(text).slice(0,44),x,y,w,h);
+  if(hudPage==='characters'){
+    panel(14,12,W-28,H-24);
+    label('YOUR CHARACTERS',32,28,W-64,28);
+    label('Choose who you walk as. Each keeps a story, field trait and separate place.',32,57,W-64,36);
+    const pageSize=5,rows=roster.characters.slice(rosterOffset,rosterOffset+pageSize);
+    rows.forEach((c,i)=>{
+      const y=98+i*94,arc=CHARACTER_ARCS.find(a=>a.id===c.arc);
+      const trait=CHARACTER_TRAITS.find(a=>a.id===c.trait);
+      const place=characterPlace(c.place);
+      button(`character:select:${c.id}`,`${c.id===roster.selected?'▶ ':''}${c.name} · ${place.label}`,
+        32,y,W-64,33);
+      label(characterBio(c),38,y+35,W-76,21);
+      label(`${arc.label} · ${trait.label} · ${characterChapter(c,st).title}`,38,y+57,W-76,21);
+    });
+    const footer=H-56;
+    if(roster.characters.length>pageSize){
+      button('roster:prev','‹ Earlier',32,footer-40,(W-78)/2,32);
+      button('roster:next','Later ›',46+(W-78)/2,footer-40,(W-78)/2,32);
+    }
+    button('characters:new','Create character',32,footer,(W-78)/2,36);
+    button('characters:back','Return',46+(W-78)/2,footer,(W-78)/2,36);
+    hud.set_document_json(JSON.stringify({items}));return;
+  }
+  if(hudPage==='character-create'){
+    panel(14,12,W-28,H-24);
+    label('CREATE A CHARACTER',32,28,W-64,28);
+    label('Choose a name, personal story, field trait and starting place.',32,57,W-64,28);
+    const arc=CHARACTER_ARCS.find(a=>a.id===characterDraft.arc);
+    const trait=CHARACTER_TRAITS.find(a=>a.id===characterDraft.trait);
+    const home=characterPlace(characterDraft.home);
+    const row=(id,title,value,y)=>button(id,`${title}: ${value}  ›`,32,y,W-64,38);
+    row('draft:name','Name',characterDraft.name,101);
+    row('draft:arc','Story',arc.label,150);
+    row('draft:trait','Field trait',trait.label,199);
+    row('draft:home','Start at',home.label,248);
+    label(arc.opening,38,298,W-76,38);
+    label(trait.detail,38,343,W-76,32);
+    label(characterBio(characterDraft),38,383,W-76,48);
+    const footer=H-63;
+    button('characters:create','Begin this story',32,footer,(W-78)/2,36);
+    button('characters:cancel','Cancel',46+(W-78)/2,footer,(W-78)/2,36);
+    hud.set_document_json(JSON.stringify({items}));return;
+  }
   if(cameraMode!=='walk')placePositions.forEach((p,i)=>{
     const [text,icon,color]=PLACE_MARKERS[i];
     items.push({kind:'marker',id:`place:${i}`,text,x:p.x,y:p.y,z:p.z,w:32,h:32,icon,color});
@@ -650,12 +762,44 @@ function renderHud() {
   button('camera:map','Map',compact?18:146,compact?116:75,compact?84:72,34);
   button('camera:survey','Survey',compact?110:224,compact?116:75,compact?84:82,34);
   button('camera:walk','Walk',compact?202:312,compact?116:75,compact?84:72,34);
-  label(cameraMode==='walk'?'GROUND VIEW · WASD MOVE · DRAG LOOK':
+  label(cameraMode==='walk'?'FIRST PERSON · WASD MOVE · DRAG LOOK':
     focusedPlace===null?`${cameraMode.toUpperCase()} VIEW`:
       PLACE_MARKERS[focusedPlace][0].toUpperCase(),18,compact?157:114,compact?280:395,23);
   if(cameraMode==='walk'){
-    panel(0,H-58,W,58);
-    label('WASD move · Drag look · Shift run · 1 Map · 2 Survey',18,H-47,W-36,25);
+    const c=playing(),trait=CHARACTER_TRAITS.find(t=>t.id===c.trait);
+    const arc=CHARACTER_ARCS.find(a=>a.id===c.arc), chapter=characterChapter(c,st);
+    button('page:characters',`Characters · ${c.name}`,18,compact?184:142,170,30);
+    label(`${characterPlace(c.place).label} · ${arc.label} · ${trait.label}`,
+      compact?198:198,compact?188:146,W-(compact?216:220),23);
+    if(hudPage==='walk-site'&&activeWalkSite){
+      panel(16,H-238,W-32,222);
+      label(`${activeWalkSite.label.toUpperCase()} · ${c.name.toUpperCase()}`,32,H-221,W-64,26);
+      let y=H-185;
+      for(const entry of hudSiteLines){
+        const words=String(entry).split(/\s+/);let line='';
+        for(const word of words){
+          if((line+' '+word).length>52){label(line,34,y,W-68,21);y+=22;line='';}
+          line+=(line?' ':'')+word;
+        }
+        if(line){label(line,34,y,W-68,21);y+=24;}
+        if(y>H-112)break;
+      }
+      hudSiteActions.slice(0,3).forEach(id=>{
+        if(y>H-105)return;
+        const title=catalog.find(a=>a.id===id)?.label||id;
+        button(`action:${id}`,title,32,y,W-64,31);y+=36;
+      });
+      button('walk:close','Back to exploring',32,H-57,W-64,34);
+      hud.set_document_json(JSON.stringify({items}));return;
+    }
+    panel(0,H-112,W,112);
+    label(chapter.title,18,H-101,W-36,22);
+    label(chapter.goal,18,H-77,W-36,22);
+    label('WASD move · Drag look · Shift run · E explore nearby · 1 Map · 2 Survey',
+      18,H-39,W-230,24);
+    const nearby=nearbyWorldSite(c);
+    if(nearby)button('walk:site',`E · ${nearby.label}`,W-204,H-43,186,32);
+    label('⌖',W*0.5-10,H*0.5-11,22,24);
     hud.set_document_json(JSON.stringify({items}));
     return;
   }
@@ -761,6 +905,7 @@ function renderHud() {
       ['replay','Replay decisions'],['new-game','New campaign'],['sky-preset','Change sky']]){
       button(`utility:${id}`,title,right+14,y,panelW-28,rowH);y+=rowStep;}
     button('style:next',`Visual style: ${ART_STYLES[artStyle]}`,right+14,y,panelW-28,rowH);y+=rowStep;
+    button('page:characters','Choose or create character',right+14,y,panelW-28,rowH);y+=rowStep;
     button('page:script','VibeScript console',right+14,y,panelW-28,rowH);y+=rowStep;
     label(`QUALIA PORTAL  ·  TIER ${portal.tier()}`,right+14,y+15);
     label(`${sceneMeshes} VERIFIED .10d MESHES`,right+14,y+43);
@@ -794,7 +939,73 @@ function renderHud() {
   hud.set_document_json(JSON.stringify({items}));
 }
 
+function playAsCharacter(id,saveCurrent=true){
+  if(saveCurrent&&cameraMode==='walk')moveCharacter(playing(),walk.x,walk.z,territory);
+  const c=selectCharacter(roster,id),place=characterPlace(c.place);
+  territory=c.place;walk={x:c.x,z:c.z};cameraMode='walk';
+  camGoal=null;zoomGoal=null;camYaw=place.yaw;camPitch=place.pitch;
+  focusedPlace=null;activeWalkSite=null;hudPage='orders';
+  refresh();
+  saveCharacters().catch(e=>note(`Character save: ${e}`));
+}
+
+function openWalkSite(site){
+  activeWalkSite=site;hudPage='walk-site';hudSiteActions=[];
+  if(site.index>=0){
+    const [title,brief]=siteBrief(site.index,state());
+    const available=new Set([...$('actions').querySelectorAll('button[data-action]')]
+      .map(b=>b.dataset.action));
+    hudSiteActions=SITE_ACTIONS[site.index].filter(id=>available.has(id));
+    hudSiteLines=[title,brief,`A place in ${characterPlace(playing().place).label}.`];
+  }else{
+    const chapter=characterChapter(playing(),state());
+    hudSiteLines=['Creek valley overlook',chapter.opening,chapter.goal];
+  }
+  renderHud();
+}
+
 function handleHudAction(id){
+  if(id==='page:characters'){
+    characterReturnPage=hudPage;rosterOffset=0;hudPage='characters';renderHud();return;
+  }
+  if(id==='characters:back'){hudPage=characterReturnPage;renderHud();return;}
+  if(id==='characters:cancel'){hudPage='characters';renderHud();return;}
+  if(id==='characters:new'){
+    const unused=CHARACTER_NAMES.find(name=>!roster.characters.some(c=>c.name===name));
+    characterDraft={...characterDraft,name:unused||CHARACTER_NAMES[0]};
+    hudPage='character-create';renderHud();return;
+  }
+  if(id==='characters:create'){
+    try {
+      if(cameraMode==='walk')moveCharacter(playing(),walk.x,walk.z,territory);
+      const c=createCharacter(roster,characterDraft);hudPage='orders';playAsCharacter(c.id,false);
+    }
+    catch(e){note(`Character creation: ${e.message}`);}
+    return;
+  }
+  if(id.startsWith('character:select:')){
+    playAsCharacter(Number(id.slice('character:select:'.length)));return;
+  }
+  if(id==='draft:name'){
+    characterDraft.name=cycleChoice(characterDraft.name,CHARACTER_NAMES);renderHud();return;
+  }
+  if(id==='draft:arc'){
+    characterDraft.arc=cycleChoice(characterDraft.arc,CHARACTER_ARCS.map(a=>a.id));renderHud();return;
+  }
+  if(id==='draft:trait'){
+    characterDraft.trait=cycleChoice(characterDraft.trait,CHARACTER_TRAITS.map(t=>t.id));renderHud();return;
+  }
+  if(id==='draft:home'){
+    characterDraft.home=cycleChoice(characterDraft.home,CHARACTER_PLACES.map(p=>p.id));renderHud();return;
+  }
+  if(id==='roster:prev'||id==='roster:next'){
+    rosterOffset=Math.max(0,Math.min(Math.max(0,roster.characters.length-5),
+      rosterOffset+(id==='roster:next'?5:-5)));renderHud();return;
+  }
+  if(id==='walk:site'){
+    const site=nearbyWorldSite();if(site)openWalkSite(site);return;
+  }
+  if(id==='walk:close'){hudPage='orders';renderHud();return;}
   if(id.startsWith('place:')){inspect(PLACES[Number(id.slice(6))]);return;}
   if(id.startsWith('focus:')){inspect(PLACES[Number(id.slice(6))]);return;}
   if(id==='result:explore'){hudPage='goals';renderHud();return;}
@@ -842,6 +1053,18 @@ function handleHudAction(id){
 }
 document.addEventListener('keydown',e=>{
   if(e.target?.matches?.('input,textarea'))return;
+  if(e.key==='Escape'&&hudPage==='character-create'){
+    handleHudAction('characters:cancel');return;
+  }
+  if(e.key==='Escape'&&hudPage==='characters'){
+    handleHudAction('characters:back');return;
+  }
+  if(cameraMode==='walk'&&hudPage==='orders'&&e.key.toLowerCase()==='e'){
+    const site=nearbyWorldSite();if(site)openWalkSite(site);return;
+  }
+  if(cameraMode==='walk'&&e.key==='Escape'&&hudPage==='walk-site'){
+    hudPage='orders';renderHud();return;
+  }
   if(['1','2','3'].includes(e.key)&&!e.repeat){
     setCameraMode({1:'map',2:'survey',3:'walk'}[e.key]);return;
   }
@@ -1083,6 +1306,7 @@ function tryAction(id) {
 
 $('save').onclick = async () => {
   await m.world_save('rc-save.n3', new TextEncoder().encode(session.world()));
+  await saveCharacters();
   $('persist').textContent = 'saved';
   renderHud();
 };
@@ -1103,8 +1327,12 @@ $('load').onclick = async () => {
     return;
   }
   session = new m.GameSession(saved, ACTIONS);
+  await loadCharacters();
   hudPage=state().finale?'result':'orders';resultMessage='';
   focusedPlace=null;
+  if(cameraMode==='walk'){
+    territory=playing().place;walk={x:playing().x,z:playing().z};
+  }
   if(state().finale){territory='saltwind';focusTerritory('saltwind');}
   refresh(); $('persist').textContent = 'loaded'; renderHud();
 };
@@ -1118,8 +1346,11 @@ function verifyReplay() {
 $('replay').onclick = () => {verifyReplay();renderHud();};
 $('new-game').onclick = () => {
   session = new m.GameSession(SEED, ACTIONS);
-  territory='kestrel';hudPage='orders';resultMessage='';
-  focusedPlace=null;focusTerritory('kestrel',true);
+  territory=playing().place;hudPage='orders';resultMessage='';
+  focusedPlace=null;
+  if(cameraMode==='walk'){
+    walk={x:playing().x,z:playing().z};placeWalkCamera();
+  }else focusTerritory(territory,true);
   $('why').style.display='none';
   $('persist').textContent='new campaign started; save when ready';
   refresh(); note('A new campaign begins at Kestrel Flats.');
@@ -1147,6 +1378,8 @@ $('vibe-preview').onclick = () => {
   }
 };
 
+await loadCharacters();
+territory=playing().place;walk={x:playing().x,z:playing().z};
 refresh();
 note('slice ready — tier ' + portal.tier());
 
