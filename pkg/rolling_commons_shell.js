@@ -5553,6 +5553,18 @@ export function tensor_buffer_build(nodes_flat) {
 }
 
 /**
+ * Camera presentation sample in source-world metres, from the same authored
+ * height function used to generate the Qualia terrain patches.
+ * @param {number} x
+ * @param {number} z
+ * @returns {number}
+ */
+export function terrain_height_world(x, z) {
+    const ret = wasm.terrain_height_world(x, z);
+    return ret;
+}
+
+/**
  * @param {string} input_json
  * @returns {string}
  */

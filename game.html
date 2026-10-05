@@ -148,6 +148,7 @@
     <nav class="territory-nav" aria-label="Territories">
       <button id="tile-kestrel" aria-current="true">01 · Kestrel Flats</button>
       <button id="tile-saltwind" aria-current="false">02 · Saltwind Reach</button>
+      <button id="tile-highlands" aria-current="false">03 · Highlands</button>
       <button id="sky-preset" aria-label="Change Qualia sky preset">☀ Daylight</button>
     </nav>
     <div class="scene-shell">
@@ -211,7 +212,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '4b4233de0a10c851';
+const WASM_BUILD = '90d0f6ec91cbdc4c';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 $('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
@@ -405,6 +406,8 @@ $('tier').textContent = 'render tier ' + portal.tier();
 let camYaw=0.6, camPitch=0.42, camZoom=canvas.width<900?1.9:1.45;
 let camTarget=null, camGoal=null, zoomGoal=null, focusedPlace=null;
 let territory='kestrel', tileCenters={}, placePositions=[];
+let cameraMode='map', walk={x:0,z:0}, worldCenter={x:0,y:0,z:0}, worldScale=1;
+const walkKeys=new Set();
 function applyCam(){
   try {
     if (camTarget) {
@@ -419,18 +422,50 @@ function framedTarget(p,zoom){
   const shift=panelWidth*zoom*Math.tan(Math.PI/8)/canvas.height;
   return {x:p.x+Math.cos(camYaw)*shift,y:p.y,z:p.z-Math.sin(camYaw)*shift};
 }
+function placeWalkCamera(){
+  const eye={x:(walk.x-worldCenter.x)*worldScale,
+    y:(m.terrain_height_world(walk.x,walk.z)+1.65-worldCenter.y)*worldScale,
+    z:(walk.z-worldCenter.z)*worldScale};
+  const distance=0.35, flat=Math.cos(camPitch);
+  camZoom=distance;
+  camTarget={x:eye.x-distance*flat*Math.sin(camYaw),
+    y:eye.y-distance*Math.sin(camPitch),
+    z:eye.z-distance*flat*Math.cos(camYaw)};
+  applyCam();
+}
+function setCameraMode(mode){
+  cameraMode=mode;camGoal=null;zoomGoal=null;
+  if(mode==='walk'){
+    const start={kestrel:[-1.5,2.3],saltwind:[16.0,2.6],highlands:[1.5,-15.3]}[territory];
+    walk={x:start[0],z:start[1]};camPitch=territory==='highlands'?0.25:0.17;
+    camYaw=territory==='highlands'?-1.1:0.6;
+    placeWalkCamera();
+  }else{
+    camPitch=mode==='survey'?0.16:0.42;
+    camYaw=0.6;
+    focusTerritory(territory,true);
+  }
+  renderHud();
+}
 function focusTerritory(id, immediate=false){
   const p=tileCenters[id]; if(!p)return;
   focusedPlace=null;
-  zoomGoal=canvas.width<900?1.85:1.55;
+  if(cameraMode==='walk'){
+    const start={kestrel:[-1.5,2.3],saltwind:[16.0,2.6],highlands:[1.5,-15.3]}[id];
+    walk={x:start[0],z:start[1]};placeWalkCamera();return;
+  }
+  zoomGoal=cameraMode==='survey'?0.94:
+    id==='highlands'?1.25:canvas.width<900?1.85:1.55;
   camGoal=framedTarget(p,zoomGoal);
   if(immediate){camTarget={...camGoal};camZoom=zoomGoal;camGoal=null;zoomGoal=null;applyCam();}
 }
 function focusSite(index){
   const p=placePositions[index];if(!p)return;
-  focusedPlace=index;zoomGoal=0.83;camGoal=framedTarget(p,zoomGoal);
+  if(cameraMode==='walk'){cameraMode='survey';camPitch=0.16;}
+  focusedPlace=index;zoomGoal=cameraMode==='survey'?0.68:0.83;
+  camGoal=framedTarget(p,zoomGoal);
 }
-for (const id of ['kestrel','saltwind']) {
+for (const id of ['kestrel','saltwind','highlands']) {
   $('tile-'+id).onclick = () => { territory=id;focusTerritory(id);refresh(); };
 }
 
@@ -442,13 +477,15 @@ function rebuild() {
     st.waterOnline, st.gardenActive, st.signalOnline, st.bridgeOpen, st.bridgeBraced, st.day>4,
     st.pumpOnline, st.orchardActive, st.orchardHarvested, sceneSource);
   tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
+  worldCenter=scene.worldCenter;worldScale=scene.worldScale;
   placePositions=scene.places;
   const receipt = toObj(portal.load_scene(scene.organs));
   sceneMeshes = receipt.organs_loaded;
   if (sceneMeshes !== scene.organs.length)
     throw new Error(`QualiaDB refused ${scene.organs.length-sceneMeshes} scene meshes`);
   portal.upload_tensor(scene.tensor);
-  if(!camTarget)focusTerritory(territory,true);
+  if(cameraMode==='walk')placeWalkCamera();
+  else if(!camTarget)focusTerritory(territory,true);
   else if(focusedPlace!==null)focusSite(focusedPlace);
   applyCam();
   return st;
@@ -457,6 +494,18 @@ function rebuild() {
 // rAF render loop — tick drives GPU pick readback too
 let last=performance.now(), tickErrorShown=false;
 (function loop(t){
+  if(cameraMode==='walk'&&walkKeys.size){
+    const dt=Math.min(0.05,Math.max(0,(t-last)/1000));
+    const forward=(walkKeys.has('w')||walkKeys.has('arrowup')?1:0)
+      -(walkKeys.has('s')||walkKeys.has('arrowdown')?1:0);
+    const side=(walkKeys.has('d')?1:0)-(walkKeys.has('a')?1:0);
+    if(forward||side){
+      const step=dt*(walkKeys.has('shift')?5.0:2.6)/Math.max(1,Math.hypot(forward,side));
+      walk.x=Math.max(-6.6,Math.min(22.6,walk.x+step*(-Math.sin(camYaw)*forward+Math.cos(camYaw)*side)));
+      walk.z=Math.max(-20.6,Math.min(6.6,walk.z+step*(-Math.cos(camYaw)*forward-Math.sin(camYaw)*side)));
+      placeWalkCamera();
+    }
+  }
   if(camGoal){
     const k=Math.min(1,Math.max(0.04,(t-last)*0.007));
     for(const axis of ['x','y','z'])camTarget[axis]+=(camGoal[axis]-camTarget[axis])*k;
@@ -481,7 +530,8 @@ canvas.addEventListener('pointerdown', e=>{
   const py=(e.clientY-r.top)*canvas.height/r.height;
   drag={x:e.clientX,y:e.clientY,moved:false,hudAction:id,
     pan:e.shiftKey||e.button===1,
-    blockWorld:hudPage==='result'||py<58||py>canvas.height-58||px>(canvas.width<900?canvas.width-290:canvas.width-358)};
+    blockWorld:hudPage==='result'||py<58||py>canvas.height-58||
+      (cameraMode!=='walk'&&px>(canvas.width<900?canvas.width-290:canvas.width-358))};
   canvas.setPointerCapture(e.pointerId);
 });
 canvas.addEventListener('pointermove', e=>{ if(!drag) return;
@@ -489,10 +539,13 @@ canvas.addEventListener('pointermove', e=>{ if(!drag) return;
   if (Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>4) drag.moved=true;
   if (drag.moved){
     camGoal=null;zoomGoal=null;
-    if(drag.pan){camTarget.x-=(e.movementX||0)*0.0015;camTarget.z+=(e.movementY||0)*0.0015;}
+    if(drag.pan&&cameraMode!=='walk'){
+      camTarget.x-=(e.movementX||0)*0.0015;camTarget.z+=(e.movementY||0)*0.0015;
+    }
     else{camYaw+=(e.movementX||0)*0.008;
-      camPitch=Math.max(-1.2,Math.min(1.4,camPitch+(e.movementY||0)*0.006));}
-    applyCam(); }});
+      camPitch=Math.max(cameraMode==='walk'?-0.9:-1.2,
+        Math.min(cameraMode==='walk'?0.9:1.4,camPitch+(e.movementY||0)*0.006));}
+    if(cameraMode==='walk')placeWalkCamera();else applyCam(); }});
 canvas.addEventListener('pointerup', e=>{
   if(drag?.hudAction){
     if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)<18)
@@ -523,10 +576,11 @@ canvas.addEventListener('wheel', e=>{
   e.preventDefault();
   const r=canvas.getBoundingClientRect();
   const px=(e.clientX-r.left)*canvas.width/r.width;
-  if(px>(canvas.width<900?canvas.width-290:canvas.width-358)&&hudPage==='orders'){
+  if(cameraMode!=='walk'&&px>(canvas.width<900?canvas.width-290:canvas.width-358)&&hudPage==='orders'){
     hudOrderOffset=Math.max(0,hudOrderOffset+(e.deltaY>0?2:-2));renderHud();return;
   }
   camGoal=null;zoomGoal=null;
+  if(cameraMode==='walk')return;
   camZoom=Math.max(0.55,Math.min(20,camZoom*Math.exp(e.deltaY*0.001)));applyCam();
 }, {passive:false});
 
@@ -565,28 +619,45 @@ function renderHud() {
   const panel=(x,y,w,h)=>put('panel','','',x,y,w,h);
   const label=(text,x,y,w=300,h=23)=>put('label','',String(text).slice(0,70),x,y,w,h);
   const button=(id,text,x,y,w,h=34)=>put('button',id,String(text).slice(0,44),x,y,w,h);
-  placePositions.forEach((p,i)=>{
+  if(cameraMode!=='walk')placePositions.forEach((p,i)=>{
     const [text,icon,color]=PLACE_MARKERS[i];
     items.push({kind:'marker',id:`place:${i}`,text,x:p.x,y:p.y,z:p.z,w:32,h:32,icon,color});
   });
   panel(0,0,W,58);
   label(compact?'MASLOWS CHALLENGE':'MASLOWS CHALLENGE  ·  AN SDGs GAME',18,10,compact?245:410,25);
   label(`DAY ${st.day}  ·  ${st.bridgeOpen?'CROSSING OPEN':st.day<=4?'LOW TIDE':'HIGH TIDE'}`,18,32,420,20);
-  button('territory:kestrel','Kestrel Flats',compact?W-220:right-275,12,compact?103:128,34);
-  button('territory:saltwind','Saltwind Reach',compact?W-111:right-139,12,compact?103:128,34);
+  [['kestrel','Kestrel Flats'],['saltwind','Saltwind Reach'],['highlands','Highlands']]
+    .forEach(([id,title],i)=>button(`territory:${id}`,
+      compact?title.split(' ')[0]:title,
+      compact?W-333+i*108:right-389+i*130,12,compact?103:124,34));
   button('camera:in','+',18,75,36,34);
   button('camera:out','−',58,75,36,34);
   button('camera:fit','⌂',98,75,36,34);
-  label(focusedPlace===null?'MAP VIEW':PLACE_MARKERS[focusedPlace][0].toUpperCase(),18,114,180,23);
+  button('camera:map','Map',compact?18:146,compact?116:75,compact?84:72,34);
+  button('camera:survey','Survey',compact?110:224,compact?116:75,compact?84:82,34);
+  button('camera:walk','Walk',compact?202:312,compact?116:75,compact?84:72,34);
+  label(cameraMode==='walk'?'GROUND VIEW · WASD MOVE · DRAG LOOK':
+    focusedPlace===null?`${cameraMode.toUpperCase()} VIEW`:
+      PLACE_MARKERS[focusedPlace][0].toUpperCase(),18,compact?157:114,compact?280:395,23);
+  if(cameraMode==='walk'){
+    panel(0,H-58,W,58);
+    label('WASD move · Drag look · Shift run · 1 Map · 2 Survey',18,H-47,W-36,25);
+    hud.set_document_json(JSON.stringify({items}));
+    return;
+  }
   panel(right,66,panelW,H-128);
-  label(territory==='saltwind'?'SALTWIND REACH':'KESTREL FLATS',right+12,75,panelW-24,26);
+  label(territory==='saltwind'?'SALTWIND REACH':
+    territory==='highlands'?'NORTHERN HIGHLANDS':'KESTREL FLATS',right+12,75,panelW-24,26);
   const tabs=st.finale?['result','goals','journal','site','system']:
     ['orders','goals','journal','site','system'];
   const tabW=(panelW-24)/tabs.length;
   tabs.forEach((tab,i)=>button(`page:${tab}`,tab.toUpperCase(),right+12+i*tabW,108,tabW-3,29));
   let y=148;
   if(hudPage==='orders') {
-    const lead=campaignLead(st);
+    const lead=territory==='highlands'?
+      {title:'Explore the creek valley',
+       copy:'Walk between the two ridges, or survey the terrain from above. The crossing leads back to both settlements.',
+       action:null}:campaignLead(st);
     label(lead.title,right+14,y,panelW-28); y+=26;
     const words=lead.copy.split(' '); let line='';
     for(const word of words){
@@ -595,7 +666,9 @@ function renderHud() {
     }
     if(line){label(line,right+14,y,panelW-28,19);y+=19;}
     y+=9;
-    if(lead.action){
+    if(territory==='highlands'){
+      button('camera:walk','▶ Walk the valley',right+13,y,panelW-26,36);y+=43;
+    }else if(lead.action){
       button(`action:${lead.action}`,`▶ ${lead.label}`,right+13,y,panelW-26,36);y+=43;
       const site=siteForAction(lead.action);
       if(site>=0){button(`focus:${site}`,`◎ Find ${PLACE_MARKERS[site][0]}`,right+13,y,panelW-26,30);y+=38;}
@@ -713,11 +786,15 @@ function handleHudAction(id){
   if(id==='result:replay'){resultMessage=verifyReplay()?'Replay matches every event.':'Replay diverged.';renderHud();return;}
   if(id==='result:new'){$('new-game').click();return;}
   if(id==='camera:in'||id==='camera:out'){
+    if(cameraMode==='walk')return;
     camGoal=null;zoomGoal=null;
     camZoom=Math.max(0.55,Math.min(20,camZoom*(id==='camera:in'?0.75:1.33)));
     applyCam();return;
   }
   if(id==='camera:fit'){focusTerritory(territory);renderHud();return;}
+  if(id.startsWith('camera:')&&['map','survey','walk'].includes(id.slice(7))){
+    setCameraMode(id.slice(7));return;
+  }
   if(id.startsWith('territory:')){
     territory=id.slice(10);focusTerritory(territory);refresh();return;}
   if(id.startsWith('page:')){hudPage=id.slice(5);renderHud();return;}
@@ -748,6 +825,13 @@ function handleHudAction(id){
   if(id.startsWith('utility:')){$(id.slice(8)).click();renderHud();}
 }
 document.addEventListener('keydown',e=>{
+  if(e.target?.matches?.('input,textarea'))return;
+  if(['1','2','3'].includes(e.key)&&!e.repeat){
+    setCameraMode({1:'map',2:'survey',3:'walk'}[e.key]);return;
+  }
+  if(cameraMode==='walk'&&['w','a','s','d','shift','arrowup','arrowdown'].includes(e.key.toLowerCase())){
+    e.preventDefault();walkKeys.add(e.key.toLowerCase());return;
+  }
   if(e.key==='Tab'){e.preventDefault();hud.focus_next(e.shiftKey);}
   if((e.key==='Enter'||e.key===' ')&&hud.focused_action()){
     e.preventDefault();handleHudAction(hud.focused_action());
@@ -756,6 +840,8 @@ document.addEventListener('keydown',e=>{
     ArrowUp:[0,-0.08],ArrowDown:[0,0.08]}[e.key];
   if(pan){e.preventDefault();camGoal=null;zoomGoal=null;camTarget.x+=pan[0];camTarget.z+=pan[1];applyCam();}
 });
+document.addEventListener('keyup',e=>walkKeys.delete(e.key.toLowerCase()));
+window.addEventListener('blur',()=>walkKeys.clear());
 function refresh() {
   const st = rebuild();
   const saltwind=territory==='saltwind';
@@ -783,8 +869,9 @@ function refresh() {
     '<strong>The commons are open</strong><span>Shared water, food and shelter became a place to gather.</span>':
     `<strong>The canal is connected</strong><span>${st.harvestChoice==='"reserve"'?'Stored food stays in town while the first boat carries tools.':'The first boat carries a harvest to neighbouring communities.'}</span>`) +
     `<span>Day ${st.day} · ${done}/7 projects working · ${st.coins} coins in reserve</span>`;
-  $('tile-kestrel').setAttribute('aria-current', String(!saltwind));
+  $('tile-kestrel').setAttribute('aria-current', String(territory==='kestrel'));
   $('tile-saltwind').setAttribute('aria-current', String(saltwind));
+  $('tile-highlands').setAttribute('aria-current', String(territory==='highlands'));
   $('territory-step').textContent=saltwind?'Territory 02':'Territory 01';
   $('territory-name').textContent=saltwind?'Saltwind Reach':'Kestrel Flats';
   $('chapter-label').textContent=saltwind?'Campaign · Chapter 2':'Campaign · Chapter 1';
@@ -898,7 +985,7 @@ function refresh() {
     p.textContent='The campaign has an ending. Explore the map, replay your choices or begin a new campaign.';
     box.appendChild(p);
   }
-  $('tier').textContent = `QualiaPortal tier ${portal.tier()} · 2 territories · ${sceneMeshes} .10d meshes`;
+  $('tier').textContent = `QualiaPortal tier ${portal.tier()} · 4 land tiles · ${sceneMeshes} .10d meshes`;
   renderHud();
 }
 
@@ -1066,7 +1153,13 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const firstMesh=scriptAsset.organs[0].bytes;
   const hasSurfaceReading=firstMesh.some((v,i,a)=>v===83&&a[i+1]===82&&a[i+2]===68&&a[i+3]===49);
   note(`TEST Qualia SRD1 surface reading: ${hasSurfaceReading?'PASS':'FAIL'}`);
-  note(`TEST two territories: ${Object.keys(tileCenters).length===2 && sceneMeshes>=135 ? 'PASS' : 'FAIL'}`);
+  note(`TEST three destinations and four tiles: ${Object.keys(tileCenters).length===3 &&
+    sceneMeshes>=230 && tileCenters.highlands &&
+    Number.isFinite(m.terrain_height_world(-2.4,-15.6)) ? 'PASS' : 'FAIL'}`);
+  note(`TEST ridge and valley camera scale: ${
+    m.terrain_height_world(-2.4,-15.6)>m.terrain_height_world(8,-15.6)+1 &&
+    Number.isFinite(worldScale)&&worldScale>0&&
+    ['x','y','z'].every(axis=>Number.isFinite(worldCenter[axis]))?'PASS':'FAIL'}`);
   note(`TEST site markers: ${placePositions.length===PLACES.length && PLACE_MARKERS.length===PLACES.length && placePositions.every(p=>[p.x,p.y,p.z].every(Number.isFinite)) ? 'PASS' : 'FAIL'}`);
   try {
     const packResponse=await fetch('./assets/maslows-challenge-scenes.hmc');
