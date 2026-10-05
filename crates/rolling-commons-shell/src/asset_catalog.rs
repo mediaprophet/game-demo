@@ -9,10 +9,21 @@ use qualia_core_db::specialized_libs::computational_geometry::{authoring, parame
 /// builds the mesh before the shared `.10d` compiler seals it.
 #[derive(Debug, Clone)]
 pub enum ParametricRecipe {
-    Ant { center: [f32; 3], heading: f32 },
-    AntEyes { center: [f32; 3], heading: f32 },
-    TerrainPatch { center_x: f32, center_z: f32 },
-    SettlementPatch { center_x: f32 },
+    Ant {
+        center: [f32; 3],
+        heading: f32,
+    },
+    AntEyes {
+        center: [f32; 3],
+        heading: f32,
+    },
+    TerrainPatch {
+        center_x: f32,
+        center_z: f32,
+    },
+    SettlementPatch {
+        center_x: f32,
+    },
     Ribbon {
         control: &'static [[f32; 2]],
         width: f32,
@@ -64,38 +75,64 @@ impl ParametricRecipe {
 
     pub fn compile(&self) -> Result<Mesh, String> {
         let (center, mesh) = match self {
-            Self::Ant { center, heading } =>
-                ([0.0, 0.0, 0.0], crate::ants::ant(*center, *heading)?),
-            Self::AntEyes { center, heading } =>
-                ([0.0, 0.0, 0.0], crate::ants::eyes(*center, *heading)?),
-            Self::TerrainPatch { center_x, center_z } =>
-                ([0.0, 0.0, 0.0], crate::terrain::patch(*center_x, *center_z)),
-            Self::SettlementPatch { center_x } =>
-                ([0.0, 0.0, 0.0], crate::terrain::settlement_patch(*center_x)),
-            Self::Ribbon { control, width, elevation } => {
-                let curve: Vec<Point3> = control.iter()
-                    .map(|p| Point3::new(p[0] as f64, p[1] as f64, 0.0)).collect();
+            Self::Ant { center, heading } => {
+                ([0.0, 0.0, 0.0], crate::ants::ant(*center, *heading)?)
+            }
+            Self::AntEyes { center, heading } => {
+                ([0.0, 0.0, 0.0], crate::ants::eyes(*center, *heading)?)
+            }
+            Self::TerrainPatch { center_x, center_z } => {
+                ([0.0, 0.0, 0.0], crate::terrain::patch(*center_x, *center_z))
+            }
+            Self::SettlementPatch { center_x } => {
+                ([0.0, 0.0, 0.0], crate::terrain::settlement_patch(*center_x))
+            }
+            Self::Ribbon {
+                control,
+                width,
+                elevation,
+            } => {
+                let curve: Vec<Point3> = control
+                    .iter()
+                    .map(|p| Point3::new(p[0] as f64, p[1] as f64, 0.0))
+                    .collect();
                 let path: Vec<Point3> = (0..=24)
                     .map(|step| parametric_cad::bspline_eval(&curve, 3, step as f64 / 24.0))
-                    .collect::<Result<_, _>>().map_err(|e| format!("road curve: {e:?}"))?;
-                let mut left = vec![Point3::new(0.0,0.0,0.0); path.len()];
+                    .collect::<Result<_, _>>()
+                    .map_err(|e| format!("road curve: {e:?}"))?;
+                let mut left = vec![Point3::new(0.0, 0.0, 0.0); path.len()];
                 let mut right = left.clone();
                 parametric_cad::offset_polyline(&path, *width as f64 * 0.5, &mut left)
                     .map_err(|e| format!("road left edge: {e:?}"))?;
                 parametric_cad::offset_polyline(&path, -*width as f64 * 0.5, &mut right)
                     .map_err(|e| format!("road right edge: {e:?}"))?;
-                let mut verts = vec![Point3::new(0.0,0.0,0.0); path.len()*2];
-                let mut triangles = vec![[0u32;3]; (path.len()-1)*2];
-                let (nv, nt) = parametric_cad::loft_profiles(&left, &right,
-                    &mut verts, &mut triangles).map_err(|e| format!("road loft: {e:?}"))?;
-                let positions: Vec<[f32;3]> = verts[..nv].iter()
-                    .map(|p| [p.x as f32,*elevation,p.y as f32]).collect();
-                let mut min=[f32::INFINITY;3];let mut max=[f32::NEG_INFINITY;3];
-                for p in &positions { for axis in 0..3 {
-                    min[axis]=min[axis].min(p[axis]);max[axis]=max[axis].max(p[axis]);
-                }}
-                ([0.0,0.0,0.0],Mesh{positions,triangles:triangles[..nt].to_vec(),min,max})
-            },
+                let mut verts = vec![Point3::new(0.0, 0.0, 0.0); path.len() * 2];
+                let mut triangles = vec![[0u32; 3]; (path.len() - 1) * 2];
+                let (nv, nt) =
+                    parametric_cad::loft_profiles(&left, &right, &mut verts, &mut triangles)
+                        .map_err(|e| format!("road loft: {e:?}"))?;
+                let positions: Vec<[f32; 3]> = verts[..nv]
+                    .iter()
+                    .map(|p| [p.x as f32, *elevation, p.y as f32])
+                    .collect();
+                let mut min = [f32::INFINITY; 3];
+                let mut max = [f32::NEG_INFINITY; 3];
+                for p in &positions {
+                    for axis in 0..3 {
+                        min[axis] = min[axis].min(p[axis]);
+                        max[axis] = max[axis].max(p[axis]);
+                    }
+                }
+                (
+                    [0.0, 0.0, 0.0],
+                    Mesh {
+                        positions,
+                        triangles: triangles[..nt].to_vec(),
+                        min,
+                        max,
+                    },
+                )
+            }
             Self::Cylinder {
                 center,
                 radius,
@@ -105,28 +142,45 @@ impl ParametricRecipe {
                 *center,
                 authoring::cylinder(*radius, *height, *segments).map_err(|e| e.to_string())?,
             ),
-            Self::Stem { start, end, radius, segments } => {
+            Self::Stem {
+                start,
+                end,
+                radius,
+                segments,
+            } => {
                 let delta = [end[0] - start[0], end[1] - start[1], end[2] - start[2]];
-                let length = (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]).sqrt();
-                if length < 0.001 { return Err("stem endpoints coincide".into()); }
+                let length =
+                    (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]).sqrt();
+                if length < 0.001 {
+                    return Err("stem endpoints coincide".into());
+                }
                 let y = [delta[0] / length, delta[1] / length, delta[2] / length];
                 let horizontal = (y[0] * y[0] + y[1] * y[1]).sqrt();
-                let x = if horizontal < 0.001 { [1.0, 0.0, 0.0] }
-                        else { [y[1] / horizontal, -y[0] / horizontal, 0.0] };
-                let z = [x[1] * y[2] - x[2] * y[1],
-                         x[2] * y[0] - x[0] * y[2],
-                         x[0] * y[1] - x[1] * y[0]];
+                let x = if horizontal < 0.001 {
+                    [1.0, 0.0, 0.0]
+                } else {
+                    [y[1] / horizontal, -y[0] / horizontal, 0.0]
+                };
+                let z = [
+                    x[1] * y[2] - x[2] * y[1],
+                    x[2] * y[0] - x[0] * y[2],
+                    x[0] * y[1] - x[1] * y[0],
+                ];
                 let rotation = [
                     [x[0] as f64, x[1] as f64, x[2] as f64, 0.0],
                     [y[0] as f64, y[1] as f64, y[2] as f64, 0.0],
                     [z[0] as f64, z[1] as f64, z[2] as f64, 0.0],
                     [0.0, 0.0, 0.0, 1.0],
                 ];
-                let mesh = authoring::cylinder(*radius, length, *segments).map_err(|e| e.to_string())?;
-                let midpoint = [(start[0] + end[0]) * 0.5, (start[1] + end[1]) * 0.5,
-                                (start[2] + end[2]) * 0.5];
+                let mesh =
+                    authoring::cylinder(*radius, length, *segments).map_err(|e| e.to_string())?;
+                let midpoint = [
+                    (start[0] + end[0]) * 0.5,
+                    (start[1] + end[1]) * 0.5,
+                    (start[2] + end[2]) * 0.5,
+                ];
                 (midpoint, authoring::transform_mesh(&mesh, &rotation))
-            },
+            }
             Self::Sphere {
                 center,
                 radius,
@@ -142,8 +196,8 @@ impl ParametricRecipe {
                 latitude,
                 longitude,
             } => {
-                let sphere = authoring::uv_sphere(1.0, *latitude, *longitude)
-                    .map_err(|e| e.to_string())?;
+                let sphere =
+                    authoring::uv_sphere(1.0, *latitude, *longitude).map_err(|e| e.to_string())?;
                 (
                     *center,
                     authoring::transform_mesh(
@@ -151,7 +205,7 @@ impl ParametricRecipe {
                         &authoring::scale(radii[0] as f64, radii[1] as f64, radii[2] as f64),
                     ),
                 )
-            },
+            }
             Self::Torus {
                 center,
                 major,
@@ -280,16 +334,20 @@ pub fn kestrel_flats(
     scene.push(parametric(
         "rc:asset/main-road",
         [0.78, 0.55, 0.37, 1.0],
-        ParametricRecipe::Ribbon {control:&[
-            [-6.1,0.45],[-2.8,0.16],[2.5,0.86],[6.0,0.48],
-        ],width:1.15,elevation:0.046},
+        ParametricRecipe::Ribbon {
+            control: &[[-6.1, 0.45], [-2.8, 0.16], [2.5, 0.86], [6.0, 0.48]],
+            width: 1.15,
+            elevation: 0.046,
+        },
     ));
     scene.push(parametric(
         "rc:asset/main-road-workshop-spur",
         [0.77, 0.56, 0.39, 1.0],
-        ParametricRecipe::Ribbon {control:&[
-            [1.7,-4.35],[1.38,-2.60],[1.88,-0.45],[1.38,0.42],
-        ],width:0.82,elevation:0.048},
+        ParametricRecipe::Ribbon {
+            control: &[[1.7, -4.35], [1.38, -2.60], [1.88, -0.45], [1.38, 0.42]],
+            width: 0.82,
+            elevation: 0.048,
+        },
     ));
     scene.push(asset(
         "rc:asset/camp-shelter",
@@ -540,7 +598,11 @@ pub fn kestrel_flats(
     ));
     scene.push(asset(
         "rc:asset/mast-node",
-        if signal_online { [0.24, 0.84, 0.64, 1.0] } else { [0.25, 0.48, 0.52, 1.0] },
+        if signal_online {
+            [0.24, 0.84, 0.64, 1.0]
+        } else {
+            [0.25, 0.48, 0.52, 1.0]
+        },
         vec![block([5.75, 2.55, 5.3], [0.26, 0.32, 0.26])],
     ));
     if signal_online {
@@ -570,27 +632,96 @@ pub fn kestrel_flats(
     // Broad low mounds break up the rectangular turf without obscuring roads.
     // Each is an authored ellipsoid from Qualia's sphere and transform APIs.
     for (id, center, radii, color) in [
-        ("rc:asset/kestrel-meadow-nw", [-5.25, 0.025, -5.78], [1.35, 0.12, 0.65], [0.43, 0.78, 0.39, 1.0]),
-        ("rc:asset/kestrel-meadow-ne", [5.35, 0.025, -5.75], [1.38, 0.13, 0.67], [0.38, 0.73, 0.35, 1.0]),
-        ("rc:asset/kestrel-meadow-sw", [-5.37, 0.025, 5.72], [1.45, 0.13, 0.75], [0.40, 0.76, 0.36, 1.0]),
-        ("rc:asset/kestrel-meadow-se", [5.33, 0.025, 5.70], [1.42, 0.12, 0.72], [0.46, 0.80, 0.37, 1.0]),
-        ("rc:asset/kestrel-meadow-west", [-6.40, 0.025, 0.82], [0.51, 0.10, 1.12], [0.47, 0.77, 0.39, 1.0]),
-        ("rc:asset/kestrel-meadow-east", [6.37, 0.025, -0.55], [0.50, 0.09, 1.02], [0.41, 0.76, 0.37, 1.0]),
+        (
+            "rc:asset/kestrel-meadow-nw",
+            [-5.25, 0.025, -5.78],
+            [1.35, 0.12, 0.65],
+            [0.43, 0.78, 0.39, 1.0],
+        ),
+        (
+            "rc:asset/kestrel-meadow-ne",
+            [5.35, 0.025, -5.75],
+            [1.38, 0.13, 0.67],
+            [0.38, 0.73, 0.35, 1.0],
+        ),
+        (
+            "rc:asset/kestrel-meadow-sw",
+            [-5.37, 0.025, 5.72],
+            [1.45, 0.13, 0.75],
+            [0.40, 0.76, 0.36, 1.0],
+        ),
+        (
+            "rc:asset/kestrel-meadow-se",
+            [5.33, 0.025, 5.70],
+            [1.42, 0.12, 0.72],
+            [0.46, 0.80, 0.37, 1.0],
+        ),
+        (
+            "rc:asset/kestrel-meadow-west",
+            [-6.40, 0.025, 0.82],
+            [0.51, 0.10, 1.12],
+            [0.47, 0.77, 0.39, 1.0],
+        ),
+        (
+            "rc:asset/kestrel-meadow-east",
+            [6.37, 0.025, -0.55],
+            [0.50, 0.09, 1.02],
+            [0.41, 0.76, 0.37, 1.0],
+        ),
     ] {
-        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
-            center, radii, latitude: 7, longitude: 12,
-        }));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::Ellipsoid {
+                center,
+                radii,
+                latitude: 7,
+                longitude: 12,
+            },
+        ));
     }
     for (id, center, radii, color) in [
-        ("rc:asset/kestrel-shrub-hall", [-1.23, 0.27, -4.27], [0.46, 0.28, 0.37], [0.20, 0.58, 0.31, 1.0]),
-        ("rc:asset/kestrel-shrub-workshop", [4.98, 0.31, -1.05], [0.55, 0.33, 0.39], [0.27, 0.64, 0.38, 1.0]),
-        ("rc:asset/kestrel-shrub-camp", [-4.61, 0.28, 3.75], [0.50, 0.30, 0.43], [0.25, 0.61, 0.33, 1.0]),
-        ("rc:asset/kestrel-shrub-garden", [-2.39, 0.22, -5.54], [0.43, 0.24, 0.38], [0.29, 0.68, 0.36, 1.0]),
-        ("rc:asset/kestrel-shrub-salvage", [6.42, 0.25, 2.26], [0.39, 0.27, 0.48], [0.23, 0.58, 0.34, 1.0]),
+        (
+            "rc:asset/kestrel-shrub-hall",
+            [-1.23, 0.27, -4.27],
+            [0.46, 0.28, 0.37],
+            [0.20, 0.58, 0.31, 1.0],
+        ),
+        (
+            "rc:asset/kestrel-shrub-workshop",
+            [4.98, 0.31, -1.05],
+            [0.55, 0.33, 0.39],
+            [0.27, 0.64, 0.38, 1.0],
+        ),
+        (
+            "rc:asset/kestrel-shrub-camp",
+            [-4.61, 0.28, 3.75],
+            [0.50, 0.30, 0.43],
+            [0.25, 0.61, 0.33, 1.0],
+        ),
+        (
+            "rc:asset/kestrel-shrub-garden",
+            [-2.39, 0.22, -5.54],
+            [0.43, 0.24, 0.38],
+            [0.29, 0.68, 0.36, 1.0],
+        ),
+        (
+            "rc:asset/kestrel-shrub-salvage",
+            [6.42, 0.25, 2.26],
+            [0.39, 0.27, 0.48],
+            [0.23, 0.58, 0.34, 1.0],
+        ),
     ] {
-        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
-            center, radii, latitude: 8, longitude: 12,
-        }));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::Ellipsoid {
+                center,
+                radii,
+                latitude: 8,
+                longitude: 12,
+            },
+        ));
     }
     scene.push(asset(
         "rc:asset/footpaths",
@@ -647,7 +778,11 @@ pub fn kestrel_flats(
     ));
     scene.push(asset(
         "rc:asset/workshop-door-glow",
-        if online { [0.99, 0.80, 0.37, 1.0] } else { [0.34, 0.48, 0.53, 1.0] },
+        if online {
+            [0.99, 0.80, 0.37, 1.0]
+        } else {
+            [0.34, 0.48, 0.53, 1.0]
+        },
         vec![
             block([3.2, 1.05, -1.235], [0.54, 0.16, 0.035]),
             block([3.2, 0.22, -1.235], [0.54, 0.09, 0.035]),
@@ -738,68 +873,176 @@ pub fn kestrel_flats(
                 .collect(),
         ));
         for (id, x, z, hue) in [
-            ("rc:asset/veggie-leaves-kale-a", -4.70, -4.20, [0.22, 0.52, 0.26, 1.0]),
-            ("rc:asset/veggie-leaves-kale-b", -3.02, -4.20, [0.31, 0.62, 0.32, 1.0]),
-            ("rc:asset/veggie-leaves-chard-a", -4.70, -3.30, [0.40, 0.65, 0.34, 1.0]),
-            ("rc:asset/veggie-leaves-chard-b", -3.02, -3.30, [0.28, 0.55, 0.31, 1.0]),
+            (
+                "rc:asset/veggie-leaves-kale-a",
+                -4.70,
+                -4.20,
+                [0.22, 0.52, 0.26, 1.0],
+            ),
+            (
+                "rc:asset/veggie-leaves-kale-b",
+                -3.02,
+                -4.20,
+                [0.31, 0.62, 0.32, 1.0],
+            ),
+            (
+                "rc:asset/veggie-leaves-chard-a",
+                -4.70,
+                -3.30,
+                [0.40, 0.65, 0.34, 1.0],
+            ),
+            (
+                "rc:asset/veggie-leaves-chard-b",
+                -3.02,
+                -3.30,
+                [0.28, 0.55, 0.31, 1.0],
+            ),
         ] {
-            scene.push(parametric(id, hue, ParametricRecipe::Ellipsoid {
-                center: [x, 0.42, z], radii: [0.66, 0.20, 0.28],
-                latitude: 7, longitude: 11,
-            }));
+            scene.push(parametric(
+                id,
+                hue,
+                ParametricRecipe::Ellipsoid {
+                    center: [x, 0.42, z],
+                    radii: [0.66, 0.20, 0.28],
+                    latitude: 7,
+                    longitude: 11,
+                },
+            ));
         }
         for (id, x, z) in [
             ("rc:asset/veggie-pumpkin-a", -5.13, -4.20),
             ("rc:asset/veggie-pumpkin-b", -4.08, -4.20),
             ("rc:asset/veggie-pumpkin-c", -3.57, -3.30),
         ] {
-            scene.push(parametric(id, [0.93, 0.49, 0.20, 1.0], ParametricRecipe::Ellipsoid {
-                center: [x, 0.36, z], radii: [0.17, 0.14, 0.16],
-                latitude: 7, longitude: 10,
-            }));
+            scene.push(parametric(
+                id,
+                [0.93, 0.49, 0.20, 1.0],
+                ParametricRecipe::Ellipsoid {
+                    center: [x, 0.36, z],
+                    radii: [0.17, 0.14, 0.16],
+                    latitude: 7,
+                    longitude: 10,
+                },
+            ));
         }
     }
     // The herb border is present before the player plants the vegetable beds.
     for (id, x, z, hue) in [
-        ("rc:asset/herb-rosemary-a", -5.46, -4.95, [0.36, 0.57, 0.46, 1.0]),
-        ("rc:asset/herb-rosemary-b", -4.82, -4.95, [0.42, 0.63, 0.49, 1.0]),
-        ("rc:asset/herb-sage-a", -4.14, -4.95, [0.53, 0.67, 0.57, 1.0]),
-        ("rc:asset/herb-sage-b", -3.47, -4.95, [0.46, 0.62, 0.55, 1.0]),
+        (
+            "rc:asset/herb-rosemary-a",
+            -5.46,
+            -4.95,
+            [0.36, 0.57, 0.46, 1.0],
+        ),
+        (
+            "rc:asset/herb-rosemary-b",
+            -4.82,
+            -4.95,
+            [0.42, 0.63, 0.49, 1.0],
+        ),
+        (
+            "rc:asset/herb-sage-a",
+            -4.14,
+            -4.95,
+            [0.53, 0.67, 0.57, 1.0],
+        ),
+        (
+            "rc:asset/herb-sage-b",
+            -3.47,
+            -4.95,
+            [0.46, 0.62, 0.55, 1.0],
+        ),
         ("rc:asset/herb-thyme", -2.80, -4.95, [0.36, 0.59, 0.39, 1.0]),
     ] {
-        scene.push(parametric(id, hue, ParametricRecipe::Ellipsoid {
-            center: [x, 0.25, z], radii: [0.23, 0.20, 0.19],
-            latitude: 7, longitude: 10,
-        }));
+        scene.push(parametric(
+            id,
+            hue,
+            ParametricRecipe::Ellipsoid {
+                center: [x, 0.25, z],
+                radii: [0.23, 0.20, 0.19],
+                latitude: 7,
+                longitude: 10,
+            },
+        ));
     }
-    scene.push(parametric("rc:asset/garden-ant-mound",
-        [0.57, 0.40, 0.27, 1.0], ParametricRecipe::Ellipsoid {
-            center: [-5.82, 0.11, -5.49], radii: [0.38, 0.19, 0.35],
-            latitude: 9, longitude: 14,
-        }));
+    scene.push(parametric(
+        "rc:asset/garden-ant-mound",
+        [0.57, 0.40, 0.27, 1.0],
+        ParametricRecipe::Ellipsoid {
+            center: [-5.82, 0.11, -5.49],
+            radii: [0.38, 0.19, 0.35],
+            latitude: 9,
+            longitude: 14,
+        },
+    ));
     for (body_id, eyes_id, center, heading, color) in [
-        ("rc:asset/garden-ant-scout", "rc:asset/garden-ant-scout-eyes",
-         [-5.30, 0.20, -5.57], -0.25, [0.32, 0.17, 0.12, 1.0]),
-        ("rc:asset/garden-ant-worker-a", "rc:asset/garden-ant-worker-a-eyes",
-         [-4.62, 0.20, -5.46], 0.18, [0.39, 0.21, 0.14, 1.0]),
-        ("rc:asset/garden-ant-worker-b", "rc:asset/garden-ant-worker-b-eyes",
-         [-3.96, 0.20, -5.62], -0.34, [0.29, 0.17, 0.13, 1.0]),
-        ("rc:asset/garden-ant-worker-c", "rc:asset/garden-ant-worker-c-eyes",
-         [-5.02, 0.20, -5.38], 0.35, [0.35, 0.19, 0.13, 1.0]),
-        ("rc:asset/garden-ant-worker-d", "rc:asset/garden-ant-worker-d-eyes",
-         [-4.86, 0.20, -5.69], -0.16, [0.31, 0.17, 0.12, 1.0]),
-        ("rc:asset/garden-ant-worker-e", "rc:asset/garden-ant-worker-e-eyes",
-         [-4.37, 0.20, -5.31], 0.41, [0.38, 0.20, 0.14, 1.0]),
-        ("rc:asset/garden-ant-worker-f", "rc:asset/garden-ant-worker-f-eyes",
-         [-4.21, 0.20, -5.69], -0.18, [0.30, 0.16, 0.12, 1.0]),
-        ("rc:asset/garden-ant-worker-g", "rc:asset/garden-ant-worker-g-eyes",
-         [-3.71, 0.20, -5.49], 0.24, [0.35, 0.18, 0.12, 1.0]),
+        (
+            "rc:asset/garden-ant-scout",
+            "rc:asset/garden-ant-scout-eyes",
+            [-5.30, 0.20, -5.57],
+            -0.25,
+            [0.32, 0.17, 0.12, 1.0],
+        ),
+        (
+            "rc:asset/garden-ant-worker-a",
+            "rc:asset/garden-ant-worker-a-eyes",
+            [-4.62, 0.20, -5.46],
+            0.18,
+            [0.39, 0.21, 0.14, 1.0],
+        ),
+        (
+            "rc:asset/garden-ant-worker-b",
+            "rc:asset/garden-ant-worker-b-eyes",
+            [-3.96, 0.20, -5.62],
+            -0.34,
+            [0.29, 0.17, 0.13, 1.0],
+        ),
+        (
+            "rc:asset/garden-ant-worker-c",
+            "rc:asset/garden-ant-worker-c-eyes",
+            [-5.02, 0.20, -5.38],
+            0.35,
+            [0.35, 0.19, 0.13, 1.0],
+        ),
+        (
+            "rc:asset/garden-ant-worker-d",
+            "rc:asset/garden-ant-worker-d-eyes",
+            [-4.86, 0.20, -5.69],
+            -0.16,
+            [0.31, 0.17, 0.12, 1.0],
+        ),
+        (
+            "rc:asset/garden-ant-worker-e",
+            "rc:asset/garden-ant-worker-e-eyes",
+            [-4.37, 0.20, -5.31],
+            0.41,
+            [0.38, 0.20, 0.14, 1.0],
+        ),
+        (
+            "rc:asset/garden-ant-worker-f",
+            "rc:asset/garden-ant-worker-f-eyes",
+            [-4.21, 0.20, -5.69],
+            -0.18,
+            [0.30, 0.16, 0.12, 1.0],
+        ),
+        (
+            "rc:asset/garden-ant-worker-g",
+            "rc:asset/garden-ant-worker-g-eyes",
+            [-3.71, 0.20, -5.49],
+            0.24,
+            [0.35, 0.18, 0.12, 1.0],
+        ),
     ] {
-        scene.push(parametric(body_id, color, ParametricRecipe::Ant {
-            center, heading,
-        }));
-        scene.push(parametric(eyes_id, [0.97, 0.88, 0.67, 1.0],
-            ParametricRecipe::AntEyes { center, heading }));
+        scene.push(parametric(
+            body_id,
+            color,
+            ParametricRecipe::Ant { center, heading },
+        ));
+        scene.push(parametric(
+            eyes_id,
+            [0.97, 0.88, 0.67, 1.0],
+            ParametricRecipe::AntEyes { center, heading },
+        ));
     }
     scene.push(asset(
         "rc:asset/hall-facade",
@@ -862,26 +1105,87 @@ pub fn kestrel_flats(
     // Eucalypts need a pale, slightly leaning trunk, open fork and fine
     // blue-green leaf masses. Keep the established tree IDs for scene picks.
     for (trunk_id, crown_id, fork_id, bark_id, x, z, lean, tint) in [
-        ("rc:asset/tree-trunk-nw", "rc:asset/tree-crown-nw", "rc:asset/gum-fork-nw", "rc:asset/gum-bark-nw", -6.15, -5.5, -0.22, [0.34, 0.57, 0.52, 1.0]),
-        ("rc:asset/tree-trunk-ne", "rc:asset/tree-crown-ne", "rc:asset/gum-fork-ne", "rc:asset/gum-bark-ne", 6.1, -5.2, 0.25, [0.40, 0.64, 0.54, 1.0]),
-        ("rc:asset/tree-trunk-sw", "rc:asset/tree-crown-sw", "rc:asset/gum-fork-sw", "rc:asset/gum-bark-sw", -6.1, 5.2, -0.26, [0.38, 0.59, 0.50, 1.0]),
-        ("rc:asset/tree-trunk-se", "rc:asset/tree-crown-se", "rc:asset/gum-fork-se", "rc:asset/gum-bark-se", 6.1, 4.8, 0.21, [0.35, 0.61, 0.55, 1.0]),
+        (
+            "rc:asset/tree-trunk-nw",
+            "rc:asset/tree-crown-nw",
+            "rc:asset/gum-fork-nw",
+            "rc:asset/gum-bark-nw",
+            -6.15,
+            -5.5,
+            -0.22,
+            [0.34, 0.57, 0.52, 1.0],
+        ),
+        (
+            "rc:asset/tree-trunk-ne",
+            "rc:asset/tree-crown-ne",
+            "rc:asset/gum-fork-ne",
+            "rc:asset/gum-bark-ne",
+            6.1,
+            -5.2,
+            0.25,
+            [0.40, 0.64, 0.54, 1.0],
+        ),
+        (
+            "rc:asset/tree-trunk-sw",
+            "rc:asset/tree-crown-sw",
+            "rc:asset/gum-fork-sw",
+            "rc:asset/gum-bark-sw",
+            -6.1,
+            5.2,
+            -0.26,
+            [0.38, 0.59, 0.50, 1.0],
+        ),
+        (
+            "rc:asset/tree-trunk-se",
+            "rc:asset/tree-crown-se",
+            "rc:asset/gum-fork-se",
+            "rc:asset/gum-bark-se",
+            6.1,
+            4.8,
+            0.21,
+            [0.35, 0.61, 0.55, 1.0],
+        ),
     ] {
-        scene.push(parametric(trunk_id, [0.83, 0.79, 0.67, 1.0], ParametricRecipe::Stem {
-            start: [x, 0.02, z], end: [x + lean, 2.00, z - 0.12], radius: 0.16, segments: 9,
-        }));
-        scene.push(parametric(fork_id, [0.72, 0.65, 0.52, 1.0], ParametricRecipe::Stem {
-            start: [x + lean * 0.70, 1.43, z - 0.08],
-            end: [x + lean + 0.68, 2.52, z + 0.26], radius: 0.105, segments: 8,
-        }));
-        scene.push(parametric(bark_id, [0.61, 0.48, 0.36, 1.0], ParametricRecipe::Stem {
-            start: [x + lean * 0.28, 0.55, z - 0.02],
-            end: [x + lean * 0.45, 0.96, z - 0.04], radius: 0.169, segments: 9,
-        }));
-        scene.push(parametric(crown_id, tint, ParametricRecipe::Ellipsoid {
-            center: [x + lean, 2.75, z - 0.14], radii: [0.78, 0.36, 0.58],
-            latitude: 8, longitude: 12,
-        }));
+        scene.push(parametric(
+            trunk_id,
+            [0.83, 0.79, 0.67, 1.0],
+            ParametricRecipe::Stem {
+                start: [x, 0.02, z],
+                end: [x + lean, 2.00, z - 0.12],
+                radius: 0.16,
+                segments: 9,
+            },
+        ));
+        scene.push(parametric(
+            fork_id,
+            [0.72, 0.65, 0.52, 1.0],
+            ParametricRecipe::Stem {
+                start: [x + lean * 0.70, 1.43, z - 0.08],
+                end: [x + lean + 0.68, 2.52, z + 0.26],
+                radius: 0.105,
+                segments: 8,
+            },
+        ));
+        scene.push(parametric(
+            bark_id,
+            [0.61, 0.48, 0.36, 1.0],
+            ParametricRecipe::Stem {
+                start: [x + lean * 0.28, 0.55, z - 0.02],
+                end: [x + lean * 0.45, 0.96, z - 0.04],
+                radius: 0.169,
+                segments: 9,
+            },
+        ));
+        scene.push(parametric(
+            crown_id,
+            tint,
+            ParametricRecipe::Ellipsoid {
+                center: [x + lean, 2.75, z - 0.14],
+                radii: [0.78, 0.36, 0.58],
+                latitude: 8,
+                longitude: 12,
+            },
+        ));
     }
     for (id, center) in [
         ("rc:asset/salvage-drum-a", [5.35, 0.38, 3.65]),
@@ -1005,34 +1309,93 @@ pub fn kestrel_flats(
             ParametricRecipe::Ellipsoid {
                 center: [center[0], center[1] + 0.38, center[2]],
                 radii: [radius, radius * 0.60, radius * 0.84],
-                latitude: 8, longitude: 12,
+                latitude: 8,
+                longitude: 12,
             },
         ));
     }
     // Narrow pendent sprays keep the eucalypts distinct from the round fruit
     // trees and stay visible in the territory camera.
     for (id, center, color) in [
-        ("rc:asset/gum-spray-nw-west", [-6.77, 2.44, -5.38], [0.30, 0.56, 0.48, 1.0]),
-        ("rc:asset/gum-spray-nw-east", [-5.52, 2.56, -5.54], [0.48, 0.69, 0.54, 1.0]),
-        ("rc:asset/gum-spray-ne-west", [5.50, 2.48, -5.12], [0.34, 0.59, 0.52, 1.0]),
-        ("rc:asset/gum-spray-ne-east", [6.76, 2.57, -5.26], [0.50, 0.71, 0.59, 1.0]),
-        ("rc:asset/gum-spray-sw-west", [-6.75, 2.43, 5.26], [0.33, 0.56, 0.49, 1.0]),
-        ("rc:asset/gum-spray-sw-east", [-5.48, 2.52, 5.02], [0.51, 0.70, 0.56, 1.0]),
-        ("rc:asset/gum-spray-se-west", [5.49, 2.43, 4.75], [0.33, 0.57, 0.48, 1.0]),
-        ("rc:asset/gum-spray-se-east", [6.76, 2.52, 4.87], [0.49, 0.70, 0.56, 1.0]),
+        (
+            "rc:asset/gum-spray-nw-west",
+            [-6.77, 2.44, -5.38],
+            [0.30, 0.56, 0.48, 1.0],
+        ),
+        (
+            "rc:asset/gum-spray-nw-east",
+            [-5.52, 2.56, -5.54],
+            [0.48, 0.69, 0.54, 1.0],
+        ),
+        (
+            "rc:asset/gum-spray-ne-west",
+            [5.50, 2.48, -5.12],
+            [0.34, 0.59, 0.52, 1.0],
+        ),
+        (
+            "rc:asset/gum-spray-ne-east",
+            [6.76, 2.57, -5.26],
+            [0.50, 0.71, 0.59, 1.0],
+        ),
+        (
+            "rc:asset/gum-spray-sw-west",
+            [-6.75, 2.43, 5.26],
+            [0.33, 0.56, 0.49, 1.0],
+        ),
+        (
+            "rc:asset/gum-spray-sw-east",
+            [-5.48, 2.52, 5.02],
+            [0.51, 0.70, 0.56, 1.0],
+        ),
+        (
+            "rc:asset/gum-spray-se-west",
+            [5.49, 2.43, 4.75],
+            [0.33, 0.57, 0.48, 1.0],
+        ),
+        (
+            "rc:asset/gum-spray-se-east",
+            [6.76, 2.52, 4.87],
+            [0.49, 0.70, 0.56, 1.0],
+        ),
     ] {
-        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
-            center, radii: [0.22, 0.47, 0.23], latitude: 8, longitude: 10,
-        }));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::Ellipsoid {
+                center,
+                radii: [0.22, 0.47, 0.23],
+                latitude: 8,
+                longitude: 10,
+            },
+        ));
     }
     for (id, center, color) in [
-        ("rc:asset/wattle-bloom-nw", [-5.45, 0.46, -5.87], [0.96, 0.76, 0.28, 1.0]),
-        ("rc:asset/wattle-bloom-sw", [-5.48, 0.43, 5.82], [0.94, 0.70, 0.25, 1.0]),
-        ("rc:asset/wattle-bloom-ne", [5.47, 0.41, -5.80], [0.98, 0.79, 0.31, 1.0]),
+        (
+            "rc:asset/wattle-bloom-nw",
+            [-5.45, 0.46, -5.87],
+            [0.96, 0.76, 0.28, 1.0],
+        ),
+        (
+            "rc:asset/wattle-bloom-sw",
+            [-5.48, 0.43, 5.82],
+            [0.94, 0.70, 0.25, 1.0],
+        ),
+        (
+            "rc:asset/wattle-bloom-ne",
+            [5.47, 0.41, -5.80],
+            [0.98, 0.79, 0.31, 1.0],
+        ),
     ] {
-        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
-            center, radii: [0.30, 0.12, 0.20], latitude: 7, longitude: 10,
-        }));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::Ellipsoid {
+                center,
+                radii: [0.30, 0.12, 0.20],
+                latitude: 7,
+                longitude: 10,
+            },
+        ));
     }
     // Distinct, rounded character silhouettes. Separate limbs, faces and hair
     // retain semantic identities for later Qualia animation clips.
@@ -1277,45 +1640,135 @@ pub fn saltwind_reach(
         ParametricRecipe::SettlementPatch { center_x: 16.0 },
     ));
     for (id, center, radii, color) in [
-        ("rc:asset/saltwind-meadow-nw", [11.1, 0.02, -5.8], [1.55, 0.13, 0.70], [0.64, 0.77, 0.42, 1.0]),
-        ("rc:asset/saltwind-meadow-ne", [20.7, 0.02, -5.7], [1.58, 0.14, 0.76], [0.59, 0.75, 0.42, 1.0]),
-        ("rc:asset/saltwind-meadow-sw", [11.1, 0.02, 5.8], [1.50, 0.13, 0.69], [0.61, 0.79, 0.43, 1.0]),
-        ("rc:asset/saltwind-meadow-se", [20.7, 0.02, 5.7], [1.47, 0.12, 0.77], [0.65, 0.80, 0.40, 1.0]),
+        (
+            "rc:asset/saltwind-meadow-nw",
+            [11.1, 0.02, -5.8],
+            [1.55, 0.13, 0.70],
+            [0.64, 0.77, 0.42, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-meadow-ne",
+            [20.7, 0.02, -5.7],
+            [1.58, 0.14, 0.76],
+            [0.59, 0.75, 0.42, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-meadow-sw",
+            [11.1, 0.02, 5.8],
+            [1.50, 0.13, 0.69],
+            [0.61, 0.79, 0.43, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-meadow-se",
+            [20.7, 0.02, 5.7],
+            [1.47, 0.12, 0.77],
+            [0.65, 0.80, 0.40, 1.0],
+        ),
     ] {
-        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
-            center, radii, latitude: 7, longitude: 12,
-        }));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::Ellipsoid {
+                center,
+                radii,
+                latitude: 7,
+                longitude: 12,
+            },
+        ));
     }
     for (trunk_id, branch_id, crown_id, crown_side_id, x, z, lean) in [
-        ("rc:asset/saltwind-gum-west-trunk", "rc:asset/saltwind-gum-west-branch", "rc:asset/saltwind-gum-west-crown", "rc:asset/saltwind-gum-west-leaves", 10.6, -5.7, -0.32),
-        ("rc:asset/saltwind-gum-east-trunk", "rc:asset/saltwind-gum-east-branch", "rc:asset/saltwind-gum-east-crown", "rc:asset/saltwind-gum-east-leaves", 22.15, 5.68, 0.29),
+        (
+            "rc:asset/saltwind-gum-west-trunk",
+            "rc:asset/saltwind-gum-west-branch",
+            "rc:asset/saltwind-gum-west-crown",
+            "rc:asset/saltwind-gum-west-leaves",
+            10.6,
+            -5.7,
+            -0.32,
+        ),
+        (
+            "rc:asset/saltwind-gum-east-trunk",
+            "rc:asset/saltwind-gum-east-branch",
+            "rc:asset/saltwind-gum-east-crown",
+            "rc:asset/saltwind-gum-east-leaves",
+            22.15,
+            5.68,
+            0.29,
+        ),
     ] {
-        scene.push(parametric(trunk_id, [0.82, 0.79, 0.69, 1.0], ParametricRecipe::Stem {
-            start: [x, 0.02, z], end: [x + lean, 2.30, z - 0.16],
-            radius: 0.17, segments: 9,
-        }));
-        scene.push(parametric(branch_id, [0.69, 0.62, 0.52, 1.0], ParametricRecipe::Stem {
-            start: [x + lean * 0.70, 1.65, z - 0.10],
-            end: [x + lean + 0.77, 2.77, z + 0.29], radius: 0.10, segments: 8,
-        }));
-        scene.push(parametric(crown_id, [0.37, 0.60, 0.53, 1.0], ParametricRecipe::Ellipsoid {
-            center: [x + lean, 3.03, z - 0.20], radii: [0.95, 0.42, 0.66],
-            latitude: 8, longitude: 12,
-        }));
-        scene.push(parametric(crown_side_id, [0.56, 0.72, 0.60, 1.0], ParametricRecipe::Ellipsoid {
-            center: [x + lean + 0.74, 2.88, z + 0.20], radii: [0.71, 0.34, 0.57],
-            latitude: 8, longitude: 12,
-        }));
+        scene.push(parametric(
+            trunk_id,
+            [0.82, 0.79, 0.69, 1.0],
+            ParametricRecipe::Stem {
+                start: [x, 0.02, z],
+                end: [x + lean, 2.30, z - 0.16],
+                radius: 0.17,
+                segments: 9,
+            },
+        ));
+        scene.push(parametric(
+            branch_id,
+            [0.69, 0.62, 0.52, 1.0],
+            ParametricRecipe::Stem {
+                start: [x + lean * 0.70, 1.65, z - 0.10],
+                end: [x + lean + 0.77, 2.77, z + 0.29],
+                radius: 0.10,
+                segments: 8,
+            },
+        ));
+        scene.push(parametric(
+            crown_id,
+            [0.37, 0.60, 0.53, 1.0],
+            ParametricRecipe::Ellipsoid {
+                center: [x + lean, 3.03, z - 0.20],
+                radii: [0.95, 0.42, 0.66],
+                latitude: 8,
+                longitude: 12,
+            },
+        ));
+        scene.push(parametric(
+            crown_side_id,
+            [0.56, 0.72, 0.60, 1.0],
+            ParametricRecipe::Ellipsoid {
+                center: [x + lean + 0.74, 2.88, z + 0.20],
+                radii: [0.71, 0.34, 0.57],
+                latitude: 8,
+                longitude: 12,
+            },
+        ));
     }
     for (id, center, color) in [
-        ("rc:asset/saltwind-gum-west-spray-a", [9.96, 2.66, -5.89], [0.32, 0.55, 0.50, 1.0]),
-        ("rc:asset/saltwind-gum-west-spray-b", [11.13, 2.75, -5.47], [0.52, 0.69, 0.58, 1.0]),
-        ("rc:asset/saltwind-gum-east-spray-a", [21.60, 2.63, 5.53], [0.33, 0.56, 0.51, 1.0]),
-        ("rc:asset/saltwind-gum-east-spray-b", [22.87, 2.72, 5.85], [0.53, 0.70, 0.60, 1.0]),
+        (
+            "rc:asset/saltwind-gum-west-spray-a",
+            [9.96, 2.66, -5.89],
+            [0.32, 0.55, 0.50, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-gum-west-spray-b",
+            [11.13, 2.75, -5.47],
+            [0.52, 0.69, 0.58, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-gum-east-spray-a",
+            [21.60, 2.63, 5.53],
+            [0.33, 0.56, 0.51, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-gum-east-spray-b",
+            [22.87, 2.72, 5.85],
+            [0.53, 0.70, 0.60, 1.0],
+        ),
     ] {
-        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
-            center, radii: [0.25, 0.50, 0.23], latitude: 8, longitude: 10,
-        }));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::Ellipsoid {
+                center,
+                radii: [0.25, 0.50, 0.23],
+                latitude: 8,
+                longitude: 10,
+            },
+        ));
     }
     scene.push(asset(
         "rc:asset/channel",
@@ -1332,10 +1785,15 @@ pub fn saltwind_reach(
     scene.push(asset(
         "rc:asset/canal-reeds",
         [0.55, 0.72, 0.35, 1.0],
-        [-5.7, -4.4, -2.8, 2.1, 3.5, 5.2].into_iter().flat_map(|z| [
-            block([6.83, 0.22, z], [0.06, 0.44, 0.08]),
-            block([9.18, 0.22, z + 0.3], [0.06, 0.44, 0.08]),
-        ]).collect(),
+        [-5.7, -4.4, -2.8, 2.1, 3.5, 5.2]
+            .into_iter()
+            .flat_map(|z| {
+                [
+                    block([6.83, 0.22, z], [0.06, 0.44, 0.08]),
+                    block([9.18, 0.22, z + 0.3], [0.06, 0.44, 0.08]),
+                ]
+            })
+            .collect(),
     ));
     for (id, z, major) in [
         ("rc:asset/canal-ripple-a", -5.0, 0.37),
@@ -1348,19 +1806,45 @@ pub fn saltwind_reach(
             [0.69, 0.92, 0.91, 1.0],
             ParametricRecipe::Torus {
                 center: [8.0, if high_tide { 0.16 } else { 0.0 }, z],
-                major, minor: 0.019, segments: 24, tube_segments: 6,
+                major,
+                minor: 0.019,
+                segments: 24,
+                tube_segments: 6,
             },
         ));
     }
     for (id, center, radii) in [
-        ("rc:asset/canal-stone-a", [6.72, 0.08, -3.55], [0.29, 0.18, 0.39]),
-        ("rc:asset/canal-stone-b", [9.30, 0.08, -4.70], [0.34, 0.20, 0.31]),
-        ("rc:asset/canal-stone-c", [6.73, 0.08, 3.12], [0.25, 0.17, 0.36]),
-        ("rc:asset/canal-stone-d", [9.27, 0.08, 5.04], [0.37, 0.21, 0.28]),
+        (
+            "rc:asset/canal-stone-a",
+            [6.72, 0.08, -3.55],
+            [0.29, 0.18, 0.39],
+        ),
+        (
+            "rc:asset/canal-stone-b",
+            [9.30, 0.08, -4.70],
+            [0.34, 0.20, 0.31],
+        ),
+        (
+            "rc:asset/canal-stone-c",
+            [6.73, 0.08, 3.12],
+            [0.25, 0.17, 0.36],
+        ),
+        (
+            "rc:asset/canal-stone-d",
+            [9.27, 0.08, 5.04],
+            [0.37, 0.21, 0.28],
+        ),
     ] {
-        scene.push(parametric(id, [0.77, 0.73, 0.60, 1.0], ParametricRecipe::Ellipsoid {
-            center, radii, latitude: 7, longitude: 10,
-        }));
+        scene.push(parametric(
+            id,
+            [0.77, 0.73, 0.60, 1.0],
+            ParametricRecipe::Ellipsoid {
+                center,
+                radii,
+                latitude: 7,
+                longitude: 10,
+            },
+        ));
     }
     scene.push(asset(
         "rc:asset/bridge",
@@ -1421,16 +1905,20 @@ pub fn saltwind_reach(
     scene.push(parametric(
         "rc:asset/saltwind-main-road",
         [0.89, 0.72, 0.50, 1.0],
-        ParametricRecipe::Ribbon {control:&[
-            [9.6,0.55],[13.0,0.25],[18.8,0.83],[22.3,0.50],
-        ],width:1.25,elevation:0.049},
+        ParametricRecipe::Ribbon {
+            control: &[[9.6, 0.55], [13.0, 0.25], [18.8, 0.83], [22.3, 0.50]],
+            width: 1.25,
+            elevation: 0.049,
+        },
     ));
     scene.push(parametric(
         "rc:asset/saltwind-road-orchard-spur",
         [0.88, 0.71, 0.51, 1.0],
-        ParametricRecipe::Ribbon {control:&[
-            [16.0,-4.20],[15.65,-2.6],[16.25,-0.55],[16.0,0.48],
-        ],width:0.88,elevation:0.050},
+        ParametricRecipe::Ribbon {
+            control: &[[16.0, -4.20], [15.65, -2.6], [16.25, -0.55], [16.0, 0.48]],
+            width: 0.88,
+            elevation: 0.050,
+        },
     ));
     scene.push(asset(
         "rc:asset/saltwind-footpaths",
@@ -1444,9 +1932,7 @@ pub fn saltwind_reach(
     scene.push(asset(
         "rc:asset/saltwind-barn",
         [0.92, 0.49, 0.38, 1.0],
-        vec![
-            block([15.3, 0.79, 3.3], [2.4, 1.58, 1.85]),
-        ],
+        vec![block([15.3, 0.79, 3.3], [2.4, 1.58, 1.85])],
     ));
     scene.push(asset(
         "rc:asset/barn-roof",
@@ -1622,7 +2108,8 @@ pub fn saltwind_reach(
     scene.push(asset(
         "rc:asset/orchard-furrows",
         [0.68, 0.48, 0.30, 1.0],
-        [3.24_f32, 3.60, 3.96, 4.94, 5.30, 5.66].into_iter()
+        [3.24_f32, 3.60, 3.96, 4.94, 5.30, 5.66]
+            .into_iter()
             .map(|z| block([18.3, 0.215, z], [3.43, 0.055, 0.105]))
             .collect(),
     ));
@@ -1630,37 +2117,74 @@ pub fn saltwind_reach(
         scene.push(asset(
             "rc:asset/orchard-crop-rows",
             [0.29, 0.68, 0.34, 1.0],
-            [3.60_f32, 5.30].into_iter().flat_map(|z|
-                (0..9).map(move |i| block([16.79 + i as f32 * 0.37, 0.36, z],
-                    [0.16, 0.30, 0.21]))
-            ).collect(),
+            [3.60_f32, 5.30]
+                .into_iter()
+                .flat_map(|z| {
+                    (0..9)
+                        .map(move |i| block([16.79 + i as f32 * 0.37, 0.36, z], [0.16, 0.30, 0.21]))
+                })
+                .collect(),
         ));
     }
     for (id, z, color) in [
         ("rc:asset/lavender-row-back", -5.25, [0.57, 0.47, 0.73, 1.0]),
         ("rc:asset/lavender-row-mid", -4.85, [0.66, 0.55, 0.79, 1.0]),
-        ("rc:asset/lavender-row-front", -4.45, [0.51, 0.46, 0.70, 1.0]),
+        (
+            "rc:asset/lavender-row-front",
+            -4.45,
+            [0.51, 0.46, 0.70, 1.0],
+        ),
     ] {
-        scene.push(asset(id, [0.32, 0.55, 0.35, 1.0],
-            (0..8).map(|i| block([13.4 + i as f32 * 0.32, 0.14, z],
-                [0.055, 0.28, 0.055])).collect()));
+        scene.push(asset(
+            id,
+            [0.32, 0.55, 0.35, 1.0],
+            (0..8)
+                .map(|i| block([13.4 + i as f32 * 0.32, 0.14, z], [0.055, 0.28, 0.055]))
+                .collect(),
+        ));
         let flower_id = match id {
             "rc:asset/lavender-row-back" => "rc:asset/lavender-bloom-back",
             "rc:asset/lavender-row-mid" => "rc:asset/lavender-bloom-mid",
             _ => "rc:asset/lavender-bloom-front",
         };
-        scene.push(asset(flower_id, color, (0..8).map(|i| {
-            block([13.4 + i as f32 * 0.32, 0.34, z], [0.16, 0.17, 0.15])
-        }).collect()));
+        scene.push(asset(
+            flower_id,
+            color,
+            (0..8)
+                .map(|i| block([13.4 + i as f32 * 0.32, 0.34, z], [0.16, 0.17, 0.15]))
+                .collect(),
+        ));
     }
     for (id, center, radii, color) in [
-        ("rc:asset/saltwind-windbreak-a", [21.80, 0.32, -2.50], [0.52, 0.36, 0.68], [0.31, 0.62, 0.39, 1.0]),
-        ("rc:asset/saltwind-windbreak-b", [21.94, 0.34, -0.90], [0.49, 0.37, 0.60], [0.27, 0.59, 0.36, 1.0]),
-        ("rc:asset/saltwind-windbreak-c", [21.85, 0.31, 1.04], [0.56, 0.34, 0.63], [0.34, 0.64, 0.38, 1.0]),
+        (
+            "rc:asset/saltwind-windbreak-a",
+            [21.80, 0.32, -2.50],
+            [0.52, 0.36, 0.68],
+            [0.31, 0.62, 0.39, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-windbreak-b",
+            [21.94, 0.34, -0.90],
+            [0.49, 0.37, 0.60],
+            [0.27, 0.59, 0.36, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-windbreak-c",
+            [21.85, 0.31, 1.04],
+            [0.56, 0.34, 0.63],
+            [0.34, 0.64, 0.38, 1.0],
+        ),
     ] {
-        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
-            center, radii, latitude: 8, longitude: 12,
-        }));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::Ellipsoid {
+                center,
+                radii,
+                latitude: 8,
+                longitude: 12,
+            },
+        ));
     }
     for (trunk_id, crown_id, x, z, hue) in [
         (
@@ -1707,15 +2231,47 @@ pub fn saltwind_reach(
         ));
     }
     for (id, center, radii, color) in [
-        ("rc:asset/orchard-canopy-a-lobe", [11.78, 2.23, 4.70], [0.64, 0.53, 0.60], [0.64, 0.81, 0.42, 1.0]),
-        ("rc:asset/orchard-canopy-b-lobe", [20.13, 2.26, 4.77], [0.63, 0.57, 0.56], [0.56, 0.78, 0.44, 1.0]),
-        ("rc:asset/orchard-canopy-c-lobe", [21.38, 2.20, -5.12], [0.65, 0.56, 0.57], [0.72, 0.84, 0.44, 1.0]),
-        ("rc:asset/saltwind-shrub-market", [12.93, 0.25, -3.67], [0.48, 0.28, 0.44], [0.31, 0.63, 0.38, 1.0]),
-        ("rc:asset/saltwind-shrub-barn", [17.02, 0.28, 4.25], [0.52, 0.31, 0.41], [0.29, 0.62, 0.34, 1.0]),
+        (
+            "rc:asset/orchard-canopy-a-lobe",
+            [11.78, 2.23, 4.70],
+            [0.64, 0.53, 0.60],
+            [0.64, 0.81, 0.42, 1.0],
+        ),
+        (
+            "rc:asset/orchard-canopy-b-lobe",
+            [20.13, 2.26, 4.77],
+            [0.63, 0.57, 0.56],
+            [0.56, 0.78, 0.44, 1.0],
+        ),
+        (
+            "rc:asset/orchard-canopy-c-lobe",
+            [21.38, 2.20, -5.12],
+            [0.65, 0.56, 0.57],
+            [0.72, 0.84, 0.44, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-shrub-market",
+            [12.93, 0.25, -3.67],
+            [0.48, 0.28, 0.44],
+            [0.31, 0.63, 0.38, 1.0],
+        ),
+        (
+            "rc:asset/saltwind-shrub-barn",
+            [17.02, 0.28, 4.25],
+            [0.52, 0.31, 0.41],
+            [0.29, 0.62, 0.34, 1.0],
+        ),
     ] {
-        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
-            center, radii, latitude: 8, longitude: 12,
-        }));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::Ellipsoid {
+                center,
+                radii,
+                latitude: 8,
+                longitude: 12,
+            },
+        ));
     }
     if orchard_active && !orchard_harvested {
         scene.push(asset(
@@ -1746,13 +2302,20 @@ pub fn saltwind_reach(
         scene.push(asset(
             "rc:asset/harvest-produce",
             [0.97, 0.56, 0.23, 1.0],
-            (0..3).flat_map(|crate_index| {
-                (0..3).map(move |fruit_index| block(
-                    [16.6 + crate_index as f32 * 0.87 + fruit_index as f32 * 0.24,
-                     0.55, 2.1],
-                    [0.18, 0.18, 0.18],
-                ))
-            }).collect(),
+            (0..3)
+                .flat_map(|crate_index| {
+                    (0..3).map(move |fruit_index| {
+                        block(
+                            [
+                                16.6 + crate_index as f32 * 0.87 + fruit_index as f32 * 0.24,
+                                0.55,
+                                2.1,
+                            ],
+                            [0.18, 0.18, 0.18],
+                        )
+                    })
+                })
+                .collect(),
         ));
     }
     scene
@@ -1763,40 +2326,100 @@ pub fn saltwind_reach(
 pub fn northern_highlands() -> Vec<AssetRecipe> {
     let mut scene = Vec::with_capacity(20);
     for (id, base_id, x, color) in [
-        ("rc:asset/terrain-west-ridge", "rc:asset/ridge-west-earth", 0.0,
-         [0.45, 0.72, 0.40, 1.0]),
-        ("rc:asset/terrain-east-ridge", "rc:asset/ridge-east-earth", 16.0,
-         [0.48, 0.70, 0.42, 1.0]),
+        (
+            "rc:asset/terrain-west-ridge",
+            "rc:asset/ridge-west-earth",
+            0.0,
+            [0.45, 0.72, 0.40, 1.0],
+        ),
+        (
+            "rc:asset/terrain-east-ridge",
+            "rc:asset/ridge-east-earth",
+            16.0,
+            [0.48, 0.70, 0.42, 1.0],
+        ),
     ] {
-        scene.push(asset(base_id, [0.47, 0.34, 0.26, 1.0],
-            vec![block([x, -0.49, -14.0], [14.0, 0.38, 14.0])]));
-        scene.push(parametric(id, color, ParametricRecipe::TerrainPatch {
-            center_x: x, center_z: -14.0,
-        }));
+        scene.push(asset(
+            base_id,
+            [0.47, 0.34, 0.26, 1.0],
+            vec![block([x, -0.49, -14.0], [14.0, 0.38, 14.0])],
+        ));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::TerrainPatch {
+                center_x: x,
+                center_z: -14.0,
+            },
+        ));
     }
-    scene.push(asset("rc:asset/highland-creek", [0.28, 0.63, 0.73, 1.0],
-        vec![block([8.0, 0.025, -14.0], [2.0, 0.07, 14.0])]));
+    scene.push(asset(
+        "rc:asset/highland-creek",
+        [0.28, 0.63, 0.73, 1.0],
+        vec![block([8.0, 0.025, -14.0], [2.0, 0.07, 14.0])],
+    ));
     for (id, x, z, radii) in [
-        ("rc:asset/ridge-boulder-west", -4.9, -13.9, [0.49, 0.36, 0.61]),
-        ("rc:asset/ridge-boulder-east", 19.8, -16.6, [0.61, 0.39, 0.46]),
+        (
+            "rc:asset/ridge-boulder-west",
+            -4.9,
+            -13.9,
+            [0.49, 0.36, 0.61],
+        ),
+        (
+            "rc:asset/ridge-boulder-east",
+            19.8,
+            -16.6,
+            [0.61, 0.39, 0.46],
+        ),
         ("rc:asset/valley-boulder", 8.9, -17.6, [0.39, 0.25, 0.45]),
     ] {
-        scene.push(parametric(id, [0.60, 0.57, 0.48, 1.0],
+        scene.push(parametric(
+            id,
+            [0.60, 0.57, 0.48, 1.0],
             ParametricRecipe::Ellipsoid {
                 center: [x, crate::terrain::height(x, z) + radii[1] - 0.02, z],
-                radii, latitude: 8, longitude: 12,
-            }));
+                radii,
+                latitude: 8,
+                longitude: 12,
+            },
+        ));
     }
     for (id, x, z, color) in [
-        ("rc:asset/ridge-shrub-west-a", -4.2, -17.4, [0.26, 0.55, 0.38, 1.0]),
-        ("rc:asset/ridge-shrub-west-b", 1.9, -12.4, [0.37, 0.62, 0.42, 1.0]),
-        ("rc:asset/ridge-shrub-east-a", 14.1, -17.2, [0.29, 0.56, 0.39, 1.0]),
-        ("rc:asset/ridge-shrub-east-b", 19.1, -11.6, [0.40, 0.64, 0.43, 1.0]),
+        (
+            "rc:asset/ridge-shrub-west-a",
+            -4.2,
+            -17.4,
+            [0.26, 0.55, 0.38, 1.0],
+        ),
+        (
+            "rc:asset/ridge-shrub-west-b",
+            1.9,
+            -12.4,
+            [0.37, 0.62, 0.42, 1.0],
+        ),
+        (
+            "rc:asset/ridge-shrub-east-a",
+            14.1,
+            -17.2,
+            [0.29, 0.56, 0.39, 1.0],
+        ),
+        (
+            "rc:asset/ridge-shrub-east-b",
+            19.1,
+            -11.6,
+            [0.40, 0.64, 0.43, 1.0],
+        ),
     ] {
-        scene.push(parametric(id, color, ParametricRecipe::Ellipsoid {
-            center: [x, crate::terrain::height(x, z) + 0.28, z],
-            radii: [0.46, 0.28, 0.42], latitude: 8, longitude: 12,
-        }));
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::Ellipsoid {
+                center: [x, crate::terrain::height(x, z) + 0.28, z],
+                radii: [0.46, 0.28, 0.42],
+                latitude: 8,
+                longitude: 12,
+            },
+        ));
     }
     scene
 }

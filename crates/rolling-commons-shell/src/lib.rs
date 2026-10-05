@@ -629,6 +629,11 @@ impl GamePortal {
         Ok(())
     }
 
+    /// Toggle tensor point rendering independently from semantic picking.
+    pub fn set_tensor_projection_enabled(&mut self, enabled: bool) {
+        self.inner.set_tensor_projection_enabled(enabled);
+    }
+
     /// Queue a pick at canvas pixel (x, y). CPU fallback resolves
     /// synchronously; the GPU path resolves on a subsequent `tick`.
     pub fn queue_pick(&mut self, x: f32, y: f32, canvas_w: u32, canvas_h: u32) -> bool {

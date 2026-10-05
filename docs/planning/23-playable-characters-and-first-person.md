@@ -72,6 +72,13 @@ progression system are complete.
 
 ## Current gaps to close
 
+The next simulation layer is specified in the
+[character behaviour and logic mechanics plan](24-character-behaviour-and-logic-mechanics.md).
+It extends this roster/story slice with observable practices, commitments,
+relationship history, community governance, project delivery, and explainable
+cross-scope consequences through QualiaDB's logic capabilities; those mechanics
+are not implemented by the current character profiles yet.
+
 ### Game content and interaction
 
 - The three seed characters start in different named regions, but all regions

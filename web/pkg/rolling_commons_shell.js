@@ -376,6 +376,13 @@ export class GamePortal {
         wasm.gameportal_set_sky_preset(this.__wbg_ptr, preset);
     }
     /**
+     * Toggle tensor point rendering independently from semantic picking.
+     * @param {boolean} enabled
+     */
+    set_tensor_projection_enabled(enabled) {
+        wasm.gameportal_set_tensor_projection_enabled(this.__wbg_ptr, enabled);
+    }
+    /**
      * Render one frame; `dt_ms` is elapsed milliseconds since the last tick.
      * @param {HTMLCanvasElement} canvas
      * @param {number} dt_ms
@@ -1348,6 +1355,13 @@ export class QualiaPortal {
      */
     set_temporal_slice(t_slice, t_window) {
         wasm.qualiaportal_set_temporal_slice(this.__wbg_ptr, t_slice, t_window);
+    }
+    /**
+     * Show or hide semantic tensor nodes while retaining uploaded data for picking.
+     * @param {boolean} on
+     */
+    set_tensor_projection_enabled(on) {
+        wasm.qualiaportal_set_tensor_projection_enabled(this.__wbg_ptr, on);
     }
     /**
      * @returns {number}

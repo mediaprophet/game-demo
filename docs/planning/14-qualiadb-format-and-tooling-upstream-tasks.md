@@ -66,14 +66,14 @@ variant decision or the Q42 manifest/browser-loading acceptance criteria.
 
 ## Work order and completion rule
 
-The RTS uplift adds QG-09 through QG-18 for deterministic multi-agent ticks,
+The RTS uplift adds QG-09 through QG-19 for deterministic multi-agent ticks,
 RTS controls, pathfinding, large-scene rendering, animation, game packs,
 mutable Q42 state, Vibe authoring, terrain tooling, and browser input/audio.
 Their requirements and acceptance fixtures are specified in the
 [RTS uplift blueprint](17-rts-aaa-uplift-blueprint.md#8-required-qualiadb-upgrade-work).
 The [upstream gate work orders](19-qualiadb-upstream-gate-work-orders.md)
 give the concrete Qualia entry points, implementation sequence, failure
-fixtures, and browser completion receipts for QG-01–QG-18.
+fixtures, and browser completion receipts for QG-01–QG-19.
 Treat them as continuous upstream dependencies alongside QG-01–QG-08;
 implementation evidence and status belong in the living ledger.
 

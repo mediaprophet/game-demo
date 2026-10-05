@@ -1,11 +1,11 @@
 # QualiaDB Upstream Gates: Engineering Work Orders
 
-Status: **implementation instructions**, 2026-10-03. These work orders turn
+Status: **implementation instructions**, 2026-10-05. These work orders turn
 the [RTS blueprint](17-rts-aaa-uplift-blueprint.md) and [asset catalog](18-asset-production-catalog.md)
 into a sequence of QualiaDB changes. They govern the **full `wasm-full`
 Qualia package**, not the WebCivics profile. They do not change the licence
 of QualiaDB or game content. Existing QG-01–QG-08 are defined in the
-[format register](14-qualiadb-format-and-tooling-upstream-tasks.md); QG-09–QG-18
+[format register](14-qualiadb-format-and-tooling-upstream-tasks.md); QG-09–QG-19
 are defined here in executable detail.
 The platform-wide, game-independent completion contract for the QualiaDB
 development agent is in
@@ -51,6 +51,8 @@ QG-15 mutable Q42 ─> QG-09 fixed ticks ─> QG-11 navigation ─> RTS agents
 
 QG-05 save contract + QG-12 large scene + QG-13 animation playback
        + QG-18 input/audio/accessibility ─> finished browser slice
+
+QG-19 bounded logic-suite receipts ─> person/community/project mechanics
 ```
 
 Work can proceed concurrently when independent, but no game feature is
@@ -351,6 +353,58 @@ are triggered once per authoritative receipt and do not duplicate on replay
 or tab resume.
 
 ## Conditional gates retained from the original register
+
+### QG-19 — Expose and receipt the full logic suite for people, communities, and projects
+
+**Depends on:** capability audit of the pinned full Qualia WASM build, QG-04
+Vibe host profile, QG-05 mutable state/event contract, and the logic-specific
+fixtures in the
+[character behaviour and logic mechanics plan](24-character-behaviour-and-logic-mechanics.md).
+
+**Inspect first:** for each of N3, SHACL, deontic, epistemic, LTL,
+paraconsistent, ASP, dialectical reasoning, linear logic, description logic,
+argumentation, Allen intervals, diffusion, neuro-symbolic sieve, CRDT, CogAI,
+and the clinical modalities, record the actual public API, implementation
+crate, feature flag, semantics, bounds, failure modes, and current `wasm-full`
+binding. An implementation, showcase page, or native test alone does not prove
+that Vibe or the game can invoke it. Keep currently available APIs and newly
+needed APIs distinct in the ledger.
+
+**Implement only the verified gaps in QualiaDB:** publish a generic,
+capability-discoverable Vibe/WASM invocation profile for the logic operations
+that are absent or unusable. Each call consumes a bounded, versioned semantic
+graph or event trace and returns a typed result, stable explanation/receipt,
+budget status, and provenance. No call can mutate authoritative game state;
+only a separately validated reducer transaction may commit. Preserve each
+logic's semantics instead of flattening outcomes into one score or one
+generic “reasoning” endpoint. Do not build a game-specific JS logic engine.
+
+**Fixture:** load one fictional shared water-and-relay project involving two
+communities, member contributions, an inter-community agreement, disputed
+reports, budget/schedule alternatives, and future maintenance duties in native
+and the selected full-WASM browser target. Invoke every accepted modality
+through the published host surface for its assigned person-, community-, or
+project-scoped mechanic, then replay the same cross-scope event trace and
+verify identical typed outputs and receipts. Include malformed graphs,
+conflicting testimony, representation/permission/privacy boundaries,
+collective-resource over-allocation, overflow or budget exhaustion,
+unavailable feature flags, and version mismatch.
+
+CRDT fixtures must prove that concurrent work receipts merge without silently
+overwriting agreements or testimony. Diffusion fixtures must verify the actual
+data and topology being diffused, deterministic inputs/seeds where game state
+depends on the result, and explainable source paths. CogAI and neuro-symbolic
+sieve fixtures must prove bounded retrieval/proposal, SHACL/deontic validation,
+and rejection behavior with inference disabled. The clinical fixture uses
+synthetic opt-in data, has no player-health fields, and requires the relevant
+clinical-content review before it is surfaced to players.
+
+**Close only when:** the capability ledger names each exercised operation and
+tested WASM revision; the game can show a plain-language Why view and a
+machine-readable Logic Receipt; changing one input changes only the expected
+derived outcomes; and an LLM, CRDT merge, memory retrieval, or modality result
+cannot bypass the QualiaDB reducer. Any unsupported modality remains an
+explicit upstream blocker for its dependent mechanic, not a simulated success.
 
 - **QG-06 P64:** optional graph-scoped NPC inference. First prove that the
   full authored RTS journey works offline without model weights. If enabled,

@@ -23,7 +23,10 @@ have personal backgrounds, story paths, field traits, and separate starting
 regions and saved positions. Their chapters follow the shared campaign. See the
 [playable character and first-person plan](docs/planning/23-playable-characters-and-first-person.md)
 for the current slice, its limits, and the QualiaDB capabilities needed to
-expand it.
+expand it. The [character behaviour and logic mechanics plan](docs/planning/24-character-behaviour-and-logic-mechanics.md)
+sets the next simulation direction: linked but distinct consequences for
+people, community governance, and whole-project delivery, evaluated through
+the QualiaDB logic suite.
 
 Maslows Challenge opens with a practical choice: spend the town's twelve coins
 to move quickly, or spend workdays salvaging and repairing so cash remains
