@@ -4,7 +4,7 @@
   "sourceRecipes": "crates/rolling-commons-shell/src/asset_catalog.rs",
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "6bf7ec313076e645f2134515de1af8e4c7b3402c6199892af9fdd81e04ecb46e"
+    "sha256": "7e87beace55354e4d784180117227c0af3851a056a26336ae0c934848e5130e1"
   },
   "assets": [
     {
@@ -18,6 +18,12 @@
       "file": "10d/barn-eaves--829c293afab4.10d",
       "bytes": 948,
       "sha256": "829c293afab45644d589387b6fc54f14c5f4c42a79eb73fdfbcb60fb4d615d8c"
+    },
+    {
+      "id": "rc:asset/barn-hay-bales",
+      "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+      "bytes": 948,
+      "sha256": "fe81e9130e0100e0921b7fa099b5598354f6705bac96d98329be8bf87adc2b39"
     },
     {
       "id": "rc:asset/barn-roof",
@@ -104,10 +110,100 @@
       "sha256": "a9fe8dd4ae5dd76baca0d7d0c0dcdcc13890aa460491afae48557ab6ba2eabbe"
     },
     {
+      "id": "rc:asset/canal-boat-awning",
+      "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+      "bytes": 1260,
+      "sha256": "900b0c47bf1e8a2b8136bef675417c10f194615f796866594344003589ccf650"
+    },
+    {
+      "id": "rc:asset/canal-boat-hull-stripe",
+      "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+      "bytes": 772,
+      "sha256": "f0bef097fe187eb6efb82960ef5169b56cbf18f0c9e74e968ec9aefe4120ca44"
+    },
+    {
       "id": "rc:asset/canal-boat-rail",
       "file": "10d/canal-boat-rail--c22d12bb48bc.10d",
       "bytes": 1304,
       "sha256": "c22d12bb48bcb4e2282f972331e67285b3dc661702ced10d2cc558c7a57483db"
+    },
+    {
+      "id": "rc:asset/canal-reeds",
+      "file": "10d/canal-reeds--f769e421f44a.10d",
+      "bytes": 2544,
+      "sha256": "f769e421f44afb1353f97bcdbb7fdd94bde75e2865aa55a61090ecf1b756a137"
+    },
+    {
+      "id": "rc:asset/canal-ripple-a",
+      "file": "10d/canal-ripple-a--9122024f38d4.10d",
+      "bytes": 3700,
+      "sha256": "9122024f38d49223428e8c665aff6d3f5e8b18929f743327e4800938294d0b09"
+    },
+    {
+      "id": "rc:asset/canal-ripple-a",
+      "file": "10d/canal-ripple-a--d7c3b70427cd.10d",
+      "bytes": 3700,
+      "sha256": "d7c3b70427cd55f860b6e08165a9a12ed7a8e2a81f7422d4940d4a6cc897bee2"
+    },
+    {
+      "id": "rc:asset/canal-ripple-b",
+      "file": "10d/canal-ripple-b--d60bf5ef9868.10d",
+      "bytes": 3700,
+      "sha256": "d60bf5ef9868183fd2b4d172e10221f34f7b4c312d46faf32588ad9599558a03"
+    },
+    {
+      "id": "rc:asset/canal-ripple-b",
+      "file": "10d/canal-ripple-b--e751f608b842.10d",
+      "bytes": 3700,
+      "sha256": "e751f608b842776b9d6dd8a5256284c0b992a92a510d06af91552f8035f5bb73"
+    },
+    {
+      "id": "rc:asset/canal-ripple-c",
+      "file": "10d/canal-ripple-c--8dc8fbb44af8.10d",
+      "bytes": 3700,
+      "sha256": "8dc8fbb44af860a37f99366ff83c679d1ed3ee1b980062c205adaf6fe6fb8d1d"
+    },
+    {
+      "id": "rc:asset/canal-ripple-c",
+      "file": "10d/canal-ripple-c--f41a9ecc2505.10d",
+      "bytes": 3700,
+      "sha256": "f41a9ecc2505d0cb75e94f1ac4133f577d35ecc42c38308266cacef767e1c935"
+    },
+    {
+      "id": "rc:asset/canal-ripple-d",
+      "file": "10d/canal-ripple-d--8449edc353c3.10d",
+      "bytes": 3700,
+      "sha256": "8449edc353c31bb51c0e934271f3d0e08a8c4df0464b77377cc0ba5d76b79baa"
+    },
+    {
+      "id": "rc:asset/canal-ripple-d",
+      "file": "10d/canal-ripple-d--a76c2f70c1b6.10d",
+      "bytes": 3700,
+      "sha256": "a76c2f70c1b6ce8b5529237b4033f79ea0cecbbdcd7b6e4df3cbd4d4015d7bb0"
+    },
+    {
+      "id": "rc:asset/canal-stone-a",
+      "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+      "bytes": 1936,
+      "sha256": "72e3e83f9dab48b0809d9d8463a21af9ea70bfb3267c9aa88fae540d034a9607"
+    },
+    {
+      "id": "rc:asset/canal-stone-b",
+      "file": "10d/canal-stone-b--311155deab0b.10d",
+      "bytes": 1932,
+      "sha256": "311155deab0bc2faedc446710a849adde738cfb658e16253ec2f96edd4f4cd5a"
+    },
+    {
+      "id": "rc:asset/canal-stone-c",
+      "file": "10d/canal-stone-c--1686e49473d1.10d",
+      "bytes": 1932,
+      "sha256": "1686e49473d17303bff21598441238de5729e5b33eae442fa4d886e976bbd392"
+    },
+    {
+      "id": "rc:asset/canal-stone-d",
+      "file": "10d/canal-stone-d--4751da985d43.10d",
+      "bytes": 1932,
+      "sha256": "4751da985d43445d41534c792c8d3c0b2ed0088197751f6bd9944df560e1a5c7"
     },
     {
       "id": "rc:asset/canopy-ne-a",
@@ -303,15 +399,21 @@
     },
     {
       "id": "rc:asset/grass-verges",
-      "file": "10d/grass-verges--35ed4d66f3c5.10d",
+      "file": "10d/grass-verges--d2596c19e321.10d",
       "bytes": 1128,
-      "sha256": "35ed4d66f3c5888116d2cb9682f64fc805022cf69a96433ca467e3d843f270b8"
+      "sha256": "d2596c19e32167929e37caa8b697a68b6b01e67c1e969f71c4d194a6952ffb11"
     },
     {
       "id": "rc:asset/ground",
-      "file": "10d/ground--baf4ce633358.10d",
+      "file": "10d/ground--082f7d142357.10d",
       "bytes": 596,
-      "sha256": "baf4ce633358775fe1ff45e38d97e161e1fd0e3fc3d3be4724182a59b4e64d53"
+      "sha256": "082f7d1423573565eae34d8d088f9e8c60b33b1326e4f80fa954500cf28d950a"
+    },
+    {
+      "id": "rc:asset/hall-banner",
+      "file": "10d/hall-banner--28a5079abc26.10d",
+      "bytes": 772,
+      "sha256": "28a5079abc26fd70cb3a32e9d7b1b7d4d524337574b4ea58d0a1d38a47ace4a4"
     },
     {
       "id": "rc:asset/hall-bell-tower",
@@ -368,6 +470,78 @@
       "sha256": "4b9a8acf8b1500de06a081e30d61987f8979a298b881a6b2df0f1115196d3c1c"
     },
     {
+      "id": "rc:asset/kestrel-earth-skirt",
+      "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
+      "bytes": 596,
+      "sha256": "6395ae83b773d44100478bdac94568867910cc10ee844a187a3965e875cf1152"
+    },
+    {
+      "id": "rc:asset/kestrel-meadow-east",
+      "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+      "bytes": 2200,
+      "sha256": "b7319ffbf87852710433c68e869d549103d29114e25205d69a14f1541be42344"
+    },
+    {
+      "id": "rc:asset/kestrel-meadow-ne",
+      "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+      "bytes": 2200,
+      "sha256": "2724b3b2fe7bae95209e32eae822e7feb601c8e7c5a1df2f31133c1cb0a4954b"
+    },
+    {
+      "id": "rc:asset/kestrel-meadow-nw",
+      "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+      "bytes": 2200,
+      "sha256": "bcf59dddd4ed9722fea76ca5022d7b26d7114dce3742490647983f61f93f56d2"
+    },
+    {
+      "id": "rc:asset/kestrel-meadow-se",
+      "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+      "bytes": 2196,
+      "sha256": "d9d53d3eb2a412d0ee80bed469d2a4bdcc9625f73cd89bd71f0afe6643e233d6"
+    },
+    {
+      "id": "rc:asset/kestrel-meadow-sw",
+      "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
+      "bytes": 2200,
+      "sha256": "ba4c60e39a14c571b196d07402cbbad4365ac3228feebf9fc5965bc0becbb385"
+    },
+    {
+      "id": "rc:asset/kestrel-meadow-west",
+      "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+      "bytes": 2196,
+      "sha256": "c9be3bb517b3dd8e93341fb2cff4d0c1f8c127b255f0beb044dde5045bd8cea6"
+    },
+    {
+      "id": "rc:asset/kestrel-shrub-camp",
+      "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+      "bytes": 2472,
+      "sha256": "afa63de3cf59351517e986b0a849ecd9c1000485d4e49f98956cd5b79322661c"
+    },
+    {
+      "id": "rc:asset/kestrel-shrub-garden",
+      "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+      "bytes": 2476,
+      "sha256": "2b170a77802d419abb8cd83929bb477137b12bbc902c80f05f6708b64b02bda5"
+    },
+    {
+      "id": "rc:asset/kestrel-shrub-hall",
+      "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+      "bytes": 2476,
+      "sha256": "e238a12442cc219f8969005a19c4a09038a6d1f52c7b3a25d8cfd48d6aef2088"
+    },
+    {
+      "id": "rc:asset/kestrel-shrub-salvage",
+      "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+      "bytes": 2472,
+      "sha256": "47105a0bb9ce27008ae10fa6d79580ed063096020c17528a69b649b57d957a5b"
+    },
+    {
+      "id": "rc:asset/kestrel-shrub-workshop",
+      "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+      "bytes": 2476,
+      "sha256": "4b428335e1f152b3594316eba7a41081208afa08ca0a85f51fd00f2ab86ef68f"
+    },
+    {
       "id": "rc:asset/main-road",
       "file": "10d/main-road--26de8380118a.10d",
       "bytes": 772,
@@ -378,6 +552,18 @@
       "file": "10d/market-canopy--54baa3a3eb13.10d",
       "bytes": 948,
       "sha256": "54baa3a3eb13a87b6d51623ab7ab8f233b6df3abbf101ba34c0b2680d6fe793d"
+    },
+    {
+      "id": "rc:asset/market-canopy-cream",
+      "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+      "bytes": 948,
+      "sha256": "82c6953b0a08a97cec0ab0f7bf6589a2c3110a36222357c3ae62bc9e5450bebe"
+    },
+    {
+      "id": "rc:asset/market-display-baskets",
+      "file": "10d/market-display-baskets--8479d4c49667.10d",
+      "bytes": 948,
+      "sha256": "8479d4c496670633e815ac24b859bd525dbf2a1a158ce15c75f47d1106f303c6"
     },
     {
       "id": "rc:asset/market-produce",
@@ -422,10 +608,40 @@
       "sha256": "94e9d3c31d077b484022b8dc2ed3278219bc999ca29285bb0d07959f0613558a"
     },
     {
+      "id": "rc:asset/orchard-canopy-a-lobe",
+      "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+      "bytes": 2472,
+      "sha256": "b85fc1237b447fd1cf8f9769fb1c17c0d0c7c783430d15e3e72cc17f52ce7e99"
+    },
+    {
+      "id": "rc:asset/orchard-canopy-b-lobe",
+      "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+      "bytes": 2476,
+      "sha256": "09b14696f7aba2bcc03220bf46925303cd3aec7a7ab4942fd6f46c5a072f50f8"
+    },
+    {
+      "id": "rc:asset/orchard-canopy-c-lobe",
+      "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+      "bytes": 2476,
+      "sha256": "1ef28dfd4ffb4df7049ee17bec80b1692671639e04bf53f3a24390ffe52a7174"
+    },
+    {
+      "id": "rc:asset/orchard-crop-rows",
+      "file": "10d/orchard-crop-rows--8fe719a5a045.10d",
+      "bytes": 3604,
+      "sha256": "8fe719a5a045da57d1d5c05f15fb1902e34b23862d94d8a68c32e01a49457139"
+    },
+    {
       "id": "rc:asset/orchard-fruit",
       "file": "10d/orchard-fruit--e13dc837c908.10d",
       "bytes": 1304,
       "sha256": "e13dc837c908a7b373a613045bcdcbcbdc01975c6d2b36108a399137fa4e948c"
+    },
+    {
+      "id": "rc:asset/orchard-furrows",
+      "file": "10d/orchard-furrows--92388736bf5b.10d",
+      "bytes": 1480,
+      "sha256": "92388736bf5b767fe2574e21c3d48a9c1a6bd463aa060deb7ef99a42f6cd58b1"
     },
     {
       "id": "rc:asset/orchard-tree-a-crown",
@@ -632,6 +848,12 @@
       "sha256": "c11a3c1bc823d8b21b9e21937830bfdccf14632a96764471748556c05bb74d76"
     },
     {
+      "id": "rc:asset/saltwind-earth-skirt",
+      "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
+      "bytes": 596,
+      "sha256": "9003a939343a9456f4b7e86276048071c97f65bf133cb44f963333808304b45d"
+    },
+    {
       "id": "rc:asset/saltwind-footpaths",
       "file": "10d/saltwind-footpaths--7b31e1f4443a.10d",
       "bytes": 948,
@@ -639,9 +861,15 @@
     },
     {
       "id": "rc:asset/saltwind-ground",
-      "file": "10d/saltwind-ground--bda46b2ef028.10d",
+      "file": "10d/saltwind-ground--a34f8febb4f7.10d",
       "bytes": 596,
-      "sha256": "bda46b2ef0282421a7a759ff0164c932ec7e119fc9f8ca027cc580f366a055d4"
+      "sha256": "a34f8febb4f71395a30aafbd73e3e9efe63a59929589c5c1d5b89c16e2d59277"
+    },
+    {
+      "id": "rc:asset/saltwind-lavender-field",
+      "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+      "bytes": 4668,
+      "sha256": "175bec6223edb66119db7d990d05ee01f58cee83d0ca9d968f244c9f157dd5c0"
     },
     {
       "id": "rc:asset/saltwind-main-road",
@@ -662,10 +890,70 @@
       "sha256": "c73381376054a5c3782606913cb538855970711499a2d078228a929759650c6d"
     },
     {
+      "id": "rc:asset/saltwind-market-stripes",
+      "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+      "bytes": 948,
+      "sha256": "14468d1dec12011d32de59f2b3b3838ce525f0bef9f1acec727ea97872627a5c"
+    },
+    {
+      "id": "rc:asset/saltwind-meadow-ne",
+      "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+      "bytes": 2196,
+      "sha256": "492ee7fef0f4bc6353db4cdb49564f272a0fea2ea670fc7f8a1517d3aa475a13"
+    },
+    {
+      "id": "rc:asset/saltwind-meadow-nw",
+      "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+      "bytes": 2196,
+      "sha256": "6fb4da7d5d8c00dc2871ee4213bc4331c0288c582481a4621d828e909a854efc"
+    },
+    {
+      "id": "rc:asset/saltwind-meadow-se",
+      "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+      "bytes": 2196,
+      "sha256": "5a09cfd2ccdfbf261858a39c2f0a306cb1b3b94cb8d7701edbcc4d7646ff2f73"
+    },
+    {
+      "id": "rc:asset/saltwind-meadow-sw",
+      "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+      "bytes": 2196,
+      "sha256": "4d23ba21ffba8fc32961919ed63261788d1dea9ad6d162180bd836ea51379891"
+    },
+    {
       "id": "rc:asset/saltwind-quay",
       "file": "10d/saltwind-quay--146291ce4b7d.10d",
       "bytes": 772,
       "sha256": "146291ce4b7d2ec37b0f66d14153e58c8bad01b7c1005785cfd0500b7fcb5fc4"
+    },
+    {
+      "id": "rc:asset/saltwind-shrub-barn",
+      "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+      "bytes": 2476,
+      "sha256": "cc0ee3327044295ea05c1f242cc40aa89f1cc79242b65c1ac91e5ab0140c6ea5"
+    },
+    {
+      "id": "rc:asset/saltwind-shrub-market",
+      "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+      "bytes": 2476,
+      "sha256": "3e048a660293b7d1cfaa66727c789321703dd39aa0e556653b032896c2e6d42b"
+    },
+    {
+      "id": "rc:asset/saltwind-windbreak-a",
+      "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+      "bytes": 2472,
+      "sha256": "5543128edfbce3406ff235665b4149edf1dc22764a6c21b6af3a9d07b67478dd"
+    },
+    {
+      "id": "rc:asset/saltwind-windbreak-b",
+      "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+      "bytes": 2472,
+      "sha256": "86910efe46843db16ab437b9cc2294b6f8124d9f8ed908c67f65736a2cf0344a"
+    },
+    {
+      "id": "rc:asset/saltwind-windbreak-c",
+      "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+      "bytes": 2476,
+      "sha256": "4ddab62a9d8354903251b237cbc135d84b27f5b2d0a0d98d4378da7fbabade56"
     },
     {
       "id": "rc:asset/salvage-drum-a",
@@ -920,6 +1208,12 @@
       "sha256": "b1f851a48938a61e3897d055a1c0327fbc70261ac17d22435ff8b2217c888ce3"
     },
     {
+      "id": "rc:asset/wind-pump-vane",
+      "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+      "bytes": 948,
+      "sha256": "eb53473d34a55c7218357b15d70ad3428266fde478492baf9f8bb0fc14a3eab9"
+    },
+    {
       "id": "rc:asset/workshop",
       "file": "10d/workshop--6bac03ca260b.10d",
       "bytes": 772,
@@ -938,10 +1232,28 @@
       "sha256": "348116ff74ee9d6e6f152e145eeb891feb0d0e80bba20d519bd936ea3523eea6"
     },
     {
+      "id": "rc:asset/workshop-door-glow",
+      "file": "10d/workshop-door-glow--4202abd37128.10d",
+      "bytes": 772,
+      "sha256": "4202abd3712823704380286e7f7f7689a042b938d66683dfe8f914ec50f10ff2"
+    },
+    {
+      "id": "rc:asset/workshop-door-glow",
+      "file": "10d/workshop-door-glow--5eb179539c47.10d",
+      "bytes": 772,
+      "sha256": "5eb179539c47e601145b35f6da571aa0f4ea0305c89d8ced4dc6372098982f47"
+    },
+    {
       "id": "rc:asset/workshop-doors",
       "file": "10d/workshop-doors--bfb20b3f976a.10d",
       "bytes": 948,
       "sha256": "bfb20b3f976a79b093b1d2584ed713ccd2b71d1e883b189e656a5f27bf73eb83"
+    },
+    {
+      "id": "rc:asset/workshop-entry-awning",
+      "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+      "bytes": 728,
+      "sha256": "16ef1d473ebfe6ea537013606d3abbba24e42cd5daaec5c2bd3fa3252869552e"
     },
     {
       "id": "rc:asset/workshop-fascia",
@@ -985,12 +1297,22 @@
       "name": "opening",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -1235,6 +1557,16 @@
           ]
         },
         {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/communications-mast",
           "file": "10d/communications-mast--873fb44ef579.10d",
           "rgba": [
@@ -1256,11 +1588,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -1315,12 +1757,52 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--4202abd37128.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.47999998927116394,
+            0.5299999713897705,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-canopy",
           "file": "10d/market-canopy--54baa3a3eb13.10d",
           "rgba": [
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -2065,12 +2547,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -2081,6 +2613,96 @@
             0.23000000417232513,
             0.6700000166893005,
             0.75,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--d7c3b70427cd.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--d60bf5ef9868.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--8dc8fbb44af8.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--a76c2f70c1b6.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
             1
           ]
         },
@@ -2175,6 +2797,16 @@
           ]
         },
         {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/wind-pump-tower",
           "file": "10d/wind-pump-tower--b1f851a48938.10d",
           "rgba": [
@@ -2201,6 +2833,16 @@
             0.7200000286102295,
             0.6100000143051147,
             0.5099999904632568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
             1
           ]
         },
@@ -2235,6 +2877,16 @@
           ]
         },
         {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/saltwind-quay",
           "file": "10d/saltwind-quay--146291ce4b7d.10d",
           "rgba": [
@@ -2265,12 +2917,82 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--94e9d3c31d07.10d",
           "rgba": [
             0.5699999928474426,
             0.47999998927116394,
             0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -2333,6 +3055,56 @@
             0.4000000059604645,
             1
           ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
+            1
+          ]
         }
       ]
     },
@@ -2340,12 +3112,22 @@
       "name": "early-progress",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -2600,6 +3382,16 @@
           ]
         },
         {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/communications-mast",
           "file": "10d/communications-mast--873fb44ef579.10d",
           "rgba": [
@@ -2621,11 +3413,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -2680,6 +3582,26 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--4202abd37128.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.47999998927116394,
+            0.5299999713897705,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/solar-cells",
           "file": "10d/solar-cells--c6fabbd74dac.10d",
           "rgba": [
@@ -2696,6 +3618,26 @@
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -3450,12 +4392,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -3466,6 +4458,96 @@
             0.23000000417232513,
             0.6700000166893005,
             0.75,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--d7c3b70427cd.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--d60bf5ef9868.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--8dc8fbb44af8.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--a76c2f70c1b6.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
             1
           ]
         },
@@ -3560,6 +4642,16 @@
           ]
         },
         {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/wind-pump-tower",
           "file": "10d/wind-pump-tower--b1f851a48938.10d",
           "rgba": [
@@ -3586,6 +4678,16 @@
             0.7200000286102295,
             0.6100000143051147,
             0.5099999904632568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
             1
           ]
         },
@@ -3620,6 +4722,16 @@
           ]
         },
         {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/saltwind-quay",
           "file": "10d/saltwind-quay--146291ce4b7d.10d",
           "rgba": [
@@ -3650,12 +4762,82 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--94e9d3c31d07.10d",
           "rgba": [
             0.5699999928474426,
             0.47999998927116394,
             0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -3718,6 +4900,56 @@
             0.4000000059604645,
             1
           ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
+            1
+          ]
         }
       ]
     },
@@ -3725,12 +4957,22 @@
       "name": "workshop-online",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -3985,6 +5227,16 @@
           ]
         },
         {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/communications-mast",
           "file": "10d/communications-mast--873fb44ef579.10d",
           "rgba": [
@@ -4006,11 +5258,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -4065,6 +5427,26 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--5eb179539c47.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/solar-cells",
           "file": "10d/solar-cells--e1354a753196.10d",
           "rgba": [
@@ -4081,6 +5463,26 @@
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -4835,12 +6237,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -4851,6 +6303,96 @@
             0.23000000417232513,
             0.6700000166893005,
             0.75,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--d7c3b70427cd.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--d60bf5ef9868.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--8dc8fbb44af8.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--a76c2f70c1b6.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
             1
           ]
         },
@@ -4945,6 +6487,16 @@
           ]
         },
         {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/wind-pump-tower",
           "file": "10d/wind-pump-tower--b1f851a48938.10d",
           "rgba": [
@@ -4971,6 +6523,16 @@
             0.7200000286102295,
             0.6100000143051147,
             0.5099999904632568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
             1
           ]
         },
@@ -5005,6 +6567,16 @@
           ]
         },
         {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/saltwind-quay",
           "file": "10d/saltwind-quay--146291ce4b7d.10d",
           "rgba": [
@@ -5035,12 +6607,82 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--94e9d3c31d07.10d",
           "rgba": [
             0.5699999928474426,
             0.47999998927116394,
             0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -5103,6 +6745,56 @@
             0.4000000059604645,
             1
           ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
+            1
+          ]
         }
       ]
     },
@@ -5110,12 +6802,22 @@
       "name": "signal-online",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -5366,6 +7068,16 @@
             0.27000001072883606,
             0.36000001430511475,
             0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
             1
           ]
         },
@@ -5401,11 +7113,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -5460,6 +7282,26 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--5eb179539c47.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/solar-cells",
           "file": "10d/solar-cells--e1354a753196.10d",
           "rgba": [
@@ -5476,6 +7318,26 @@
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -6230,12 +8092,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -6250,6 +8162,96 @@
           ]
         },
         {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--d7c3b70427cd.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--d60bf5ef9868.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--8dc8fbb44af8.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--a76c2f70c1b6.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/bridge",
           "file": "10d/bridge--e0436a668ec7.10d",
           "rgba": [
@@ -6340,6 +8342,16 @@
           ]
         },
         {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/wind-pump-tower",
           "file": "10d/wind-pump-tower--b1f851a48938.10d",
           "rgba": [
@@ -6366,6 +8378,16 @@
             0.7200000286102295,
             0.6100000143051147,
             0.5099999904632568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
             1
           ]
         },
@@ -6400,6 +8422,16 @@
           ]
         },
         {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/saltwind-quay",
           "file": "10d/saltwind-quay--146291ce4b7d.10d",
           "rgba": [
@@ -6430,12 +8462,82 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--94e9d3c31d07.10d",
           "rgba": [
             0.5699999928474426,
             0.47999998927116394,
             0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -6496,6 +8598,56 @@
             0.5600000023841858,
             0.7900000214576721,
             0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
             1
           ]
         }
@@ -6505,12 +8657,22 @@
       "name": "high-tide",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -6765,6 +8927,16 @@
           ]
         },
         {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/communications-mast",
           "file": "10d/communications-mast--873fb44ef579.10d",
           "rgba": [
@@ -6786,11 +8958,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -6845,6 +9127,26 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--5eb179539c47.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/solar-cells",
           "file": "10d/solar-cells--e1354a753196.10d",
           "rgba": [
@@ -6861,6 +9163,26 @@
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -7615,12 +9937,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -7631,6 +10003,96 @@
             0.18000000715255737,
             0.47999998927116394,
             0.6600000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--9122024f38d4.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--e751f608b842.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--f41a9ecc2505.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--8449edc353c3.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
             1
           ]
         },
@@ -7725,6 +10187,16 @@
           ]
         },
         {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/wind-pump-tower",
           "file": "10d/wind-pump-tower--b1f851a48938.10d",
           "rgba": [
@@ -7751,6 +10223,16 @@
             0.7200000286102295,
             0.6100000143051147,
             0.5099999904632568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
             1
           ]
         },
@@ -7785,6 +10267,16 @@
           ]
         },
         {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/saltwind-quay",
           "file": "10d/saltwind-quay--146291ce4b7d.10d",
           "rgba": [
@@ -7815,12 +10307,82 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--94e9d3c31d07.10d",
           "rgba": [
             0.5699999928474426,
             0.47999998927116394,
             0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -7883,6 +10445,56 @@
             0.4000000059604645,
             1
           ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
+            1
+          ]
         }
       ]
     },
@@ -7890,12 +10502,22 @@
       "name": "braced-crossing",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -8150,6 +10772,16 @@
           ]
         },
         {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/communications-mast",
           "file": "10d/communications-mast--873fb44ef579.10d",
           "rgba": [
@@ -8171,11 +10803,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -8230,6 +10972,26 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--5eb179539c47.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/solar-cells",
           "file": "10d/solar-cells--e1354a753196.10d",
           "rgba": [
@@ -8246,6 +11008,26 @@
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -9000,12 +11782,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -9016,6 +11848,96 @@
             0.18000000715255737,
             0.47999998927116394,
             0.6600000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--9122024f38d4.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--e751f608b842.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--f41a9ecc2505.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--8449edc353c3.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
             1
           ]
         },
@@ -9120,6 +12042,16 @@
           ]
         },
         {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/wind-pump-tower",
           "file": "10d/wind-pump-tower--b1f851a48938.10d",
           "rgba": [
@@ -9146,6 +12078,16 @@
             0.7200000286102295,
             0.6100000143051147,
             0.5099999904632568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
             1
           ]
         },
@@ -9180,6 +12122,16 @@
           ]
         },
         {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/saltwind-quay",
           "file": "10d/saltwind-quay--146291ce4b7d.10d",
           "rgba": [
@@ -9210,12 +12162,82 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--94e9d3c31d07.10d",
           "rgba": [
             0.5699999928474426,
             0.47999998927116394,
             0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -9278,6 +12300,56 @@
             0.4000000059604645,
             1
           ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
+            1
+          ]
         }
       ]
     },
@@ -9285,12 +12357,22 @@
       "name": "bridge-open",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -9545,6 +12627,16 @@
           ]
         },
         {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/communications-mast",
           "file": "10d/communications-mast--873fb44ef579.10d",
           "rgba": [
@@ -9566,11 +12658,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -9625,6 +12827,26 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--5eb179539c47.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/solar-cells",
           "file": "10d/solar-cells--e1354a753196.10d",
           "rgba": [
@@ -9641,6 +12863,26 @@
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -10395,12 +13637,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -10411,6 +13703,96 @@
             0.18000000715255737,
             0.47999998927116394,
             0.6600000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--9122024f38d4.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--e751f608b842.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--f41a9ecc2505.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--8449edc353c3.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
             1
           ]
         },
@@ -10511,6 +13893,16 @@
             0.9900000095367432,
             0.7799999713897705,
             0.49000000953674316,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
             1
           ]
         },
@@ -10545,6 +13937,16 @@
           ]
         },
         {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/pump-trough",
           "file": "10d/pump-trough--d4a1264008df.10d",
           "rgba": [
@@ -10571,6 +13973,16 @@
             0.4300000071525574,
             0.7099999785423279,
             0.7599999904632568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
             1
           ]
         },
@@ -10605,12 +14017,82 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--94e9d3c31d07.10d",
           "rgba": [
             0.5699999928474426,
             0.47999998927116394,
             0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -10673,6 +14155,56 @@
             0.4000000059604645,
             1
           ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
+            1
+          ]
         }
       ]
     },
@@ -10680,12 +14212,22 @@
       "name": "thriving",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -10940,6 +14482,16 @@
           ]
         },
         {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/communications-mast",
           "file": "10d/communications-mast--873fb44ef579.10d",
           "rgba": [
@@ -10971,11 +14523,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -11030,6 +14692,26 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--5eb179539c47.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/solar-cells",
           "file": "10d/solar-cells--e1354a753196.10d",
           "rgba": [
@@ -11046,6 +14728,26 @@
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -11800,12 +15502,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -11816,6 +15568,96 @@
             0.18000000715255737,
             0.47999998927116394,
             0.6600000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--9122024f38d4.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--e751f608b842.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--f41a9ecc2505.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--8449edc353c3.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
             1
           ]
         },
@@ -11920,6 +15762,16 @@
           ]
         },
         {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/wind-pump-tower",
           "file": "10d/wind-pump-tower--b1f851a48938.10d",
           "rgba": [
@@ -11946,6 +15798,16 @@
             0.9800000190734863,
             0.6899999976158142,
             0.3400000035762787,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
             1
           ]
         },
@@ -11980,6 +15842,16 @@
           ]
         },
         {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/saltwind-quay",
           "file": "10d/saltwind-quay--146291ce4b7d.10d",
           "rgba": [
@@ -12010,12 +15882,92 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--3e7918f44284.10d",
           "rgba": [
             0.4399999976158142,
             0.6899999976158142,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-crop-rows",
+          "file": "10d/orchard-crop-rows--8fe719a5a045.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.3400000035762787,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -12076,6 +16028,56 @@
             0.5600000023841858,
             0.7900000214576721,
             0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
             1
           ]
         },
@@ -12095,12 +16097,22 @@
       "name": "harvested",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -12355,6 +16367,16 @@
           ]
         },
         {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/communications-mast",
           "file": "10d/communications-mast--873fb44ef579.10d",
           "rgba": [
@@ -12386,11 +16408,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -12445,6 +16577,26 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--5eb179539c47.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/solar-cells",
           "file": "10d/solar-cells--e1354a753196.10d",
           "rgba": [
@@ -12461,6 +16613,26 @@
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -13215,12 +17387,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -13231,6 +17453,96 @@
             0.18000000715255737,
             0.47999998927116394,
             0.6600000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--9122024f38d4.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--e751f608b842.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--f41a9ecc2505.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--8449edc353c3.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
             1
           ]
         },
@@ -13335,6 +17647,16 @@
           ]
         },
         {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/wind-pump-tower",
           "file": "10d/wind-pump-tower--b1f851a48938.10d",
           "rgba": [
@@ -13361,6 +17683,16 @@
             0.9800000190734863,
             0.6899999976158142,
             0.3400000035762787,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
             1
           ]
         },
@@ -13395,6 +17727,16 @@
           ]
         },
         {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/saltwind-quay",
           "file": "10d/saltwind-quay--146291ce4b7d.10d",
           "rgba": [
@@ -13425,12 +17767,92 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--3e7918f44284.10d",
           "rgba": [
             0.4399999976158142,
             0.6899999976158142,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-crop-rows",
+          "file": "10d/orchard-crop-rows--8fe719a5a045.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.3400000035762787,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -13491,6 +17913,56 @@
             0.5600000023841858,
             0.7900000214576721,
             0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
             1
           ]
         },
@@ -13520,12 +17992,22 @@
       "name": "vibe-beacon",
       "assets": [
         {
-          "id": "rc:asset/ground",
-          "file": "10d/ground--baf4ce633358.10d",
+          "id": "rc:asset/kestrel-earth-skirt",
+          "file": "10d/kestrel-earth-skirt--6395ae83b773.10d",
           "rgba": [
-            0.6200000047683716,
-            0.7799999713897705,
-            0.4000000059604645,
+            0.46000000834465027,
+            0.3100000023841858,
+            0.23999999463558197,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/ground",
+          "file": "10d/ground--082f7d142357.10d",
+          "rgba": [
+            0.5799999833106995,
+            0.8199999928474426,
+            0.4300000071525574,
             1
           ]
         },
@@ -13770,6 +18252,16 @@
           ]
         },
         {
+          "id": "rc:asset/hall-banner",
+          "file": "10d/hall-banner--28a5079abc26.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.4699999988079071,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/communications-mast",
           "file": "10d/communications-mast--873fb44ef579.10d",
           "rgba": [
@@ -13791,11 +18283,121 @@
         },
         {
           "id": "rc:asset/grass-verges",
-          "file": "10d/grass-verges--35ed4d66f3c5.10d",
+          "file": "10d/grass-verges--d2596c19e321.10d",
+          "rgba": [
+            0.36000001430511475,
+            0.7400000095367432,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-nw",
+          "file": "10d/kestrel-meadow-nw--bcf59dddd4ed.10d",
+          "rgba": [
+            0.4300000071525574,
+            0.7799999713897705,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-ne",
+          "file": "10d/kestrel-meadow-ne--2724b3b2fe7b.10d",
+          "rgba": [
+            0.3799999952316284,
+            0.7300000190734863,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-sw",
+          "file": "10d/kestrel-meadow-sw--ba4c60e39a14.10d",
           "rgba": [
             0.4000000059604645,
-            0.699999988079071,
-            0.3199999928474426,
+            0.7599999904632568,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-se",
+          "file": "10d/kestrel-meadow-se--d9d53d3eb2a4.10d",
+          "rgba": [
+            0.46000000834465027,
+            0.800000011920929,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-west",
+          "file": "10d/kestrel-meadow-west--c9be3bb517b3.10d",
+          "rgba": [
+            0.4699999988079071,
+            0.7699999809265137,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-meadow-east",
+          "file": "10d/kestrel-meadow-east--b7319ffbf878.10d",
+          "rgba": [
+            0.4099999964237213,
+            0.7599999904632568,
+            0.3700000047683716,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-hall",
+          "file": "10d/kestrel-shrub-hall--e238a12442cc.10d",
+          "rgba": [
+            0.20000000298023224,
+            0.5799999833106995,
+            0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-workshop",
+          "file": "10d/kestrel-shrub-workshop--4b428335e1f1.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.6399999856948853,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-camp",
+          "file": "10d/kestrel-shrub-camp--afa63de3cf59.10d",
+          "rgba": [
+            0.25,
+            0.6100000143051147,
+            0.33000001311302185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-garden",
+          "file": "10d/kestrel-shrub-garden--2b170a77802d.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6800000071525574,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/kestrel-shrub-salvage",
+          "file": "10d/kestrel-shrub-salvage--47105a0bb9ce.10d",
+          "rgba": [
+            0.23000000417232513,
+            0.5799999833106995,
+            0.3400000035762787,
             1
           ]
         },
@@ -13850,12 +18452,52 @@
           ]
         },
         {
+          "id": "rc:asset/workshop-entry-awning",
+          "file": "10d/workshop-entry-awning--16ef1d473ebf.10d",
+          "rgba": [
+            0.2199999988079071,
+            0.5,
+            0.5799999833106995,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-door-glow",
+          "file": "10d/workshop-door-glow--4202abd37128.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.47999998927116394,
+            0.5299999713897705,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-canopy",
           "file": "10d/market-canopy--54baa3a3eb13.10d",
           "rgba": [
             0.9599999785423279,
             0.3499999940395355,
             0.3199999928474426,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-canopy-cream",
+          "file": "10d/market-canopy-cream--82c6953b0a08.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8899999856948853,
+            0.6499999761581421,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/market-display-baskets",
+          "file": "10d/market-display-baskets--8479d4c49667.10d",
+          "rgba": [
+            0.6200000047683716,
+            0.3700000047683716,
+            0.2199999988079071,
             1
           ]
         },
@@ -14600,12 +19242,62 @@
           ]
         },
         {
-          "id": "rc:asset/saltwind-ground",
-          "file": "10d/saltwind-ground--bda46b2ef028.10d",
+          "id": "rc:asset/saltwind-earth-skirt",
+          "file": "10d/saltwind-earth-skirt--9003a939343a.10d",
           "rgba": [
-            0.7200000286102295,
-            0.7799999713897705,
-            0.4699999988079071,
+            0.5400000214576721,
+            0.3799999952316284,
+            0.27000001072883606,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-ground",
+          "file": "10d/saltwind-ground--a34f8febb4f7.10d",
+          "rgba": [
+            0.7300000190734863,
+            0.8100000023841858,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-nw",
+          "file": "10d/saltwind-meadow-nw--6fb4da7d5d8c.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.7699999809265137,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-ne",
+          "file": "10d/saltwind-meadow-ne--492ee7fef0f4.10d",
+          "rgba": [
+            0.5899999737739563,
+            0.75,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-sw",
+          "file": "10d/saltwind-meadow-sw--4d23ba21ffba.10d",
+          "rgba": [
+            0.6100000143051147,
+            0.7900000214576721,
+            0.4300000071525574,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-meadow-se",
+          "file": "10d/saltwind-meadow-se--5a09cfd2ccdf.10d",
+          "rgba": [
+            0.6499999761581421,
+            0.800000011920929,
+            0.4000000059604645,
             1
           ]
         },
@@ -14616,6 +19308,96 @@
             0.23000000417232513,
             0.6700000166893005,
             0.75,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-reeds",
+          "file": "10d/canal-reeds--f769e421f44a.10d",
+          "rgba": [
+            0.550000011920929,
+            0.7200000286102295,
+            0.3499999940395355,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-a",
+          "file": "10d/canal-ripple-a--d7c3b70427cd.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-b",
+          "file": "10d/canal-ripple-b--d60bf5ef9868.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-c",
+          "file": "10d/canal-ripple-c--8dc8fbb44af8.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-ripple-d",
+          "file": "10d/canal-ripple-d--a76c2f70c1b6.10d",
+          "rgba": [
+            0.6899999976158142,
+            0.9200000166893005,
+            0.9100000262260437,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-a",
+          "file": "10d/canal-stone-a--72e3e83f9dab.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-b",
+          "file": "10d/canal-stone-b--311155deab0b.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-c",
+          "file": "10d/canal-stone-c--1686e49473d1.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-stone-d",
+          "file": "10d/canal-stone-d--4751da985d43.10d",
+          "rgba": [
+            0.7699999809265137,
+            0.7300000190734863,
+            0.6000000238418579,
             1
           ]
         },
@@ -14710,6 +19492,16 @@
           ]
         },
         {
+          "id": "rc:asset/barn-hay-bales",
+          "file": "10d/barn-hay-bales--fe81e9130e01.10d",
+          "rgba": [
+            0.9399999976158142,
+            0.7300000190734863,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/wind-pump-tower",
           "file": "10d/wind-pump-tower--b1f851a48938.10d",
           "rgba": [
@@ -14736,6 +19528,16 @@
             0.7200000286102295,
             0.6100000143051147,
             0.5099999904632568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/wind-pump-vane",
+          "file": "10d/wind-pump-vane--eb53473d34a5.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5400000214576721,
+            0.5899999737739563,
             1
           ]
         },
@@ -14770,6 +19572,16 @@
           ]
         },
         {
+          "id": "rc:asset/saltwind-market-stripes",
+          "file": "10d/saltwind-market-stripes--14468d1dec12.10d",
+          "rgba": [
+            0.9900000095367432,
+            0.8799999952316284,
+            0.6200000047683716,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/saltwind-quay",
           "file": "10d/saltwind-quay--146291ce4b7d.10d",
           "rgba": [
@@ -14800,12 +19612,82 @@
           ]
         },
         {
+          "id": "rc:asset/canal-boat-awning",
+          "file": "10d/canal-boat-awning--900b0c47bf1e.10d",
+          "rgba": [
+            0.9599999785423279,
+            0.7699999809265137,
+            0.47999998927116394,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/canal-boat-hull-stripe",
+          "file": "10d/canal-boat-hull-stripe--f0bef097fe18.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6399999856948853,
+            0.7099999785423279,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/orchard-beds",
           "file": "10d/orchard-beds--94e9d3c31d07.10d",
           "rgba": [
             0.5699999928474426,
             0.47999998927116394,
             0.3100000023841858,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-furrows",
+          "file": "10d/orchard-furrows--92388736bf5b.10d",
+          "rgba": [
+            0.6800000071525574,
+            0.47999998927116394,
+            0.30000001192092896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-lavender-field",
+          "file": "10d/saltwind-lavender-field--175bec6223ed.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.5199999809265137,
+            0.7300000190734863,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-a",
+          "file": "10d/saltwind-windbreak-a--5543128edfbc.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6200000047683716,
+            0.38999998569488525,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-b",
+          "file": "10d/saltwind-windbreak-b--86910efe4684.10d",
+          "rgba": [
+            0.27000001072883606,
+            0.5899999737739563,
+            0.36000001430511475,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-windbreak-c",
+          "file": "10d/saltwind-windbreak-c--4ddab62a9d83.10d",
+          "rgba": [
+            0.3400000035762787,
+            0.6399999856948853,
+            0.3799999952316284,
             1
           ]
         },
@@ -14866,6 +19748,56 @@
             0.5600000023841858,
             0.7900000214576721,
             0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-a-lobe",
+          "file": "10d/orchard-canopy-a-lobe--b85fc1237b44.10d",
+          "rgba": [
+            0.6399999856948853,
+            0.8100000023841858,
+            0.41999998688697815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-b-lobe",
+          "file": "10d/orchard-canopy-b-lobe--09b14696f7ab.10d",
+          "rgba": [
+            0.5600000023841858,
+            0.7799999713897705,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/orchard-canopy-c-lobe",
+          "file": "10d/orchard-canopy-c-lobe--1ef28dfd4ffb.10d",
+          "rgba": [
+            0.7200000286102295,
+            0.8399999737739563,
+            0.4399999976158142,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-market",
+          "file": "10d/saltwind-shrub-market--3e048a660293.10d",
+          "rgba": [
+            0.3100000023841858,
+            0.6299999952316284,
+            0.3799999952316284,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/saltwind-shrub-barn",
+          "file": "10d/saltwind-shrub-barn--cc0ee3327044.10d",
+          "rgba": [
+            0.28999999165534973,
+            0.6200000047683716,
+            0.3400000035762787,
             1
           ]
         },
