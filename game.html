@@ -554,6 +554,7 @@ function rebuild() {
   if (sceneMeshes !== scene.organs.length)
     throw new Error(`QualiaDB refused ${scene.organs.length-sceneMeshes} scene meshes`);
   portal.upload_tensor(scene.tensor);
+  portal.set_tensor_projection_enabled(false);
   if(cameraMode==='walk')placeWalkCamera();
   else if(!camTarget)focusTerritory(territory,true);
   else if(focusedPlace!==null)focusSite(focusedPlace);
@@ -745,7 +746,7 @@ function renderHud() {
     button('characters:cancel','Cancel',46+(W-78)/2,footer,(W-78)/2,36);
     hud.set_document_json(JSON.stringify({items}));return;
   }
-  if(cameraMode!=='walk')placePositions.forEach((p,i)=>{
+  placePositions.forEach((p,i)=>{
     const [text,icon,color]=PLACE_MARKERS[i];
     items.push({kind:'marker',id:`place:${i}`,text,x:p.x,y:p.y,z:p.z,w:32,h:32,icon,color});
   });
