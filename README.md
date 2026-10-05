@@ -33,7 +33,10 @@ crossing, commissions a pump and plants an orchard. The canal rises after day
 four: a quick bridge repair is no longer possible, so a late player must
 spend an extra crew shift on bracing or pay a specialist crew two coins. The
 water level and bridge bracing are authored Qualia `.10d` scene states. The
-player then chooses an ending:
+orchard then offers a one-time choice: reserve its harvest to reduce the cost
+of a commons gathering, or sell it for three coins toward the town's next
+project. Qualia validates the choice and the orchard visibly changes to packed
+produce crates. The player then chooses an ending:
 open a local commons with a harvest gathering, or outfit a trade boat for
 neighbouring settlements. The two endings have different requirements and
 consequences in the saved, replayable world. The interface shows a field

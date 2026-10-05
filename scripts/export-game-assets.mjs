@@ -15,15 +15,16 @@ const out = join(root, 'assets', 'generated', '10d');
 await mkdir(out, { recursive: true });
 const beacon = (await readFile(join(root, 'web', 'fixtures', 'community-beacon.vibe'), 'utf8')).trim();
 const cases = [
-  ['opening', [0, 0, false, false, false, false, false, false, false, false, false, false, '']],
-  ['early-progress', [1, 1, false, true, true, true, false, false, false, false, false, false, '']],
-  ['workshop-online', [1, 2, true, true, true, true, false, false, false, false, false, false, '']],
-  ['signal-online', [1, 2, true, true, true, true, true, false, false, false, false, false, '']],
-  ['high-tide', [1, 2, true, true, true, true, false, false, false, true, false, false, '']],
-  ['braced-crossing', [1, 2, true, true, true, true, false, false, true, true, false, false, '']],
-  ['bridge-open', [1, 2, true, true, true, true, false, true, true, true, false, false, '']],
-  ['thriving', [2, 2, true, true, true, true, true, true, true, true, true, true, '']],
-  ['vibe-beacon', [0, 0, false, false, false, false, false, false, false, false, false, false, beacon]],
+  ['opening', [0, 0, false, false, false, false, false, false, false, false, false, false, false, '']],
+  ['early-progress', [1, 1, false, true, true, true, false, false, false, false, false, false, false, '']],
+  ['workshop-online', [1, 2, true, true, true, true, false, false, false, false, false, false, false, '']],
+  ['signal-online', [1, 2, true, true, true, true, true, false, false, false, false, false, false, '']],
+  ['high-tide', [1, 2, true, true, true, true, false, false, false, true, false, false, false, '']],
+  ['braced-crossing', [1, 2, true, true, true, true, false, false, true, true, false, false, false, '']],
+  ['bridge-open', [1, 2, true, true, true, true, false, true, true, true, false, false, false, '']],
+  ['thriving', [2, 2, true, true, true, true, true, true, true, true, true, true, false, '']],
+  ['harvested', [2, 2, true, true, true, true, true, true, true, true, true, true, true, '']],
+  ['vibe-beacon', [0, 0, false, false, false, false, false, false, false, false, false, false, false, beacon]],
 ];
 
 const assets = new Map();

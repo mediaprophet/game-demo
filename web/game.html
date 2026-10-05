@@ -211,7 +211,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '0f651bcca7b4fabe';
+const WASM_BUILD = '6bf7ec313076e645';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 $('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
@@ -245,6 +245,8 @@ const state = () => ({
   bridgeBraced: values('rc:bridge','rc:bracedBy').length > 0,
   pumpOnline: values('rc:windPump','rc:status').includes('"online"'),
   orchardActive: values('rc:orchard','rc:status').includes('"growing"'),
+  harvestChoice: values('rc:orchard','rc:harvestChoice')[0] || '',
+  orchardHarvested: values('rc:orchard','rc:harvestChoice').length > 0,
   orderDelivered: values('rc:workshop','rc:deliveredOrder').length > 0,
   finale: values('rc:community','rc:finale')[0] || '',
   day: values('rc:player','rc:turn').length + 1,
@@ -272,6 +274,8 @@ const STORY = {
   connectMastLabour: 'Repair the communications mast with a crew shift. Once connected, distant neighbours can send work to the workshop.',
   connectMastCoins: 'Buy replacement transmitter parts to connect the mast today without using the crew. The remote contract will pay later.',
   fulfilRemoteOrder: 'The connected mast brings a distant repair contract. Complete it for four coins to fund your final community choice.',
+  reserveHarvest: 'Keep the first harvest for neighbours. A gathering can then use stored food and only two coins of bought supplies.',
+  sellHarvest: 'Sell the first harvest for three coins. The cash can fund a trade boat or other shared supplies.',
   endTurn: 'Your crew has spent its work for today. Rest and begin again tomorrow.',
 };
 function campaignLead(st) {
@@ -305,6 +309,10 @@ function campaignLead(st) {
     label:st.labour?'Commission the wind pump':'Rest for tomorrow',action:st.labour?'raiseWindPump':'endTurn',territory:'saltwind'};
   if (!st.orchardActive) return {title:'Plant for the future',copy:STORY.plantOrchard,
     label:st.labour?'Plant the orchard':'Rest for tomorrow',action:st.labour?'plantOrchard':'endTurn',territory:'saltwind'};
+  if (!st.orchardHarvested && st.coins<4) return {
+    title:'Decide what to do with the harvest',
+    copy:'Reserve food for a lower-cost commons gathering, or sell it for three coins. You can also choose an ending with the resources you already have.',
+    label:'Explore the orchard choices',action:null,territory:'saltwind'};
   if (st.coins<4 && st.orderDelivered && !st.signalOnline) {
     const action=st.labour?'connectMastLabour':st.coins>=3?'connectMastCoins':'endTurn';
     return {title:'Find another source of supplies',copy:STORY[action]||STORY.endTurn,
@@ -346,7 +354,7 @@ const SITE_ACTIONS = [
   ['startGarden'],
   ['restoreBridge','braceBridge','restoreBridgeLateLabour','restoreBridgeLateCoins'],
   ['raiseWindPump'],
-  ['plantOrchard','openCommons','launchTradeRoute'],
+  ['plantOrchard','reserveHarvest','sellHarvest','openCommons','openCommonsReserved','launchTradeRoute'],
   ['connectMastLabour','connectMastCoins','fulfilRemoteOrder'],
 ];
 const siteForAction = id => SITE_ACTIONS.findIndex(ids=>ids.includes(id));
@@ -361,7 +369,9 @@ function siteBrief(index,st){
     case 6:return ['GARDEN',st.gardenActive?'Food is growing in the first beds.':'Plant once shared water is flowing.'];
     case 7:return ['CANAL CROSSING',st.bridgeOpen?'The route to Saltwind is open.':st.day<=4?'Low tide makes the bridge easier to repair.':'High tide demands bracing or a specialist crew.'];
     case 8:return ['WIND PUMP',st.pumpOnline?'The pump supplies Saltwind Reach.':'An open bridge and powered workshop are needed.'];
-    case 9:return ['ORCHARD',st.orchardActive?'Harvest is ready for a commons or trade route.':'Bring the wind pump online, then plant the orchard.'];
+    case 9:return ['ORCHARD',!st.orchardActive?'Bring the wind pump online, then plant the orchard.':
+      st.harvestChoice==='"reserve"'?'The harvest is stored for a lower-cost commons gathering.':
+      st.harvestChoice==='"sell"'?'The harvest was sold to fund the next project.':'Choose to reserve the harvest for the commons or sell it for coins.'];
     default:return ['SIGNAL MAST',st.signalOnline?st.remoteOrderDelivered?'The remote repair contract is complete.':'The link is live. A remote repair contract awaits.':'Power the workshop, then reconnect the mast by labour or purchased parts.'];
   }
 }
@@ -430,7 +440,7 @@ function rebuild() {
   const st = state();
   const scene = m.scene_build(st.upgrades, st.parts.length, st.online, st.approved,
     st.waterOnline, st.gardenActive, st.signalOnline, st.bridgeOpen, st.bridgeBraced, st.day>4,
-    st.pumpOnline, st.orchardActive, sceneSource);
+    st.pumpOnline, st.orchardActive, st.orchardHarvested, sceneSource);
   tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
   placePositions=scene.places;
   const receipt = toObj(portal.load_scene(scene.organs));
@@ -531,7 +541,8 @@ function inspect(s){
   const available=new Set([...$('actions').querySelectorAll('button[data-action]')]
     .map(b=>b.dataset.action));
   if(siteIndex===9&&st.orchardActive&&!st.finale){
-    available.add('openCommons');available.add('launchTradeRoute');
+    available.add(st.harvestChoice==='"reserve"'?'openCommonsReserved':'openCommons');
+    available.add('launchTradeRoute');
   }
   hudSiteActions=SITE_ACTIONS[siteIndex].filter(id=>available.has(id));
   if(!st.labour&&available.has('endTurn')&&!st.finale)hudSiteActions.push('endTurn');
@@ -596,7 +607,7 @@ function renderHud() {
       .map(b=>({id:b.dataset.action,text:b.textContent}))
       .filter(a=>a.id!==lead.action);
     if(st.orchardActive&&!st.finale) actions.push(
-      {id:'openCommons',text:'Host the commons gathering'},
+      {id:st.harvestChoice==='"reserve"'?'openCommonsReserved':'openCommons',text:'Host the commons gathering'},
       {id:'launchTradeRoute',text:'Launch the trade route'});
     const available=Math.max(0,Math.floor((H-158-y-34)/40)+1);
     hudOrderOffset=Math.min(hudOrderOffset,Math.max(0,actions.length-available));
@@ -610,7 +621,8 @@ function renderHud() {
   } else if(hudPage==='goals'||hudPage==='result') {
     label(hudPage==='result'?'CAMPAIGN RECORD':territory==='saltwind'?'CROSS THE CANAL':'RESTORE THE COMMONS',right+14,y);y+=34;
     const goals=territory==='saltwind' ? [
-      ['Crossing',st.bridgeOpen],['Wind pump',st.pumpOnline],['Orchard',st.orchardActive]
+      ['Crossing',st.bridgeOpen],['Wind pump',st.pumpOnline],['Orchard',st.orchardActive],
+      ['Harvest choice (optional)',st.orchardHarvested]
     ] : [['Shelter',st.upgrades>0],['Workshop',st.online],['Shared water',st.waterOnline],['Garden',st.gardenActive],['Signal mast (optional)',st.signalOnline]];
     for(const [name,done] of goals){label(`${done?'✓':'○'}  ${name}`,right+18,y);y+=33;}
     y+=12;label('COMMUNITY PROGRESS',right+14,y);y+=29;
@@ -681,7 +693,8 @@ function renderHud() {
     panel(x,top,width,286);
     label('CAMPAIGN COMPLETE',x+18,top+15,width-36,25);
     label(st.finale==='"commons"'?'THE COMMONS ARE OPEN':'THE CANAL IS CONNECTED',x+18,top+48,width-36,28);
-    label(st.finale==='"commons"'?'The harvest belongs to the community.':'The first trade boat carries the harvest onward.',x+18,top+81,width-36,25);
+    label(st.finale==='"commons"'?'The harvest belongs to the community.':
+      st.harvestChoice==='"reserve"'?'Stored food stays; trade carries tools.':'The first trade boat carries the harvest onward.',x+18,top+81,width-36,25);
     const done=[st.upgrades>0,st.online,st.waterOnline,st.gardenActive,
       st.bridgeOpen,st.pumpOnline,st.orchardActive].filter(Boolean).length;
     label(`DAY ${st.day}  ·  ${done}/7 PROJECTS  ·  ${st.coins} COINS`,x+18,top+108,width-36,23);
@@ -768,7 +781,7 @@ function refresh() {
   victory.hidden=!st.finale;
   if (st.finale) victory.innerHTML=(st.finale==='"commons"'?
     '<strong>The commons are open</strong><span>Shared water, food and shelter became a place to gather.</span>':
-    '<strong>The canal is connected</strong><span>The first boat carries a harvest to neighbouring communities.</span>')+
+    `<strong>The canal is connected</strong><span>${st.harvestChoice==='"reserve"'?'Stored food stays in town while the first boat carries tools.':'The first boat carries a harvest to neighbouring communities.'}</span>`) +
     `<span>Day ${st.day} · ${done}/7 projects working · ${st.coins} coins in reserve</span>`;
   $('tile-kestrel').setAttribute('aria-current', String(!saltwind));
   $('tile-saltwind').setAttribute('aria-current', String(saltwind));
@@ -786,7 +799,7 @@ function refresh() {
     (saltwind ?
       resource('Bridge',st.bridgeOpen?'Open':'Broken',st.bridgeOpen?'status-good':'status-warn') +
       resource('Wind pump',st.pumpOnline?'Running':'Offline',st.pumpOnline?'status-good':'status-warn') +
-      resource('Orchard',st.orchardActive?'Growing':'Dry',st.orchardActive?'status-good':'status-warn') :
+      resource('Harvest',st.harvestChoice==='"reserve"'?'Stored':st.harvestChoice==='"sell"'?'Sold':st.orchardActive?'Ready':'Dry',st.orchardActive?'status-good':'status-warn') :
       resource('Workshop',st.online?'Powered':'Offline',st.online?'status-good':'status-warn') +
       resource('Water',st.waterOnline?'Flowing':'Offline',st.waterOnline?'status-good':'status-warn') +
       resource('Garden',st.gardenActive?'Growing':'Dry',st.gardenActive?'status-good':'status-warn') +
@@ -797,7 +810,9 @@ function refresh() {
       `Low tide until day 4 · ${st.waterOnline?'crew can work':'restore Kestrel water first'}`:
       st.bridgeBraced?'Supports braced · finish next workday':'High tide · brace supports or hire a crew',st.bridgeOpen) +
     objective('Commission the wind pump',st.pumpOnline?'Pump running':'Needs bridge and powered workshop',st.pumpOnline) +
-    objective('Plant the orchard',st.orchardActive?'Fruit growing':'Needs the wind pump',st.orchardActive) :
+    objective('Plant the orchard',st.orchardActive?'Fruit growing':'Needs the wind pump',st.orchardActive) +
+    objective('Choose a harvest use (optional)',st.harvestChoice==='"reserve"'?'Food stored for the commons':
+      st.harvestChoice==='"sell"'?'Crop sold for project funds':'Reserve food or sell for three coins',st.orchardHarvested) :
     objective('Improve your shelter',`${st.upgrades} upgrade${st.upgrades===1?'':'s'} made`,st.upgrades>0) +
     objective('Power the workshop',`${st.parts.length}/2 parts · ${st.approved?'endorsed':'approval pending'}`,st.online) +
     objective('Restore shared water',st.waterOnline?'Tank operational':'Repair by buying or salvaging',st.waterOnline) +
@@ -806,12 +821,21 @@ function refresh() {
   const finalePanel=$('finale-panel');
   finalePanel.hidden=!st.orchardActive || !!st.finale;
   if (!finalePanel.hidden) {
+    const reserved=st.harvestChoice==='"reserve"';
+    const commonsCost=reserved?2:4;
+    const commonsAction=reserved?'openCommonsReserved':'openCommons';
     finalePanel.innerHTML=`<span class="eyebrow">Final decision</span><h2>What will the new capacity serve?</h2>
       <div class="muted">Both are valid endings. Your choice is recorded in the Qualia world and replay.</div>
+      ${st.orchardHarvested?'':`<div class="finale-options">
+        <div class="finale-option"><strong>Reserve the harvest</strong><p>Store food for neighbours and reduce the commons supply cost by two coins.</p>
+          <button data-finale="reserveHarvest">Reserve food · 1 labour</button></div>
+        <div class="finale-option"><strong>Sell the harvest</strong><p>Earn three coins for the boat or another community project.</p>
+          <button data-finale="sellHarvest">Sell crop · +3 coins, 1 labour</button></div>
+      </div>`}
       <div class="finale-options">
         <div class="finale-option"><strong>Open the commons</strong><p>Put local food, water and a sound shelter first. Host a harvest gathering for the community.</p>
-          <button data-finale="openCommons">Host the gathering · 4 coins + 1 labour</button>
-          <small>${st.upgrades>0?'✓ Shelter':'○ Improve the shelter'} · ${st.gardenActive?'✓ Garden':'○ Plant the garden'} · ${st.coins>=4?'✓ Four coins':'○ Find four coins'} · ${st.labour?'✓ Crew ready':'○ Rest first'}</small></div>
+          <button data-finale="${commonsAction}">Host the gathering · ${commonsCost} coins + 1 labour</button>
+          <small>${st.upgrades>0?'✓ Shelter':'○ Improve the shelter'} · ${st.gardenActive?'✓ Garden':'○ Plant the garden'} · ${st.coins>=commonsCost?`✓ ${commonsCost} coins`:`○ Find ${commonsCost} coins`} · ${st.labour?'✓ Crew ready':'○ Rest first'}</small></div>
         <div class="finale-option"><strong>Launch the trade route</strong><p>Use the crossing and harvest to build a dependable link with neighbouring settlements.</p>
           <button data-finale="launchTradeRoute">Outfit the first boat · 2 coins + 1 labour</button>
           <small>${st.coins>=2?'✓ Two coins':'○ Find two coins'} · ${st.labour?'✓ Crew ready':'○ Rest first'}</small></div>
@@ -821,7 +845,7 @@ function refresh() {
   $('inspector').innerHTML = saltwind ? `<h2>Saltwind Reach</h2><dl>
     <dt>Crossing</dt><dd>${st.bridgeOpen?'Bridge restored':'Bridge is broken'}</dd>
     <dt>Water</dt><dd>${st.pumpOnline?'Wind pump commissioned':'Pump awaiting crew'}</dd>
-    <dt>Harvest</dt><dd>${st.orchardActive?'Orchard growing':'Orchard not planted'}</dd>
+    <dt>Harvest</dt><dd>${st.harvestChoice==='"reserve"'?'Stored for the commons':st.harvestChoice==='"sell"'?'Sold at market':st.orchardActive?'Fruit ready':'Orchard not planted'}</dd>
   </dl>` : `<h2>Community overview</h2><dl>
     <dt>Location</dt><dd>Kestrel Flats camp</dd>
     <dt>Inventory</dt><dd>${st.held.map(short).join(', ')||'No parts held'}</dd>
@@ -837,7 +861,7 @@ function refresh() {
   const heldPanel=st.held.includes('rc:partPanel'), heldInverter=st.held.includes('rc:partInverter');
   const groups=st.finale ? [] : saltwind ? [
     ['Saltwind projects',st.bridgeOpen ? st.pumpOnline ?
-      st.orchardActive?[]:['plantOrchard'] : ['raiseWindPump'] :
+      st.orchardActive?st.orchardHarvested?[]:['reserveHarvest','sellHarvest']:['plantOrchard'] : ['raiseWindPump'] :
       st.day<=4?['restoreBridge']:
       st.bridgeBraced?['restoreBridgeLateLabour','restoreBridgeLateCoins']:
       ['braceBridge','restoreBridgeLateCoins']],
@@ -896,7 +920,10 @@ function tryAction(id) {
       connectMastLabour:'The mast is connected by the local crew.',
       connectMastCoins:'The purchased parts bring the mast online.',
       fulfilRemoteOrder:'The remote repair contract is delivered. Four coins earned.',
+      reserveHarvest:'The first harvest is stored for the commons.',
+      sellHarvest:'The harvest is sold. Three coins earned.',
       openCommons:'The commons opens with a harvest gathering.',
+      openCommonsReserved:'The stored harvest makes the commons gathering possible.',
       launchTradeRoute:'The first trade boat sets out.',endTurn:'The crew rests. A new day begins.'
     };
     note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
@@ -905,7 +932,7 @@ function tryAction(id) {
       territory=actionSite>=7&&actionSite<=9?'saltwind':'kestrel';
       focusSite(actionSite);
     }
-    if (id==='openCommons'||id==='launchTradeRoute'){
+    if (id==='openCommons'||id==='openCommonsReserved'||id==='launchTradeRoute'){
       territory='saltwind';hudPage='result';resultMessage='';
       focusedPlace=null;focusTerritory('saltwind');
     }
@@ -923,7 +950,9 @@ function tryAction(id) {
     braceBridge:['restoreBridgeLateCoins','endTurn'],
     restoreBridgeLateCoins:['braceBridge','endTurn'],
     restoreBridgeLateLabour:['restoreBridgeLateCoins','endTurn'],
+    reserveHarvest:['sellHarvest','endTurn'],sellHarvest:['reserveHarvest','endTurn'],
     openCommons:['improveShelterLabour','fulfilWorkshopOrder','endTurn','launchTradeRoute'],
+    openCommonsReserved:['reserveHarvest','improveShelterLabour','endTurn'],
     launchTradeRoute:['fulfilWorkshopOrder','endTurn','openCommons']
   };
   const lead=campaignLead(state());
@@ -1032,7 +1061,7 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST Vibe world query: ${query.ok && query.value===12 ? 'PASS' : 'FAIL'}`);
   const scriptBlock = toObj(testSession.vibe_propose('= "startGarden"'));
   note(`TEST Vibe blocked order: ${scriptBlock.ok===false ? 'PASS' : 'FAIL'}`);
-  const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, false, VIBE_SCENE);
+  const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, false, false, VIBE_SCENE);
   note(`TEST Vibe scene asset: ${scriptAsset.organs.length===sceneMeshes+1 ? 'PASS' : 'FAIL'}`);
   const firstMesh=scriptAsset.organs[0].bytes;
   const hasSurfaceReading=firstMesh.some((v,i,a)=>v===83&&a[i+1]===82&&a[i+2]===68&&a[i+3]===49);
@@ -1126,8 +1155,37 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const signalRest=toObj(signalLabour.s.propose('endTurn'));
   const remoteAfterRest=toObj(signalLabour.s.propose('fulfilRemoteOrder'));
   note(`TEST signal labour route: ${signalLabour.ready&&labourConnection.ok&&!remoteBeforeRest.ok&&signalRest.ok&&remoteAfterRest.ok?'PASS':'FAIL'}`);
-  const signalScene=m.scene_build(1,2,true,true,true,true,true,false,false,false,false,false,'');
+  const signalScene=m.scene_build(1,2,true,true,true,true,true,false,false,false,false,false,false,'');
   note(`TEST connected mast geometry: ${signalScene.organs.some(o=>o.id==='rc:asset/mast-signal')?'PASS':'FAIL'}`);
+  const harvestStart=()=>{
+    const s=new m.GameSession(SEED,ACTIONS);
+    const steps=['buyInverter','salvagePanel','endTurn','contributeInverter',
+      'contributePanel','requestApproval','switchPowerOn','repairTankCoins',
+      'restoreBridge','endTurn','raiseWindPump','endTurn','plantOrchard','endTurn'];
+    return {s,ready:steps.map(id=>toObj(s.propose(id))).every(r=>r.ok)};
+  };
+  const reserve=harvestStart();
+  const stored=toObj(reserve.s.propose('reserveHarvest'));
+  const cannotSell=toObj(reserve.s.propose('sellHarvest'));
+  const storeRest=toObj(reserve.s.propose('endTurn'));
+  const shelter=toObj(reserve.s.propose('improveShelterLabour'));
+  const shelterRest=toObj(reserve.s.propose('endTurn'));
+  const garden=toObj(reserve.s.propose('startGarden'));
+  const gardenRest=toObj(reserve.s.propose('endTurn'));
+  const cheapCommons=toObj(reserve.s.propose('openCommonsReserved'));
+  note(`TEST reserved harvest commons: ${reserve.ready&&stored.ok&&!cannotSell.ok&&storeRest.ok&&shelter.ok&&shelterRest.ok&&garden.ok&&gardenRest.ok&&cheapCommons.ok&&!reserve.s.world().includes('rc:community rc:foodReserve rc:orchard .')?'PASS':'FAIL'}`);
+  const reserveReplay=toObj(m.session_replay(SEED,ACTIONS,toObj(reserve.s.events())));
+  note(`TEST reserved harvest replay: ${reserveReplay.diverged_at===null&&reserveReplay.world===reserve.s.world()?'PASS':'FAIL'}`);
+  const sale=harvestStart();
+  const sold=toObj(sale.s.propose('sellHarvest'));
+  const cannotReserve=toObj(sale.s.propose('reserveHarvest'));
+  const saleRest=toObj(sale.s.propose('endTurn'));
+  const saleTrade=toObj(sale.s.propose('launchTradeRoute'));
+  note(`TEST harvest sale and trade: ${sale.ready&&sold.ok&&!cannotReserve.ok&&saleRest.ok&&saleTrade.ok&&sale.s.world().includes('rc:orchard rc:harvestChoice "sell" .')?'PASS':'FAIL'}`);
+  const saleReplay=toObj(m.session_replay(SEED,ACTIONS,toObj(sale.s.events())));
+  note(`TEST harvest sale replay: ${saleReplay.diverged_at===null&&saleReplay.world===sale.s.world()?'PASS':'FAIL'}`);
+  const harvestedScene=m.scene_build(1,2,true,true,true,true,true,true,false,true,true,true,true,'');
+  note(`TEST visible harvest crates: ${harvestedScene.organs.some(o=>o.id==='rc:asset/harvest-crates')&&!harvestedScene.organs.some(o=>o.id==='rc:asset/orchard-fruit')?'PASS':'FAIL'}`);
   const lateStart=()=>{
     const s=new m.GameSession(SEED,ACTIONS);
     const receipts=[toObj(s.propose('repairTankCoins'))];

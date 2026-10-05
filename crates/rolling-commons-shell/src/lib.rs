@@ -273,6 +273,7 @@ pub fn scene_build(
     high_tide: bool,
     pump_online: bool,
     orchard_active: bool,
+    orchard_harvested: bool,
     vibe_scene: &str,
 ) -> Result<JsValue, JsValue> {
     use qualia_core_db::container_10d::provenance_section::ProvenanceSidecar;
@@ -399,6 +400,7 @@ pub fn scene_build(
         high_tide,
         pump_online,
         orchard_active,
+        orchard_harvested,
     ));
     if !vibe_scene.trim().is_empty() {
         recipes.push(vibe_scene_recipe(vibe_scene).map_err(|e| JsValue::from_str(&e))?);

@@ -1711,7 +1711,7 @@ export function sample_packed_quins_wasm(db_bytes: Uint8Array, max_quins: number
  * mesh as `.10d`, and align semantic pick nodes with the portal projection.
  * JavaScript supplies only game state and displays the result.
  */
-export function scene_build(upgrades: number, parts: number, online: boolean, approved: boolean, water_online: boolean, garden_active: boolean, signal_online: boolean, bridge_open: boolean, bridge_braced: boolean, high_tide: boolean, pump_online: boolean, orchard_active: boolean, vibe_scene: string): any;
+export function scene_build(upgrades: number, parts: number, online: boolean, approved: boolean, water_online: boolean, garden_active: boolean, signal_online: boolean, bridge_open: boolean, bridge_braced: boolean, high_tide: boolean, pump_online: boolean, orchard_active: boolean, orchard_harvested: boolean, vibe_scene: string): any;
 
 export function sequence_alignment(input_json: string): string;
 
@@ -2269,7 +2269,7 @@ export interface InitOutput {
     readonly pack_game_hmc: (a: any, b: number, c: number) => [number, number, number, number];
     readonly pinned_qualiadb_revision: () => [number, number];
     readonly rules_load_n3: (a: number, b: number) => any;
-    readonly scene_build: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number) => [number, number, number];
+    readonly scene_build: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number) => [number, number, number];
     readonly session_replay: (a: number, b: number, c: number, d: number, e: any) => [number, number, number];
     readonly tensor_buffer_build: (a: number, b: number) => [number, number, number, number];
     readonly verify_game_hmc: (a: number, b: number) => [number, number, number];

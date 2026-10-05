@@ -6,6 +6,17 @@ engine gaps remain work orders; game-specific replacements are not acceptable.
 
 ## Game work in this pass
 
+**Orchard harvest choice (2026-10-05):** After planting, the player may spend
+one crew shift to reserve the first crop for a lower-cost commons gathering
+(two coins rather than four), or sell it for three coins. The two choices are
+mutually exclusive and optional; the original endings remain finishable.
+Qualia SHACL gates the choice and the reserved-food ending, and the event tape
+replays either route exactly. The orchard changes from fruit beds to packed
+produce crates through game-owned recipes compiled by full Qualia WASM. The
+game HMC now carries 162 distinct `.10d` variants across ten scene states.
+The local browser passed 60 scripted checks, including the new routes, visual
+state receipt, HMC integrity, and replay. QualiaDB was not changed.
+
 **Communications and contract pass (2026-10-04):** The Kestrel mast is now a
 playable optional project. Once workshop power is online, a player can spend
 one work shift or three coins to connect it. A connected mast unlocks a single

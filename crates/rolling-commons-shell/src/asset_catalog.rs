@@ -1016,6 +1016,7 @@ pub fn saltwind_reach(
     high_tide: bool,
     pump_online: bool,
     orchard_active: bool,
+    orchard_harvested: bool,
 ) -> Vec<AssetRecipe> {
     let mut scene = Vec::with_capacity(40);
     scene.push(asset(
@@ -1284,7 +1285,7 @@ pub fn saltwind_reach(
             },
         ));
     }
-    if orchard_active {
+    if orchard_active && !orchard_harvested {
         scene.push(asset(
             "rc:asset/orchard-fruit",
             [0.98, 0.38, 0.26, 1.0],
@@ -1295,6 +1296,31 @@ pub fn saltwind_reach(
                 block([17.5, 0.32, 5.3], [0.16, 0.17, 0.16]),
                 block([18.6, 0.30, 5.3], [0.16, 0.17, 0.16]),
             ],
+        ));
+    }
+    if orchard_harvested {
+        scene.push(asset(
+            "rc:asset/harvest-crates",
+            [0.64, 0.39, 0.22, 1.0],
+            vec![
+                block([16.85, 0.22, 2.10], [0.75, 0.42, 0.72]),
+                block([17.72, 0.22, 2.10], [0.75, 0.42, 0.72]),
+                block([18.59, 0.22, 2.10], [0.75, 0.42, 0.72]),
+                block([16.85, 0.47, 2.10], [0.82, 0.07, 0.79]),
+                block([17.72, 0.47, 2.10], [0.82, 0.07, 0.79]),
+                block([18.59, 0.47, 2.10], [0.82, 0.07, 0.79]),
+            ],
+        ));
+        scene.push(asset(
+            "rc:asset/harvest-produce",
+            [0.97, 0.56, 0.23, 1.0],
+            (0..3).flat_map(|crate_index| {
+                (0..3).map(move |fruit_index| block(
+                    [16.6 + crate_index as f32 * 0.87 + fruit_index as f32 * 0.24,
+                     0.55, 2.1],
+                    [0.18, 0.18, 0.18],
+                ))
+            }).collect(),
         ));
     }
     scene

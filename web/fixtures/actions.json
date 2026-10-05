@@ -368,6 +368,72 @@
               "rc:player rc:coin rc:signal{seq}d ."]
     },
     {
+      "id": "reserveHarvest",
+      "label": "Reserve the orchard harvest for the commons (1 labour)",
+      "explain": "Store the first harvest for neighbours. This reduces gathering supplies from four coins to two.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Orchard", "path": "rc:harvestChoice",
+         "constraints": [{"kind": "maxCount", "num": 0}]},
+        {"targetClass": "rc:Community", "path": "rc:finale",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:orchard rc:harvestChoice \"reserve\" .",
+              "rc:community rc:foodReserve rc:orchard ."]
+    },
+    {
+      "id": "sellHarvest",
+      "label": "Sell the orchard harvest at market (+3 coins, 1 labour)",
+      "explain": "Trade the first crop for three coins. The cash can outfit the boat or fund shared supplies.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Orchard", "path": "rc:harvestChoice",
+         "constraints": [{"kind": "maxCount", "num": 0}]},
+        {"targetClass": "rc:Community", "path": "rc:finale",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
+      "add": ["rc:orchard rc:harvestChoice \"sell\" .",
+              "rc:player rc:coin rc:harvest{seq}a .",
+              "rc:player rc:coin rc:harvest{seq}b .",
+              "rc:player rc:coin rc:harvest{seq}c ."]
+    },
+    {
+      "id": "openCommonsReserved",
+      "label": "Open the commons with stored food (2 coins, 1 labour)",
+      "explain": "Use the reserved orchard harvest to host a gathering with fewer purchased supplies. Needs shelter, garden, orchard, two coins and a crew shift.",
+      "gate": [
+        {"targetClass": "rc:Resident", "path": "rc:coin",
+         "constraints": [{"kind": "minCount", "num": 2}]},
+        {"targetClass": "rc:Resident", "path": "rc:labourToken",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Shelter", "path": "rc:upgrade",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Garden", "path": "rc:plantedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Community", "path": "rc:foodReserve",
+         "constraints": [{"kind": "minCount", "num": 1}]},
+        {"targetClass": "rc:Community", "path": "rc:finale",
+         "constraints": [{"kind": "maxCount", "num": 0}]}
+      ],
+      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 2}],
+      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
+                    {"s": "rc:community", "p": "rc:status"},
+                    {"s": "rc:community", "p": "rc:foodReserve"}],
+      "add": ["rc:community rc:status \"open\" .",
+              "rc:community rc:finale \"commons\" .",
+              "rc:community rc:gatheredAt rc:saltwindReach ."]
+    },
+    {
       "id": "openCommons",
       "label": "Open the commons with a harvest gathering (4 coins, 1 labour)",
       "explain": "Celebrate a safe local food and water network. Needs a repaired shelter, the garden, the orchard and four coins for shared supplies.",
