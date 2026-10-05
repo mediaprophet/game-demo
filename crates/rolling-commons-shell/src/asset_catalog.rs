@@ -9,7 +9,15 @@ use qualia_core_db::specialized_libs::computational_geometry::{authoring, parame
 /// builds the mesh before the shared `.10d` compiler seals it.
 #[derive(Debug, Clone)]
 pub enum ParametricRecipe {
+    Ant { center: [f32; 3], heading: f32 },
+    AntEyes { center: [f32; 3], heading: f32 },
     TerrainPatch { center_x: f32, center_z: f32 },
+    SettlementPatch { center_x: f32 },
+    Ribbon {
+        control: &'static [[f32; 2]],
+        width: f32,
+        elevation: f32,
+    },
     Cylinder {
         center: [f32; 3],
         radius: f32,
@@ -56,8 +64,38 @@ impl ParametricRecipe {
 
     pub fn compile(&self) -> Result<Mesh, String> {
         let (center, mesh) = match self {
+            Self::Ant { center, heading } =>
+                ([0.0, 0.0, 0.0], crate::ants::ant(*center, *heading)?),
+            Self::AntEyes { center, heading } =>
+                ([0.0, 0.0, 0.0], crate::ants::eyes(*center, *heading)?),
             Self::TerrainPatch { center_x, center_z } =>
                 ([0.0, 0.0, 0.0], crate::terrain::patch(*center_x, *center_z)),
+            Self::SettlementPatch { center_x } =>
+                ([0.0, 0.0, 0.0], crate::terrain::settlement_patch(*center_x)),
+            Self::Ribbon { control, width, elevation } => {
+                let curve: Vec<Point3> = control.iter()
+                    .map(|p| Point3::new(p[0] as f64, p[1] as f64, 0.0)).collect();
+                let path: Vec<Point3> = (0..=24)
+                    .map(|step| parametric_cad::bspline_eval(&curve, 3, step as f64 / 24.0))
+                    .collect::<Result<_, _>>().map_err(|e| format!("road curve: {e:?}"))?;
+                let mut left = vec![Point3::new(0.0,0.0,0.0); path.len()];
+                let mut right = left.clone();
+                parametric_cad::offset_polyline(&path, *width as f64 * 0.5, &mut left)
+                    .map_err(|e| format!("road left edge: {e:?}"))?;
+                parametric_cad::offset_polyline(&path, -*width as f64 * 0.5, &mut right)
+                    .map_err(|e| format!("road right edge: {e:?}"))?;
+                let mut verts = vec![Point3::new(0.0,0.0,0.0); path.len()*2];
+                let mut triangles = vec![[0u32;3]; (path.len()-1)*2];
+                let (nv, nt) = parametric_cad::loft_profiles(&left, &right,
+                    &mut verts, &mut triangles).map_err(|e| format!("road loft: {e:?}"))?;
+                let positions: Vec<[f32;3]> = verts[..nv].iter()
+                    .map(|p| [p.x as f32,*elevation,p.y as f32]).collect();
+                let mut min=[f32::INFINITY;3];let mut max=[f32::NEG_INFINITY;3];
+                for p in &positions { for axis in 0..3 {
+                    min[axis]=min[axis].min(p[axis]);max[axis]=max[axis].max(p[axis]);
+                }}
+                ([0.0,0.0,0.0],Mesh{positions,triangles:triangles[..nt].to_vec(),min,max})
+            },
             Self::Cylinder {
                 center,
                 radius,
@@ -232,20 +270,26 @@ pub fn kestrel_flats(
     scene.push(asset(
         "rc:asset/kestrel-earth-skirt",
         [0.46, 0.31, 0.24, 1.0],
-        vec![block([0.0, -0.29, 0.0], [14.18, 0.43, 14.18])],
+        vec![block([0.0, -0.49, 0.0], [14.18, 0.38, 14.18])],
     ));
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/ground",
         [0.58, 0.82, 0.43, 1.0],
-        vec![block([0.0, -0.08, 0.0], [14.0, 0.16, 14.0])],
+        ParametricRecipe::SettlementPatch { center_x: 0.0 },
     ));
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/main-road",
         [0.78, 0.55, 0.37, 1.0],
-        vec![
-            block([0.0, 0.01, 0.5], [12.5, 0.04, 1.2]),
-            block([1.6, 0.012, -1.8], [1.1, 0.04, 5.5]),
-        ],
+        ParametricRecipe::Ribbon {control:&[
+            [-6.1,0.45],[-2.8,0.16],[2.5,0.86],[6.0,0.48],
+        ],width:1.15,elevation:0.046},
+    ));
+    scene.push(parametric(
+        "rc:asset/main-road-workshop-spur",
+        [0.77, 0.56, 0.39, 1.0],
+        ParametricRecipe::Ribbon {control:&[
+            [1.7,-4.35],[1.38,-2.60],[1.88,-0.45],[1.38,0.42],
+        ],width:0.82,elevation:0.048},
     ));
     scene.push(asset(
         "rc:asset/camp-shelter",
@@ -728,6 +772,35 @@ pub fn kestrel_flats(
             latitude: 7, longitude: 10,
         }));
     }
+    scene.push(parametric("rc:asset/garden-ant-mound",
+        [0.57, 0.40, 0.27, 1.0], ParametricRecipe::Ellipsoid {
+            center: [-5.82, 0.11, -5.49], radii: [0.38, 0.19, 0.35],
+            latitude: 9, longitude: 14,
+        }));
+    for (body_id, eyes_id, center, heading, color) in [
+        ("rc:asset/garden-ant-scout", "rc:asset/garden-ant-scout-eyes",
+         [-5.30, 0.20, -5.57], -0.25, [0.32, 0.17, 0.12, 1.0]),
+        ("rc:asset/garden-ant-worker-a", "rc:asset/garden-ant-worker-a-eyes",
+         [-4.62, 0.20, -5.46], 0.18, [0.39, 0.21, 0.14, 1.0]),
+        ("rc:asset/garden-ant-worker-b", "rc:asset/garden-ant-worker-b-eyes",
+         [-3.96, 0.20, -5.62], -0.34, [0.29, 0.17, 0.13, 1.0]),
+        ("rc:asset/garden-ant-worker-c", "rc:asset/garden-ant-worker-c-eyes",
+         [-5.02, 0.20, -5.38], 0.35, [0.35, 0.19, 0.13, 1.0]),
+        ("rc:asset/garden-ant-worker-d", "rc:asset/garden-ant-worker-d-eyes",
+         [-4.86, 0.20, -5.69], -0.16, [0.31, 0.17, 0.12, 1.0]),
+        ("rc:asset/garden-ant-worker-e", "rc:asset/garden-ant-worker-e-eyes",
+         [-4.37, 0.20, -5.31], 0.41, [0.38, 0.20, 0.14, 1.0]),
+        ("rc:asset/garden-ant-worker-f", "rc:asset/garden-ant-worker-f-eyes",
+         [-4.21, 0.20, -5.69], -0.18, [0.30, 0.16, 0.12, 1.0]),
+        ("rc:asset/garden-ant-worker-g", "rc:asset/garden-ant-worker-g-eyes",
+         [-3.71, 0.20, -5.49], 0.24, [0.35, 0.18, 0.12, 1.0]),
+    ] {
+        scene.push(parametric(body_id, color, ParametricRecipe::Ant {
+            center, heading,
+        }));
+        scene.push(parametric(eyes_id, [0.97, 0.88, 0.67, 1.0],
+            ParametricRecipe::AntEyes { center, heading }));
+    }
     scene.push(asset(
         "rc:asset/hall-facade",
         [0.99, 0.88, 0.66, 1.0],
@@ -1196,12 +1269,12 @@ pub fn saltwind_reach(
     scene.push(asset(
         "rc:asset/saltwind-earth-skirt",
         [0.54, 0.38, 0.27, 1.0],
-        vec![block([16.0, -0.29, 0.0], [14.18, 0.43, 14.18])],
+        vec![block([16.0, -0.49, 0.0], [14.18, 0.38, 14.18])],
     ));
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/saltwind-ground",
         [0.73, 0.81, 0.48, 1.0],
-        vec![block([16.0, -0.08, 0.0], [14.0, 0.16, 14.0])],
+        ParametricRecipe::SettlementPatch { center_x: 16.0 },
     ));
     for (id, center, radii, color) in [
         ("rc:asset/saltwind-meadow-nw", [11.1, 0.02, -5.8], [1.55, 0.13, 0.70], [0.64, 0.77, 0.42, 1.0]),
@@ -1345,13 +1418,19 @@ pub fn saltwind_reach(
             ],
         ));
     }
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/saltwind-main-road",
         [0.89, 0.72, 0.50, 1.0],
-        vec![
-            block([16.0, 0.01, 0.5], [13.0, 0.05, 1.35]),
-            block([16.0, 0.01, -1.65], [1.0, 0.05, 5.5]),
-        ],
+        ParametricRecipe::Ribbon {control:&[
+            [9.6,0.55],[13.0,0.25],[18.8,0.83],[22.3,0.50],
+        ],width:1.25,elevation:0.049},
+    ));
+    scene.push(parametric(
+        "rc:asset/saltwind-road-orchard-spur",
+        [0.88, 0.71, 0.51, 1.0],
+        ParametricRecipe::Ribbon {control:&[
+            [16.0,-4.20],[15.65,-2.6],[16.25,-0.55],[16.0,0.48],
+        ],width:0.88,elevation:0.050},
     ));
     scene.push(asset(
         "rc:asset/saltwind-footpaths",
@@ -1690,7 +1769,7 @@ pub fn northern_highlands() -> Vec<AssetRecipe> {
          [0.48, 0.70, 0.42, 1.0]),
     ] {
         scene.push(asset(base_id, [0.47, 0.34, 0.26, 1.0],
-            vec![block([x, -0.27, -14.0], [14.0, 0.50, 14.0])]));
+            vec![block([x, -0.49, -14.0], [14.0, 0.38, 14.0])]));
         scene.push(parametric(id, color, ParametricRecipe::TerrainPatch {
             center_x: x, center_z: -14.0,
         }));

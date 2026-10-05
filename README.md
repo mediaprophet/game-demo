@@ -59,10 +59,11 @@ garden once water is available.
 The page also exposes VibeScript cells for live world snapshot queries,
 SHACL-gated order proposals, and a bounded scene asset that compiles through
 Qualia computational geometry to a provenance-bearing `.10d` mesh.
-Kestrel Flats has 149 always-present original `.10d` scene organs; the
-Saltwind Reach tile adds 73 more plus state variants. Two generated northern
-highland tiles add 12 terrain, creek, rock and shrub organs, for 234 in the
-opening scene. The connected scene uses
+Kestrel Flats has 167 always-present original `.10d` scene organs; the
+Saltwind Reach tile adds 74 more plus state variants. Two generated northern
+highland tiles add 12 terrain, creek, rock and shrub organs, for 253 in the
+opening scene. The 293-variant HMC includes sampled settlement terrain,
+curved road ribbons, a garden ant trail, and their state variants. The connected scene uses
 QualiaPortal's camera target and daylight sky APIs. State variants live in
 the game-owned catalog. Rounded assets use Qualia's computational
 geometry authoring and parametric CAD; all scene assets retain source

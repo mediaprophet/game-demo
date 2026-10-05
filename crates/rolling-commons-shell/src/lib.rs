@@ -11,6 +11,7 @@
 #![cfg(target_arch = "wasm32")]
 
 mod asset_catalog;
+mod ants;
 mod terrain;
 
 use std::collections::BTreeMap;
@@ -488,6 +489,10 @@ pub fn scene_build(
 pub fn terrain_height_world(x: f32, z: f32) -> f32 {
     if (-7.0..=23.0).contains(&x) && (-21.0..=-7.0).contains(&z) {
         terrain::height(x, z)
+    } else if (-7.0..=7.0).contains(&x) && (-7.0..=7.0).contains(&z) {
+        terrain::settlement_height(0.0, x, z)
+    } else if (9.0..=23.0).contains(&x) && (-7.0..=7.0).contains(&z) {
+        terrain::settlement_height(16.0, x, z)
     } else {
         0.0
     }

@@ -100,6 +100,17 @@ width on compact screens. The current pack has 274 `.10d` variants, with 234
 organs in the opening scene. Browser checks passed 61/61. Ground collision,
 navigation, streaming, terrain LOD and biome asset placement are still open.
 
+The later settlement silhouette pass replaces two flat ground slabs with
+sampled Qualia DEM terrain, replaces the main roads with B-spline ribbons,
+and adds an eight-ant trail beside a garden mound. The ground-height Walk
+camera now frames the trail from a distance. Browser inspection showed the
+ants at garden scale, and the campaign self-check passed 61/61. The HMC has
+293 `.10d` variants and 253 opening organs. This is still far from a film
+look: rectangular terrain skirts, box buildings, flat colour, simple lighting
+and static ants are visible limitations. Prioritise the existing QG-12 material,
+light and shadow contract and QG-03/13 animation path, then author detailed
+game meshes against those generic capabilities.
+
 ## Quality work still needed
 
 1. Inspect both rendered territories after the WebGPU depth and occlusion fix. Tune camera,
