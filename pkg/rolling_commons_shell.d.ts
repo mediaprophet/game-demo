@@ -1743,6 +1743,11 @@ export function serialize_rdf_wasm(val: any): any;
 export function session_replay(seed_n3: string, actions_json: string, event_ids: any): any;
 
 /**
+ * Presentation preference only; world state and game rules are unchanged.
+ */
+export function set_art_style(style: number): void;
+
+/**
  * Simulates a GBM price path and returns the full series together with
  * min_price, max_price, and final_price.
  */
@@ -2277,6 +2282,7 @@ export interface InitOutput {
     readonly rules_load_n3: (a: number, b: number) => any;
     readonly scene_build: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number) => [number, number, number];
     readonly session_replay: (a: number, b: number, c: number, d: number, e: any) => [number, number, number];
+    readonly set_art_style: (a: number) => void;
     readonly tensor_buffer_build: (a: number, b: number) => [number, number, number, number];
     readonly terrain_height_world: (a: number, b: number) => number;
     readonly verify_game_hmc: (a: number, b: number) => [number, number, number];

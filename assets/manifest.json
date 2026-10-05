@@ -1,10 +1,11 @@
 {
   "format": "maslows-challenge-asset-export-v1",
+  "artStyle": "storybook",
   "generator": "scripts/export-game-assets.mjs",
   "sourceRecipes": "crates/rolling-commons-shell/src/asset_catalog.rs",
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "522f6ddc18e48838df3744bf18bcbce0417de35606b1118b80ae23c7b656cc19"
+    "sha256": "bd9e94d6243582051cbf062fb03e5b7d95d25b5c1f2b6aba60e7dd1c91cf666b"
   },
   "assets": [
     {

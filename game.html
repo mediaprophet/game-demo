@@ -212,7 +212,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '522f6ddc18e48838';
+const WASM_BUILD = 'bd9e94d624358205';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 $('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
@@ -386,6 +386,11 @@ hudCanvas.height = canvas.height;
 try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
 const portal = new m.GamePortal(canvas);
 const hud = new m.GameHud(hudCanvas);
+const ART_STYLES=['Storybook','Earthlight'];
+let artStyle=0;
+try { artStyle=Number(localStorage.getItem('maslows-art-style'))===1?1:0; } catch {}
+if(new URLSearchParams(location.search).has('selftest'))artStyle=0;
+m.set_art_style(artStyle);
 let hudPage='orders', hudOrderOffset=0, hudScriptResult='', resultMessage='';
 let hudSiteLines=[], hudSiteActions=[];
 window.addEventListener('resize',()=>{
@@ -394,7 +399,7 @@ window.addEventListener('resize',()=>{
   canvas.width=w;canvas.height=h;hudCanvas.width=w;hudCanvas.height=h;
   applyCam();renderHud();
 });
-let skyPreset=1;
+let skyPreset=artStyle===1?2:1;
 portal.set_sky_preset(skyPreset);
 $('sky-preset').onclick = () => {
   skyPreset=skyPreset===3?1:skyPreset+1;
@@ -489,6 +494,15 @@ function rebuild() {
   else if(focusedPlace!==null)focusSite(focusedPlace);
   applyCam();
   return st;
+}
+
+function selectArtStyle(next){
+  artStyle=next%ART_STYLES.length;
+  m.set_art_style(artStyle);
+  try { localStorage.setItem('maslows-art-style',String(artStyle)); } catch {}
+  skyPreset=artStyle===1?2:1;
+  portal.set_sky_preset(skyPreset);
+  rebuild();renderHud();
 }
 
 // rAF render loop — tick drives GPU pick readback too
@@ -746,6 +760,7 @@ function renderHud() {
     for(const [id,title] of [['save','Save campaign'],['load','Load campaign'],
       ['replay','Replay decisions'],['new-game','New campaign'],['sky-preset','Change sky']]){
       button(`utility:${id}`,title,right+14,y,panelW-28,rowH);y+=rowStep;}
+    button('style:next',`Visual style: ${ART_STYLES[artStyle]}`,right+14,y,panelW-28,rowH);y+=rowStep;
     button('page:script','VibeScript console',right+14,y,panelW-28,rowH);y+=rowStep;
     label(`QUALIA PORTAL  ·  TIER ${portal.tier()}`,right+14,y+15);
     label(`${sceneMeshes} VERIFIED .10d MESHES`,right+14,y+43);
@@ -798,6 +813,7 @@ function handleHudAction(id){
   if(id.startsWith('territory:')){
     territory=id.slice(10);focusTerritory(territory);refresh();return;}
   if(id.startsWith('page:')){hudPage=id.slice(5);renderHud();return;}
+  if(id==='style:next'){selectArtStyle(artStyle+1);return;}
   if(id.startsWith('action:')){tryAction(id.slice(7));return;}
   if(id.startsWith('script:')){
     const command=id.slice(7);
