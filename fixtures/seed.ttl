@@ -41,6 +41,14 @@ rc:solarProject a rc:CommunityProject .
 rc:solarProject rc:name "Workshop solar upgrade" .
 rc:solarProject rc:forFacility rc:workshop .
 rc:solarProject rc:targetWatts 400 .
+rc:solarProject rc:hasApplication rc:grantApplication .
+rc:grantApplication a rc:FundingApplication .
+rc:grantApplication rc:forProject rc:solarProject .
+rc:solarProject rc:designDocumentsFrom rc:player .
+rc:solarProject rc:technicalKnowledgeHeldBy rc:player .
+rc:player rc:holdsTechnicalKnowledge rc:solarIntegration .
+rc:solarIntegration a rc:TechnicalKnowledge .
+rc:solarIntegration rc:requiredFor rc:solarProject .
 
 rc:market a rc:Market .
 rc:market rc:sells rc:partPanel .
@@ -57,6 +65,17 @@ rc:scrapyard rc:mayYield rc:partInverter .
 
 rc:committee a rc:Committee .
 rc:committee rc:governs rc:solarProject .
+rc:committee rc:chair rc:committeeChair .
+rc:committeeChair a rc:CommitteeMember .
+rc:committeeChair rc:associate rc:chairAssociate .
+rc:chairAssociate a rc:Contractor .
+rc:committeeChair rc:decisionMakerFor rc:committee .
+rc:community rc:resident rc:residentMara .
+rc:community rc:resident rc:residentEli .
+rc:community rc:resident rc:residentJon .
+rc:residentMara a rc:CommunityMember .
+rc:residentEli a rc:CommunityMember .
+rc:residentJon a rc:CommunityMember .
 
 rc:waterTank a rc:WaterTank .
 rc:waterTank rc:name "Shared water tank" .
@@ -81,3 +100,39 @@ rc:windPump rc:atPlace rc:saltwindReach .
 rc:orchard a rc:Orchard .
 rc:orchard rc:status "dry" .
 rc:orchard rc:usesWaterFrom rc:windPump .
+
+# Opening history deliberately keeps the contributor's initiative, claims
+# against them, and current institutional treatment as separate facts.
+rc:playerHistory a rc:PlayerHistory .
+rc:playerHistory rc:about rc:player .
+rc:player rc:housingStatus "unhoused" .
+rc:player rc:sleepingAt rc:camp .
+rc:player rc:reputationStanding "contested" .
+rc:playerHistory rc:priorProject rc:waterCoop .
+rc:waterCoop a rc:HistoricalProject .
+rc:waterCoop rc:initiatedBy rc:player .
+rc:waterCoop rc:respondedTo rc:unmetWaterNeed .
+rc:waterCoop rc:initiallyUnfunded "true" .
+rc:waterCoop rc:outcome "unsafe-hours-after-maintenance-lapse" .
+rc:player rc:acceptsInitiativeResponsibility rc:waterCoop .
+rc:maintenanceLapse rc:causedBy rc:fundingGap .
+rc:maintenanceLapse rc:harmed rc:residentMara .
+rc:maintenanceClaim a rc:Claim .
+rc:maintenanceClaim rc:assertedBy rc:committeeChair .
+rc:maintenanceClaim rc:about rc:player .
+rc:maintenanceClaim rc:status "disputed" .
+rc:playerHistory rc:repairAttempt rc:unfunded .
+rc:playerHistory rc:claimAgainstContributor rc:committeeChair .
+rc:committeeChair rc:conflictOfInterest rc:currentSolarProject .
+rc:committeeChair rc:seeksControlOf rc:solarProject .
+rc:committeeChair rc:seeksGrantFundsFor rc:solarProject .
+rc:committeeChair rc:usesClaimFor rc:grantApplication .
+rc:politicalBacker a rc:Contractor .
+rc:politicalBacker rc:expectsFutureSupportFrom rc:committeeChair .
+rc:playerHistory rc:currentPlansReusedBy rc:committee .
+rc:committee rc:usesPlansFrom rc:player .
+rc:playerHistory rc:remedyStatus "not-yet-documented" .
+rc:policeOfficer a rc:InstitutionalActor .
+rc:policeOfficer rc:worksWith rc:committeeChair .
+rc:publicWorksDepartment a rc:GovernmentAgency .
+rc:publicWorksDepartment rc:responsibleFor rc:solarProject .

@@ -296,15 +296,18 @@ export class GamePortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
-     * Load a multi-object scene: `Array<{bytes: .10d, r,g,b,a}>` where each
+     * Load a multi-asset scene: `Array<{bytes: .10d, r,g,b,a}>` where each
      * mesh keeps its authored position in the shared coordinate space — one
      * global normalisation across all objects. This is how a town of
-     * distinct props composes into one viewport mesh.
-     * @param {Array<any>} organs
+     * distinct props composes into one viewport mesh. The engine binding
+     * still carries its legacy anatomy-era name (`load_body_organs_colored`);
+     * the upstream rename is tracked as QG-20 in
+     * `docs/planning/19-qualiadb-upstream-gate-work-orders.md`.
+     * @param {Array<any>} assets
      * @returns {any}
      */
-    load_scene(organs) {
-        const ret = wasm.gameportal_load_scene(this.__wbg_ptr, organs);
+    load_scene(assets) {
+        const ret = wasm.gameportal_load_scene(this.__wbg_ptr, assets);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }
@@ -345,6 +348,14 @@ export class GamePortal {
         return ret !== 0;
     }
     /**
+     * Toggle the ambient particle field (tensor-node particle cloud).
+     * Off in this game; exposed so the frame guard can assert it stays off.
+     * @param {boolean} enabled
+     */
+    set_ambient_enabled(enabled) {
+        wasm.gameportal_set_ambient_enabled(this.__wbg_ptr, enabled);
+    }
+    /**
      * @param {number} yaw
      * @param {number} pitch
      * @param {number} zoom
@@ -368,6 +379,19 @@ export class GamePortal {
         if (ret[1]) {
             throw takeFromExternrefTable0(ret[0]);
         }
+    }
+    /**
+     * Tunable key/fill/ambient light from the QualiaPortal surface, so a
+     * visual style can present its own daylight reading without touching
+     * campaign or rule state.
+     * @param {number} sun_r
+     * @param {number} sun_g
+     * @param {number} sun_b
+     * @param {number} intensity
+     * @param {number} ambient
+     */
+    set_lighting(sun_r, sun_g, sun_b, intensity, ambient) {
+        wasm.gameportal_set_lighting(this.__wbg_ptr, sun_r, sun_g, sun_b, intensity, ambient);
     }
     /**
      * @param {number} preset
@@ -1209,9 +1233,10 @@ export class QualiaPortal {
         wasm.qualiaportal_set_acoustic_enabled(this.__wbg_ptr, enabled);
     }
     /**
-     * Enable/disable the **ambient particle field** — the mixer's "ambient" channel. Off by default
-     * (a plain mesh/anatomy view has no use for the decorative random cloud); a Tensor10D upload
-     * turns it on automatically because the particles then encode epistemic nodes.
+     * Enable/disable the **ambient particle field** — the mixer's "ambient" channel. Off by
+     * default and opt-in: a plain mesh/anatomy view (or a game scene) keeps it off, and a
+     * Tensor10D upload never forces it on. Hosts that want the tensor-node particle view
+     * enable it explicitly.
      * @param {boolean} on
      */
     set_ambient_enabled(on) {
@@ -7838,27 +7863,27 @@ function __wbg_get_imports() {
             return ret;
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2159, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2168, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1434, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1443, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_5147e1cd83daddce___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1434, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1443, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_5147e1cd83daddce___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__2);
             return ret;
         },
         __wbindgen_cast_0000000000000004: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1434, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1443, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_5147e1cd83daddce___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__3);
             return ret;
         },
         __wbindgen_cast_0000000000000005: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 719, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 728, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke_______true_);
             return ret;
         },
