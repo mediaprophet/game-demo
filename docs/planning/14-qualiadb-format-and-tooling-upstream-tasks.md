@@ -63,6 +63,7 @@ variant decision or the Q42 manifest/browser-loading acceptance criteria.
 | QG-06 | Conditional on local NPC inference | Connect an approved `.p64` model to QualiaDB's graph-scoped inference and Vibe/game proposal gateway without packaging model weights into Q42. Decide whether P64 is a separate optional download or HMC entry. | One bounded local call shows model/version, allowed context, latency/memory, and validated proposal; disabling or missing P64 leaves the authored journey complete. |
 | QG-07 | Conditional on data-shaped terrain | Join QualiaDB source snapshots, geospatial transforms, terrain/mesh generation, `.10d`, Q42 spatial identity, and HMC packaging. | A licensed or fictional heightfield yields a versioned offline pack with visible source/transform evidence, stable coordinates, scene picking, and repeatable generation. |
 | QG-08 | Later, only if on-demand place streaming is chosen | Design QualiaDB-owned range fetch, source policy, cache, geometry repair, tile seams, budgeted WASM/GPU lifecycle, and deterministic snapshot/replay for HTTP geography. | Same saved snapshot replays offline; bounded traversal releases old tiles; missing or malformed source fails visibly. No direct game-side HTTP/mesh stack. |
+| QG-20 | Required for Australia-wide OSM world packs | Add generic QualiaDB OSM/PBF or documented-intermediate ingestion, preserving source identity/tags/version/licence; spatial topology/CRS transforms; routable graph construction; bounded Q42/HMC spatial queries; seam-safe render-tile clipping; and provenance-aware `.10d`/HMC references. Keep ODbL-derived geography separable from unrelated game content and expose pack attribution metadata. | Import a dated, licensed Australian regional extract into a versioned offline pack; validate representative boundaries, paths, polygons, building footprints, route alternatives, tile seams and spatial queries; display attribution; reproduce the same travel/map state offline from the saved snapshot. Test the public QualiaDB capabilities against a second non-game geographic fixture. |
 
 ## Work order and completion rule
 
@@ -73,8 +74,10 @@ Their requirements and acceptance fixtures are specified in the
 [RTS uplift blueprint](17-rts-aaa-uplift-blueprint.md#8-required-qualiadb-upgrade-work).
 The [upstream gate work orders](19-qualiadb-upstream-gate-work-orders.md)
 give the concrete Qualia entry points, implementation sequence, failure
-fixtures, and browser completion receipts for QG-01–QG-19.
-Treat them as continuous upstream dependencies alongside QG-01–QG-08;
+fixtures, and browser completion receipts for QG-01–QG-19. QG-20 adds the
+Australia-wide OSM ingestion and world-map path described in the
+[Australia world atlas plan](29-australia-world-atlas-and-osm-pack.md).
+Treat these as continuous upstream dependencies alongside QG-01–QG-08;
 implementation evidence and status belong in the living ledger.
 
 Start with **QG-01, QG-02, QG-04, and QG-05** as Phase 0/1 integration

@@ -5,7 +5,7 @@
   "sourceRecipes": "crates/rolling-commons-shell/src/asset_catalog.rs",
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "bd9e94d6243582051cbf062fb03e5b7d95d25b5c1f2b6aba60e7dd1c91cf666b"
+    "sha256": "93e462b842bcc1534641ab1e6c276711abbc1d45ad5bcbf9d75f268bfb591c53"
   },
   "assets": [
     {
@@ -87,22 +87,226 @@
       "sha256": "6d1b6a5dbc1e5b196a37a4840548a3daeebfdc4d16f467833755c1194dade0cd"
     },
     {
-      "id": "rc:asset/camp-shelter",
-      "file": "10d/camp-shelter--66260ee60499.10d",
-      "bytes": 728,
-      "sha256": "66260ee60499728866f3700a27ae1f1afd6c23ea784d2c55b5a8c31ad48ad58a"
+      "id": "rc:asset/camp-shade-frame",
+      "file": "10d/camp-shade-frame--82e608f953b4.10d",
+      "bytes": 1304,
+      "sha256": "82e608f953b49359ea387e4f1fffc57c7258833ffcc618127a34f7e42cc7e3b9"
+    },
+    {
+      "id": "rc:asset/camp-shade-panels",
+      "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+      "bytes": 1284,
+      "sha256": "0ea78b3cec34f3597e87b10ad45c059d10d724c368e4a7d8d4a2a2f13cbe7258"
+    },
+    {
+      "id": "rc:asset/camp-shade-post-a",
+      "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+      "bytes": 980,
+      "sha256": "fee6f3b4de0d4459ce0a8537f56d4fef593b749802962135bca56aceced5fadc"
+    },
+    {
+      "id": "rc:asset/camp-shade-post-b",
+      "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+      "bytes": 980,
+      "sha256": "2e9fc29fb2eed9b8b06b73f313e98f0e385b1d6d1991256bfc5b9796becdc2db"
+    },
+    {
+      "id": "rc:asset/camp-shade-post-c",
+      "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+      "bytes": 980,
+      "sha256": "6a61bf65586219a6d7dd005150951fb939682e8809e18309fad09b2bd6ae01fb"
+    },
+    {
+      "id": "rc:asset/camp-shade-post-d",
+      "file": "10d/camp-shade-post-d--444758907d9a.10d",
+      "bytes": 980,
+      "sha256": "444758907d9abaa0685c6e8d1089d48ee4c00a157b5a61fa32e92b6e75a0eb08"
+    },
+    {
+      "id": "rc:asset/camp-shade-post-e",
+      "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+      "bytes": 976,
+      "sha256": "d79451f54cd85e31d918108025579d3e4d290f6a3711dd13a9c55153f0844380"
+    },
+    {
+      "id": "rc:asset/camp-shade-post-f",
+      "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+      "bytes": 976,
+      "sha256": "bbf29288f5508a75a63888eba7293426f46c1ef96ca83fdd0af347f7e31d2407"
     },
     {
       "id": "rc:asset/camp-shelter",
-      "file": "10d/camp-shelter--9b30cd0f0fe8.10d",
-      "bytes": 728,
-      "sha256": "9b30cd0f0fe80b5079f93952bc0eb91f5495ef3bb78988b5cae1ce820f06aabc"
+      "file": "10d/camp-shelter--3df6900292b7.10d",
+      "bytes": 3584,
+      "sha256": "3df6900292b7ff626f4033003773ed0ce63cbcf106942f4c13090f44c093b860"
     },
     {
       "id": "rc:asset/camp-shelter",
-      "file": "10d/camp-shelter--ace1b784ead8.10d",
-      "bytes": 728,
-      "sha256": "ace1b784ead867a978ba194ab1913d062fc364c76f236c43ed4b77b8385e2ea7"
+      "file": "10d/camp-shelter--4cbdd84bab44.10d",
+      "bytes": 3584,
+      "sha256": "4cbdd84bab441bd885b0b18d08a0d651b9ce7a0bd162fc2cc06806e23fdc1167"
+    },
+    {
+      "id": "rc:asset/camp-shelter",
+      "file": "10d/camp-shelter--df911f60fba5.10d",
+      "bytes": 3584,
+      "sha256": "df911f60fba512fb8098832cf98eefb2a38c1b74c02df5957233a7f0e1640cc0"
+    },
+    {
+      "id": "rc:asset/camp-shelter-annex",
+      "file": "10d/camp-shelter-annex--0ff0f565ed79.10d",
+      "bytes": 2284,
+      "sha256": "0ff0f565ed79d52cad041b703650bff781b5150ea1d157ce96f983c9224f990c"
+    },
+    {
+      "id": "rc:asset/camp-shelter-annex",
+      "file": "10d/camp-shelter-annex--a59d077abadd.10d",
+      "bytes": 2288,
+      "sha256": "a59d077abaddd6a9bd357d6fed83b00d81c911b6ab9300d02f7ca24246f6f1ab"
+    },
+    {
+      "id": "rc:asset/camp-shelter-awning",
+      "file": "10d/camp-shelter-awning--b21b3a7fda74.10d",
+      "bytes": 704,
+      "sha256": "b21b3a7fda74f92ecdc53afd9ee85fa9fe0027e739351df42789c4cbfb6d51ce"
+    },
+    {
+      "id": "rc:asset/camp-shelter-awning",
+      "file": "10d/camp-shelter-awning--b58e7bcc5a4b.10d",
+      "bytes": 704,
+      "sha256": "b58e7bcc5a4bfea297fe4469cc2ceac6fd9ce730d526cf21b230b3681b964053"
+    },
+    {
+      "id": "rc:asset/camp-shelter-awning",
+      "file": "10d/camp-shelter-awning--bf105fc272f6.10d",
+      "bytes": 708,
+      "sha256": "bf105fc272f6ee5a6932d9c3f6fe5251ebe6b446084f4116d482377d5a4a4951"
+    },
+    {
+      "id": "rc:asset/camp-shelter-awning-post-a",
+      "file": "10d/camp-shelter-awning-post-a--3b029a82b674.10d",
+      "bytes": 904,
+      "sha256": "3b029a82b67413cbbf9fe1f0502a5d7ea0717a5053ec63c34a730a44d90aa488"
+    },
+    {
+      "id": "rc:asset/camp-shelter-awning-post-a",
+      "file": "10d/camp-shelter-awning-post-a--a865e4b09bf4.10d",
+      "bytes": 904,
+      "sha256": "a865e4b09bf4b2ecec861252fc77f283b9eae0dbe90c9415c8bb38d7af914a5c"
+    },
+    {
+      "id": "rc:asset/camp-shelter-awning-post-a",
+      "file": "10d/camp-shelter-awning-post-a--aa2db2b63937.10d",
+      "bytes": 900,
+      "sha256": "aa2db2b63937adda68fb5e0e200eaa56c939e6166e63153e3ea959df6eb972df"
+    },
+    {
+      "id": "rc:asset/camp-shelter-awning-post-b",
+      "file": "10d/camp-shelter-awning-post-b--62fa56aa9e36.10d",
+      "bytes": 892,
+      "sha256": "62fa56aa9e367d2d27996659c322248d240ee2339854d7ae409fc02e1b443dda"
+    },
+    {
+      "id": "rc:asset/camp-shelter-awning-post-b",
+      "file": "10d/camp-shelter-awning-post-b--8277f93ff7b7.10d",
+      "bytes": 896,
+      "sha256": "8277f93ff7b728866773480587b83209f2e050f0ba606749aee43641ff3408f8"
+    },
+    {
+      "id": "rc:asset/camp-shelter-awning-post-b",
+      "file": "10d/camp-shelter-awning-post-b--a64850098fe8.10d",
+      "bytes": 896,
+      "sha256": "a64850098fe848d3b96c88712f86723bfcbab5a5dc65a37532dee675bdcbd733"
+    },
+    {
+      "id": "rc:asset/camp-shelter-band",
+      "file": "10d/camp-shelter-band--2754f4d11406.10d",
+      "bytes": 1952,
+      "sha256": "2754f4d11406da6344ede1d289e9f109a7682df2c396a852c30719f4543583d3"
+    },
+    {
+      "id": "rc:asset/camp-shelter-band",
+      "file": "10d/camp-shelter-band--f68463fde21c.10d",
+      "bytes": 1952,
+      "sha256": "f68463fde21cf3fbfb16c3195beec5cbe90e8a3854f61f08e3a192577b21fd9b"
+    },
+    {
+      "id": "rc:asset/camp-shelter-band",
+      "file": "10d/camp-shelter-band--f72d17b6c849.10d",
+      "bytes": 1952,
+      "sha256": "f72d17b6c849d16d9471527fe25bbe14c37dd71a316c0b41eb1cea9fa39f899b"
+    },
+    {
+      "id": "rc:asset/camp-shelter-chassis",
+      "file": "10d/camp-shelter-chassis--4ea90c21600a.10d",
+      "bytes": 772,
+      "sha256": "4ea90c21600a3ca29d89058b58261c82eebf036712ad0702d42ac481f6a3d219"
+    },
+    {
+      "id": "rc:asset/camp-shelter-chassis",
+      "file": "10d/camp-shelter-chassis--632926196e67.10d",
+      "bytes": 772,
+      "sha256": "632926196e67a4d4a207c6821c1387aca488c78507cf095e272719e122a891d5"
+    },
+    {
+      "id": "rc:asset/camp-shelter-chassis",
+      "file": "10d/camp-shelter-chassis--d0ce16a0843a.10d",
+      "bytes": 772,
+      "sha256": "d0ce16a0843abd618bff6f72f1d3ce4c91df13130497e58bba9e054e038307e7"
+    },
+    {
+      "id": "rc:asset/camp-shelter-door",
+      "file": "10d/camp-shelter-door--0529ca90e8af.10d",
+      "bytes": 596,
+      "sha256": "0529ca90e8affdb9fa00ea021b3cc24b83665d5cfbbe69bfb78c8778cb9bb394"
+    },
+    {
+      "id": "rc:asset/camp-shelter-door",
+      "file": "10d/camp-shelter-door--5fafc9992e57.10d",
+      "bytes": 596,
+      "sha256": "5fafc9992e579a51f1725767df99930f07c5c676a365fb67ff65765de75cc330"
+    },
+    {
+      "id": "rc:asset/camp-shelter-door",
+      "file": "10d/camp-shelter-door--c156bb6c6cf9.10d",
+      "bytes": 596,
+      "sha256": "c156bb6c6cf91bdce1f02c7c4e2165dde0d03402ce5a24561e52a3567ca0abc4"
+    },
+    {
+      "id": "rc:asset/camp-shelter-hitch",
+      "file": "10d/camp-shelter-hitch--4b82131f04c8.10d",
+      "bytes": 772,
+      "sha256": "4b82131f04c8dfa109e33bf9b7819f20075ec8b540908b6f5811930fa30dd70b"
+    },
+    {
+      "id": "rc:asset/camp-shelter-hitch",
+      "file": "10d/camp-shelter-hitch--921be3201838.10d",
+      "bytes": 772,
+      "sha256": "921be3201838cbb10e4c35c0162f1b5a14ff0bb4f9ed079fc0e50ec0297cc0bd"
+    },
+    {
+      "id": "rc:asset/camp-shelter-hitch",
+      "file": "10d/camp-shelter-hitch--ae854b4c0e99.10d",
+      "bytes": 772,
+      "sha256": "ae854b4c0e9904d3ef8f5246a9c8c533a1a62c295a079ce58cce64877e889dc6"
+    },
+    {
+      "id": "rc:asset/camp-shelter-wheel-port",
+      "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+      "bytes": 1148,
+      "sha256": "5d8e380f9616d1d1319c7426ee0120f1166d8de01a2785acc4bab8d6712f6d0f"
+    },
+    {
+      "id": "rc:asset/camp-shelter-wheel-starboard",
+      "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+      "bytes": 1148,
+      "sha256": "ca8ead03841adac76dd32c1bed33f55638f63e5edacc1241f71c5978b6ca0536"
+    },
+    {
+      "id": "rc:asset/camp-shelter-windows",
+      "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+      "bytes": 1128,
+      "sha256": "3b21cc6fa216d1b7f34f860d8920ae5d5a586667e13e003d8ac80f32a497cb95"
     },
     {
       "id": "rc:asset/canal-boat",
@@ -748,9 +952,9 @@
     },
     {
       "id": "rc:asset/kestrel-shrub-camp",
-      "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+      "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
       "bytes": 2472,
-      "sha256": "ecab8340ee004ab425bb7f272db964cbbfad2ea96dac496f274c6d242aabf480"
+      "sha256": "e69dc5b3595400ad15be7225b81394f3d12a83d7f52b786ee1a33686a6f381f7"
     },
     {
       "id": "rc:asset/kestrel-shrub-garden",
@@ -826,15 +1030,15 @@
     },
     {
       "id": "rc:asset/market-canopy",
-      "file": "10d/market-canopy--5bd1c17ad51b.10d",
-      "bytes": 948,
-      "sha256": "5bd1c17ad51b54b43394ce310796fd478637f3969b0d452572c00bf12fb03b6b"
+      "file": "10d/market-canopy--705485bc01b9.10d",
+      "bytes": 1240,
+      "sha256": "705485bc01b911f8cb17ca5910925901b1a85728189dcc63869cc26171391ca7"
     },
     {
       "id": "rc:asset/market-canopy-cream",
-      "file": "10d/market-canopy-cream--0de6fba32921.10d",
+      "file": "10d/market-canopy-cream--5193954f716a.10d",
       "bytes": 948,
-      "sha256": "0de6fba32921a636d779aa7db09f4bb27d0a4223a41a8346f966e1c95b99a899"
+      "sha256": "5193954f716a301753248378e8fdcffa1477725934bc582c13f3ebde46fcaed6"
     },
     {
       "id": "rc:asset/market-display-baskets",
@@ -850,9 +1054,9 @@
     },
     {
       "id": "rc:asset/market-stall",
-      "file": "10d/market-stall--0aeb0f481822.10d",
-      "bytes": 904,
-      "sha256": "0aeb0f48182263b6022013482fe4324da55d55a432658f7f6f717f4148ada12d"
+      "file": "10d/market-stall--eb2a329fa701.10d",
+      "bytes": 772,
+      "sha256": "eb2a329fa701d64733c925566d34b4e99952caca772b63585edb930849d2289f"
     },
     {
       "id": "rc:asset/mast-node",
@@ -1113,6 +1317,78 @@
       "sha256": "3ac2d3ec3bcf4aa591c3e37943b9f9272a4a8d04297929a87b3ed4fcd3009146"
     },
     {
+      "id": "rc:asset/resident-eve-arms",
+      "file": "10d/resident-eve-arms--34a2f7863039.10d",
+      "bytes": 772,
+      "sha256": "34a2f7863039a8f0ec8b0315dc57348e857a86d80f38f0e726f06bf904da665c"
+    },
+    {
+      "id": "rc:asset/resident-eve-boots",
+      "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+      "bytes": 772,
+      "sha256": "4960c2ea60a5958c4880b717afce9e3f201579794199289449b5b14c11acaa1e"
+    },
+    {
+      "id": "rc:asset/resident-eve-coat",
+      "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+      "bytes": 2504,
+      "sha256": "ace02577a3ee56ee5727fd01ff62919a3c4091e5940d0d91247fd26e88bc3043"
+    },
+    {
+      "id": "rc:asset/resident-eve-face",
+      "file": "10d/resident-eve-face--2653a7a44b93.10d",
+      "bytes": 772,
+      "sha256": "2653a7a44b93cdb5e9c2513ee9ec3dd583096afa8594d8842223eaeb395567a4"
+    },
+    {
+      "id": "rc:asset/resident-eve-hair",
+      "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+      "bytes": 2460,
+      "sha256": "d0baf24bf976ba4b32c401da9001e43309dcfd18abf234f34fc29bec49f422b9"
+    },
+    {
+      "id": "rc:asset/resident-eve-head",
+      "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+      "bytes": 2456,
+      "sha256": "8f16e0a5c4ba677c3745419664c6b2675bfe735dbffb1735ce0ef0531a0a0bc1"
+    },
+    {
+      "id": "rc:asset/resident-finn-arms",
+      "file": "10d/resident-finn-arms--643e3c90a147.10d",
+      "bytes": 772,
+      "sha256": "643e3c90a14731d35af314c98e4e164c8fd56d5c4ac5c871748d0e258aadb78f"
+    },
+    {
+      "id": "rc:asset/resident-finn-boots",
+      "file": "10d/resident-finn-boots--f258e5650319.10d",
+      "bytes": 772,
+      "sha256": "f258e5650319d217c0db1303c95ec5663b44bdb7fc1d32fdbb2805d1255adca9"
+    },
+    {
+      "id": "rc:asset/resident-finn-coat",
+      "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+      "bytes": 2504,
+      "sha256": "5cc7b64dbdadea03b8e10bc81080862e3bd2bcf74336b0696d47dd87e0ab6917"
+    },
+    {
+      "id": "rc:asset/resident-finn-face",
+      "file": "10d/resident-finn-face--4e368781ceea.10d",
+      "bytes": 772,
+      "sha256": "4e368781ceea8fddd03b65b35471b62f99cc49f2550ebb105c03d02e7cefb7a5"
+    },
+    {
+      "id": "rc:asset/resident-finn-hair",
+      "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
+      "bytes": 2464,
+      "sha256": "a89af6fa80f1ce0fc4d8605aad98e7de01638e00aad111c605c01b3f6fb80391"
+    },
+    {
+      "id": "rc:asset/resident-finn-head",
+      "file": "10d/resident-finn-head--45163d58df80.10d",
+      "bytes": 2456,
+      "sha256": "45163d58df807166d56e502f3d2646a8834e82630854955fb21ddacaf2243f4d"
+    },
+    {
       "id": "rc:asset/ridge-boulder-east",
       "file": "10d/ridge-boulder-east--aa0c6139ded5.10d",
       "bytes": 2480,
@@ -1270,15 +1546,15 @@
     },
     {
       "id": "rc:asset/saltwind-market",
-      "file": "10d/saltwind-market--830fcf1d5511.10d",
-      "bytes": 728,
-      "sha256": "830fcf1d5511fc54da5463c5408acabbf51bb7aa398d807c30963679f1702ade"
+      "file": "10d/saltwind-market--5c050161d410.10d",
+      "bytes": 596,
+      "sha256": "5c050161d4100ee6775eb80f1197f2447f4c57e5de219246d9169af98b160578"
     },
     {
       "id": "rc:asset/saltwind-market-awning",
-      "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
-      "bytes": 596,
-      "sha256": "aa558d6ffb7432976941502d10c30261759432cd432cd0936a3e70d8ae583336"
+      "file": "10d/saltwind-market-awning--8669919a5732.10d",
+      "bytes": 1240,
+      "sha256": "8669919a5732eaabac5ef6ef32377d5e6a9359751f526cf55b3fc4f9453c8912"
     },
     {
       "id": "rc:asset/saltwind-market-stripes",
@@ -1384,27 +1660,27 @@
     },
     {
       "id": "rc:asset/solar-array",
-      "file": "10d/solar-array--5ace11f6ff5a.10d",
-      "bytes": 772,
-      "sha256": "5ace11f6ff5ac8de8dc08ddeb7fc248785da34f6e7edc51d2e26fcf94dec57fd"
+      "file": "10d/solar-array--4f1c04d70833.10d",
+      "bytes": 1580,
+      "sha256": "4f1c04d708333b3a3724703df6810f9a29ea5482621e8e7ff02813ee48fb3dae"
     },
     {
       "id": "rc:asset/solar-array",
-      "file": "10d/solar-array--60084b2cba47.10d",
-      "bytes": 596,
-      "sha256": "60084b2cba4715248084355e6fe71f4af417202a64ae3aadbea7c9596b9bb775"
+      "file": "10d/solar-array--b5a82a4d1115.10d",
+      "bytes": 1028,
+      "sha256": "b5a82a4d111570b7e7febb1c8f65bf25fabba02cbe0dbf2d0ddb5742b3923fe9"
     },
     {
       "id": "rc:asset/solar-cells",
-      "file": "10d/solar-cells--6f8f1af1009e.10d",
-      "bytes": 1480,
-      "sha256": "6f8f1af1009efe93f4b31ec71d1fcf295a961da904152e3a23494250bdd1cfd2"
+      "file": "10d/solar-cells--6472d5801ed7.10d",
+      "bytes": 1032,
+      "sha256": "6472d5801ed7f3bf8f773037baac5fab3133620f0ffb6a961b6c67b47a008480"
     },
     {
       "id": "rc:asset/solar-cells",
-      "file": "10d/solar-cells--74c35f2e86c8.10d",
-      "bytes": 948,
-      "sha256": "74c35f2e86c8efdb54ffa2eb1299c3b0974b7bc121c67d4b1fdfc58a0e1fc08b"
+      "file": "10d/solar-cells--6cedd83d2a1c.10d",
+      "bytes": 756,
+      "sha256": "6cedd83d2a1cf244e9a97712796f23f806a3c10b61c7670404bcb62817ddc12d"
     },
     {
       "id": "rc:asset/street-globe-east",
@@ -1702,9 +1978,15 @@
     },
     {
       "id": "rc:asset/workshop-chimney",
-      "file": "10d/workshop-chimney--535083070010.10d",
-      "bytes": 772,
-      "sha256": "535083070010b8065aa263d9f1619a2ee2d3e28749f42275d5a192905078c6d3"
+      "file": "10d/workshop-chimney--92ee6da09cd5.10d",
+      "bytes": 1068,
+      "sha256": "92ee6da09cd5d4156de39ef6cf53e3006395fdf543a21191239c84fca07a3b3a"
+    },
+    {
+      "id": "rc:asset/workshop-chimney-cap",
+      "file": "10d/workshop-chimney-cap--255016630621.10d",
+      "bytes": 596,
+      "sha256": "255016630621fedf61510f8eb74a39ba9c7958142067775ee33e1143d84c5176"
     },
     {
       "id": "rc:asset/workshop-door-glow",
@@ -1813,11 +2095,111 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--9b30cd0f0fe8.10d",
+          "file": "10d/camp-shelter--df911f60fba5.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--2754f4d11406.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--632926196e67.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--921be3201838.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--0529ca90e8af.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--b58e7bcc5a4b.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--3b029a82b674.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--a64850098fe8.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
             1
           ]
         },
@@ -1828,6 +2210,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -1863,11 +2325,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -1883,7 +2355,7 @@
         },
         {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -2163,7 +2635,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -2263,7 +2735,7 @@
         },
         {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -2273,7 +2745,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -3302,6 +3774,126 @@
           ]
         },
         {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/flower-a",
           "file": "10d/flower-a--03ecee142860.10d",
           "rgba": [
@@ -3883,7 +4475,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -3893,7 +4485,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,
@@ -4348,11 +4940,121 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--ace1b784ead8.10d",
+          "file": "10d/camp-shelter--4cbdd84bab44.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--f72d17b6c849.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--d0ce16a0843a.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--4b82131f04c8.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--5fafc9992e57.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--b21b3a7fda74.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--aa2db2b63937.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--62fa56aa9e36.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-annex",
+          "file": "10d/camp-shelter-annex--0ff0f565ed79.10d",
+          "rgba": [
+            0.6464182138442993,
+            0.6348262429237366,
+            0.5069542527198792,
             1
           ]
         },
@@ -4363,6 +5065,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -4398,11 +5180,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -4418,7 +5210,7 @@
         },
         {
           "id": "rc:asset/solar-array",
-          "file": "10d/solar-array--60084b2cba47.10d",
+          "file": "10d/solar-array--b5a82a4d1115.10d",
           "rgba": [
             0.23608040809631348,
             0.31304842233657837,
@@ -4427,8 +5219,18 @@
           ]
         },
         {
+          "id": "rc:asset/solar-cells",
+          "file": "10d/solar-cells--6cedd83d2a1c.10d",
+          "rgba": [
+            0.30834537744522095,
+            0.5447213649749756,
+            0.6589134335517883,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -4708,7 +5510,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -4807,18 +5609,8 @@
           ]
         },
         {
-          "id": "rc:asset/solar-cells",
-          "file": "10d/solar-cells--74c35f2e86c8.10d",
-          "rgba": [
-            0.30834537744522095,
-            0.5447213649749756,
-            0.6589134335517883,
-            1
-          ]
-        },
-        {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -4828,7 +5620,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -5937,6 +6729,126 @@
           ]
         },
         {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/flower-a",
           "file": "10d/flower-a--03ecee142860.10d",
           "rgba": [
@@ -6518,7 +7430,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -6528,7 +7440,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,
@@ -6983,11 +7895,121 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--ace1b784ead8.10d",
+          "file": "10d/camp-shelter--4cbdd84bab44.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--f72d17b6c849.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--d0ce16a0843a.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--4b82131f04c8.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--5fafc9992e57.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--b21b3a7fda74.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--aa2db2b63937.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--62fa56aa9e36.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-annex",
+          "file": "10d/camp-shelter-annex--0ff0f565ed79.10d",
+          "rgba": [
+            0.6464182138442993,
+            0.6348262429237366,
+            0.5069542527198792,
             1
           ]
         },
@@ -6998,6 +8020,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -7033,11 +8135,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -7053,7 +8165,7 @@
         },
         {
           "id": "rc:asset/solar-array",
-          "file": "10d/solar-array--5ace11f6ff5a.10d",
+          "file": "10d/solar-array--4f1c04d70833.10d",
           "rgba": [
             0.23608040809631348,
             0.31304842233657837,
@@ -7062,8 +8174,18 @@
           ]
         },
         {
+          "id": "rc:asset/solar-cells",
+          "file": "10d/solar-cells--6472d5801ed7.10d",
+          "rgba": [
+            0.30834537744522095,
+            0.5447213649749756,
+            0.6589134335517883,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -7343,7 +8465,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -7442,18 +8564,8 @@
           ]
         },
         {
-          "id": "rc:asset/solar-cells",
-          "file": "10d/solar-cells--6f8f1af1009e.10d",
-          "rgba": [
-            0.30834537744522095,
-            0.5447213649749756,
-            0.6589134335517883,
-            1
-          ]
-        },
-        {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -7463,7 +8575,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -8572,6 +9684,126 @@
           ]
         },
         {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/flower-a",
           "file": "10d/flower-a--03ecee142860.10d",
           "rgba": [
@@ -9153,7 +10385,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -9163,7 +10395,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,
@@ -9618,11 +10850,121 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--ace1b784ead8.10d",
+          "file": "10d/camp-shelter--4cbdd84bab44.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--f72d17b6c849.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--d0ce16a0843a.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--4b82131f04c8.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--5fafc9992e57.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--b21b3a7fda74.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--aa2db2b63937.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--62fa56aa9e36.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-annex",
+          "file": "10d/camp-shelter-annex--0ff0f565ed79.10d",
+          "rgba": [
+            0.6464182138442993,
+            0.6348262429237366,
+            0.5069542527198792,
             1
           ]
         },
@@ -9633,6 +10975,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -9668,11 +11090,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -9688,7 +11120,7 @@
         },
         {
           "id": "rc:asset/solar-array",
-          "file": "10d/solar-array--5ace11f6ff5a.10d",
+          "file": "10d/solar-array--4f1c04d70833.10d",
           "rgba": [
             0.23608040809631348,
             0.31304842233657837,
@@ -9697,8 +11129,18 @@
           ]
         },
         {
+          "id": "rc:asset/solar-cells",
+          "file": "10d/solar-cells--6472d5801ed7.10d",
+          "rgba": [
+            0.30834537744522095,
+            0.5447213649749756,
+            0.6589134335517883,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -9988,7 +11430,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -10087,18 +11529,8 @@
           ]
         },
         {
-          "id": "rc:asset/solar-cells",
-          "file": "10d/solar-cells--6f8f1af1009e.10d",
-          "rgba": [
-            0.30834537744522095,
-            0.5447213649749756,
-            0.6589134335517883,
-            1
-          ]
-        },
-        {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -10108,7 +11540,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -11209,6 +12641,126 @@
         {
           "id": "rc:asset/resident-dev-hair",
           "file": "10d/resident-dev-hair--c01537724790.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
           "rgba": [
             0.28522464632987976,
             0.27363264560699463,
@@ -11798,7 +13350,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -11808,7 +13360,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,
@@ -12263,11 +13815,121 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--ace1b784ead8.10d",
+          "file": "10d/camp-shelter--4cbdd84bab44.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--f72d17b6c849.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--d0ce16a0843a.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--4b82131f04c8.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--5fafc9992e57.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--b21b3a7fda74.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--aa2db2b63937.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--62fa56aa9e36.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-annex",
+          "file": "10d/camp-shelter-annex--0ff0f565ed79.10d",
+          "rgba": [
+            0.6464182138442993,
+            0.6348262429237366,
+            0.5069542527198792,
             1
           ]
         },
@@ -12278,6 +13940,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -12313,11 +14055,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -12333,7 +14085,7 @@
         },
         {
           "id": "rc:asset/solar-array",
-          "file": "10d/solar-array--5ace11f6ff5a.10d",
+          "file": "10d/solar-array--4f1c04d70833.10d",
           "rgba": [
             0.23608040809631348,
             0.31304842233657837,
@@ -12342,8 +14094,18 @@
           ]
         },
         {
+          "id": "rc:asset/solar-cells",
+          "file": "10d/solar-cells--6472d5801ed7.10d",
+          "rgba": [
+            0.30834537744522095,
+            0.5447213649749756,
+            0.6589134335517883,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -12623,7 +14385,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -12722,18 +14484,8 @@
           ]
         },
         {
-          "id": "rc:asset/solar-cells",
-          "file": "10d/solar-cells--6f8f1af1009e.10d",
-          "rgba": [
-            0.30834537744522095,
-            0.5447213649749756,
-            0.6589134335517883,
-            1
-          ]
-        },
-        {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -12743,7 +14495,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -13844,6 +15596,126 @@
         {
           "id": "rc:asset/resident-dev-hair",
           "file": "10d/resident-dev-hair--c01537724790.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
           "rgba": [
             0.28522464632987976,
             0.27363264560699463,
@@ -14433,7 +16305,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -14443,7 +16315,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,
@@ -14898,11 +16770,121 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--ace1b784ead8.10d",
+          "file": "10d/camp-shelter--4cbdd84bab44.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--f72d17b6c849.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--d0ce16a0843a.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--4b82131f04c8.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--5fafc9992e57.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--b21b3a7fda74.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--aa2db2b63937.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--62fa56aa9e36.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-annex",
+          "file": "10d/camp-shelter-annex--0ff0f565ed79.10d",
+          "rgba": [
+            0.6464182138442993,
+            0.6348262429237366,
+            0.5069542527198792,
             1
           ]
         },
@@ -14913,6 +16895,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -14948,11 +17010,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -14968,7 +17040,7 @@
         },
         {
           "id": "rc:asset/solar-array",
-          "file": "10d/solar-array--5ace11f6ff5a.10d",
+          "file": "10d/solar-array--4f1c04d70833.10d",
           "rgba": [
             0.23608040809631348,
             0.31304842233657837,
@@ -14977,8 +17049,18 @@
           ]
         },
         {
+          "id": "rc:asset/solar-cells",
+          "file": "10d/solar-cells--6472d5801ed7.10d",
+          "rgba": [
+            0.30834537744522095,
+            0.5447213649749756,
+            0.6589134335517883,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -15258,7 +17340,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -15357,18 +17439,8 @@
           ]
         },
         {
-          "id": "rc:asset/solar-cells",
-          "file": "10d/solar-cells--6f8f1af1009e.10d",
-          "rgba": [
-            0.30834537744522095,
-            0.5447213649749756,
-            0.6589134335517883,
-            1
-          ]
-        },
-        {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -15378,7 +17450,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -16479,6 +18551,126 @@
         {
           "id": "rc:asset/resident-dev-hair",
           "file": "10d/resident-dev-hair--c01537724790.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
           "rgba": [
             0.28522464632987976,
             0.27363264560699463,
@@ -17078,7 +19270,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -17088,7 +19280,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,
@@ -17543,11 +19735,121 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--ace1b784ead8.10d",
+          "file": "10d/camp-shelter--4cbdd84bab44.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--f72d17b6c849.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--d0ce16a0843a.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--4b82131f04c8.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--5fafc9992e57.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--b21b3a7fda74.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--aa2db2b63937.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--62fa56aa9e36.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-annex",
+          "file": "10d/camp-shelter-annex--0ff0f565ed79.10d",
+          "rgba": [
+            0.6464182138442993,
+            0.6348262429237366,
+            0.5069542527198792,
             1
           ]
         },
@@ -17558,6 +19860,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -17593,11 +19975,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -17613,7 +20005,7 @@
         },
         {
           "id": "rc:asset/solar-array",
-          "file": "10d/solar-array--5ace11f6ff5a.10d",
+          "file": "10d/solar-array--4f1c04d70833.10d",
           "rgba": [
             0.23608040809631348,
             0.31304842233657837,
@@ -17622,8 +20014,18 @@
           ]
         },
         {
+          "id": "rc:asset/solar-cells",
+          "file": "10d/solar-cells--6472d5801ed7.10d",
+          "rgba": [
+            0.30834537744522095,
+            0.5447213649749756,
+            0.6589134335517883,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -17903,7 +20305,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -18002,18 +20404,8 @@
           ]
         },
         {
-          "id": "rc:asset/solar-cells",
-          "file": "10d/solar-cells--6f8f1af1009e.10d",
-          "rgba": [
-            0.30834537744522095,
-            0.5447213649749756,
-            0.6589134335517883,
-            1
-          ]
-        },
-        {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -18023,7 +20415,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -19124,6 +21516,126 @@
         {
           "id": "rc:asset/resident-dev-hair",
           "file": "10d/resident-dev-hair--c01537724790.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
           "rgba": [
             0.28522464632987976,
             0.27363264560699463,
@@ -19723,7 +22235,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -19733,7 +22245,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,
@@ -20188,11 +22700,121 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--66260ee60499.10d",
+          "file": "10d/camp-shelter--3df6900292b7.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--f68463fde21c.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--4ea90c21600a.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--ae854b4c0e99.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--c156bb6c6cf9.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--bf105fc272f6.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--a865e4b09bf4.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--8277f93ff7b7.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-annex",
+          "file": "10d/camp-shelter-annex--a59d077abadd.10d",
+          "rgba": [
+            0.6464182138442993,
+            0.6348262429237366,
+            0.5069542527198792,
             1
           ]
         },
@@ -20203,6 +22825,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -20238,11 +22940,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -20258,7 +22970,7 @@
         },
         {
           "id": "rc:asset/solar-array",
-          "file": "10d/solar-array--5ace11f6ff5a.10d",
+          "file": "10d/solar-array--4f1c04d70833.10d",
           "rgba": [
             0.23608040809631348,
             0.31304842233657837,
@@ -20267,8 +22979,18 @@
           ]
         },
         {
+          "id": "rc:asset/solar-cells",
+          "file": "10d/solar-cells--6472d5801ed7.10d",
+          "rgba": [
+            0.30834537744522095,
+            0.5447213649749756,
+            0.6589134335517883,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -20558,7 +23280,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -20657,18 +23379,8 @@
           ]
         },
         {
-          "id": "rc:asset/solar-cells",
-          "file": "10d/solar-cells--6f8f1af1009e.10d",
-          "rgba": [
-            0.30834537744522095,
-            0.5447213649749756,
-            0.6589134335517883,
-            1
-          ]
-        },
-        {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -20678,7 +23390,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -21787,6 +24499,126 @@
           ]
         },
         {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/flower-a",
           "file": "10d/flower-a--03ecee142860.10d",
           "rgba": [
@@ -22378,7 +25210,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -22388,7 +25220,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,
@@ -22863,11 +25695,121 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--66260ee60499.10d",
+          "file": "10d/camp-shelter--3df6900292b7.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--f68463fde21c.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--4ea90c21600a.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--ae854b4c0e99.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--c156bb6c6cf9.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--bf105fc272f6.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--a865e4b09bf4.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--8277f93ff7b7.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-annex",
+          "file": "10d/camp-shelter-annex--a59d077abadd.10d",
+          "rgba": [
+            0.6464182138442993,
+            0.6348262429237366,
+            0.5069542527198792,
             1
           ]
         },
@@ -22878,6 +25820,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -22913,11 +25935,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -22933,7 +25965,7 @@
         },
         {
           "id": "rc:asset/solar-array",
-          "file": "10d/solar-array--5ace11f6ff5a.10d",
+          "file": "10d/solar-array--4f1c04d70833.10d",
           "rgba": [
             0.23608040809631348,
             0.31304842233657837,
@@ -22942,8 +25974,18 @@
           ]
         },
         {
+          "id": "rc:asset/solar-cells",
+          "file": "10d/solar-cells--6472d5801ed7.10d",
+          "rgba": [
+            0.30834537744522095,
+            0.5447213649749756,
+            0.6589134335517883,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -23233,7 +26275,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -23332,18 +26374,8 @@
           ]
         },
         {
-          "id": "rc:asset/solar-cells",
-          "file": "10d/solar-cells--6f8f1af1009e.10d",
-          "rgba": [
-            0.30834537744522095,
-            0.5447213649749756,
-            0.6589134335517883,
-            1
-          ]
-        },
-        {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -23353,7 +26385,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -24462,6 +27494,126 @@
           ]
         },
         {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/flower-a",
           "file": "10d/flower-a--03ecee142860.10d",
           "rgba": [
@@ -25053,7 +28205,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -25063,7 +28215,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,
@@ -25548,11 +28700,111 @@
         },
         {
           "id": "rc:asset/camp-shelter",
-          "file": "10d/camp-shelter--9b30cd0f0fe8.10d",
+          "file": "10d/camp-shelter--df911f60fba5.10d",
           "rgba": [
-            0.8231282234191895,
-            0.5458561778068542,
-            0.4179842174053192,
+            0.8945797681808472,
+            0.8475637435913086,
+            0.7846357822418213,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-band",
+          "file": "10d/camp-shelter-band--2754f4d11406.10d",
+          "rgba": [
+            0.7469863295555115,
+            0.46971431374549866,
+            0.3064183294773102,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-chassis",
+          "file": "10d/camp-shelter-chassis--632926196e67.10d",
+          "rgba": [
+            0.311687707901001,
+            0.28238368034362793,
+            0.2548796832561493,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-port",
+          "file": "10d/camp-shelter-wheel-port--5d8e380f9616.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-wheel-starboard",
+          "file": "10d/camp-shelter-wheel-starboard--ca8ead03841a.10d",
+          "rgba": [
+            0.2136780023574829,
+            0.18437400460243225,
+            0.162773996591568,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-hitch",
+          "file": "10d/camp-shelter-hitch--921be3201838.10d",
+          "rgba": [
+            0.4592876434326172,
+            0.4299837052822113,
+            0.4024796783924103,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-windows",
+          "file": "10d/camp-shelter-windows--3b21cc6fa216.10d",
+          "rgba": [
+            0.3892892003059387,
+            0.4426411986351013,
+            0.480081170797348,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-door",
+          "file": "10d/camp-shelter-door--0529ca90e8af.10d",
+          "rgba": [
+            0.7294842600822449,
+            0.4404042661190033,
+            0.3125322163105011,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning",
+          "file": "10d/camp-shelter-awning--b58e7bcc5a4b.10d",
+          "rgba": [
+            0.9012184739112854,
+            0.8542024493217468,
+            0.7676584720611572,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-a",
+          "file": "10d/camp-shelter-awning-post-a--3b029a82b674.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shelter-awning-post-b",
+          "file": "10d/camp-shelter-awning-post-b--a64850098fe8.10d",
+          "rgba": [
+            0.44288766384124756,
+            0.4135836958885193,
+            0.38607966899871826,
             1
           ]
         },
@@ -25563,6 +28815,86 @@
             0.5803295373916626,
             0.4211375117301941,
             0.31688153743743896,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-a",
+          "file": "10d/camp-shade-post-a--fee6f3b4de0d.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-b",
+          "file": "10d/camp-shade-post-b--2e9fc29fb2ee.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-c",
+          "file": "10d/camp-shade-post-c--6a61bf655862.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-d",
+          "file": "10d/camp-shade-post-d--444758907d9a.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-e",
+          "file": "10d/camp-shade-post-e--d79451f54cd8.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-post-f",
+          "file": "10d/camp-shade-post-f--bbf29288f550.10d",
+          "rgba": [
+            0.8742043972015381,
+            0.838996410369873,
+            0.7878764867782593,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-frame",
+          "file": "10d/camp-shade-frame--82e608f953b4.10d",
+          "rgba": [
+            0.40611231327056885,
+            0.3886163532733917,
+            0.37292033433914185,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/camp-shade-panels",
+          "file": "10d/camp-shade-panels--0ea78b3cec34.10d",
+          "rgba": [
+            0.24456247687339783,
+            0.2742984890937805,
+            0.3353544771671295,
             1
           ]
         },
@@ -25598,11 +28930,21 @@
         },
         {
           "id": "rc:asset/workshop-chimney",
-          "file": "10d/workshop-chimney--535083070010.10d",
+          "file": "10d/workshop-chimney--92ee6da09cd5.10d",
           "rgba": [
             0.6201880574226379,
             0.3901481032371521,
             0.3331240713596344,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/workshop-chimney-cap",
+          "file": "10d/workshop-chimney-cap--255016630621.10d",
+          "rgba": [
+            0.7964289784431458,
+            0.7730289697647095,
+            0.7337170839309692,
             1
           ]
         },
@@ -25618,7 +28960,7 @@
         },
         {
           "id": "rc:asset/market-stall",
-          "file": "10d/market-stall--0aeb0f481822.10d",
+          "file": "10d/market-stall--eb2a329fa701.10d",
           "rgba": [
             0.8491714000701904,
             0.6250354647636414,
@@ -25898,7 +29240,7 @@
         },
         {
           "id": "rc:asset/kestrel-shrub-camp",
-          "file": "10d/kestrel-shrub-camp--ecab8340ee00.10d",
+          "file": "10d/kestrel-shrub-camp--e69dc5b35954.10d",
           "rgba": [
             0.33040863275527954,
             0.5519126653671265,
@@ -25998,7 +29340,7 @@
         },
         {
           "id": "rc:asset/market-canopy",
-          "file": "10d/market-canopy--5bd1c17ad51b.10d",
+          "file": "10d/market-canopy--705485bc01b9.10d",
           "rgba": [
             0.6516926288604736,
             0.4401886463165283,
@@ -26008,7 +29350,7 @@
         },
         {
           "id": "rc:asset/market-canopy-cream",
-          "file": "10d/market-canopy-cream--0de6fba32921.10d",
+          "file": "10d/market-canopy-cream--5193954f716a.10d",
           "rgba": [
             0.7304971218109131,
             0.746657133102417,
@@ -27037,6 +30379,126 @@
           ]
         },
         {
+          "id": "rc:asset/resident-eve-coat",
+          "file": "10d/resident-eve-coat--ace02577a3ee.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-head",
+          "file": "10d/resident-eve-head--8f16e0a5c4ba.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-boots",
+          "file": "10d/resident-eve-boots--4960c2ea60a5.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-arms",
+          "file": "10d/resident-eve-arms--34a2f7863039.10d",
+          "rgba": [
+            0.7225437164306641,
+            0.4511757493019104,
+            0.3882477581501007,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-face",
+          "file": "10d/resident-eve-face--2653a7a44b93.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-eve-hair",
+          "file": "10d/resident-eve-hair--d0baf24bf976.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-coat",
+          "file": "10d/resident-finn-coat--5cc7b64dbdad.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-head",
+          "file": "10d/resident-finn-head--45163d58df80.10d",
+          "rgba": [
+            0.8348312377929688,
+            0.6579272747039795,
+            0.5123432874679565,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-boots",
+          "file": "10d/resident-finn-boots--f258e5650319.10d",
+          "rgba": [
+            0.3827718496322632,
+            0.3829878568649292,
+            0.43223583698272705,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-arms",
+          "file": "10d/resident-finn-arms--643e3c90a147.10d",
+          "rgba": [
+            0.49221885204315186,
+            0.5396668910980225,
+            0.4236028790473938,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-face",
+          "file": "10d/resident-finn-face--4e368781ceea.10d",
+          "rgba": [
+            0.2328495979309082,
+            0.2625855803489685,
+            0.2705056071281433,
+            1
+          ]
+        },
+        {
+          "id": "rc:asset/resident-finn-hair",
+          "file": "10d/resident-finn-hair--a89af6fa80f1.10d",
+          "rgba": [
+            0.28522464632987976,
+            0.27363264560699463,
+            0.2638406455516815,
+            1
+          ]
+        },
+        {
           "id": "rc:asset/flower-a",
           "file": "10d/flower-a--03ecee142860.10d",
           "rgba": [
@@ -27618,7 +31080,7 @@
         },
         {
           "id": "rc:asset/saltwind-market",
-          "file": "10d/saltwind-market--830fcf1d5511.10d",
+          "file": "10d/saltwind-market--5c050161d410.10d",
           "rgba": [
             0.8723183870315552,
             0.6954143643379211,
@@ -27628,7 +31090,7 @@
         },
         {
           "id": "rc:asset/saltwind-market-awning",
-          "file": "10d/saltwind-market-awning--aa558d6ffb74.10d",
+          "file": "10d/saltwind-market-awning--8669919a5732.10d",
           "rgba": [
             0.5197675824165344,
             0.6616795659065247,

@@ -10,14 +10,19 @@ on the final game's look.
 
 ## Selectable styles
 
-The in-game System panel offers Storybook and Earthlight. Storybook is the
-current bright palette. Earthlight is an initial warmer, more restrained study
-toward the animated-film target. The choice changes game-owned `.10d` surface
-readings and Qualia sky lighting; both styles have separate HMC packs. It is a
-presentation preference, independent of saved campaign state. Neither preset
-is a finished film look yet. Add future styles through the same style registry,
-asset authoring path and in-game selector, with a separate reviewed HMC per
-style. Let players preview the same place and camera pose when comparing them.
+The in-game System panel offers Storybook, Earthlight and Community
+Grounds. Storybook is the current bright palette. Earthlight is an initial
+warmer, more restrained study toward the animated-film target. Community
+Grounds carries the muted sage, olive, warm tan, terracotta and cream palette
+sampled from the civics.au community-ground concept illustration, with the
+camp rebuilt as a rounded home-on-wheels pod parked under a tilted solar
+shade structure. The choice changes game-owned `.10d` surface readings and
+Qualia sky lighting; each style has a separate HMC pack. It is a
+presentation preference, independent of saved campaign state. None of the
+presets is a finished film look yet. Add future styles through the same style
+registry, asset authoring path and in-game selector, with a separate
+reviewed HMC per style. Let players preview the same place and camera pose
+when comparing them.
 
 ## Target on screen
 
@@ -77,8 +82,9 @@ except for work separately authorised by the owner.
 
 ## Review gate
 
-The current 293-variant pack and 61/61 campaign checks prove packaging and
-gameplay compatibility, **not** film-quality art. Accept the visual target only
+The current 340-variant packs (one per style) and 61/61 campaign checks prove
+packaging and gameplay compatibility, **not** film-quality art. Accept the
+visual target only
 after the three reference frames show original polished characters,
 architecture, botany and terrain at actual game size; movement and material
 response are visible in the full Qualia WASM renderer; and the campaign,

@@ -212,7 +212,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = 'bd9e94d624358205-characters-5';
+const WASM_BUILD = '93e462b842bcc153-characters-5';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 const characters = await import(`./characters.mjs?v=${WASM_BUILD}`);
@@ -221,9 +221,10 @@ const {CHARACTER_NAMES,CHARACTER_ARCS,CHARACTER_TRAITS,CHARACTER_PLACES,characte
   nearbyRadius,walkSpeed,characterChapter,encodeCharacters,decodeCharacters}=characters;
 $('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
 
-const [SEED, ACTIONS, VIBE_SCENE] = await Promise.all(
-  ['fixtures/seed.ttl', 'fixtures/actions.json', 'fixtures/community-beacon.vibe']
+const [SEED, ACTIONS, VIBE_SCENE, INVESTMENT_TAXONOMY_TEXT] = await Promise.all(
+  ['fixtures/seed.ttl', 'fixtures/actions.json', 'fixtures/community-beacon.vibe', 'fixtures/investment-taxonomy.json']
     .map(async u => (await fetch(u, {cache:'no-store'})).text()));
+const INVESTMENT_TAXONOMY = JSON.parse(INVESTMENT_TAXONOMY_TEXT);
 $('vibe-scene').value = VIBE_SCENE.trim();
 let session = new m.GameSession(SEED, ACTIONS);
 const catalog = JSON.parse(ACTIONS).actions;
@@ -261,33 +262,106 @@ function queueCharacterSave(){
 }
 
 // ---------- world doc → display facts (presentation only) ----------
-const triples = () => session.world().split('\n')
+const triples = (source=session) => source.world().split('\n')
   .map(l => l.trim().split(/\s+/)).filter(p => p.length >= 3)
   .map(p => ({ s:p[0], p:p[1], o:p[2].replace(/\.$/,'') }));
-const values = (s,p) => triples().filter(t => t.s===s && t.p===p).map(t => t.o);
+const values = (s,p,source=session) => triples(source).filter(t => t.s===s && t.p===p).map(t => t.o);
 const short = (t) => t.replace(/^rc:/,'').replace(/^ev:/,'ev:');
-const state = () => ({
-  coins:  values('rc:player','rc:coin').length,
-  labour: values('rc:player','rc:labourToken').length > 0,
-  held:   values('rc:player','rc:holdsPart'),
-  parts:  values('rc:solarProject','rc:partInstalled'),
-  approved: values('rc:solarProject','rc:approvedBy').length > 0,
-  online: values('rc:workshop','rc:status').includes('"online"'),
-  upgrades: values('rc:swag','rc:upgrade').length,
-  waterOnline: values('rc:waterTank','rc:status').includes('"online"'),
-  gardenActive: values('rc:garden','rc:status').includes('"growing"'),
-  signalOnline: values('rc:communicationsMast','rc:status').includes('"online"'),
-  remoteOrderDelivered: values('rc:communicationsMast','rc:deliveredOrder').length > 0,
-  bridgeOpen: values('rc:bridge','rc:status').includes('"passable"'),
-  bridgeBraced: values('rc:bridge','rc:bracedBy').length > 0,
-  pumpOnline: values('rc:windPump','rc:status').includes('"online"'),
-  orchardActive: values('rc:orchard','rc:status').includes('"growing"'),
-  harvestChoice: values('rc:orchard','rc:harvestChoice')[0] || '',
-  orchardHarvested: values('rc:orchard','rc:harvestChoice').length > 0,
-  orderDelivered: values('rc:workshop','rc:deliveredOrder').length > 0,
-  finale: values('rc:community','rc:finale')[0] || '',
-  day: values('rc:player','rc:turn').length + 1,
+const state = (source=session) => ({
+  coins:  values('rc:player','rc:coin',source).length,
+  labour: values('rc:player','rc:labourToken',source).length > 0,
+  held:   values('rc:player','rc:holdsPart',source),
+  parts:  values('rc:solarProject','rc:partInstalled',source),
+  supporters: values('rc:solarProject','rc:supportedBy',source).length,
+  committeeFormed: values('rc:solarProject','rc:committeeFormed',source).length>0,
+  scoped: values('rc:solarProject','rc:scoped',source).length>0,
+  grantStatus: values('rc:solarProject','rc:grantStatus',source)[0]||'',
+  fundingNarrativeUsed: values('rc:solarProject','rc:fundingNarrativeUsed',source).length>0,
+  fundingSource: values('rc:solarProject','rc:fundingSource',source)[0]||'',
+  fundingFailed: values('rc:solarProject','rc:fundingFailed',source).length>0,
+  procurementReady: values('rc:solarProject','rc:procurementReady',source).length>0,
+  fundingAvailable: values('rc:solarProject','rc:fundingAvailable',source).length>0,
+  fundingDisposition: values('rc:solarProject','rc:fundingDisposition',source).at(-1)||'',
+  historyRecorded: values('rc:player','rc:historyRecorded',source).length>0,
+  reviewStatus: values('rc:player','rc:reviewStatus',source)[0]||'',
+  housingStatus: values('rc:player','rc:housingStatus',source)[0]||'',
+  reputationStanding: values('rc:player','rc:reputationStanding',source)[0]||'',
+  communityRaised: values('rc:community','rc:raisedFunds',source).includes('rc:solarProject'),
+  publicised: values('rc:player','rc:publicised',source).length>0,
+  vendorEligible: values('rc:player','rc:vendorEligibleFor',source).includes('rc:solarProject'),
+  governmentFunds: values('rc:publicWorksDepartment','rc:funds',source).length,
+  governmentControlled: values('rc:solarProject','rc:controlledBy',source).includes('rc:publicWorksDepartment'),
+  politicalContract: values('rc:publicWorksDepartment','rc:contracted',source).includes('rc:politicalBacker'),
+  captureChallenge: values('rc:publicWorksDepartment','rc:challengeStatus',source)[0]||'',
+  capabilityLevel: values('rc:solarProject','rc:capabilityLevel',source).includes('"integrated"')?'integrated':values('rc:solarProject','rc:capabilityLevel',source).at(-1)||'',
+  crewTrained: values('rc:residentCrew','rc:learned',source).includes('rc:solarIntegration'),
+  knowledgeStatus: values('rc:solarProject','rc:knowledgeStatus',source).at(-1)||'',
+  maintenanceCapacity: values('rc:solarProject','rc:maintenanceCapacity',source).at(-1)||'',
+  committeeFunds: values('rc:committee','rc:funds',source).length,
+  earnedCredit: values('rc:solarProject','rc:creditGivenTo',source).includes('rc:player'),
+  creditWithheld: values('rc:solarProject','rc:creditWithheldFrom',source).includes('rc:player'),
+  approved: values('rc:solarProject','rc:approvedBy',source).length > 0,
+  online: values('rc:workshop','rc:status',source).includes('"online"'),
+  upgrades: values('rc:swag','rc:upgrade',source).length,
+  waterOnline: values('rc:waterTank','rc:status',source).includes('"online"'),
+  gardenActive: values('rc:garden','rc:status',source).includes('"growing"'),
+  signalOnline: values('rc:communicationsMast','rc:status',source).includes('"online"'),
+  remoteOrderDelivered: values('rc:communicationsMast','rc:deliveredOrder',source).length > 0,
+  bridgeOpen: values('rc:bridge','rc:status',source).includes('"passable"'),
+  bridgeBraced: values('rc:bridge','rc:bracedBy',source).length > 0,
+  pumpOnline: values('rc:windPump','rc:status',source).includes('"online"'),
+  orchardActive: values('rc:orchard','rc:status',source).includes('"growing"'),
+  harvestChoice: values('rc:orchard','rc:harvestChoice',source)[0] || '',
+  orchardHarvested: values('rc:orchard','rc:harvestChoice',source).length > 0,
+  orderDelivered: values('rc:workshop','rc:deliveredOrder',source).length > 0,
+  finale: values('rc:community','rc:finale',source)[0] || '',
+  day: values('rc:player','rc:turn',source).length + 1,
 });
+function measureInvestmentChoices(source=session){
+  const ids=toObj(source.events())||[],replay=new m.GameSession(SEED,ACTIONS),records=[];
+  for(const id of ids){
+    const before=state(replay),receipt=toObj(replay.propose(id)),after=state(replay);
+    if(!receipt.ok)continue;
+    const mapping=INVESTMENT_TAXONOMY.actionMappings[id]||{};
+    const personalCoinDelta=after.coins-before.coins,sharedCoinDelta=after.committeeFunds-before.committeeFunds;
+    const labourUsed=before.labour&&!after.labour;
+    const categoryIds=new Set(mapping.categories||[]);
+    if(personalCoinDelta||sharedCoinDelta)categoryIds.add('resource-investment').add('cost-and-opportunity-cost');
+    if(labourUsed)categoryIds.add('contribution-and-work').add('cost-and-opportunity-cost');
+    if(before.supporters!==after.supporters||before.committeeFormed!==after.committeeFormed||
+       before.fundingDisposition!==after.fundingDisposition||before.approved!==after.approved||
+       before.governmentControlled!==after.governmentControlled)categoryIds.add('control-and-governance');
+    if(before.waterOnline!==after.waterOnline||before.online!==after.online||before.upgrades!==after.upgrades||
+       before.gardenActive!==after.gardenActive||before.bridgeOpen!==after.bridgeOpen||
+       before.pumpOnline!==after.pumpOnline||before.orchardActive!==after.orchardActive||
+       before.crewTrained!==after.crewTrained||before.capabilityLevel!==after.capabilityLevel)
+      categoryIds.add('benefit-and-return').add('capacity-and-maintenance');
+    if(before.reviewStatus!==after.reviewStatus||before.publicised!==after.publicised||
+       before.reputationStanding!==after.reputationStanding||sharedCoinDelta<0)
+      categoryIds.add('risk-and-exposure');
+    const categoryLabels=[...categoryIds].map(key=>
+      INVESTMENT_TAXONOMY.categories.find(category=>category.id===key)?.label||key);
+    const changes=[];
+    if(before.supporters!==after.supporters)changes.push(`community support ${after.supporters-before.supporters>0?'+':''}${after.supporters-before.supporters}`);
+    if(before.waterOnline!==after.waterOnline)changes.push(after.waterOnline?'shared water enabled':'shared water lost');
+    if(before.online!==after.online)changes.push(after.online?'workshop enabled':'workshop unavailable');
+    if(before.upgrades!==after.upgrades)changes.push('shelter improved');
+    if(before.gardenActive!==after.gardenActive)changes.push('food growing');
+    if(before.fundingDisposition!==after.fundingDisposition&&after.fundingDisposition)changes.push(`project disposition ${after.fundingDisposition.replaceAll('"','')}`);
+    if(before.capabilityLevel!==after.capabilityLevel&&after.capabilityLevel)changes.push(`capability ${after.capabilityLevel.replaceAll('"','')}`);
+    if(before.crewTrained!==after.crewTrained&&after.crewTrained)changes.push('local crew trained');
+    records.push({
+      action:id,sequence:receipt.seq,day:before.day,
+      categories:categoryLabels.length?categoryLabels:['Other consequential choice'],
+      payer:mapping.payer||(personalCoinDelta<0||labourUsed?'player':sharedCoinDelta<0?'committee':'no direct resource spend'),
+      beneficiaries:mapping.beneficiaries||((before.waterOnline!==after.waterOnline||before.online!==after.online||before.gardenActive!==after.gardenActive)?['community','project']:[]),
+      personalCoinDelta,sharedCoinDelta,labourUsed,
+      costNarrative:mapping.costNarrative||`Observed resource changes: ${personalCoinDelta} personal coins, ${sharedCoinDelta} shared coins${labourUsed?' and one workday':''}.`,
+      outcomeChanges:changes,
+    });
+  }
+  return records;
+}
 
 const STORY = {
   repairTankLabour: 'The cistern has been dry for weeks. Salvage a fitting and get water moving before the next project.',
@@ -298,6 +372,26 @@ const STORY = {
   contributePanel: 'You have the panel. Fit it to the shared solar project so everyone can use the workshop.',
   contributeInverter: 'You have the inverter. Install it before asking the committee to approve the system.',
   requestApproval: 'Bring the installed work to the committee. The workshop needs a public decision, not just parts.',
+  canvassMara: 'Mara asks for guaranteed public workshop hours. Listen and record her concern before asking the committee to act.',
+  canvassEli: 'Eli asks who will maintain the system and account for grant money. His support takes another workday to earn.',
+  canvassSecondResident: 'Only one resident currently backs the proposal. Spend a day hearing another resident; a broader mandate improves the grant case.',
+  formCommittee: 'A resident has backed the proposal. Convene a committee with a mandate before it can accept or spend community money.',
+  scopeSolarProject: 'Spend two of your own coins and a workday documenting the scope, budget, access terms, and maintenance plan. This is unpaid preparation.',
+  submitGrant: 'Pay the application cost and submit. The grant decision is delayed until after rest; one supporter may not be enough.',
+  reviseGrant: 'The grant was declined. A second resident now backs the project; spend another day revising the application.',
+  hireFairly: 'The committee controls the grant after the chair used the disputed history to undermine your credibility with the funder. Fair procurement can still record and pay your present contribution; it does not restore your standing or repay earlier costs.',
+  appointInsider: 'The committee pays its chair’s associate for the wiring. Your equipment contribution can still help the community, but your work is uncredited and maintenance is left unfunded. The award and project control stay with the committee.',
+  mismanageGrant: 'The committee spends the grant without accounts. No installer is hired and the community receives no service.',
+  raiseCommunityFunds: 'The grant has failed or disappeared. Ask residents for another pool of contributions. Their money can restart the project, but the meetings cost time and the earlier unpaid work stays unpaid.',
+  selfFundProject: 'You can make the project move by putting in three scarce coins and another workday. That gets equipment moving; it does not reimburse your preparation or make the risk fair.',
+  recordAppropriation: 'You are unhoused and camping at Kestrel Flats. You initiated a water project because no one was addressing an unmet need. A later funding gap left unsafe access hours and harmed Mara. You take responsibility for starting the work and its effects, while who controlled or could fund maintenance remains disputed. You tried to repair the harm without funding. Now the committee is using your new plans while excluding you. Record what can be verified. These histories do not cancel each other out.',
+  seekPoliceReview: 'Take the record to local police. The complaint is assigned to an officer who has worked with the committee chair. The conflict is disclosed, but the review is closed without action; the project and your work remain in use.',
+  publiciseAppropriation: 'Put the documented reuse before the town. More people hear your account, but leaders call the dispute disruptive and some residents withdraw support. Visibility is not a finding of fact or a legal remedy.',
+  registerOriginatorVendor: 'Pay three coins and a workday for supplier registration, insurance and tax paperwork. The procurement barrier falls only after you pay; registration does not guarantee the contract.',
+  hireOriginator: 'The committee awards you the contract after you pay the registration cost yourself. This pays some current work and records your contribution, but cannot reimburse earlier unpaid preparation or restore standing.',
+  acceptGovernmentCapture: 'The department claims the project was already underway, takes the grant and control, and leaves you out of its account. The initiative may continue, but its authorship and decision power have shifted.',
+  delegateToPoliticalBacker: 'The department pays a politically connected contractor. The chair expects future political support; the contractor receives public money while your unpaid work stays uncredited and maintenance is unfunded.',
+  contestGovernmentCapture: 'You spend two coins and another workday challenging the takeover. After rest, the department dismisses the challenge and keeps control. The cost and reputational hit remain.',
   switchPowerOn: 'The system is fitted and endorsed. Switch it on to give the settlement repair capacity.',
   startGarden: 'Water is back. Plant the first beds so the town can grow food locally.',
   improveShelterLabour: 'A sound place to sleep matters. Use your own work to patch the shelter.',
@@ -319,19 +413,34 @@ function campaignLead(st) {
   if (st.finale) return {title:st.finale==='"commons"'?'The commons are open':'The canal is connected',
     copy:st.finale==='"commons"'?'You chose a local gathering and opened a shared place to celebrate the harvest.':'You chose a working trade link, carrying Saltwind’s produce to neighbouring communities.',
     label:'Campaign complete · explore the map', action:null, territory:'saltwind'};
+  if (!st.historyRecorded) return {title:'A project before the committee',copy:STORY.recordAppropriation,
+    label:st.labour?'Document the reuse and prior harm':'Rest for tomorrow',
+    action:st.labour?'recordAppropriation':'endTurn',territory:'kestrel'};
   if (!st.waterOnline) return {title:'First, restore shared water',copy:STORY.repairTankLabour,
     label:st.labour?'Repair the tank':'Rest for tomorrow',action:st.labour?'repairTankLabour':'endTurn',territory:'kestrel'};
   const heldPanel=st.held.includes('rc:partPanel'), heldInverter=st.held.includes('rc:partInverter');
   const fittedPanel=st.parts.includes('rc:partPanel'), fittedInverter=st.parts.includes('rc:partInverter');
   if (!st.online) {
     let action;
-    if (heldPanel) action='contributePanel';
+    if (!st.historyRecorded) action='recordAppropriation';
+    else if (!st.committeeFormed) action=st.supporters?'formCommittee':'canvassMara';
+    else if (!st.scoped) action='scopeSolarProject';
+    else if (st.fundingFailed) action=st.supporters<2?'canvassSecondResident':st.coins>=3?'selfFundProject':'raiseCommunityFunds';
+    else if (st.fundingAvailable&&!st.fundingDisposition) action=null;
+    else if (!st.grantStatus) action='submitGrant';
+    else if (st.grantStatus==="\"pending\"") action='endTurn';
+    else if (st.grantStatus==="\"declined\"") action=st.supporters<2?'canvassSecondResident':'reviseGrant';
+    else if (st.grantStatus==="\"awarded\""&&!st.fundingDisposition) action=null;
+    else if (!st.procurementReady) action=st.fundingFailed?'raiseCommunityFunds':null;
+    else if (heldPanel) action='contributePanel';
     else if (heldInverter) action='contributeInverter';
     else if (!fittedPanel) action=st.labour?'salvagePanel':st.coins>=4?'buyPanel':'endTurn';
     else if (!fittedInverter) action=st.coins>=7?'buyInverter':st.labour?'salvageInverter':'endTurn';
     else if (!st.approved) action='requestApproval';
     else action='switchPowerOn';
-    return {title:'Power the workshop',copy:STORY[action],label:catalog.find(a=>a.id===action)?.label||'Continue',action,territory:'kestrel'};
+    const title=!st.historyRecorded?'Document what happened before the next meeting':!st.committeeFormed?'Build a mandate before the project':!st.scoped?'Prepare the project':st.fundingDisposition==='"government-claimed"'?'The department controls the project':st.fundingFailed?'Recover from a failed funding path':!st.grantStatus?'Seek funding':st.grantStatus==="\"pending\""?'Wait for the grant decision':st.grantStatus==="\"declined\""?'Respond to the declined application':!st.fundingDisposition?'Choose who gets paid and who controls the work':'Power the workshop';
+  const copy=STORY[action]|| (st.fundingDisposition==='"government-claimed"'?'The department controls the funds and project. Delegate the contract to its political backer, or pay again to challenge the takeover; the review may still fail.':'Choose whether to pursue supplier registration, let the committee hire someone else, accept government control, or take another route. Each choice changes money, credit, service, and future relationships.');
+  return {title,copy,label:action?catalog.find(a=>a.id===action)?.label:'Choose a funding, procurement, or challenge path',action,territory:'kestrel'};
   }
   if (!st.gardenActive) return {title:'Grow local food',copy:STORY.startGarden,
     label:st.labour?'Plant the garden':'Rest for tomorrow',action:st.labour?'startGarden':'endTurn',territory:'kestrel'};
@@ -400,7 +509,7 @@ const SITE_ACTIONS = [
   ['salvagePanel','salvageInverter'],
   ['buyPanel','buyInverter'],
   ['contributePanel','contributeInverter','switchPowerOn','fulfilWorkshopOrder'],
-  ['requestApproval'],
+  ['canvassMara','canvassEli','canvassSecondResident','formCommittee','scopeSolarProject','submitGrant','reviseGrant','hireFairly','appointInsider','mismanageGrant','requestApproval'],
   ['repairTankCoins','repairTankLabour'],
   ['startGarden'],
   ['restoreBridge','braceBridge','restoreBridgeLateLabour','restoreBridgeLateCoins'],
@@ -449,9 +558,10 @@ hudCanvas.height = canvas.height;
 try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
 const portal = new m.GamePortal(canvas);
 const hud = new m.GameHud(hudCanvas);
-const ART_STYLES=['Storybook','Earthlight'];
+const ART_STYLES=['Storybook','Earthlight','Community Grounds'];
 let artStyle=0;
-try { artStyle=Number(localStorage.getItem('maslows-art-style'))===1?1:0; } catch {}
+try { const savedStyle=Number(localStorage.getItem('maslows-art-style'));
+  artStyle=ART_STYLES[savedStyle]===undefined?0:savedStyle; } catch {}
 if(new URLSearchParams(location.search).has('selftest'))artStyle=0;
 m.set_art_style(artStyle);
 let hudPage='orders', hudOrderOffset=0, hudScriptResult='', resultMessage='';
@@ -464,9 +574,12 @@ window.addEventListener('resize',()=>{
 });
 let skyPreset=artStyle===1?2:1;
 portal.set_sky_preset(skyPreset);
+// Community Grounds presents a soft warm daylight under the Qualia sky.
+if(artStyle===2)portal.set_lighting(0.58,0.76,0.55,1.32,0.74);
 $('sky-preset').onclick = () => {
   skyPreset=skyPreset===3?1:skyPreset+1;
   portal.set_sky_preset(skyPreset);
+  if(artStyle===2)portal.set_lighting(0.58,0.76,0.55,1.32,0.74);
   $('sky-preset').textContent=['','☀ Daylight','◒ Golden hour','☾ Moonlight'][skyPreset];
 };
 $('tier').textContent = 'render tier ' + portal.tier();
@@ -549,10 +662,11 @@ function rebuild() {
   tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
   worldCenter=scene.worldCenter;worldScale=scene.worldScale;
   placePositions=scene.places;
-  const receipt = toObj(portal.load_scene(scene.organs));
+  // receipt.organs_loaded is the engine's legacy anatomy-era field name.
+  const receipt = toObj(portal.load_scene(scene.assets));
   sceneMeshes = receipt.organs_loaded;
-  if (sceneMeshes !== scene.organs.length)
-    throw new Error(`QualiaDB refused ${scene.organs.length-sceneMeshes} scene meshes`);
+  if (sceneMeshes !== scene.assets.length)
+    throw new Error(`QualiaDB refused ${scene.assets.length-sceneMeshes} scene meshes`);
   portal.upload_tensor(scene.tensor);
   portal.set_tensor_projection_enabled(false);
   if(cameraMode==='walk')placeWalkCamera();
@@ -568,6 +682,7 @@ function selectArtStyle(next){
   try { localStorage.setItem('maslows-art-style',String(artStyle)); } catch {}
   skyPreset=artStyle===1?2:1;
   portal.set_sky_preset(skyPreset);
+  if(artStyle===2)portal.set_lighting(0.58,0.76,0.55,1.32,0.74);
   rebuild();renderHud();
 }
 
@@ -599,6 +714,12 @@ let last=performance.now(), tickErrorShown=false;
     }
     applyCam();
   }
+  // Keep the engine's demo tensor visuals (ambient particle field and node
+  // sprites) off: a GPU re-init inside tick can re-upload the resident
+  // tensor, so assert both presentation toggles every frame. Picking stays
+  // fully available.
+  portal.set_ambient_enabled(false);
+  portal.set_tensor_projection_enabled(false);
   try { portal.tick(canvas, Math.min(50, t-last)); }
   catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
   last=t; requestAnimationFrame(loop);
@@ -863,9 +984,26 @@ function renderHud() {
     put('meter','','',right+14,y,panelW-28,14,done/7);
     label(`${done} OF 7 PROJECTS`,right+14,y+20);
   } else if(hudPage==='journal') {
-    label('EVENT JOURNAL',right+14,y);y+=33;
-    const entries=[...$('log').children].slice(0,Math.floor((H-y-120)/31));
-    entries.forEach(el=>{label(el.textContent.slice(0,38),right+14,y);y+=30;});
+    label('MEASURED INVESTMENT CHOICES',right+14,y);y+=25;
+    label(`Open English WordNet 2025+ · Q42LEX v4 · ${toObj(session.events()).length} choices`,right+14,y);y+=23;
+    const allRecords=measureInvestmentChoices(),counts=new Map();
+    allRecords.forEach(row=>row.categories.forEach(category=>counts.set(category,(counts.get(category)||0)+1)));
+    for(const [category,count] of [...counts].sort((a,b)=>b[1]-a[1]).slice(0,2)){
+      label(`${category}: ${count}`,right+14,y,panelW-28,18);y+=18;
+    }
+    const records=allRecords.slice(-3).reverse();
+    for(const row of records){
+      const category=row.categories[0]||'Choice';
+      label(`Day ${row.day} · ${category}`,right+14,y,panelW-28,19);y+=19;
+      const resources=[row.personalCoinDelta?`personal coins ${row.personalCoinDelta>0?'+':''}${row.personalCoinDelta}`:'',
+        row.sharedCoinDelta?`shared coins ${row.sharedCoinDelta>0?'+':''}${row.sharedCoinDelta}`:'',row.labourUsed?'one workday':''].filter(Boolean);
+      label(`${row.payer} pays · ${resources.join(' · ')||'no tracked spend'}`,right+14,y,panelW-28,19);y+=19;
+      label(`Benefits: ${row.beneficiaries.join(', ')||'none recorded'}${row.outcomeChanges.length?` · ${row.outcomeChanges[0]}`:''}`,right+14,y,panelW-28,19);y+=22;
+    }
+    if(!records.length){label('Choices and outcomes appear here as you play.',right+14,y,panelW-28,38);y+=43;}
+    label('EVENT JOURNAL',right+14,y);y+=24;
+    const entries=[...$('log').children].slice(0,Math.floor((H-y-120)/27));
+    entries.forEach(el=>{label(el.textContent.slice(0,38),right+14,y);y+=25;});
   } else if(hudPage==='site') {
     label(focusedPlace===null?'ORDER DETAILS':'SITE ORDERS',right+14,y);y+=35;
     const lines=hudSiteLines.length ? hudSiteLines :
@@ -1140,8 +1278,9 @@ function refresh() {
     objective('Plant the orchard',st.orchardActive?'Fruit growing':'Needs the wind pump',st.orchardActive) +
     objective('Choose a harvest use (optional)',st.harvestChoice==='"reserve"'?'Food stored for the commons':
       st.harvestChoice==='"sell"'?'Crop sold for project funds':'Reserve food or sell for three coins',st.orchardHarvested) :
+    objective('Organise and fund the workshop project',!st.historyRecorded?'Camping unhoused · document disputed reuse and prior harm':!st.committeeFormed?'Listen to residents and form a mandated committee':!st.scoped?'Committee formed · scope and budget still need unpaid work':st.fundingDisposition==='"government-claimed"'?'Department claims prior ownership · contest at personal cost or let it delegate':st.fundingDisposition==='"government-delegated"'?'Political backer paid · control displaced · maintenance unfunded':st.fundingDisposition==='"originator-paid"'?'Creator paid after self-funded registration · local crew learns the technical work':st.fundingAvailable&&!st.fundingDisposition?`${st.communityRaised?'Community contributions':'Grant'} · ${st.committeeFunds} coins in committee treasury`:st.fundingFailed?'Funding failed · spend time organizing or cover more costs yourself':!st.grantStatus?'Self-funded preparation · grant application not yet submitted':st.grantStatus==='"pending"'?'Grant decision pending until the next day':st.grantStatus==='"declined"'?'Grant declined · revise, raise community funds, or self-fund':st.fundingDisposition==='"fair"'?'Installer paid · your contribution credited · routine capability and funded maintenance':st.fundingDisposition==='"insider"'?'Insider paid · community may get a basic service, but know-how and maintenance are absent':st.fundingDisposition==='"mismanaged"'?'Grant unaccounted · no work delivered · audit requested':st.fundingDisposition==='"self-funded"'?'You carried the cost · integrated capability, but maintenance remains unfunded':'Project not yet funded',!!st.fundingDisposition) +
     objective('Improve your shelter',`${st.upgrades} upgrade${st.upgrades===1?'':'s'} made`,st.upgrades>0) +
-    objective('Power the workshop',`${st.parts.length}/2 parts · ${st.approved?'endorsed':'approval pending'}`,st.online) +
+    objective('Power the workshop',`${st.parts.length}/2 parts · ${st.approved?'endorsed':'approval pending'} · ${st.capabilityLevel||'capability unassessed'}`,st.online) +
     objective('Restore shared water',st.waterOnline?'Tank operational':'Repair by buying or salvaging',st.waterOnline) +
     objective('Start the garden',st.gardenActive?'Beds planted':'Needs water and labour',st.gardenActive) +
     objective('Connect the signal mast (optional)',st.signalOnline?'Remote work available':'Needs workshop power · labour or 3 coins',st.signalOnline);
@@ -1175,6 +1314,14 @@ function refresh() {
     <dt>Harvest</dt><dd>${st.harvestChoice==='"reserve"'?'Stored for the commons':st.harvestChoice==='"sell"'?'Sold at market':st.orchardActive?'Fruit ready':'Orchard not planted'}</dd>
   </dl>` : `<h2>Community overview</h2><dl>
     <dt>Location</dt><dd>Kestrel Flats camp</dd>
+    <dt>Housing</dt><dd>${st.housingStatus||'Not recorded'}</dd>
+    <dt>Standing</dt><dd>${st.reputationStanding||'Not recorded'} · previous maintenance harm acknowledged; current claims remain contested</dd>
+    <dt>Funding control</dt><dd>${st.fundingNarrativeUsed?'Funder relied on the chair’s disputed claim · committee controls the award':'No award decision yet'}</dd>
+    <dt>Procurement access</dt><dd>${st.vendorEligible?'Registered; contract selection still uncertain':st.scoped?'Three personal coins and one workday for registration':'Registration not yet available'}</dd>
+    <dt>Technical capacity</dt><dd>${st.capabilityLevel||'Unassessed'}${st.knowledgeStatus==='"plan-only"'?' · plans reused; initiator still holds integration know-how':st.knowledgeStatus==='"not-transferred"'?' · equipment and signage without transferred integration know-how':st.knowledgeStatus==='"licensed-and-taught"'?' · originator licensed and taught the local crew':st.knowledgeStatus==='"originator-operated"'?' · operated by the originator':''}${st.crewTrained&&st.knowledgeStatus!=='"licensed-and-taught"'?' · local crew learned through the initiator’s unpaid teaching':''}</dd>
+    <dt>Maintenance</dt><dd>${st.maintenanceCapacity||'Not funded'}</dd>
+    <dt>Project control</dt><dd>${st.governmentControlled?'Public Works Department':st.fundingDisposition==='"government-delegated"'?'Department contract delegated':st.fundingAvailable?'Committee controls award':'No funds controlled'}</dd>
+    <dt>Review</dt><dd>${st.reviewStatus||'No complaint filed'}${st.reviewStatus==='"closed-conflicted"'?' · officer disclosed ties to committee chair; closed without action':''}</dd>
     <dt>Inventory</dt><dd>${st.held.map(short).join(', ')||'No parts held'}</dd>
     <dt>Solar project</dt><dd>${st.parts.length}/2 parts installed · ${st.approved?'endorsed':'awaiting committee'}</dd>
     <dt>Shelter</dt><dd>${st.upgrades} improvement${st.upgrades===1?'':'s'}</dd>
@@ -1186,7 +1333,9 @@ function refresh() {
   box.querySelector('#campaign-finished-note')?.remove();
   const fittedPanel=st.parts.includes('rc:partPanel'), fittedInverter=st.parts.includes('rc:partInverter');
   const heldPanel=st.held.includes('rc:partPanel'), heldInverter=st.held.includes('rc:partInverter');
-  const groups=st.finale ? [] : saltwind ? [
+  const groups=st.finale ? [] : !st.historyRecorded ? [
+    ['Opening history',st.labour?['recordAppropriation']:['endTurn']],
+  ] : saltwind ? [
     ['Saltwind projects',st.bridgeOpen ? st.pumpOnline ?
       st.orchardActive?st.orchardHarvested?[]:['reserveHarvest','sellHarvest']:['plantOrchard'] : ['raiseWindPump'] :
       st.day<=4?['restoreBridge']:
@@ -1194,12 +1343,25 @@ function refresh() {
       ['braceBridge','restoreBridgeLateCoins']],
     ['Crew',st.labour?[]:['endTurn']],
   ] : [
+    ['Knowledge and capability',st.scoped&&!st.crewTrained?['teachCrewUnpaid']:[]],
+    ['Committee and grant',!st.committeeFormed?['canvassMara','canvassEli','formCommittee']:
+      !st.scoped?[...(st.supporters<2?['canvassSecondResident']:[]),'scopeSolarProject']:
+      st.grantStatus==='"pending"'?[]:
+      st.fundingDisposition==='"government-claimed"'?[...(st.captureChallenge!=='"dismissed"'?['contestGovernmentCapture']:[]),...(!st.politicalContract?['delegateToPoliticalBacker']:[])]:
+      st.fundingAvailable&&!st.fundingDisposition?[...(st.vendorEligible?['hireOriginator']:st.coins>=3?['registerOriginatorVendor']:[]),'hireFairly','appointInsider','acceptGovernmentCapture',...(st.fundingSource==='"grant"'?['mismanageGrant']:[])]:
+      st.fundingFailed?[...(st.supporters<2?['canvassSecondResident']:[]),...(!st.communityRaised&&st.supporters>=2?['raiseCommunityFunds']:[]),...(!st.procurementReady&&st.coins>=3?['selfFundProject']:[]),...(st.grantStatus==='"declined"'&&st.supporters>=2?['reviseGrant']:[])]:
+      st.grantStatus==='"declined"'?[...(st.supporters<2?['canvassSecondResident']:[]),'reviseGrant']:
+      !st.grantStatus?[...(st.supporters<2?['canvassSecondResident']:[]),'submitGrant']:
+      !st.fundingDisposition?['hireFairly','appointInsider',...(st.fundingSource==='"grant"'?['mismanageGrant']:[])]:[]],
     ['Workshop power',st.online?[]:[
-      ...(!fittedPanel&&!heldPanel?['buyPanel','salvagePanel']:[]),
-      ...(!fittedInverter&&!heldInverter?['buyInverter','salvageInverter']:[]),
-      ...(heldPanel?['contributePanel']:[]),...(heldInverter?['contributeInverter']:[]),
+      ...(st.procurementReady&&!fittedPanel&&!heldPanel?['buyPanel','salvagePanel']:[]),
+      ...(st.procurementReady&&!fittedInverter&&!heldInverter?['buyInverter','salvageInverter']:[]),
+      ...(heldPanel&&st.procurementReady?['contributePanel']:[]),...(heldInverter&&st.procurementReady?['contributeInverter']:[]),
       ...(st.parts.length>0&&!st.approved?['requestApproval']:[]),
-      ...(st.parts.length>=2&&st.approved?['switchPowerOn']:[]) ]],
+      ...(st.parts.length>=2&&st.approved&&st.fundingDisposition?['switchPowerOn']:[]) ]],
+    ['Record and remedy',st.historyRecorded?[
+      ...(st.reviewStatus!=='"closed-conflicted"'?['seekPoliceReview']:[]),
+      ...(!st.publicised&&st.committeeFormed&&st.supporters>=2?['publiciseAppropriation']:[])]:[]],
     ['Shelter',st.upgrades>0?[]:['improveShelterCoins','improveShelterLabour']],
     ['Water and food',st.waterOnline ? st.gardenActive?[]:['startGarden'] : ['repairTankCoins','repairTankLabour']],
     ['Workshop work',st.online&&!st.orderDelivered?['fulfilWorkshopOrder']:[]],
@@ -1237,6 +1399,26 @@ function tryAction(id) {
     if(hudPage==='site')hudPage='orders';
     const eventCopy={
       repairTankLabour:'The tank is flowing again.',repairTankCoins:'New fittings brought the tank back online.',
+      canvassMara:'Mara backs the proposal after her access concern is recorded.',
+      canvassEli:'Eli backs the proposal after his maintenance concern is recorded.',
+      canvassSecondResident:'Another resident backs the project after their concern is recorded.',
+      recordAppropriation:'You spent a workday documenting the reuse of your plans. The file keeps your initiative, the later maintenance harm and the current dispute separate.',
+      seekPoliceReview:'The officer disclosed a relationship with the committee chair and closed the complaint without action. No credit or remedy was restored.',
+      publiciseAppropriation:'The dispute is now public. One resident withdrew support after committee leaders called it disruptive.',
+      registerOriginatorVendor:'You paid three coins and a workday for supplier registration. You can now compete for the project contract, but selection is not guaranteed.',
+      hireOriginator:'The committee selected you. The contract pays three coins and records your contribution; it does not repay the earlier registration and preparation costs.',
+      acceptGovernmentCapture:'The department announced the project as an existing program, took control of the grant, and omitted you from its account.',
+      delegateToPoliticalBacker:'The department paid its politically connected contractor. The chair expects future support; you remain uncredited and maintenance is unfunded.',
+      contestGovernmentCapture:'You spent two coins and another workday challenging the takeover. The department dismissed the complaint after rest and kept control.',
+      raiseCommunityFunds:'Residents pledged five new committee coins. The application and your unpaid preparation remain sunk costs.',
+      selfFundProject:'You put three personal coins and a workday into the project. Procurement can move, but your earlier costs remain unreimbursed.',
+      formCommittee:'The residents convene a committee with a community mandate.',
+      scopeSolarProject:'You paid two coins and a day to prepare the project. The cost is recorded as your unpaid contribution.',
+      submitGrant:'Application submitted. The committee must wait for a funding decision.',
+      reviseGrant:'The application is revised and resubmitted with broader resident backing.',
+      hireFairly:'The committee pays a local installer for wiring, records your unpaid preparation, and keeps the maintenance plan. You still need to source the equipment.',
+      appointInsider:'The committee pays its chair’s associate for wiring. Your equipment can still benefit the community, but your contribution is uncredited and maintenance is neglected.',
+      mismanageGrant:'The grant is unaccounted for. No contractor is hired; an audit is requested.',
       startGarden:'The first garden beds are planted.',switchPowerOn:'The workshop lights come on.',
       restoreBridge:'The bridge is passable. Saltwind Reach is open.',
       braceBridge:'The bridge supports are braced against the high canal.',
@@ -1399,8 +1581,8 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const scriptBlock = toObj(testSession.vibe_propose('= "startGarden"'));
   note(`TEST Vibe blocked order: ${scriptBlock.ok===false ? 'PASS' : 'FAIL'}`);
   const scriptAsset = m.scene_build(0, 0, false, false, false, false, false, false, false, false, false, false, false, VIBE_SCENE);
-  note(`TEST Vibe scene asset: ${scriptAsset.organs.length===sceneMeshes+1 ? 'PASS' : 'FAIL'}`);
-  const firstMesh=scriptAsset.organs[0].bytes;
+  note(`TEST Vibe scene asset: ${scriptAsset.assets.length===sceneMeshes+1 ? 'PASS' : 'FAIL'}`);
+  const firstMesh=scriptAsset.assets[0].bytes;
   const hasSurfaceReading=firstMesh.some((v,i,a)=>v===83&&a[i+1]===82&&a[i+2]===68&&a[i+3]===49);
   note(`TEST Qualia SRD1 surface reading: ${hasSurfaceReading?'PASS':'FAIL'}`);
   note(`TEST three destinations and four tiles: ${Object.keys(tileCenters).length===3 &&
@@ -1426,11 +1608,67 @@ if (new URLSearchParams(location.search).has('selftest')) {
     const r = toObj(testSession.propose(id));
     note(`TEST ${name}: ${id} ${r.ok===wantOk?'PASS':'FAIL'}`);
     if (r.ok !== wantOk)
-      note(`TEST ${name} detail: ${JSON.stringify(r).slice(0,200)}`);
+      note(`TEST ${name} detail: ${JSON.stringify(r).slice(0,1200)}`);
     return r.ok;
   };
   expect('blocked action', 'switchPowerOn', false);       // Why? — no parts, no endorsement
-  expect('route A: buy', 'buyInverter', true);            // 12-7 = 5 coins left
+  const projectSetup=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn',
+    'canvassSecondResident','endTurn','scopeSolarProject','endTurn',
+    'submitGrant','endTurn','hireFairly'];
+  projectSetup.forEach((id,i)=>expect(`committee and funding stage ${i+1}`,id,true));
+  note(`TEST grant outcome state: ${testSession.world().split('\n').filter(x=>/solarProject rc:(supportedBy|grantStatus)|committee rc:funds/.test(x)).join(' | ')}`);
+  const earlyApply=new m.GameSession(SEED,ACTIONS);
+  const earlySteps=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn','scopeSolarProject','endTurn','submitGrant','endTurn'];
+  const earlyReceipts=earlySteps.map(id=>toObj(earlyApply.propose(id)));
+  const declined=earlyApply.world().includes('rc:solarProject rc:grantStatus "declined" .');
+  const broaden=['canvassSecondResident','endTurn','reviseGrant','endTurn'];
+  const retryReceipts=broaden.map(id=>toObj(earlyApply.propose(id)));
+  note(`TEST delayed grant decline and revised application: ${earlyReceipts.every(r=>r.ok)&&declined&&retryReceipts.every(r=>r.ok)&&earlyApply.world().includes('rc:solarProject rc:grantStatus "awarded" .')?'PASS':'FAIL'}`);
+  const remedies=new m.GameSession(SEED,ACTIONS);
+  const remedySteps=['recordAppropriation','endTurn','seekPoliceReview','endTurn','canvassMara','endTurn','canvassSecondResident','endTurn','formCommittee','endTurn','publiciseAppropriation'];
+  const remedyReceipts=remedySteps.map(id=>toObj(remedies.propose(id)));
+  const remedyWorld=remedies.world();
+  note(`TEST conflicted remedy and public retaliation: ${remedyReceipts.every(r=>r.ok)&&remedyWorld.includes('rc:player rc:reviewStatus "closed-conflicted" .')&&remedyWorld.includes('rc:committee rc:describedComplaintAs "disruptive" .')?'PASS':'FAIL'}`);
+  if (!remedyReceipts.every(r=>r.ok)) note(`TEST conflicted remedy detail: ${JSON.stringify(remedyReceipts.filter(r=>!r.ok))}`);
+  const communityFund=new m.GameSession(SEED,ACTIONS);
+  const communitySteps=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn','scopeSolarProject','endTurn','submitGrant','endTurn','canvassSecondResident','endTurn','raiseCommunityFunds','endTurn','hireFairly'];
+  const communityReceipts=communitySteps.map(id=>toObj(communityFund.propose(id)));
+  note(`TEST declined grant to community-funded fair procurement: ${communityReceipts.every(r=>r.ok)&&communityFund.world().includes('rc:community rc:raisedFunds rc:solarProject .')&&communityFund.world().includes('rc:solarProject rc:fundingDisposition "fair" .')?'PASS':'FAIL'}`);
+  const selfFund=new m.GameSession(SEED,ACTIONS);
+  const selfFundSteps=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn','scopeSolarProject','endTurn','submitGrant','endTurn','selfFundProject'];
+  const selfFundReceipts=selfFundSteps.map(id=>toObj(selfFund.propose(id)));
+  note(`TEST declined grant to unpaid personal fallback: ${selfFundReceipts.every(r=>r.ok)&&selfFund.world().includes('rc:solarProject rc:fundingDisposition "self-funded" .')&&selfFund.world().includes('rc:player rc:selfFundedProject rc:solarProject .')?'PASS':'FAIL'}`);
+  const originatorPath=new m.GameSession(SEED,ACTIONS);
+  const originatorSteps=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn','canvassSecondResident','endTurn','scopeSolarProject','endTurn','submitGrant','endTurn','registerOriginatorVendor','endTurn','hireOriginator'];
+  const originatorReceipts=originatorSteps.map(id=>toObj(originatorPath.propose(id)));
+  const originatorWorld=originatorPath.world();
+  note(`TEST creator contract transfers know-how through paid teaching: ${originatorReceipts.every(r=>r.ok)&&originatorWorld.includes('rc:player rc:paidBy rc:committee .')&&originatorWorld.includes('rc:residentCrew rc:learned rc:solarIntegration .')&&originatorWorld.includes('rc:player rc:holdsTechnicalKnowledge rc:solarIntegration .')?'PASS':'FAIL'}`);
+  const unpaidTeachPath=new m.GameSession(SEED,ACTIONS);
+  const unpaidTeachSteps=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn','scopeSolarProject','endTurn','teachCrewUnpaid'];
+  const unpaidTeachReceipts=unpaidTeachSteps.map(id=>toObj(unpaidTeachPath.propose(id)));
+  const unpaidTeachWorld=unpaidTeachPath.world();
+  note(`TEST voluntary unpaid teaching builds local capability while initiator retains know-how: ${unpaidTeachReceipts.every(r=>r.ok)&&unpaidTeachWorld.includes('rc:solarProject rc:capabilityLevel "integrated" .')&&unpaidTeachWorld.includes('rc:player rc:unpaidKnowledgeContribution rc:solarProject .')&&unpaidTeachWorld.includes('rc:player rc:retainsKnowledge rc:solarIntegration .')?'PASS':'FAIL'}`);
+  const measuredChoices=measureInvestmentChoices(unpaidTeachPath);
+  const measuredTeaching=measuredChoices.find(choice=>choice.action==='teachCrewUnpaid');
+  note(`TEST WordNet vocabulary measures gameplay choices and outcomes: ${INVESTMENT_TAXONOMY.lexicalSource.release==='2025+'&&INVESTMENT_TAXONOMY.lexicalSource.q42LexiconVersion===4&&measuredTeaching?.labourUsed&&measuredTeaching.payer==='player'&&measuredTeaching.categories.includes('Contribution and work')&&measuredTeaching.outcomeChanges.includes('local crew trained')?'PASS':'FAIL'}`);
+  const capturePath=new m.GameSession(SEED,ACTIONS);
+  const captureSteps=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn','canvassSecondResident','endTurn','scopeSolarProject','endTurn','submitGrant','endTurn','acceptGovernmentCapture','delegateToPoliticalBacker'];
+  const captureReceipts=captureSteps.map(id=>toObj(capturePath.propose(id)));
+  const captureWorld=capturePath.world();
+  note(`TEST public grant capture delegates to political backer without knowledge transfer: ${captureReceipts.every(r=>r.ok)&&captureWorld.includes('rc:politicalBacker rc:paidBy rc:publicWorksDepartment .')&&captureWorld.includes('rc:solarProject rc:capabilityLevel "shell" .')&&captureWorld.includes('rc:player rc:holdsTechnicalKnowledge rc:solarIntegration .')&&!captureWorld.includes('rc:residentCrew rc:learned rc:solarIntegration .')?'PASS':'FAIL'}`);
+  const appealPath=new m.GameSession(SEED,ACTIONS);
+  const appealSteps=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn','canvassSecondResident','endTurn','scopeSolarProject','endTurn','submitGrant','endTurn','acceptGovernmentCapture','contestGovernmentCapture','endTurn'];
+  const appealReceipts=appealSteps.map(id=>toObj(appealPath.propose(id)));
+  note(`TEST costly procurement challenge dismissed without restoring control: ${appealReceipts.every(r=>r.ok)&&appealPath.world().includes('rc:publicWorksDepartment rc:challengeStatus "dismissed" .')&&appealPath.world().includes('rc:publicWorksDepartment rc:refusedChallengeBy rc:player .')?'PASS':'FAIL'}`);
+  const unfair=new m.GameSession(SEED,ACTIONS);
+  const unfairSteps=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn','canvassSecondResident','endTurn','scopeSolarProject','endTurn','submitGrant','endTurn','appointInsider','buyInverter','salvagePanel','endTurn','contributeInverter','contributePanel','requestApproval','switchPowerOn'];
+  const unfairReceipts=unfairSteps.map(id=>toObj(unfair.propose(id)));
+  const unfairWorld=unfair.world();
+  note(`TEST contractor payment, withheld credit, community benefit: ${unfairReceipts.every(r=>r.ok)&&unfairWorld.includes('rc:solarProject rc:creditWithheldFrom rc:player .')&&unfairWorld.includes('rc:community rc:benefitsFrom rc:solarProject .')&&unfairWorld.includes('rc:chairAssociate rc:paidBy rc:committee .')?'PASS':'FAIL'}`);
+  const wasted=new m.GameSession(SEED,ACTIONS);
+  const wastedReceipts=['recordAppropriation','endTurn','canvassMara','endTurn','formCommittee','endTurn','canvassSecondResident','endTurn','scopeSolarProject','endTurn','submitGrant','endTurn','mismanageGrant'].map(id=>toObj(wasted.propose(id)));
+  note(`TEST mismanaged grant blocks community delivery: ${wastedReceipts.every(r=>r.ok)&&wasted.world().includes('rc:committee rc:auditRequestedBy rc:community .')&&!wasted.world().includes('rc:workshop rc:status "online" .')?'PASS':'FAIL'}`);
+  expect('route A: buy', 'buyInverter', true);            // after self-funded preparation
   expect('route B: salvage', 'salvagePanel', true);       // labour spent
   expect('rest after labour', 'endTurn', true);           // regain labour token
   expect('rest while rested', 'endTurn', false);          // blocked: labour still held
@@ -1440,16 +1678,20 @@ if (new URLSearchParams(location.search).has('selftest')) {
   expect('contribute 2', 'contributePanel', true);
   expect('committee endorses', 'requestApproval', true);  // parts>=1 → endorsement
   expect('committee decision is unique', 'requestApproval', false);
-  expect('improve shelter', 'improveShelterCoins', true); // 5 >= 3 coins
+  expect('improve shelter', 'improveShelterLabour', true);
+  expect('rest after shelter work', 'endTurn', true);
   expect('goal', 'switchPowerOn', true);
   expect('solar completion is unique', 'switchPowerOn', false);
   expect('water: coin route blocked', 'repairTankCoins', false);
   expect('water: labour route', 'repairTankLabour', true);
   expect('rest before planting', 'endTurn', true);
   expect('garden', 'startGarden', true);
-  expect('bridge before rest', 'restoreBridge', false);
-  expect('rest before bridge', 'endTurn', true);
-  expect('bridge', 'restoreBridge', true);
+  expect('low-tide bridge action is no longer available', 'restoreBridge', false);
+  expect('rest before bracing', 'endTurn', true);
+  expect('brace late bridge', 'braceBridge', true);
+  expect('finish bridge before rest', 'restoreBridgeLateLabour', false);
+  expect('rest before bridge completion', 'endTurn', true);
+  expect('finish braced bridge', 'restoreBridgeLateLabour', true);
   expect('pump before rest', 'raiseWindPump', false);
   expect('rest before pump', 'endTurn', true);
   expect('pump', 'raiseWindPump', true);
@@ -1467,9 +1709,9 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const rep = toObj(m.session_replay(SEED, ACTIONS, ids));
   note(`TEST replay: ${rep.diverged_at===null && rep.world===testSession.world() ? 'PASS' : 'FAIL'}`);
   const tradeSession = new m.GameSession(SEED, ACTIONS);
-  const tradeSteps=[
+  const tradeSteps=[...projectSetup,
     'buyInverter','salvagePanel','endTurn','contributeInverter','contributePanel',
-    'requestApproval','switchPowerOn','repairTankCoins','restoreBridge','endTurn',
+    'requestApproval','switchPowerOn','repairTankLabour','endTurn','braceBridge','endTurn','restoreBridgeLateLabour','endTurn',
     'raiseWindPump','endTurn','plantOrchard','endTurn','launchTradeRoute'
   ];
   const tradeResults=tradeSteps.map(id=>toObj(tradeSession.propose(id)));
@@ -1479,17 +1721,19 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST trade replay: ${tradeReplay.diverged_at===null&&tradeReplay.world===tradeWorld?'PASS':'FAIL'}`);
   const signalStart=()=>{
     const s=new m.GameSession(SEED,ACTIONS);
-    const receipts=['buyInverter','salvagePanel','endTurn','contributeInverter',
+    const receipts=[...projectSetup,'buyInverter','salvagePanel','endTurn','contributeInverter',
       'contributePanel','requestApproval','switchPowerOn'].map(id=>toObj(s.propose(id)));
     return {s,ready:receipts.every(r=>r.ok)};
   };
   const signalPaid=signalStart();
+  const workshopOrderForParts=toObj(signalPaid.s.propose('fulfilWorkshopOrder'));
   const paidConnection=toObj(signalPaid.s.propose('connectMastCoins'));
   const cannotReconnect=toObj(signalPaid.s.propose('connectMastLabour'));
+  const signalPaidRest=toObj(signalPaid.s.propose('endTurn'));
   const remotePaid=toObj(signalPaid.s.propose('fulfilRemoteOrder'));
   const remoteDuplicate=toObj(signalPaid.s.propose('fulfilRemoteOrder'));
   const signalWorld=signalPaid.s.world();
-  note(`TEST signal coin route and remote contract: ${signalPaid.ready&&paidConnection.ok&&!cannotReconnect.ok&&remotePaid.ok&&!remoteDuplicate.ok&&signalWorld.includes('rc:communicationsMast rc:status "online" .')?'PASS':'FAIL'}`);
+  note(`TEST signal coin route and remote contract: ${signalPaid.ready&&workshopOrderForParts.ok&&paidConnection.ok&&!cannotReconnect.ok&&signalPaidRest.ok&&remotePaid.ok&&!remoteDuplicate.ok&&signalWorld.includes('rc:communicationsMast rc:status "online" .')?'PASS':'FAIL'}`);
   const signalReplay=toObj(m.session_replay(SEED,ACTIONS,toObj(signalPaid.s.events())));
   note(`TEST signal replay: ${signalReplay.diverged_at===null&&signalReplay.world===signalWorld?'PASS':'FAIL'}`);
   const signalLabour=signalStart();
@@ -1499,12 +1743,11 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const remoteAfterRest=toObj(signalLabour.s.propose('fulfilRemoteOrder'));
   note(`TEST signal labour route: ${signalLabour.ready&&labourConnection.ok&&!remoteBeforeRest.ok&&signalRest.ok&&remoteAfterRest.ok?'PASS':'FAIL'}`);
   const signalScene=m.scene_build(1,2,true,true,true,true,true,false,false,false,false,false,false,'');
-  note(`TEST connected mast geometry: ${signalScene.organs.some(o=>o.id==='rc:asset/mast-signal')?'PASS':'FAIL'}`);
+  note(`TEST connected mast geometry: ${signalScene.assets.some(o=>o.id==='rc:asset/mast-signal')?'PASS':'FAIL'}`);
   const harvestStart=()=>{
     const s=new m.GameSession(SEED,ACTIONS);
-    const steps=['buyInverter','salvagePanel','endTurn','contributeInverter',
-      'contributePanel','requestApproval','switchPowerOn','repairTankCoins',
-      'restoreBridge','endTurn','raiseWindPump','endTurn','plantOrchard','endTurn'];
+    const steps=[...projectSetup,'buyInverter','salvagePanel','endTurn','contributeInverter',
+      'contributePanel','requestApproval','switchPowerOn','repairTankLabour','endTurn','braceBridge','endTurn','restoreBridgeLateLabour','endTurn','raiseWindPump','endTurn','plantOrchard','endTurn'];
     return {s,ready:steps.map(id=>toObj(s.propose(id))).every(r=>r.ok)};
   };
   const reserve=harvestStart();
@@ -1528,7 +1771,7 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const saleReplay=toObj(m.session_replay(SEED,ACTIONS,toObj(sale.s.events())));
   note(`TEST harvest sale replay: ${saleReplay.diverged_at===null&&saleReplay.world===sale.s.world()?'PASS':'FAIL'}`);
   const harvestedScene=m.scene_build(1,2,true,true,true,true,true,true,false,true,true,true,true,'');
-  note(`TEST visible harvest crates: ${harvestedScene.organs.some(o=>o.id==='rc:asset/harvest-crates')&&!harvestedScene.organs.some(o=>o.id==='rc:asset/orchard-fruit')?'PASS':'FAIL'}`);
+  note(`TEST visible harvest crates: ${harvestedScene.assets.some(o=>o.id==='rc:asset/harvest-crates')&&!harvestedScene.assets.some(o=>o.id==='rc:asset/orchard-fruit')?'PASS':'FAIL'}`);
   const lateStart=()=>{
     const s=new m.GameSession(SEED,ACTIONS);
     const receipts=[toObj(s.propose('repairTankCoins'))];

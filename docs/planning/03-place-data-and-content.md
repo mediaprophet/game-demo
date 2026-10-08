@@ -133,6 +133,13 @@ adopt. This protects offline play, replay determinism, and evidence quality.
 
 ## Online GIS acquisition boundary
 
+The Australia-wide spatial hierarchy, OpenStreetMap layer responsibilities,
+travel graph, ODbL handling, tile hierarchy, and QualiaDB dependency gates are
+specified in the [Australia world atlas and OSM pack plan](29-australia-world-atlas-and-osm-pack.md).
+That plan also records the current implementation gap: the existing three
+fictional areas share one scene and do not yet constitute an Australian atlas
+or an inter-region travel system.
+
 The pack builder may retrieve appropriately licensed GIS/public data from online
 sources during an explicit authoring/import step. It records the source URL or
 identifier, licence, retrieval date, version/coverage, checksum where possible,
@@ -190,16 +197,28 @@ The game uses stylised presentation and must not imply survey-grade precision.
 
 ## Content-authoring levels
 
-1. **Australian core pack:** original fictional Australian place; no external
-   data required. It proves regional mechanics and provides reliable tests.
-2. **Australian data-shaped demonstration pack:** one small public-data-derived locality,
-   with a minimal curated layer set and full provenance/evidence view.
-3. **Regional pack kit:** validated authoring templates, region profiles, import tooling,
-   licence/privacy checklists, and content review gates.
-4. **International packs:** separately reviewed regional packs that reuse core
+1. **Australian real-place foundation:** a selected Australian locality with a
+   versioned geographic snapshot and visible source/provenance. It grounds the
+   playable community-development loop in places, routes, terrain, and facilities
+   players can recognize. Fictional scenarios and characters may be layered over
+   those public geographic facts; they must not be presented as facts about local
+   residents or organisations.
+2. **Additional Australian local packs:** more localities with distinct sourced
+   geography, terrain, public facilities, routes, data coverage, and local style
+   profiles. Each distinguishes atlas-only, data-shaped, and fully playable
+   areas.
+3. **Regional pack kit:** validated authoring templates, region profiles,
+   QualiaDB ingestion/rendering tools, licence/privacy checklists, and content
+   review gates. It allows players to start from their own community when data
+   coverage and licensing support it.
+4. **Fictional mechanics fixtures:** small authored places remain useful for
+   deterministic tests, safe onboarding, and scenarios where no appropriate
+   geographic pack exists. They are clearly labelled as fictional and do not
+   substitute for the real-place gameplay goal.
+5. **International packs:** separately reviewed regional packs reuse core
    semantic concepts while bringing their own archetypes, locale, policy
    assumptions, assets, and data-source rules.
-5. **Network packs:** explicit shared agreements and capability exchange between
+6. **Network packs:** explicit shared agreements and capability exchange between
    independently authored communities.
 
 ## Acceptance criteria for the first data-shaped pack

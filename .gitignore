@@ -3,3 +3,5 @@
 **/pkg-*/
 node_modules
 *.log
+.devin
+.codex-build-tmp

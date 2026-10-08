@@ -21,14 +21,14 @@ QG-12/13/14. Do not approximate those engine features with page overlays.
 ## What exists today
 
 `crates/rolling-commons-shell/src/asset_catalog.rs` now produces 149
-always-present original Kestrel Flats scene organs, with additional solar and
+always-present original Kestrel Flats scene assets, with additional solar and
 garden variants. They cover terrain colour zones, paths, detailed buildings,
 market stock, garden soil and crops, a rounded tank, trees, lamps, salvage
 drums, vehicle detail, residents, flowers, background forms and infrastructure.
 The shell uses QualiaDB's bounded
 primitive assembler and its full computational-geometry authoring APIs:
 deterministic cylinders, spheres, ellipsoids, tori, transforms and parametric
-profile revolution. Every organ is sealed through the Qualia `.10d` compiler with a
+profile revolution. Every asset is sealed through the Qualia `.10d` compiler with a
 game-owned source recipe and provenance sidecar, then rendered by full
 QualiaPortal. Stable `rc:asset/` IDs remain available. These are **detailed
 blockouts for composition and interaction testing**, not finished AAA art.
@@ -38,15 +38,15 @@ manifest. It verifies the pack with Qualia's reader. QG-01/02/14 remain the
 production gate: the canonical HMC variant, Q42 identity/rights manifest,
 browser pack loading, and complete state/animation packaging are not yet proven.
 
-Saltwind Reach adds 73 always-present organs on a second connected land tile:
+Saltwind Reach adds 73 always-present assets on a second connected land tile:
 canal, bridge, roads, barn, market, quay, boat, wind pump and orchard. Bridge,
 pump and fruit variants follow the SHACL-validated project states. The full
-settlement map is 222 persistent `.10d` organs before conditional variants. Qualia's
+settlement map is 222 persistent `.10d` assets before conditional variants. Qualia's
 public camera target and sky preset APIs provide territory navigation and
 daylight presentation in the full WASM game.
 These counts come from the current `opening` scene in the generated manifest;
 the older planning estimates did not include later environment and character
-organs.
+assets.
 
 The current asset export contains 274 distinct `.10d` variants across ten
 scene states in the game-owned HMC pack. The latest landscape pass adds layered
@@ -73,7 +73,7 @@ game-authored height function provides Qualia's DEM terrain mesh builder with
 17-by-17 samples per tile. Its western and eastern ridges flank a two-metre
 creek corridor, which continues the canal visually. The resulting meshes,
 soil bases, creek, stones and shrubs are sealed as 12 game-owned `.10d`
-organs. The opening scene has 234 organs. The highland tiles are currently
+assets. The opening scene has 234 assets. The highland tiles are currently
 scenery for camera exploration; buildability, paths, biome distribution,
 streaming and level-of-detail evidence remain future production work.
 The connected communications mast adds a rounded signal head and a distinct

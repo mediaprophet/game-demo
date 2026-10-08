@@ -1,0 +1,552 @@
+{
+  "schema": "maslows-investment-taxonomy/1",
+  "purpose": "Lexical crosswalk for classifying consequential socioeconomic choices during gameplay. Categories describe decisions and resource flows, not moral character.",
+  "lexicalSource": {
+    "name": "Open English WordNet",
+    "release": "2025+",
+    "sourcePath": "C:/github/ontology/english-wordnet-2025-plus",
+    "q42Volume": "english-wordnet-2025-plus.q42",
+    "q42VolumeVersion": 3,
+    "q42LexiconVersion": 4,
+    "q42LexiconEntries": 1732603,
+    "sourceTurtle": "english-wordnet-2025-plus.ttl",
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "method": "Use the current Open English WordNet Q42 lexicon for exact lemma and part-of-speech validation when the generic Q42 range-query interface is available. The listed terms are candidates, not validated senses. Polysemous lemmas must retain all synset candidates and definitions; the game must not silently select a sense. The game concepts below are an application crosswalk, not a claim that WordNet defines socioeconomic policy.",
+    "licenseSource": "The source Turtle declares dc:license <https://creativecommons.org/licenses/by/4.0/> on the Open English WordNet lexicon.",
+    "sourceUrl": "https://en-word.net/",
+    "resolutionStatus": "pending-generic-Q42-WASM-range-reader",
+    "termStatus": "Candidate lemmas only; synsets and senses are not yet resolved or validated in-game."
+  },
+  "categories": [
+    {
+      "id": "resource-investment",
+      "label": "Resource investment and allocation",
+      "gameMeaning": "Choice to commit scarce resources now in expectation of an outcome over time.",
+      "wordnetCandidates": [
+        {
+          "lemma": "investment",
+          "pos": "n"
+        },
+        {
+          "lemma": "invest",
+          "pos": "v"
+        },
+        {
+          "lemma": "allocate",
+          "pos": "v"
+        },
+        {
+          "lemma": "allocation",
+          "pos": "n"
+        },
+        {
+          "lemma": "resource",
+          "pos": "n"
+        },
+        {
+          "lemma": "capital",
+          "pos": "n"
+        }
+      ]
+    },
+    {
+      "id": "contribution-and-work",
+      "label": "Contribution and work",
+      "gameMeaning": "Money, labour, time, skill, care, or equipment supplied by a person or group.",
+      "wordnetCandidates": [
+        {
+          "lemma": "contribute",
+          "pos": "v"
+        },
+        {
+          "lemma": "contribution",
+          "pos": "n"
+        },
+        {
+          "lemma": "work",
+          "pos": "n"
+        },
+        {
+          "lemma": "labor",
+          "pos": "n"
+        },
+        {
+          "lemma": "time",
+          "pos": "n"
+        },
+        {
+          "lemma": "skill",
+          "pos": "n"
+        },
+        {
+          "lemma": "care",
+          "pos": "n"
+        }
+      ]
+    },
+    {
+      "id": "cost-and-opportunity-cost",
+      "label": "Cost and opportunity cost",
+      "gameMeaning": "Direct spending and the alternative use or need forgone by committing a resource.",
+      "wordnetCandidates": [
+        {
+          "lemma": "cost",
+          "pos": "n"
+        },
+        {
+          "lemma": "expenditure",
+          "pos": "n"
+        },
+        {
+          "lemma": "expense",
+          "pos": "n"
+        },
+        {
+          "lemma": "sacrifice",
+          "pos": "n"
+        },
+        {
+          "lemma": "forgo",
+          "pos": "v"
+        },
+        {
+          "lemma": "opportunity_cost",
+          "pos": "n"
+        },
+        {
+          "lemma": "debt",
+          "pos": "n"
+        }
+      ]
+    },
+    {
+      "id": "benefit-and-return",
+      "label": "Benefit and return",
+      "gameMeaning": "Who receives income, service, capability, safety, authority, or other return, and when.",
+      "wordnetCandidates": [
+        {
+          "lemma": "benefit",
+          "pos": "n"
+        },
+        {
+          "lemma": "gain",
+          "pos": "n"
+        },
+        {
+          "lemma": "return",
+          "pos": "n"
+        },
+        {
+          "lemma": "profit",
+          "pos": "n"
+        },
+        {
+          "lemma": "income",
+          "pos": "n"
+        },
+        {
+          "lemma": "service",
+          "pos": "n"
+        }
+      ]
+    },
+    {
+      "id": "risk-and-exposure",
+      "label": "Risk and exposure",
+      "gameMeaning": "Who carries financial, bodily, reputational, legal, housing, or delivery risk.",
+      "wordnetCandidates": [
+        {
+          "lemma": "risk",
+          "pos": "n"
+        },
+        {
+          "lemma": "exposure",
+          "pos": "n"
+        },
+        {
+          "lemma": "burden",
+          "pos": "n"
+        },
+        {
+          "lemma": "harm",
+          "pos": "n"
+        },
+        {
+          "lemma": "loss",
+          "pos": "n"
+        },
+        {
+          "lemma": "vulnerability",
+          "pos": "n"
+        }
+      ]
+    },
+    {
+      "id": "capacity-and-maintenance",
+      "label": "Capability and maintenance",
+      "gameMeaning": "Whether an investment produces durable skills, usable assets, operation, repair, and local autonomy.",
+      "wordnetCandidates": [
+        {
+          "lemma": "capability",
+          "pos": "n"
+        },
+        {
+          "lemma": "capacity",
+          "pos": "n"
+        },
+        {
+          "lemma": "knowledge",
+          "pos": "n"
+        },
+        {
+          "lemma": "learn",
+          "pos": "v"
+        },
+        {
+          "lemma": "maintain",
+          "pos": "v"
+        },
+        {
+          "lemma": "repair",
+          "pos": "v"
+        },
+        {
+          "lemma": "dependence",
+          "pos": "n"
+        }
+      ]
+    },
+    {
+      "id": "control-and-governance",
+      "label": "Control and governance",
+      "gameMeaning": "Who sets terms, controls funds and artifacts, makes decisions, receives credit, and can seek review.",
+      "wordnetCandidates": [
+        {
+          "lemma": "control",
+          "pos": "n"
+        },
+        {
+          "lemma": "governance",
+          "pos": "n"
+        },
+        {
+          "lemma": "authority",
+          "pos": "n"
+        },
+        {
+          "lemma": "decision",
+          "pos": "n"
+        },
+        {
+          "lemma": "credit",
+          "pos": "n"
+        },
+        {
+          "lemma": "accountability",
+          "pos": "n"
+        },
+        {
+          "lemma": "cooperation",
+          "pos": "n"
+        }
+      ]
+    }
+  ],
+  "actionMappings": {
+    "scopeSolarProject": {
+      "categories": [
+        "resource-investment",
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "risk-and-exposure",
+        "control-and-governance"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "community",
+        "project"
+      ],
+      "costNarrative": "unpaid planning time and personal money; basic-needs work or income is deferred"
+    },
+    "submitGrant": {
+      "categories": [
+        "resource-investment",
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "risk-and-exposure"
+      ],
+      "payer": "committee",
+      "beneficiaries": [
+        "project",
+        "community"
+      ],
+      "costNarrative": "application labour and delay; result remains uncertain"
+    },
+    "reviseGrant": {
+      "categories": [
+        "resource-investment",
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "risk-and-exposure"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "project",
+        "community"
+      ],
+      "costNarrative": "another unpaid workday after a declined application"
+    },
+    "raiseCommunityFunds": {
+      "categories": [
+        "resource-investment",
+        "contribution-and-work",
+        "control-and-governance",
+        "risk-and-exposure"
+      ],
+      "payer": "community",
+      "beneficiaries": [
+        "project",
+        "community"
+      ],
+      "costNarrative": "residents commit scarce money; earlier personal costs remain sunk"
+    },
+    "selfFundProject": {
+      "categories": [
+        "resource-investment",
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "risk-and-exposure"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "project",
+        "community"
+      ],
+      "costNarrative": "personal savings and a workday are committed without reimbursement"
+    },
+    "registerOriginatorVendor": {
+      "categories": [
+        "resource-investment",
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "risk-and-exposure"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "player",
+        "project"
+      ],
+      "costNarrative": "registration, insurance and tax paperwork are paid before selection is known"
+    },
+    "hireOriginator": {
+      "categories": [
+        "benefit-and-return",
+        "capacity-and-maintenance",
+        "control-and-governance"
+      ],
+      "payer": "committee",
+      "beneficiaries": [
+        "player",
+        "community",
+        "project"
+      ],
+      "costNarrative": "current work is paid; earlier unpaid preparation is not reimbursed"
+    },
+    "hireFairly": {
+      "categories": [
+        "benefit-and-return",
+        "capacity-and-maintenance",
+        "control-and-governance"
+      ],
+      "payer": "committee",
+      "beneficiaries": [
+        "community",
+        "project"
+      ],
+      "costNarrative": "installer is paid and routine maintenance is funded; prior personal losses remain"
+    },
+    "appointInsider": {
+      "categories": [
+        "benefit-and-return",
+        "risk-and-exposure",
+        "capacity-and-maintenance",
+        "control-and-governance"
+      ],
+      "payer": "committee",
+      "beneficiaries": [
+        "insider",
+        "community"
+      ],
+      "costNarrative": "connected contractor is paid; creator credit, local know-how and maintenance are lost"
+    },
+    "mismanageGrant": {
+      "categories": [
+        "risk-and-exposure",
+        "capacity-and-maintenance",
+        "control-and-governance"
+      ],
+      "payer": "community",
+      "beneficiaries": [],
+      "costNarrative": "public-purpose funds are spent without delivery or accounts"
+    },
+    "acceptGovernmentCapture": {
+      "categories": [
+        "control-and-governance",
+        "risk-and-exposure",
+        "capacity-and-maintenance"
+      ],
+      "payer": "public",
+      "beneficiaries": [
+        "agency",
+        "project"
+      ],
+      "costNarrative": "public money and control move; originator credit and authority are displaced"
+    },
+    "delegateToPoliticalBacker": {
+      "categories": [
+        "benefit-and-return",
+        "risk-and-exposure",
+        "capacity-and-maintenance",
+        "control-and-governance"
+      ],
+      "payer": "public",
+      "beneficiaries": [
+        "contractor",
+        "committee"
+      ],
+      "costNarrative": "connected contractor receives payment; maintenance and knowledge transfer are absent"
+    },
+    "contestGovernmentCapture": {
+      "categories": [
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "risk-and-exposure",
+        "control-and-governance"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "community",
+        "project"
+      ],
+      "costNarrative": "personal money, time and standing are risked for a remedy that may fail"
+    },
+    "recordAppropriation": {
+      "categories": [
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "risk-and-exposure",
+        "control-and-governance"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "public",
+        "community"
+      ],
+      "costNarrative": "one workday goes to preserving an account rather than paid work, care or rest"
+    },
+    "seekPoliceReview": {
+      "categories": [
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "risk-and-exposure",
+        "control-and-governance"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "public",
+        "community"
+      ],
+      "costNarrative": "a workday is spent seeking remedy; the conflicted process can close without action"
+    },
+    "publiciseAppropriation": {
+      "categories": [
+        "contribution-and-work",
+        "risk-and-exposure",
+        "control-and-governance"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "public",
+        "community"
+      ],
+      "costNarrative": "visibility may increase understanding and retaliation or support loss"
+    },
+    "teachCrewUnpaid": {
+      "categories": [
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "capacity-and-maintenance",
+        "benefit-and-return"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "residentCrew",
+        "community",
+        "project"
+      ],
+      "costNarrative": "local capability grows through the initiator’s unpaid work"
+    },
+    "repairTankLabour": {
+      "categories": [
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "benefit-and-return",
+        "capacity-and-maintenance"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "community"
+      ],
+      "costNarrative": "one workday restores shared water access"
+    },
+    "repairTankCoins": {
+      "categories": [
+        "resource-investment",
+        "cost-and-opportunity-cost",
+        "benefit-and-return",
+        "capacity-and-maintenance"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "community"
+      ],
+      "costNarrative": "personal money buys fittings to restore shared water"
+    },
+    "improveShelterLabour": {
+      "categories": [
+        "contribution-and-work",
+        "cost-and-opportunity-cost",
+        "benefit-and-return"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "player"
+      ],
+      "costNarrative": "one workday improves shelter but competes with earning and project work"
+    },
+    "improveShelterCoins": {
+      "categories": [
+        "resource-investment",
+        "cost-and-opportunity-cost",
+        "benefit-and-return"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "player"
+      ],
+      "costNarrative": "personal money improves shelter"
+    },
+    "endTurn": {
+      "categories": [
+        "capacity-and-maintenance",
+        "cost-and-opportunity-cost"
+      ],
+      "payer": "player",
+      "beneficiaries": [
+        "player"
+      ],
+      "costNarrative": "rest restores work capacity but consumes calendar time"
+    }
+  },
+  "measurementRule": "For each action in the saved gameplay tape, replay the state before and after it and record actor, day, personal and shared money delta, labour/time used, action tags, stated purpose, who pays, intended beneficiaries, cost narrative, alternatives available at that point, and subsequent service/capability/control outcomes. Multiple category tags are allowed. Derive and revise the taxonomy from repeated choices and outcomes; never infer virtue, criminality, or social worth from a tag."
+}

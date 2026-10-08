@@ -278,8 +278,8 @@ on both GPU and supported lower-spec paths.
 
 **Inspect:** `render/gpu/`, `render/scene_graph/`, `render/portal/`,
 `webizen-render/src/scene.rs` and material/texture APIs. Preserve the full
-Qualia renderer and its semantic picking. The 91-organ Kestrel Flats browser
-scene demonstrates geometry and per-organ colour, while the full Portal path
+Qualia renderer and its semantic picking. The 91-asset Kestrel Flats browser
+scene demonstrates geometry and per-asset colour, while the full Portal path
 has no game-verified material, texture, light, shadow or sky authoring
 contract yet. Browser inspection of the earlier full Portal path showed a black clear
 and pale, ghostlike surfaces despite opaque authored RGBA. The current
@@ -298,8 +298,9 @@ and consumes the sky and camera APIs, but visual acceptance is blocked.
 observe `QualiaPortal tier 2 · 2 territories · 115 .10d meshes` while the
 960 × 600 canvas stays black. `?selftest` passes the scene, actions and replay.
 For isolation, call `init_webgpu(canvas)`, construct `GamePortal`, pass only
-`scene_build(...).organs[0]` to `load_scene`, then tick. The receipt reports
-`organs_loaded:1`, `total_triangles:12`, `vertex_count:8`,
+`scene_build(...).assets[0]` to `load_scene`, then tick. The receipt reports
+`organs_loaded:1` (engine receipt field; game-side scene arrays are `assets`),
+`total_triangles:12`, `vertex_count:8`,
 `renderer:"webgpu"`, `uploaded:true`; the canvas is still black. Camera zoom
 4.0, legacy origin camera, and changing sky preset after initialization do
 not restore visible pixels. No JS tick exception or browser warning was
@@ -415,6 +416,23 @@ explicit upstream blocker for its dependent mechanic, not a simulated success.
 - **QG-08 on-demand geography:** deferred. A future decision must add
   Qualia-owned acquisition/cache/tile lifecycle and offline replay before
   browser network geography affects authoritative play.
+
+### QG-20 — Retire anatomy-era API names (`organ`)
+
+The public QualiaPortal surface still carries anatomy-era terminology:
+`load_body_organs_colored` (WASM export `qualiaportal_load_body_organs_colored`)
+and the `organs_loaded`/`organs_refused` receipt fields. The game side is
+migrated — `scene_build` returns `assets`, `GamePortal::load_scene(assets)`, the
+export script and all game docs use *asset* — but the engine binding name is an
+upstream contract and must not be renamed game-side.
+
+**Upstream work:** add asset-named aliases (e.g. `load_assets_colored`,
+`assets_loaded`/`assets_refused`) alongside the existing entry points, mark the
+`organ`-named API deprecated in QualiaDB docs/changelog, and keep both working
+for one release window so other consumers (anatomy viewers) migrate on their own
+schedule. Then bump the game's pin and switch `GamePortal::load_scene` to the
+new name. Pure rename — no behaviour change; the existing conformance tests
+must pass against the aliased surface.
 
 ## First implementation sequence
 

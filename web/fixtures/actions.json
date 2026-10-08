@@ -1,491 +1,5414 @@
 {
   "actions": [
     {
+      "id": "recordAppropriation",
+      "label": "Document the reuse of your work (1 workday)",
+      "explain": "You initiated the earlier water project because no one was meeting an unmet need. A later funding gap left unsafe access hours and harmed Mara. You take responsibility for starting the work and its effects, while control of maintenance and claims of sole blame remain disputed. The committee now uses your new plans while excluding you; spend a day recording what can be verified, without assuming a remedy.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:PlayerHistory",
+          "path": "rc:recorded",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:player rc:historyRecorded rc:recorded{seq} .",
+        "rc:player rc:documentedReuse rc:solarProject .",
+        "rc:player rc:reviewStatus \"not-filed\" .",
+        "rc:playerHistory rc:recorded rc:record{seq} ."
+      ]
+    },
+    {
+      "id": "seekPoliceReview",
+      "label": "Ask police to review the documented conflict (1 workday)",
+      "explain": "The assigned officer discloses a working relationship with the committee chair, then closes the complaint without action. The record remains, but there is no remedy or restored credit.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:PlayerHistory",
+          "path": "rc:recorded",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:PlayerHistory",
+          "path": "rc:reviewFiled",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:player",
+          "p": "rc:reviewStatus"
+        }
+      ],
+      "add": [
+        "rc:player rc:reviewFiled rc:filed{seq} .",
+        "rc:player rc:reviewStatus \"closed-conflicted\" .",
+        "rc:policeOfficer rc:hasConflictOfInterest rc:committeeChair .",
+        "rc:policeOfficer rc:closedWithoutAction rc:player .",
+        "rc:solarProject rc:appropriationEvidence rc:player .",
+        "rc:playerHistory rc:remedyStatus \"closed-conflicted\" ."
+      ]
+    },
+    {
+      "id": "publiciseAppropriation",
+      "label": "Bring the documented reuse into public view (1 workday)",
+      "explain": "Publicly describe what the records show and what remains disputed. More residents hear the case, but committee leaders frame it as disruptive; one supporter withdraws. Visibility is not proof or a legal remedy.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:PlayerHistory",
+          "path": "rc:recorded",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:PlayerHistory",
+          "path": "rc:publicised",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:committeeFormed",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:player rc:publicised rc:solarProject .",
+        "rc:player rc:reputationStanding \"contested\" .",
+        "rc:committee rc:describedComplaintAs \"disruptive\" .",
+        "rc:community rc:withdrawnSupport rc:residentJon ."
+      ],
+      "removeN": [
+        {
+          "s": "rc:solarProject",
+          "p": "rc:supportedBy",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "canvassMara",
+      "label": "Hear Mara's concerns (1 workday)",
+      "explain": "Mara wants a workshop budget and public access hours before she will support a solar proposal.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:heardFrom",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:community rc:heardFrom rc:residentMara .",
+        "rc:residentMara rc:concern rc:publicAccess .",
+        "rc:solarProject rc:supportedBy rc:residentMara ."
+      ]
+    },
+    {
+      "id": "canvassEli",
+      "label": "Hear Eli's concerns (1 workday)",
+      "explain": "Eli wants maintenance responsibility and a clear account of grant spending before he will support the project.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:heardFrom",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:community rc:heardFrom rc:residentEli .",
+        "rc:residentEli rc:concern rc:maintenance .",
+        "rc:solarProject rc:supportedBy rc:residentEli ."
+      ]
+    },
+    {
+      "id": "formCommittee",
+      "label": "Convene a project committee (1 workday)",
+      "explain": "A committee needs a resident mandate. Convening it takes time before it can hold funds or make decisions.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:committeeFormed",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:committeeFormed rc:committee .",
+        "rc:committee rc:mandatedBy rc:community ."
+      ]
+    },
+    {
+      "id": "canvassSecondResident",
+      "label": "Seek a second resident's backing (1 workday)",
+      "explain": "One resident supports the project so far. Make time to hear another view; a broader mandate improves the chance of a grant.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            },
+            {
+              "kind": "maxCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:supportedBy rc:residentJon .",
+        "rc:residentJon rc:concern rc:maintenance .",
+        "rc:community rc:heardFrom rc:residentJon ."
+      ]
+    },
+    {
+      "id": "scopeSolarProject",
+      "label": "Write the scope and budget (2 coins + 1 workday)",
+      "explain": "You pay the travel and materials cost yourself to document access, maintenance, and a workable budget. This is unpaid preparation; no grant is promised.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:committeeFormed",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:scoped",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 2
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:scoped rc:scope{seq} .",
+        "rc:solarProject rc:preparationFundedBy rc:player .",
+        "rc:player rc:unpaidPreparation rc:solarProject ."
+      ]
+    },
+    {
+      "id": "submitGrant",
+      "label": "Submit the community grant application (1 coin + 1 workday)",
+      "explain": "The application fee and preparation are paid by you. Funding is uncertain: the decision arrives after the next rest, and one endorsement may not beat competing proposals.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:scoped",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:grantStatus",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 1
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:grantStatus \"pending\" .",
+        "rc:grantAgency rc:receivedApplication rc:solarProject .",
+        "rc:player rc:unpaidPreparation rc:solarProject .",
+        "rc:solarProject rc:grantDecisionPending rc:grant{seq} .",
+        "rc:solarProject rc:grantDecisionPending rc:grant{seq} ."
+      ]
+    },
+    {
+      "id": "reviseGrant",
+      "label": "Revise and resubmit with both residents' backing (1 workday)",
+      "explain": "The first application was declined. You have another supporter now; spend a workday revising the case and try again.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:grantDeclined",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:grantAttempts",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:grantStatus"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:grantDeclined"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:grantDeclined"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingFailed"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:grantStatus \"pending\" .",
+        "rc:solarProject rc:grantAttempts rc:attempt{seq} .",
+        "rc:solarProject rc:grantDecisionPending rc:grant{seq} .",
+        "rc:solarProject rc:grantDecisionPending rc:grant{seq} ."
+      ]
+    },
+    {
+      "id": "hireFairly",
+      "label": "Fairly hire a local installer for the wiring (3 committee coins)",
+      "explain": "The committee pays a local installer to wire up the hardware, records your unpaid preparation, and keeps the maintenance and open-access terms. You still need to source and contribute the panel and inverter.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingAvailable",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Committee",
+          "path": "rc:funds",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingDisposition",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:committee",
+          "p": "rc:funds",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"fair\" .",
+        "rc:solarProject rc:contractor rc:localInstaller .",
+        "rc:localInstaller rc:paidBy rc:committee .",
+        "rc:localInstaller rc:payment rc:pay{seq} .",
+        "rc:solarProject rc:creditGivenTo rc:player .",
+        "rc:solarProject rc:maintenancePlan rc:residentCrew .",
+        "rc:solarProject rc:publicAccess \"open\" .",
+        "rc:committee rc:keptAccounts rc:solarProject .",
+        "rc:solarProject rc:procurementReady rc:ready{seq} .",
+        "rc:solarProject rc:capabilityLevel \"routine\" .",
+        "rc:solarProject rc:knowledgeStatus \"plan-only\" .",
+        "rc:solarProject rc:maintenanceCapacity \"funded\" ."
+      ]
+    },
+    {
+      "id": "appointInsider",
+      "label": "Award the wiring contract to the chair’s associate (3 committee coins)",
+      "explain": "The committee pays the chair’s associate to wire up the hardware, but bypasses the unpaid contributor, gives them no credit, and drops the agreed maintenance term. The community can still benefit if the equipment is supplied; trust and future cooperation take a hit.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingAvailable",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Committee",
+          "path": "rc:funds",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingDisposition",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:committee",
+          "p": "rc:funds",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"insider\" .",
+        "rc:solarProject rc:contractor rc:chairAssociate .",
+        "rc:chairAssociate rc:paidBy rc:committee .",
+        "rc:chairAssociate rc:payment rc:pay{seq} .",
+        "rc:solarProject rc:creditWithheldFrom rc:player .",
+        "rc:solarProject rc:maintenancePlan rc:unfunded .",
+        "rc:solarProject rc:publicAccess \"open\" .",
+        "rc:player rc:relationshipHarmedBy rc:committee .",
+        "rc:solarProject rc:procurementReady rc:ready{seq} .",
+        "rc:solarProject rc:capabilityLevel \"shell\" .",
+        "rc:solarProject rc:knowledgeStatus \"not-transferred\" .",
+        "rc:solarProject rc:maintenanceCapacity \"unfunded\" ."
+      ]
+    },
+    {
+      "id": "mismanageGrant",
+      "label": "Mismanage the grant (all 5 committee coins)",
+      "explain": "The committee loses the grant to untracked spending. There is no installer payment or finished work; the community remains without the service while an audit is requested.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:grantAwarded",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Committee",
+          "path": "rc:funds",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 5
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingDisposition",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingSource",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:committee",
+          "p": "rc:funds"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"mismanaged\" .",
+        "rc:committee rc:auditRequestedBy rc:community .",
+        "rc:committee rc:unaccountedSpending \"5\" .",
+        "rc:solarProject rc:fundingFailed rc:failure{seq} ."
+      ]
+    },
+    {
+      "id": "raiseCommunityFunds",
+      "label": "Organise community contributions (1 workday)",
+      "explain": "After the grant fails or is lost, bring residents together to raise a small, explicit pool. This takes time and community backing; the money belongs to the committee, not you.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingFailed",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingFailed"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingDisposition"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingSource \"community-raised\" .",
+        "rc:community rc:raisedFunds rc:solarProject .",
+        "rc:committee rc:funds rc:pledge{seq}a .",
+        "rc:committee rc:funds rc:pledge{seq}b .",
+        "rc:committee rc:funds rc:pledge{seq}c .",
+        "rc:committee rc:funds rc:pledge{seq}d .",
+        "rc:committee rc:funds rc:pledge{seq}e .",
+        "rc:solarProject rc:fundingAvailable rc:pool{seq} ."
+      ]
+    },
+    {
+      "id": "selfFundProject",
+      "label": "Carry the project yourself (3 coins + 1 workday)",
+      "explain": "If the grant fails, the committee loses the money, or community fundraising is not right for you, personally cover the remaining start-up costs. This does not repay the coins and work already spent.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingFailed",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:procurementReady",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingFailed"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingDisposition"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"self-funded\" .",
+        "rc:solarProject rc:fundingSource \"player\" .",
+        "rc:solarProject rc:procurementReady rc:ready{seq} .",
+        "rc:player rc:selfFundedProject rc:solarProject .",
+        "rc:solarProject rc:capabilityLevel \"integrated\" .",
+        "rc:solarProject rc:knowledgeStatus \"originator-operated\" .",
+        "rc:solarProject rc:maintenanceCapacity \"unfunded\" ."
+      ]
+    },
+    {
       "id": "buyPanel",
       "label": "Buy a solar panel at the market (4 coins)",
       "explain": "The market route: fast, but spends coins.",
-      "gate": [{"targetClass": "rc:Resident", "path": "rc:coin",
-                "constraints": [{"kind": "minCount", "num": 4}]},
-               {"targetClass": "rc:Resident", "path": "rc:panelAcquired",
-                "constraints": [{"kind": "maxCount", "num": 0}]}],
-      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 4}],
-      "add": ["rc:player rc:holdsPart rc:partPanel .",
-              "rc:player rc:panelAcquired rc:partPanel ."]
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:panelAcquired",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 4
+        }
+      ],
+      "add": [
+        "rc:player rc:holdsPart rc:partPanel .",
+        "rc:player rc:panelAcquired rc:partPanel ."
+      ]
     },
     {
       "id": "buyInverter",
       "label": "Buy an inverter at the market (7 coins)",
       "explain": "The market route: fast, but spends coins.",
-      "gate": [{"targetClass": "rc:Resident", "path": "rc:coin",
-                "constraints": [{"kind": "minCount", "num": 7}]},
-               {"targetClass": "rc:Resident", "path": "rc:inverterAcquired",
-                "constraints": [{"kind": "maxCount", "num": 0}]}],
-      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 7}],
-      "add": ["rc:player rc:holdsPart rc:partInverter .",
-              "rc:player rc:inverterAcquired rc:partInverter ."]
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 7
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:inverterAcquired",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 7
+        }
+      ],
+      "add": [
+        "rc:player rc:holdsPart rc:partInverter .",
+        "rc:player rc:inverterAcquired rc:partInverter ."
+      ]
     },
     {
       "id": "salvagePanel",
       "label": "Salvage a panel from the scrapyard (1 labour)",
       "explain": "The labour route: keeps coins, spends a turn's work.",
-      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
-                "constraints": [{"kind": "minCount", "num": 1}]},
-               {"targetClass": "rc:Resident", "path": "rc:panelAcquired",
-                "constraints": [{"kind": "maxCount", "num": 0}]}],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
-      "add": ["rc:player rc:holdsPart rc:partPanel .",
-              "rc:player rc:panelAcquired rc:partPanel .",
-              "rc:player rc:salvagedAt rc:scrapyard ."]
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:panelAcquired",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:player rc:holdsPart rc:partPanel .",
+        "rc:player rc:panelAcquired rc:partPanel .",
+        "rc:player rc:salvagedAt rc:scrapyard ."
+      ]
     },
     {
       "id": "salvageInverter",
       "label": "Salvage an inverter from the scrapyard (1 labour)",
       "explain": "The labour route: keeps coins, spends a turn's work.",
-      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
-                "constraints": [{"kind": "minCount", "num": 1}]},
-               {"targetClass": "rc:Resident", "path": "rc:inverterAcquired",
-                "constraints": [{"kind": "maxCount", "num": 0}]}],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
-      "add": ["rc:player rc:holdsPart rc:partInverter .",
-              "rc:player rc:inverterAcquired rc:partInverter .",
-              "rc:player rc:salvagedAt rc:scrapyard ."]
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:inverterAcquired",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:player rc:holdsPart rc:partInverter .",
+        "rc:player rc:inverterAcquired rc:partInverter .",
+        "rc:player rc:salvagedAt rc:scrapyard ."
+      ]
     },
     {
       "id": "contributePanel",
       "label": "Install the panel into the solar project",
       "explain": "Shared work: your part becomes community infrastructure.",
-      "gate": [{"targetClass": "rc:Resident", "path": "rc:holdsPart",
-                "constraints": [{"kind": "hasValue", "text": "rc:partPanel"}]}],
-      "removeN": [{"s": "rc:player", "p": "rc:holdsPart", "o": "rc:partPanel", "n": 1}],
-      "add": ["rc:solarProject rc:partInstalled rc:partPanel .",
-              "rc:solarProject rc:contributedBy rc:player ."]
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:holdsPart",
+          "constraints": [
+            {
+              "kind": "hasValue",
+              "text": "rc:partPanel"
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:holdsPart",
+          "o": "rc:partPanel",
+          "n": 1
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:partInstalled rc:partPanel .",
+        "rc:solarProject rc:contributedBy rc:player ."
+      ]
     },
     {
       "id": "contributeInverter",
       "label": "Install the inverter into the solar project",
       "explain": "Shared work: your part becomes community infrastructure.",
-      "gate": [{"targetClass": "rc:Resident", "path": "rc:holdsPart",
-                "constraints": [{"kind": "hasValue", "text": "rc:partInverter"}]}],
-      "removeN": [{"s": "rc:player", "p": "rc:holdsPart", "o": "rc:partInverter", "n": 1}],
-      "add": ["rc:solarProject rc:partInstalled rc:partInverter .",
-              "rc:solarProject rc:contributedBy rc:player ."]
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:holdsPart",
+          "constraints": [
+            {
+              "kind": "hasValue",
+              "text": "rc:partInverter"
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:holdsPart",
+          "o": "rc:partInverter",
+          "n": 1
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:partInstalled rc:partInverter .",
+        "rc:solarProject rc:contributedBy rc:player ."
+      ]
     },
     {
       "id": "requestApproval",
       "label": "Present the project at the committee meeting",
       "explain": "The committee endorses a project once real parts are installed.",
-      "gate": [{"targetClass": "rc:CommunityProject", "path": "rc:partInstalled",
-                "constraints": [{"kind": "minCount", "num": 1}]},
-               {"targetClass": "rc:CommunityProject", "path": "rc:approvedBy",
-                "constraints": [{"kind": "maxCount", "num": 0}]}],
-      "add": ["rc:solarProject rc:approvedBy rc:committee ."]
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:partInstalled",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:approvedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:approvedBy rc:committee ."
+      ]
     },
     {
       "id": "switchPowerOn",
       "label": "Switch on the workshop solar system",
       "explain": "Needs both parts installed AND committee endorsement.",
       "gate": [
-        {"targetClass": "rc:CommunityProject", "path": "rc:partInstalled",
-         "constraints": [{"kind": "hasValue", "text": "rc:partPanel"},
-                         {"kind": "hasValue", "text": "rc:partInverter"}]},
-        {"targetClass": "rc:CommunityProject", "path": "rc:approvedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:partInstalled",
+          "constraints": [
+            {
+              "kind": "hasValue",
+              "text": "rc:partPanel"
+            },
+            {
+              "kind": "hasValue",
+              "text": "rc:partInverter"
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:approvedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
       ],
-      "removeAll": [{"s": "rc:workshop", "p": "rc:status"},
-                    {"s": "rc:workshop", "p": "rc:powerWatts"}],
-      "add": ["rc:workshop rc:status \"online\" .",
-              "rc:workshop rc:powerWatts 400 .",
-              "rc:solarProject rc:completedIn rc:e{seq} ."]
+      "removeAll": [
+        {
+          "s": "rc:workshop",
+          "p": "rc:status"
+        },
+        {
+          "s": "rc:workshop",
+          "p": "rc:powerWatts"
+        }
+      ],
+      "add": [
+        "rc:workshop rc:status \"online\" .",
+        "rc:workshop rc:powerWatts 400 .",
+        "rc:community rc:benefitsFrom rc:solarProject .",
+        "rc:solarProject rc:completedIn rc:e{seq} ."
+      ]
     },
     {
       "id": "improveShelterCoins",
       "label": "Improve the shelter with bought materials (3 coins)",
       "explain": "Personal asset improvement via the market route.",
-      "gate": [{"targetClass": "rc:Resident", "path": "rc:coin",
-                "constraints": [{"kind": "minCount", "num": 3}]}],
-      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 3}],
-      "add": ["rc:swag rc:upgrade rc:u{seq} .",
-              "rc:swag rc:improvedWith rc:materials ."]
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:swag rc:upgrade rc:u{seq} .",
+        "rc:swag rc:improvedWith rc:materials ."
+      ]
     },
     {
       "id": "improveShelterLabour",
       "label": "Patch the shelter yourself (1 labour)",
       "explain": "Personal asset improvement via the labour route.",
-      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
-                "constraints": [{"kind": "minCount", "num": 1}]}],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
-      "add": ["rc:swag rc:upgrade rc:u{seq} .",
-              "rc:swag rc:repairedBy rc:player ."]
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:swag rc:upgrade rc:u{seq} .",
+        "rc:swag rc:repairedBy rc:player ."
+      ]
     },
     {
       "id": "endTurn",
       "label": "Rest for the evening (regain labour)",
       "explain": "Only useful once you've spent your labour.",
-      "gate": [{"targetClass": "rc:Resident", "path": "rc:labourToken",
-                "constraints": [{"kind": "maxCount", "num": 0}]}],
-      "add": ["rc:player rc:labourToken rc:l{seq} .",
-              "rc:player rc:turn rc:t{seq} ."]
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "add": [
+        "rc:player rc:labourToken rc:l{seq} .",
+        "rc:player rc:turn rc:t{seq} ."
+      ],
+      "afterTurn": [
+        {
+          "gate": [
+            {
+              "targetClass": "rc:CommunityProject",
+              "path": "rc:grantDecisionPending",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 1
+                }
+              ]
+            },
+            {
+              "targetClass": "rc:CommunityProject",
+              "path": "rc:supportedBy",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 2
+                }
+              ]
+            }
+          ],
+          "removeAll": [
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantStatus"
+            },
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantDecisionPending"
+            },
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantDecisionPending"
+            }
+          ],
+          "add": [
+            "rc:solarProject rc:grantStatus \"awarded\" .",
+            "rc:committee rc:funds rc:f{seq}a .",
+            "rc:committee rc:funds rc:f{seq}b .",
+            "rc:committee rc:funds rc:f{seq}c .",
+            "rc:committee rc:funds rc:f{seq}d .",
+            "rc:committee rc:funds rc:f{seq}e .",
+            "rc:grantAgency rc:award rc:solarProject .",
+            "rc:solarProject rc:grantAwarded rc:award{seq} .",
+            "rc:solarProject rc:grantAwarded rc:award{seq} .",
+            "rc:solarProject rc:fundingSource \"grant\" .",
+            "rc:solarProject rc:fundingAvailable rc:grant{seq} .",
+            "rc:solarProject rc:fundingNarrativeUsed rc:attack{seq} .",
+            "rc:grantAgency rc:reliedOnClaim rc:maintenanceClaim .",
+            "rc:grantAgency rc:awardedControlTo rc:committee .",
+            "rc:grantAgency rc:excludedContributor rc:player .",
+            "rc:player rc:reputationHarmedBy rc:grantNarrative .",
+            "rc:grantNarrative a rc:InstitutionalDecision .",
+            "rc:grantNarrative rc:usedClaim rc:maintenanceClaim .",
+            "rc:grantNarrative rc:affected rc:solarProject ."
+          ]
+        },
+        {
+          "gate": [
+            {
+              "targetClass": "rc:CommunityProject",
+              "path": "rc:grantDecisionPending",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 1
+                }
+              ]
+            },
+            {
+              "targetClass": "rc:CommunityProject",
+              "path": "rc:supportedBy",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 1
+                },
+                {
+                  "kind": "maxCount",
+                  "num": 1
+                }
+              ]
+            }
+          ],
+          "removeAll": [
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantStatus"
+            },
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantDecisionPending"
+            },
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantDecisionPending"
+            }
+          ],
+          "add": [
+            "rc:solarProject rc:grantStatus \"declined\" .",
+            "rc:grantAgency rc:declined rc:solarProject .",
+            "rc:solarProject rc:grantDeclined rc:decline{seq} .",
+            "rc:solarProject rc:grantDeclined rc:decline{seq} .",
+            "rc:solarProject rc:fundingFailed rc:failure{seq} ."
+          ]
+        },
+        {
+          "gate": [
+            {
+              "targetClass": "rc:GovernmentAgency",
+              "path": "rc:challengePending",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 1
+                }
+              ]
+            }
+          ],
+          "removeAll": [
+            {
+              "s": "rc:publicWorksDepartment",
+              "p": "rc:challengePending"
+            }
+          ],
+          "add": [
+            "rc:publicWorksDepartment rc:challengeStatus \"dismissed\" .",
+            "rc:publicWorksDepartment rc:refusedChallengeBy rc:player .",
+            "rc:player rc:reputationHarmedBy rc:agencyChallengeReview .",
+            "rc:agencyChallengeReview a rc:InstitutionalDecision .",
+            "rc:agencyChallengeReview rc:affected rc:solarProject ."
+          ]
+        }
+      ]
     },
     {
       "id": "repairTankCoins",
       "label": "Repair the water tank with parts (3 coins)",
       "explain": "Buy a replacement fitting and return the shared tank to service.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:coin",
-         "constraints": [{"kind": "minCount", "num": 3}]},
-        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 3}],
-      "removeAll": [{"s": "rc:waterTank", "p": "rc:status"},
-                    {"s": "rc:waterTank", "p": "rc:waterLitres"}],
-      "add": ["rc:waterTank rc:status \"online\" .",
-              "rc:waterTank rc:waterLitres 200 .",
-              "rc:waterTank rc:repairedBy rc:player ."]
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 3
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:waterTank",
+          "p": "rc:status"
+        },
+        {
+          "s": "rc:waterTank",
+          "p": "rc:waterLitres"
+        }
+      ],
+      "add": [
+        "rc:waterTank rc:status \"online\" .",
+        "rc:waterTank rc:waterLitres 200 .",
+        "rc:waterTank rc:repairedBy rc:player ."
+      ]
     },
     {
       "id": "repairTankLabour",
       "label": "Repair the water tank with salvaged fittings (1 labour)",
       "explain": "Use time and repair skill instead of buying a new fitting.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:waterTank", "p": "rc:status"},
-                    {"s": "rc:waterTank", "p": "rc:waterLitres"}],
-      "add": ["rc:waterTank rc:status \"online\" .",
-              "rc:waterTank rc:waterLitres 200 .",
-              "rc:waterTank rc:repairedBy rc:player ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:waterTank",
+          "p": "rc:status"
+        },
+        {
+          "s": "rc:waterTank",
+          "p": "rc:waterLitres"
+        }
+      ],
+      "add": [
+        "rc:waterTank rc:status \"online\" .",
+        "rc:waterTank rc:waterLitres 200 .",
+        "rc:waterTank rc:repairedBy rc:player ."
+      ]
     },
     {
       "id": "startGarden",
       "label": "Plant the garden using shared water (1 labour)",
       "explain": "The garden needs a working tank and one block of labour.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Garden", "path": "rc:plantedBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Garden",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:garden", "p": "rc:status"}],
-      "add": ["rc:garden rc:status \"growing\" .",
-              "rc:garden rc:plantedBy rc:player ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:garden",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:garden rc:status \"growing\" .",
+        "rc:garden rc:plantedBy rc:player ."
+      ]
     },
     {
       "id": "restoreBridge",
       "label": "Rebuild the canal bridge (1 labour)",
       "explain": "The bridge crew needs working water and one block of labour. Finish by the end of day four before the canal rises.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Resident", "path": "rc:turn",
-         "constraints": [{"kind": "maxCount", "num": 3}]},
-        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:turn",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:bridge", "p": "rc:status"}],
-      "add": ["rc:bridge rc:status \"passable\" .",
-              "rc:bridge rc:restoredBy rc:player ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:bridge",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:bridge rc:status \"passable\" .",
+        "rc:bridge rc:restoredBy rc:player ."
+      ]
     },
     {
       "id": "braceBridge",
       "label": "Brace the flooded bridge supports (1 labour)",
       "explain": "After day four, the high canal needs a bracing shift before the usual crew can finish the bridge.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:turn",
-         "constraints": [{"kind": "minCount", "num": 4}]},
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Bridge", "path": "rc:bracedBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]},
-        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:turn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:bracedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
-      "add": ["rc:bridge rc:bracedBy rc:player ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:bridge rc:bracedBy rc:player ."
+      ]
     },
     {
       "id": "restoreBridgeLateLabour",
       "label": "Finish the braced bridge (1 labour)",
       "explain": "The supports are braced. One more workday reopens the crossing without spending coins.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:turn",
-         "constraints": [{"kind": "minCount", "num": 4}]},
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Bridge", "path": "rc:bracedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:turn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:bracedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:bridge", "p": "rc:status"}],
-      "add": ["rc:bridge rc:status \"passable\" .",
-              "rc:bridge rc:restoredBy rc:player ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:bridge",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:bridge rc:status \"passable\" .",
+        "rc:bridge rc:restoredBy rc:player ."
+      ]
     },
     {
       "id": "restoreBridgeLateCoins",
       "label": "Hire a canal crew to rebuild now (2 coins, 1 labour)",
       "explain": "After day four, a specialist crew can work through the high water in one day. It costs two coins and your labour to coordinate.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:turn",
-         "constraints": [{"kind": "minCount", "num": 4}]},
-        {"targetClass": "rc:Resident", "path": "rc:coin",
-         "constraints": [{"kind": "minCount", "num": 2}]},
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:WaterTank", "path": "rc:repairedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:turn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 2}],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:bridge", "p": "rc:status"}],
-      "add": ["rc:bridge rc:status \"passable\" .",
-              "rc:bridge rc:restoredBy rc:player ."]
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 2
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:bridge",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:bridge rc:status \"passable\" .",
+        "rc:bridge rc:restoredBy rc:player ."
+      ]
     },
     {
       "id": "raiseWindPump",
       "label": "Commission the wind pump (1 labour)",
       "explain": "The crossing must be restored and the workshop powered before the pump can be commissioned.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Pump", "path": "rc:commissionedBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Pump",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:windPump", "p": "rc:status"}],
-      "add": ["rc:windPump rc:status \"online\" .",
-              "rc:windPump rc:commissionedBy rc:player ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:windPump",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:windPump rc:status \"online\" .",
+        "rc:windPump rc:commissionedBy rc:player ."
+      ]
     },
     {
       "id": "plantOrchard",
       "label": "Plant the Saltwind orchard (1 labour)",
       "explain": "The orchard needs the commissioned wind pump and one block of labour.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Pump", "path": "rc:commissionedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Pump",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:orchard", "p": "rc:status"}],
-      "add": ["rc:orchard rc:status \"growing\" .",
-              "rc:orchard rc:plantedBy rc:player ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:orchard",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:orchard rc:status \"growing\" .",
+        "rc:orchard rc:plantedBy rc:player ."
+      ]
     },
     {
       "id": "fulfilWorkshopOrder",
       "label": "Complete the repair order (+3 coins, 1 labour)",
       "explain": "A nearby settlement pays for one urgent repair after the workshop has power.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Workshop", "path": "rc:deliveredOrder",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Workshop",
+          "path": "rc:deliveredOrder",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
-      "add": ["rc:workshop rc:deliveredOrder rc:order{seq} .",
-              "rc:player rc:coin rc:earned{seq}a .",
-              "rc:player rc:coin rc:earned{seq}b .",
-              "rc:player rc:coin rc:earned{seq}c ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:workshop rc:deliveredOrder rc:order{seq} .",
+        "rc:player rc:coin rc:earned{seq}a .",
+        "rc:player rc:coin rc:earned{seq}b .",
+        "rc:player rc:coin rc:earned{seq}c ."
+      ]
     },
     {
       "id": "connectMastLabour",
       "label": "Repair the signal mast (1 labour)",
       "explain": "Use a crew shift to reconnect the mast once the workshop has power. This opens a remote repair contract.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Relay", "path": "rc:commissionedBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Relay",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:communicationsMast", "p": "rc:status"}],
-      "add": ["rc:communicationsMast rc:status \"online\" .",
-              "rc:communicationsMast rc:commissionedBy rc:player ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:communicationsMast",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:communicationsMast rc:status \"online\" .",
+        "rc:communicationsMast rc:commissionedBy rc:player ."
+      ]
     },
     {
       "id": "connectMastCoins",
       "label": "Buy mast parts and reconnect it (3 coins)",
       "explain": "Purchase the missing transmitter parts and connect the mast without using today's crew shift.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:coin",
-         "constraints": [{"kind": "minCount", "num": 3}]},
-        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Relay", "path": "rc:commissionedBy",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Relay",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 3}],
-      "removeAll": [{"s": "rc:communicationsMast", "p": "rc:status"}],
-      "add": ["rc:communicationsMast rc:status \"online\" .",
-              "rc:communicationsMast rc:commissionedBy rc:player ."]
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 3
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:communicationsMast",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:communicationsMast rc:status \"online\" .",
+        "rc:communicationsMast rc:commissionedBy rc:player ."
+      ]
     },
     {
       "id": "fulfilRemoteOrder",
       "label": "Deliver the remote repair contract (+4 coins, 1 labour)",
       "explain": "With the workshop powered and the signal mast connected, take one distant community's repair order.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:CommunityProject", "path": "rc:completedIn",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Relay", "path": "rc:commissionedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Relay", "path": "rc:deliveredOrder",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Relay",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Relay",
+          "path": "rc:deliveredOrder",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
-      "add": ["rc:communicationsMast rc:deliveredOrder rc:remoteOrder{seq} .",
-              "rc:player rc:coin rc:signal{seq}a .",
-              "rc:player rc:coin rc:signal{seq}b .",
-              "rc:player rc:coin rc:signal{seq}c .",
-              "rc:player rc:coin rc:signal{seq}d ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:communicationsMast rc:deliveredOrder rc:remoteOrder{seq} .",
+        "rc:player rc:coin rc:signal{seq}a .",
+        "rc:player rc:coin rc:signal{seq}b .",
+        "rc:player rc:coin rc:signal{seq}c .",
+        "rc:player rc:coin rc:signal{seq}d ."
+      ]
     },
     {
       "id": "reserveHarvest",
       "label": "Reserve the orchard harvest for the commons (1 labour)",
       "explain": "Store the first harvest for neighbours. This reduces gathering supplies from four coins to two.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Orchard", "path": "rc:harvestChoice",
-         "constraints": [{"kind": "maxCount", "num": 0}]},
-        {"targetClass": "rc:Community", "path": "rc:finale",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:harvestChoice",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
-      "add": ["rc:orchard rc:harvestChoice \"reserve\" .",
-              "rc:community rc:foodReserve rc:orchard ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:orchard rc:harvestChoice \"reserve\" .",
+        "rc:community rc:foodReserve rc:orchard ."
+      ]
     },
     {
       "id": "sellHarvest",
       "label": "Sell the orchard harvest at market (+3 coins, 1 labour)",
       "explain": "Trade the first crop for three coins. The cash can outfit the boat or fund shared supplies.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Orchard", "path": "rc:harvestChoice",
-         "constraints": [{"kind": "maxCount", "num": 0}]},
-        {"targetClass": "rc:Community", "path": "rc:finale",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:harvestChoice",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"}],
-      "add": ["rc:orchard rc:harvestChoice \"sell\" .",
-              "rc:player rc:coin rc:harvest{seq}a .",
-              "rc:player rc:coin rc:harvest{seq}b .",
-              "rc:player rc:coin rc:harvest{seq}c ."]
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:orchard rc:harvestChoice \"sell\" .",
+        "rc:player rc:coin rc:harvest{seq}a .",
+        "rc:player rc:coin rc:harvest{seq}b .",
+        "rc:player rc:coin rc:harvest{seq}c ."
+      ]
     },
     {
       "id": "openCommonsReserved",
       "label": "Open the commons with stored food (2 coins, 1 labour)",
       "explain": "Use the reserved orchard harvest to host a gathering with fewer purchased supplies. Needs shelter, garden, orchard, two coins and a crew shift.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:coin",
-         "constraints": [{"kind": "minCount", "num": 2}]},
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Shelter", "path": "rc:upgrade",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Garden", "path": "rc:plantedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Community", "path": "rc:foodReserve",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Community", "path": "rc:finale",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Shelter",
+          "path": "rc:upgrade",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Garden",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:foodReserve",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 2}],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:community", "p": "rc:status"},
-                    {"s": "rc:community", "p": "rc:foodReserve"}],
-      "add": ["rc:community rc:status \"open\" .",
-              "rc:community rc:finale \"commons\" .",
-              "rc:community rc:gatheredAt rc:saltwindReach ."]
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 2
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:community",
+          "p": "rc:status"
+        },
+        {
+          "s": "rc:community",
+          "p": "rc:foodReserve"
+        }
+      ],
+      "add": [
+        "rc:community rc:status \"open\" .",
+        "rc:community rc:finale \"commons\" .",
+        "rc:community rc:gatheredAt rc:saltwindReach ."
+      ]
     },
     {
       "id": "openCommons",
       "label": "Open the commons with a harvest gathering (4 coins, 1 labour)",
       "explain": "Celebrate a safe local food and water network. Needs a repaired shelter, the garden, the orchard and four coins for shared supplies.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:coin",
-         "constraints": [{"kind": "minCount", "num": 4}]},
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Shelter", "path": "rc:upgrade",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Garden", "path": "rc:plantedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Community", "path": "rc:finale",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Shelter",
+          "path": "rc:upgrade",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Garden",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 4}],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:community", "p": "rc:status"}],
-      "add": ["rc:community rc:status \"open\" .",
-              "rc:community rc:finale \"commons\" .",
-              "rc:community rc:gatheredAt rc:saltwindReach ."]
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 4
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:community",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:community rc:status \"open\" .",
+        "rc:community rc:finale \"commons\" .",
+        "rc:community rc:gatheredAt rc:saltwindReach ."
+      ]
     },
     {
       "id": "launchTradeRoute",
       "label": "Launch the canal trade route (2 coins, 1 labour)",
       "explain": "Connect the repaired infrastructure to neighbours. Needs the crossing, pump and orchard, plus two coins to outfit the first boat.",
       "gate": [
-        {"targetClass": "rc:Resident", "path": "rc:coin",
-         "constraints": [{"kind": "minCount", "num": 2}]},
-        {"targetClass": "rc:Resident", "path": "rc:labourToken",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Bridge", "path": "rc:restoredBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Pump", "path": "rc:commissionedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Orchard", "path": "rc:plantedBy",
-         "constraints": [{"kind": "minCount", "num": 1}]},
-        {"targetClass": "rc:Community", "path": "rc:finale",
-         "constraints": [{"kind": "maxCount", "num": 0}]}
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Pump",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
       ],
-      "removeN": [{"s": "rc:player", "p": "rc:coin", "n": 2}],
-      "removeAll": [{"s": "rc:player", "p": "rc:labourToken"},
-                    {"s": "rc:community", "p": "rc:status"}],
-      "add": ["rc:community rc:status \"connected\" .",
-              "rc:community rc:finale \"trade\" .",
-              "rc:community rc:tradesWith rc:neighbours .",
-              "rc:player rc:coin rc:freight{seq}a .",
-              "rc:player rc:coin rc:freight{seq}b .",
-              "rc:player rc:coin rc:freight{seq}c .",
-              "rc:player rc:coin rc:freight{seq}d ."]
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 2
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:community",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:community rc:status \"connected\" .",
+        "rc:community rc:finale \"trade\" .",
+        "rc:community rc:tradesWith rc:neighbours .",
+        "rc:player rc:coin rc:freight{seq}a .",
+        "rc:player rc:coin rc:freight{seq}b .",
+        "rc:player rc:coin rc:freight{seq}c .",
+        "rc:player rc:coin rc:freight{seq}d ."
+      ]
+    },
+    {
+      "id": "canvassMara",
+      "label": "Hear Mara's concerns (1 workday)",
+      "explain": "Mara wants a workshop budget and public access hours before she will support a solar proposal.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:heardFrom",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:community rc:heardFrom rc:residentMara .",
+        "rc:residentMara rc:concern rc:publicAccess .",
+        "rc:solarProject rc:supportedBy rc:residentMara ."
+      ]
+    },
+    {
+      "id": "canvassEli",
+      "label": "Hear Eli's concerns (1 workday)",
+      "explain": "Eli wants maintenance responsibility and a clear account of grant spending before he will support the project.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:heardFrom",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:community rc:heardFrom rc:residentEli .",
+        "rc:residentEli rc:concern rc:maintenance .",
+        "rc:solarProject rc:supportedBy rc:residentEli ."
+      ]
+    },
+    {
+      "id": "formCommittee",
+      "label": "Convene a project committee (1 workday)",
+      "explain": "A committee needs a resident mandate. Convening it takes time before it can hold funds or make decisions.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:committeeFormed",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:committeeFormed rc:committee .",
+        "rc:committee rc:mandatedBy rc:community ."
+      ]
+    },
+    {
+      "id": "canvassSecondResident",
+      "label": "Seek a second resident's backing (1 workday)",
+      "explain": "One resident supports the project so far. Make time to hear another view; a broader mandate improves the chance of a grant.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            },
+            {
+              "kind": "maxCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:supportedBy rc:residentJon .",
+        "rc:residentJon rc:concern rc:maintenance .",
+        "rc:community rc:heardFrom rc:residentJon ."
+      ]
+    },
+    {
+      "id": "scopeSolarProject",
+      "label": "Write the scope and budget (2 coins + 1 workday)",
+      "explain": "You pay the travel and materials cost yourself to document access, maintenance, and a workable budget. This is unpaid preparation; no grant is promised.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:committeeFormed",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:scoped",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 2
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:scoped rc:scope{seq} .",
+        "rc:solarProject rc:preparationFundedBy rc:player .",
+        "rc:player rc:unpaidPreparation rc:solarProject ."
+      ]
+    },
+    {
+      "id": "submitGrant",
+      "label": "Submit the community grant application (1 coin + 1 workday)",
+      "explain": "The application fee and preparation are paid by you. Funding is uncertain: the decision arrives after the next rest, and one endorsement may not beat competing proposals.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:scoped",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:grantStatus",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 1
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:grantStatus \"pending\" .",
+        "rc:grantAgency rc:receivedApplication rc:solarProject .",
+        "rc:player rc:unpaidPreparation rc:solarProject .",
+        "rc:solarProject rc:grantDecisionPending rc:grant{seq} .",
+        "rc:solarProject rc:grantDecisionPending rc:grant{seq} ."
+      ]
+    },
+    {
+      "id": "reviseGrant",
+      "label": "Revise and resubmit with both residents' backing (1 workday)",
+      "explain": "The first application was declined. You have another supporter now; spend a workday revising the case and try again.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:grantDeclined",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:grantAttempts",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:grantStatus"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:grantDeclined"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:grantDeclined"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingFailed"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:grantStatus \"pending\" .",
+        "rc:solarProject rc:grantAttempts rc:attempt{seq} .",
+        "rc:solarProject rc:grantDecisionPending rc:grant{seq} .",
+        "rc:solarProject rc:grantDecisionPending rc:grant{seq} ."
+      ]
+    },
+    {
+      "id": "hireFairly",
+      "label": "Fairly hire a local installer for the wiring (3 committee coins)",
+      "explain": "The committee pays a local installer to wire up the hardware, records your unpaid preparation, and keeps the maintenance and open-access terms. You still need to source and contribute the panel and inverter.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingAvailable",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingAvailable",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Committee",
+          "path": "rc:funds",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingDisposition",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:committee",
+          "p": "rc:funds",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"fair\" .",
+        "rc:solarProject rc:contractor rc:localInstaller .",
+        "rc:localInstaller rc:paidBy rc:committee .",
+        "rc:localInstaller rc:payment rc:pay{seq} .",
+        "rc:solarProject rc:creditGivenTo rc:player .",
+        "rc:solarProject rc:maintenancePlan rc:residentCrew .",
+        "rc:solarProject rc:publicAccess \"open\" .",
+        "rc:committee rc:keptAccounts rc:solarProject .",
+        "rc:solarProject rc:procurementReady rc:ready{seq} ."
+      ]
+    },
+    {
+      "id": "appointInsider",
+      "label": "Award the wiring contract to the chair’s associate (3 committee coins)",
+      "explain": "The committee pays the chair’s associate to wire up the hardware, but bypasses the unpaid contributor, gives them no credit, and drops the agreed maintenance term. The community can still benefit if the equipment is supplied; trust and future cooperation take a hit.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingAvailable",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingAvailable",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Committee",
+          "path": "rc:funds",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingDisposition",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:committee",
+          "p": "rc:funds",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"insider\" .",
+        "rc:solarProject rc:contractor rc:chairAssociate .",
+        "rc:chairAssociate rc:paidBy rc:committee .",
+        "rc:chairAssociate rc:payment rc:pay{seq} .",
+        "rc:solarProject rc:creditWithheldFrom rc:player .",
+        "rc:solarProject rc:maintenancePlan rc:unfunded .",
+        "rc:solarProject rc:publicAccess \"open\" .",
+        "rc:player rc:relationshipHarmedBy rc:committee .",
+        "rc:solarProject rc:procurementReady rc:ready{seq} ."
+      ]
+    },
+    {
+      "id": "mismanageGrant",
+      "label": "Mismanage the grant (all 5 committee coins)",
+      "explain": "The committee loses the grant to untracked spending. There is no installer payment or finished work; the community remains without the service while an audit is requested.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:grantAwarded",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Committee",
+          "path": "rc:funds",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 5
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingDisposition",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingSource",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:committee",
+          "p": "rc:funds"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"mismanaged\" .",
+        "rc:committee rc:auditRequestedBy rc:community .",
+        "rc:committee rc:unaccountedSpending \"5\" .",
+        "rc:solarProject rc:fundingFailed rc:failure{seq} ."
+      ]
+    },
+    {
+      "id": "raiseCommunityFunds",
+      "label": "Organise community contributions (1 workday)",
+      "explain": "After the grant fails or is lost, bring residents together to raise a small, explicit pool. This takes time and community backing; the money belongs to the committee, not you.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingFailed",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:supportedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingSource",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingFailed"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingDisposition"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingSource \"community-raised\" .",
+        "rc:community rc:raisedFunds rc:solarProject .",
+        "rc:committee rc:funds rc:pledge{seq}a .",
+        "rc:committee rc:funds rc:pledge{seq}b .",
+        "rc:committee rc:funds rc:pledge{seq}c .",
+        "rc:committee rc:funds rc:pledge{seq}d .",
+        "rc:committee rc:funds rc:pledge{seq}e .",
+        "rc:solarProject rc:fundingAvailable rc:pool{seq} ."
+      ]
+    },
+    {
+      "id": "selfFundProject",
+      "label": "Carry the project yourself (3 coins + 1 workday)",
+      "explain": "If the grant fails, the committee loses the money, or community fundraising is not right for you, personally cover the remaining start-up costs. This does not repay the coins and work already spent.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingFailed",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:procurementReady",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingFailed"
+        },
+        {
+          "s": "rc:solarProject",
+          "p": "rc:fundingDisposition"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"self-funded\" .",
+        "rc:solarProject rc:fundingSource \"player\" .",
+        "rc:solarProject rc:procurementReady rc:ready{seq} .",
+        "rc:player rc:selfFundedProject rc:solarProject ."
+      ]
+    },
+    {
+      "id": "buyPanel",
+      "label": "Buy a solar panel at the market (4 coins)",
+      "explain": "The market route: fast, but spends coins.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:panelAcquired",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 4
+        }
+      ],
+      "add": [
+        "rc:player rc:holdsPart rc:partPanel .",
+        "rc:player rc:panelAcquired rc:partPanel ."
+      ]
+    },
+    {
+      "id": "buyInverter",
+      "label": "Buy an inverter at the market (7 coins)",
+      "explain": "The market route: fast, but spends coins.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 7
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:inverterAcquired",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 7
+        }
+      ],
+      "add": [
+        "rc:player rc:holdsPart rc:partInverter .",
+        "rc:player rc:inverterAcquired rc:partInverter ."
+      ]
+    },
+    {
+      "id": "salvagePanel",
+      "label": "Salvage a panel from the scrapyard (1 labour)",
+      "explain": "The labour route: keeps coins, spends a turn's work.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:panelAcquired",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:player rc:holdsPart rc:partPanel .",
+        "rc:player rc:panelAcquired rc:partPanel .",
+        "rc:player rc:salvagedAt rc:scrapyard ."
+      ]
+    },
+    {
+      "id": "salvageInverter",
+      "label": "Salvage an inverter from the scrapyard (1 labour)",
+      "explain": "The labour route: keeps coins, spends a turn's work.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:inverterAcquired",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:player rc:holdsPart rc:partInverter .",
+        "rc:player rc:inverterAcquired rc:partInverter .",
+        "rc:player rc:salvagedAt rc:scrapyard ."
+      ]
+    },
+    {
+      "id": "contributePanel",
+      "label": "Install the panel into the solar project",
+      "explain": "Shared work: your part becomes community infrastructure.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:holdsPart",
+          "constraints": [
+            {
+              "kind": "hasValue",
+              "text": "rc:partPanel"
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:holdsPart",
+          "o": "rc:partPanel",
+          "n": 1
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:partInstalled rc:partPanel .",
+        "rc:solarProject rc:contributedBy rc:player ."
+      ]
+    },
+    {
+      "id": "contributeInverter",
+      "label": "Install the inverter into the solar project",
+      "explain": "Shared work: your part becomes community infrastructure.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:holdsPart",
+          "constraints": [
+            {
+              "kind": "hasValue",
+              "text": "rc:partInverter"
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:holdsPart",
+          "o": "rc:partInverter",
+          "n": 1
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:partInstalled rc:partInverter .",
+        "rc:solarProject rc:contributedBy rc:player ."
+      ]
+    },
+    {
+      "id": "requestApproval",
+      "label": "Present the project at the committee meeting",
+      "explain": "The committee endorses a project once real parts are installed.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:partInstalled",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:approvedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:approvedBy rc:committee ."
+      ]
+    },
+    {
+      "id": "switchPowerOn",
+      "label": "Switch on the workshop solar system",
+      "explain": "Needs both parts installed AND committee endorsement.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:partInstalled",
+          "constraints": [
+            {
+              "kind": "hasValue",
+              "text": "rc:partPanel"
+            },
+            {
+              "kind": "hasValue",
+              "text": "rc:partInverter"
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:approvedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ],
+          "path": "rc:procurementReady",
+          "targetClass": "rc:CommunityProject"
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:workshop",
+          "p": "rc:status"
+        },
+        {
+          "s": "rc:workshop",
+          "p": "rc:powerWatts"
+        }
+      ],
+      "add": [
+        "rc:workshop rc:status \"online\" .",
+        "rc:workshop rc:powerWatts 400 .",
+        "rc:community rc:benefitsFrom rc:solarProject .",
+        "rc:solarProject rc:completedIn rc:e{seq} ."
+      ]
+    },
+    {
+      "id": "improveShelterCoins",
+      "label": "Improve the shelter with bought materials (3 coins)",
+      "explain": "Personal asset improvement via the market route.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:swag rc:upgrade rc:u{seq} .",
+        "rc:swag rc:improvedWith rc:materials ."
+      ]
+    },
+    {
+      "id": "improveShelterLabour",
+      "label": "Patch the shelter yourself (1 labour)",
+      "explain": "Personal asset improvement via the labour route.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:swag rc:upgrade rc:u{seq} .",
+        "rc:swag rc:repairedBy rc:player ."
+      ]
+    },
+    {
+      "id": "endTurn",
+      "label": "Rest for the evening (regain labour)",
+      "explain": "Only useful once you've spent your labour.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "add": [
+        "rc:player rc:labourToken rc:l{seq} .",
+        "rc:player rc:turn rc:t{seq} ."
+      ],
+      "afterTurn": [
+        {
+          "gate": [
+            {
+              "targetClass": "rc:CommunityProject",
+              "path": "rc:grantDecisionPending",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 1
+                }
+              ]
+            },
+            {
+              "targetClass": "rc:CommunityProject",
+              "path": "rc:supportedBy",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 2
+                }
+              ]
+            }
+          ],
+          "removeAll": [
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantStatus"
+            },
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantDecisionPending"
+            },
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantDecisionPending"
+            }
+          ],
+          "add": [
+            "rc:solarProject rc:grantStatus \"awarded\" .",
+            "rc:committee rc:funds rc:f{seq}a .",
+            "rc:committee rc:funds rc:f{seq}b .",
+            "rc:committee rc:funds rc:f{seq}c .",
+            "rc:committee rc:funds rc:f{seq}d .",
+            "rc:committee rc:funds rc:f{seq}e .",
+            "rc:grantAgency rc:award rc:solarProject .",
+            "rc:solarProject rc:grantAwarded rc:award{seq} .",
+            "rc:solarProject rc:grantAwarded rc:award{seq} .",
+            "rc:solarProject rc:fundingSource \"grant\" .",
+            "rc:solarProject rc:fundingAvailable rc:grant{seq} .",
+            "rc:solarProject rc:fundingNarrativeUsed rc:attack{seq} .",
+            "rc:grantAgency rc:reliedOnClaim rc:maintenanceClaim .",
+            "rc:grantAgency rc:awardedControlTo rc:committee .",
+            "rc:grantAgency rc:excludedContributor rc:player .",
+            "rc:player rc:reputationHarmedBy rc:grantNarrative .",
+            "rc:grantNarrative a rc:InstitutionalDecision .",
+            "rc:grantNarrative rc:usedClaim rc:maintenanceClaim .",
+            "rc:grantNarrative rc:affected rc:solarProject ."
+          ]
+        },
+        {
+          "gate": [
+            {
+              "targetClass": "rc:CommunityProject",
+              "path": "rc:grantDecisionPending",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 1
+                }
+              ]
+            },
+            {
+              "targetClass": "rc:CommunityProject",
+              "path": "rc:supportedBy",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 1
+                },
+                {
+                  "kind": "maxCount",
+                  "num": 1
+                }
+              ]
+            }
+          ],
+          "removeAll": [
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantStatus"
+            },
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantDecisionPending"
+            },
+            {
+              "s": "rc:solarProject",
+              "p": "rc:grantDecisionPending"
+            }
+          ],
+          "add": [
+            "rc:solarProject rc:grantStatus \"declined\" .",
+            "rc:grantAgency rc:declined rc:solarProject .",
+            "rc:solarProject rc:grantDeclined rc:decline{seq} .",
+            "rc:solarProject rc:grantDeclined rc:decline{seq} .",
+            "rc:solarProject rc:fundingFailed rc:failure{seq} ."
+          ]
+        },
+        {
+          "gate": [
+            {
+              "targetClass": "rc:GovernmentAgency",
+              "path": "rc:challengePending",
+              "constraints": [
+                {
+                  "kind": "minCount",
+                  "num": 1
+                }
+              ]
+            }
+          ],
+          "removeAll": [
+            {
+              "s": "rc:publicWorksDepartment",
+              "p": "rc:challengePending"
+            }
+          ],
+          "add": [
+            "rc:publicWorksDepartment rc:challengeStatus \"dismissed\" .",
+            "rc:publicWorksDepartment rc:refusedChallengeBy rc:player .",
+            "rc:player rc:reputationHarmedBy rc:agencyChallengeReview .",
+            "rc:agencyChallengeReview a rc:InstitutionalDecision .",
+            "rc:agencyChallengeReview rc:affected rc:solarProject ."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "repairTankCoins",
+      "label": "Repair the water tank with parts (3 coins)",
+      "explain": "Buy a replacement fitting and return the shared tank to service.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 3
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:waterTank",
+          "p": "rc:status"
+        },
+        {
+          "s": "rc:waterTank",
+          "p": "rc:waterLitres"
+        }
+      ],
+      "add": [
+        "rc:waterTank rc:status \"online\" .",
+        "rc:waterTank rc:waterLitres 200 .",
+        "rc:waterTank rc:repairedBy rc:player ."
+      ]
+    },
+    {
+      "id": "repairTankLabour",
+      "label": "Repair the water tank with salvaged fittings (1 labour)",
+      "explain": "Use time and repair skill instead of buying a new fitting.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:waterTank",
+          "p": "rc:status"
+        },
+        {
+          "s": "rc:waterTank",
+          "p": "rc:waterLitres"
+        }
+      ],
+      "add": [
+        "rc:waterTank rc:status \"online\" .",
+        "rc:waterTank rc:waterLitres 200 .",
+        "rc:waterTank rc:repairedBy rc:player ."
+      ]
+    },
+    {
+      "id": "startGarden",
+      "label": "Plant the garden using shared water (1 labour)",
+      "explain": "The garden needs a working tank and one block of labour.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Garden",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:garden",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:garden rc:status \"growing\" .",
+        "rc:garden rc:plantedBy rc:player ."
+      ]
+    },
+    {
+      "id": "restoreBridge",
+      "label": "Rebuild the canal bridge (1 labour)",
+      "explain": "The bridge crew needs working water and one block of labour. Finish by the end of day four before the canal rises.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:turn",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:bridge",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:bridge rc:status \"passable\" .",
+        "rc:bridge rc:restoredBy rc:player ."
+      ]
+    },
+    {
+      "id": "braceBridge",
+      "label": "Brace the flooded bridge supports (1 labour)",
+      "explain": "After day four, the high canal needs a bracing shift before the usual crew can finish the bridge.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:turn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:bracedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:bridge rc:bracedBy rc:player ."
+      ]
+    },
+    {
+      "id": "restoreBridgeLateLabour",
+      "label": "Finish the braced bridge (1 labour)",
+      "explain": "The supports are braced. One more workday reopens the crossing without spending coins.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:turn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:bracedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:bridge",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:bridge rc:status \"passable\" .",
+        "rc:bridge rc:restoredBy rc:player ."
+      ]
+    },
+    {
+      "id": "restoreBridgeLateCoins",
+      "label": "Hire a canal crew to rebuild now (2 coins, 1 labour)",
+      "explain": "After day four, a specialist crew can work through the high water in one day. It costs two coins and your labour to coordinate.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:turn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:WaterTank",
+          "path": "rc:repairedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 2
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:bridge",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:bridge rc:status \"passable\" .",
+        "rc:bridge rc:restoredBy rc:player ."
+      ]
+    },
+    {
+      "id": "raiseWindPump",
+      "label": "Commission the wind pump (1 labour)",
+      "explain": "The crossing must be restored and the workshop powered before the pump can be commissioned.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Pump",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:windPump",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:windPump rc:status \"online\" .",
+        "rc:windPump rc:commissionedBy rc:player ."
+      ]
+    },
+    {
+      "id": "plantOrchard",
+      "label": "Plant the Saltwind orchard (1 labour)",
+      "explain": "The orchard needs the commissioned wind pump and one block of labour.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Pump",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:orchard",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:orchard rc:status \"growing\" .",
+        "rc:orchard rc:plantedBy rc:player ."
+      ]
+    },
+    {
+      "id": "fulfilWorkshopOrder",
+      "label": "Complete the repair order (+3 coins, 1 labour)",
+      "explain": "A nearby settlement pays for one urgent repair after the workshop has power.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Workshop",
+          "path": "rc:deliveredOrder",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:workshop rc:deliveredOrder rc:order{seq} .",
+        "rc:player rc:coin rc:earned{seq}a .",
+        "rc:player rc:coin rc:earned{seq}b .",
+        "rc:player rc:coin rc:earned{seq}c ."
+      ]
+    },
+    {
+      "id": "connectMastLabour",
+      "label": "Repair the signal mast (1 labour)",
+      "explain": "Use a crew shift to reconnect the mast once the workshop has power. This opens a remote repair contract.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Relay",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:communicationsMast",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:communicationsMast rc:status \"online\" .",
+        "rc:communicationsMast rc:commissionedBy rc:player ."
+      ]
+    },
+    {
+      "id": "connectMastCoins",
+      "label": "Buy mast parts and reconnect it (3 coins)",
+      "explain": "Purchase the missing transmitter parts and connect the mast without using today's crew shift.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Relay",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 3
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:communicationsMast",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:communicationsMast rc:status \"online\" .",
+        "rc:communicationsMast rc:commissionedBy rc:player ."
+      ]
+    },
+    {
+      "id": "fulfilRemoteOrder",
+      "label": "Deliver the remote repair contract (+4 coins, 1 labour)",
+      "explain": "With the workshop powered and the signal mast connected, take one distant community's repair order.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:completedIn",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Relay",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Relay",
+          "path": "rc:deliveredOrder",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:communicationsMast rc:deliveredOrder rc:remoteOrder{seq} .",
+        "rc:player rc:coin rc:signal{seq}a .",
+        "rc:player rc:coin rc:signal{seq}b .",
+        "rc:player rc:coin rc:signal{seq}c .",
+        "rc:player rc:coin rc:signal{seq}d ."
+      ]
+    },
+    {
+      "id": "reserveHarvest",
+      "label": "Reserve the orchard harvest for the commons (1 labour)",
+      "explain": "Store the first harvest for neighbours. This reduces gathering supplies from four coins to two.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:harvestChoice",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:orchard rc:harvestChoice \"reserve\" .",
+        "rc:community rc:foodReserve rc:orchard ."
+      ]
+    },
+    {
+      "id": "sellHarvest",
+      "label": "Sell the orchard harvest at market (+3 coins, 1 labour)",
+      "explain": "Trade the first crop for three coins. The cash can outfit the boat or fund shared supplies.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:harvestChoice",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:orchard rc:harvestChoice \"sell\" .",
+        "rc:player rc:coin rc:harvest{seq}a .",
+        "rc:player rc:coin rc:harvest{seq}b .",
+        "rc:player rc:coin rc:harvest{seq}c ."
+      ]
+    },
+    {
+      "id": "openCommonsReserved",
+      "label": "Open the commons with stored food (2 coins, 1 labour)",
+      "explain": "Use the reserved orchard harvest to host a gathering with fewer purchased supplies. Needs shelter, garden, orchard, two coins and a crew shift.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Shelter",
+          "path": "rc:upgrade",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Garden",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:foodReserve",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 2
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:community",
+          "p": "rc:status"
+        },
+        {
+          "s": "rc:community",
+          "p": "rc:foodReserve"
+        }
+      ],
+      "add": [
+        "rc:community rc:status \"open\" .",
+        "rc:community rc:finale \"commons\" .",
+        "rc:community rc:gatheredAt rc:saltwindReach ."
+      ]
+    },
+    {
+      "id": "openCommons",
+      "label": "Open the commons with a harvest gathering (4 coins, 1 labour)",
+      "explain": "Celebrate a safe local food and water network. Needs a repaired shelter, the garden, the orchard and four coins for shared supplies.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 4
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Shelter",
+          "path": "rc:upgrade",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Garden",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 4
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:community",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:community rc:status \"open\" .",
+        "rc:community rc:finale \"commons\" .",
+        "rc:community rc:gatheredAt rc:saltwindReach ."
+      ]
+    },
+    {
+      "id": "launchTradeRoute",
+      "label": "Launch the canal trade route (2 coins, 1 labour)",
+      "explain": "Connect the repaired infrastructure to neighbours. Needs the crossing, pump and orchard, plus two coins to outfit the first boat.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Bridge",
+          "path": "rc:restoredBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Pump",
+          "path": "rc:commissionedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Orchard",
+          "path": "rc:plantedBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Community",
+          "path": "rc:finale",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 2
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        },
+        {
+          "s": "rc:community",
+          "p": "rc:status"
+        }
+      ],
+      "add": [
+        "rc:community rc:status \"connected\" .",
+        "rc:community rc:finale \"trade\" .",
+        "rc:community rc:tradesWith rc:neighbours .",
+        "rc:player rc:coin rc:freight{seq}a .",
+        "rc:player rc:coin rc:freight{seq}b .",
+        "rc:player rc:coin rc:freight{seq}c .",
+        "rc:player rc:coin rc:freight{seq}d ."
+      ]
+    },
+    {
+      "id": "registerOriginatorVendor",
+      "label": "Meet supplier registration rules (3 personal coins + 1 workday)",
+      "explain": "Procurement requires supplier registration, insurance and tax documentation. You pay these costs from your own money while camping, with no guarantee of being selected.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:scoped",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:vendorEligibleFor",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:player rc:vendorEligibleFor rc:solarProject .",
+        "rc:player rc:paidRegistrationFor rc:solarProject .",
+        "rc:player rc:unpaidPreparation rc:solarProject ."
+      ]
+    },
+    {
+      "id": "hireOriginator",
+      "label": "Award the contract to the project originator (3 committee coins)",
+      "explain": "You completed supplier requirements at personal cost. If selected, the committee pays for wiring, records your contribution, and keeps the maintenance terms. Registration costs are not repaid.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingAvailable",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Committee",
+          "path": "rc:funds",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingDisposition",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:vendorEligibleFor",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:committee",
+          "p": "rc:funds",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"originator-paid\" .",
+        "rc:solarProject rc:contractor rc:player .",
+        "rc:player rc:paidBy rc:committee .",
+        "rc:player rc:payment rc:originatorPay{seq} .",
+        "rc:player rc:coin rc:originatorCoin{seq}a .",
+        "rc:player rc:coin rc:originatorCoin{seq}b .",
+        "rc:player rc:coin rc:originatorCoin{seq}c .",
+        "rc:solarProject rc:creditGivenTo rc:player .",
+        "rc:solarProject rc:maintenancePlan rc:residentCrew .",
+        "rc:solarProject rc:publicAccess \"open\" .",
+        "rc:committee rc:keptAccounts rc:solarProject .",
+        "rc:solarProject rc:procurementReady rc:ready{seq} .",
+        "rc:solarProject rc:capabilityLevel \"integrated\" .",
+        "rc:solarProject rc:knowledgeStatus \"licensed-and-taught\" .",
+        "rc:solarIntegration rc:ownedBy rc:player .",
+        "rc:player rc:transferredKnowledgeTo rc:residentCrew .",
+        "rc:residentCrew rc:learned rc:solarIntegration .",
+        "rc:solarProject rc:maintenanceCapacity \"funded\" ."
+      ]
+    },
+    {
+      "id": "acceptGovernmentCapture",
+      "label": "Government absorbs the project as an existing program",
+      "explain": "The department announces this was already part of its program, takes the grant and project control, and leaves the originator out of its account. Work may continue under the department while authorship and decision power move away from you.",
+      "gate": [
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:grantAwarded",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Committee",
+          "path": "rc:funds",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 5
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:fundingDisposition",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:GovernmentAgency",
+          "path": "rc:announcedAsExistingProgram",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:committee",
+          "p": "rc:funds"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:fundingDisposition \"government-claimed\" .",
+        "rc:solarProject rc:controlledBy rc:publicWorksDepartment .",
+        "rc:publicWorksDepartment rc:funds rc:governmentFunds{seq}a .",
+        "rc:publicWorksDepartment rc:funds rc:governmentFunds{seq}b .",
+        "rc:publicWorksDepartment rc:funds rc:governmentFunds{seq}c .",
+        "rc:publicWorksDepartment rc:funds rc:governmentFunds{seq}d .",
+        "rc:publicWorksDepartment rc:funds rc:governmentFunds{seq}e .",
+        "rc:publicWorksDepartment rc:announcedAsExistingProgram rc:solarProject .",
+        "rc:publicWorksDepartment rc:usesClaim rc:maintenanceClaim .",
+        "rc:publicWorksDepartment rc:omitsOriginator rc:player .",
+        "rc:player rc:authorshipTakenBy rc:publicWorksDepartment ."
+      ]
+    },
+    {
+      "id": "delegateToPoliticalBacker",
+      "label": "Delegate the work to a political backer (3 public coins)",
+      "explain": "A politically connected contractor gets the wiring contract. It receives public money and the committee chair expects future political support. The project may serve residents while your work stays uncredited and maintenance is unfunded.",
+      "gate": [
+        {
+          "targetClass": "rc:GovernmentAgency",
+          "path": "rc:funds",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 3
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:controlledBy",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:GovernmentAgency",
+          "path": "rc:contracted",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:publicWorksDepartment",
+          "p": "rc:funds",
+          "n": 3
+        }
+      ],
+      "add": [
+        "rc:publicWorksDepartment rc:contracted rc:politicalBacker .",
+        "rc:politicalBacker rc:paidBy rc:publicWorksDepartment .",
+        "rc:politicalBacker rc:payment rc:politicalPay{seq} .",
+        "rc:politicalBacker rc:futureSupportExpectedBy rc:committeeChair .",
+        "rc:committeeChair rc:expectsFutureSupportFrom rc:politicalBacker .",
+        "rc:solarProject rc:contractor rc:politicalBacker .",
+        "rc:solarProject rc:fundingDisposition \"government-delegated\" .",
+        "rc:solarProject rc:creditWithheldFrom rc:player .",
+        "rc:solarProject rc:maintenancePlan rc:unfunded .",
+        "rc:solarProject rc:publicAccess \"open\" .",
+        "rc:player rc:relationshipHarmedBy rc:publicWorksDepartment .",
+        "rc:solarProject rc:procurementReady rc:ready{seq} .",
+        "rc:solarProject rc:capabilityLevel \"shell\" .",
+        "rc:solarProject rc:knowledgeStatus \"not-transferred\" .",
+        "rc:solarProject rc:maintenanceCapacity \"unfunded\" .",
+        "rc:solarProject rc:visibleOutput \"installed-signage-and-equipment\" ."
+      ]
+    },
+    {
+      "id": "contestGovernmentCapture",
+      "label": "Challenge the takeover (2 personal coins + 1 workday)",
+      "explain": "Spend scarce funds and time contesting the department claim and omission of your authorship. The complaint is reviewed after rest; refusal leaves the department in control and the money spent.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:coin",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 2
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:GovernmentAgency",
+          "path": "rc:announcedAsExistingProgram",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:GovernmentAgency",
+          "path": "rc:challengeStatus",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "removeN": [
+        {
+          "s": "rc:player",
+          "p": "rc:coin",
+          "n": 2
+        }
+      ],
+      "add": [
+        "rc:publicWorksDepartment rc:challengePending rc:challenge{seq} .",
+        "rc:player rc:contestedGovernmentCapture rc:solarProject ."
+      ]
+    },
+    {
+      "id": "teachCrewUnpaid",
+      "label": "Teach the crew your integration know-how (1 workday, unpaid)",
+      "explain": "Choose to share what you know without a contract. It costs a workday and earns no money or guaranteed credit. The crew gains practical capability, while you remain the knowledge holder; others may still control and claim the project.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:labourToken",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:holdsTechnicalKnowledge",
+          "constraints": [
+            {
+              "kind": "hasValue",
+              "text": "rc:solarIntegration"
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:scoped",
+          "constraints": [
+            {
+              "kind": "minCount",
+              "num": 1
+            }
+          ]
+        },
+        {
+          "targetClass": "rc:CommunityProject",
+          "path": "rc:unpaidTraining",
+          "constraints": [
+            {
+              "kind": "maxCount",
+              "num": 0
+            }
+          ]
+        }
+      ],
+      "removeAll": [
+        {
+          "s": "rc:player",
+          "p": "rc:labourToken"
+        }
+      ],
+      "add": [
+        "rc:solarProject rc:unpaidTraining rc:training{seq} .",
+        "rc:solarProject rc:capabilityLevel \"integrated\" .",
+        "rc:residentCrew rc:learned rc:solarIntegration .",
+        "rc:player rc:unpaidKnowledgeContribution rc:solarProject .",
+        "rc:player rc:retainsKnowledge rc:solarIntegration ."
+      ]
     }
   ]
 }

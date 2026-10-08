@@ -69,10 +69,10 @@ garden once water is available.
 The page also exposes VibeScript cells for live world snapshot queries,
 SHACL-gated order proposals, and a bounded scene asset that compiles through
 Qualia computational geometry to a provenance-bearing `.10d` mesh.
-Kestrel Flats has 167 always-present original `.10d` scene organs; the
+Kestrel Flats has 198 always-present original `.10d` scene assets; the
 Saltwind Reach tile adds 74 more plus state variants. Two generated northern
-highland tiles add 12 terrain, creek, rock and shrub organs, for 253 in the
-opening scene. The 293-variant HMC includes sampled settlement terrain,
+highland tiles add 12 terrain, creek, rock and shrub assets, for 284 in the
+opening scene. The 340-variant HMC includes sampled settlement terrain,
 curved road ribbons, a garden ant trail, and their state variants. The connected scene uses
 QualiaPortal's camera target and daylight sky APIs. State variants live in
 the game-owned catalog. Rounded assets use Qualia's computational
@@ -80,13 +80,21 @@ geometry authoring and parametric CAD; all scene assets retain source
 provenance. Layered terrain, rounded meadows and shrubs, canal banks and
 ripples, orchard rows, and market and building accents give the two territories
 clearer shapes and colour at strategy zoom. The workshop, hall and barn have
-separately coloured gabled roofs and structural trim. These remain composition
-blockouts; finished materials, animation and canonical production HMC tooling
+separately coloured roofs and structural trim, with a rounded flue and
+curved barrel canopies over the two market stalls. The camp is a rounded
+home-on-wheels pod with chassis, wheels, hitch, awning and a shelter-upgrade
+annex, parked in a bay under a long tilted solar shade structure with
+slope-mounted workshop panels, while residents gather on the deck beside
+their home. These remain composition
+blockouts in material; finished materials, animation and canonical production HMC tooling
 remain upstream gates.
 
-The in-game System panel offers two visual styles. Storybook keeps the bright
-original palette; Earthlight supplies a warmer, less saturated `.10d` surface
-reading and Qualia sky. The game exports a separate HMC for each style and
+The in-game System panel offers three visual styles. Storybook keeps the
+bright original palette; Earthlight supplies a warmer, less saturated `.10d`
+surface reading and Qualia sky; Community Grounds applies the muted sage,
+olive, warm tan, terracotta and cream palette sampled from the civics.au
+community-ground concept illustration, with object-family colours and soft
+warm daylight. The game exports a separate HMC for each style and
 remembers the player's presentation preference independently of campaign saves.
 The selectable style system is a foundation for the fuller animated-film art
 direction described in [the visual plan](docs/planning/22-animated-film-visual-direction.md).
@@ -195,6 +203,7 @@ The planning set is the current source of truth:
 - [RTS and AAA-quality uplift blueprint](docs/planning/17-rts-aaa-uplift-blueprint.md)
 - [Asset production catalog](docs/planning/18-asset-production-catalog.md)
 - [QualiaDB upstream gate work orders](docs/planning/19-qualiadb-upstream-gate-work-orders.md)
+- [AAA graphics and asset engine gap register](docs/planning/31-aaa-graphics-engine-gap-register.md)
 - [Current game build and QualiaDB needs](docs/planning/20-current-game-build-and-qualiadb-needs.md)
 - [QualiaDB refactor build gates](docs/planning/21-refactor-build-gates.md)
 - QualiaDB platform completion brief (sibling repository:

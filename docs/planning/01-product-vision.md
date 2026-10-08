@@ -111,11 +111,15 @@ one already.
 
 ## Regional focus and portable design
 
-The first release is designed for **Australian places and play**. Its first
-journeys foreground long-distance travel, tent and vehicle-supported living,
-caravans/vans/buses, repair spaces, solar and storage, variable service access,
-and community grounds. Australian public-data and fictional/data-shaped packs
-are the first content target.
+The first release is designed for **real Australian places and play**. Its
+geographic foundation should let a player locate a community they know and
+work with recognizable terrain, waterways, roads, buildings, public facilities,
+and travel connections. Fictional or consented scenarios may be layered over
+that geography; fictional maps remain useful as test fixtures but cannot be the
+only community-development setting. Journeys foreground long-distance travel,
+tent and vehicle-supported living, caravans/vans/buses, repair spaces, solar
+and storage, variable service access, and community grounds. Every sourced
+layer remains versioned and inspectable.
 
 This focus must not become a hard-coded universal life path. The core game is
 about making a viable dwelling and contributing to shared civic capability. A
@@ -263,9 +267,14 @@ Need or opportunity
 
 ## First playable scenario
 
-The vertical slice is a single small community ground in a fictionalised,
-data-shaped Australian town. It contains a tent site, repair bay, shared solar
-canopy, community room, data-container pad, and six nearby locations.
+The vertical slice uses a small real Australian locality as its geographic
+ground, with a versioned, attributed map and elevation source. The player can
+recognize and inspect actual mapped terrain, roads, waterways, buildings, and
+public facilities while all character stories and project events remain clearly
+fictional unless individually sourced and consented. Game-built changes are a
+separate overlay and never alter or claim approval over the source geography.
+The slice adds the scenario's repair bay, shared solar canopy, community room,
+data-container pad, and nearby project anchors as game-layer objects.
 
 The player works with four NPC roles:
 

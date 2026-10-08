@@ -66,6 +66,54 @@ pub enum ParametricRecipe {
         profile: &'static [[f32; 2]],
         segments: usize,
     },
+    /// A revolved profile stretched into an elongated rounded body, such as a
+    /// home-on-wheels pod. Qualia revolves, scales and transforms the mesh.
+    Pod {
+        center: [f32; 3],
+        profile: &'static [[f32; 2]],
+        segments: usize,
+        stretch: [f32; 3],
+    },
+    /// A wheel: a Qualia cylinder turned onto its axle and placed.
+    Wheel {
+        center: [f32; 3],
+        radius: f32,
+        width: f32,
+        segments: u32,
+    },
+    /// A barrel roof or canopy: a Qualia cylinder laid along X so only the
+    /// upper arc shows above the eave line.
+    Barrel {
+        center: [f32; 3],
+        radius: f32,
+        length: f32,
+        segments: u32,
+    },
+    /// A rotated flat panel (solar glass, awning fabric). Pitch tips around X,
+    /// roll around Z, then yaw around Y; Qualia boxes and transforms it.
+    TiltedBox {
+        center: [f32; 3],
+        size: [f32; 3],
+        pitch_deg: f32,
+        roll_deg: f32,
+        yaw_deg: f32,
+    },
+    /// Several rotated boxes baked into one mesh: panel arrays, mounting
+    /// rails, shade structures. Each part is placed relative to the group.
+    PanelGroup {
+        center: [f32; 3],
+        parts: Vec<PanelPart>,
+    },
+}
+
+/// One rotated box inside a `PanelGroup`, offset from the group center.
+#[derive(Debug, Clone, Copy)]
+pub struct PanelPart {
+    pub offset: [f32; 3],
+    pub size: [f32; 3],
+    pub pitch_deg: f32,
+    pub roll_deg: f32,
+    pub yaw_deg: f32,
 }
 
 impl ParametricRecipe {
@@ -257,6 +305,170 @@ impl ParametricRecipe {
                     },
                 )
             }
+            Self::Pod {
+                center,
+                profile,
+                segments,
+                stretch,
+            } => {
+                let profile: Vec<Point3> = profile
+                    .iter()
+                    .map(|p| Point3::new(p[0] as f64, p[1] as f64, 0.0))
+                    .collect();
+                let mut vertices = vec![Point3::new(0.0, 0.0, 0.0); profile.len() * *segments];
+                let mut triangles = vec![[0u32; 3]; (profile.len() - 1) * *segments * 2];
+                let (nv, nt) = parametric_cad::revolve_profile(
+                    &profile,
+                    *segments,
+                    &mut vertices,
+                    &mut triangles,
+                )
+                .map_err(|e| format!("pod revolve: {e:?}"))?;
+                let positions: Vec<[f32; 3]> = vertices[..nv]
+                    .iter()
+                    .map(|p| [p.x as f32, p.y as f32, p.z as f32])
+                    .collect();
+                let mut min = [f32::INFINITY; 3];
+                let mut max = [f32::NEG_INFINITY; 3];
+                for p in &positions {
+                    for axis in 0..3 {
+                        min[axis] = min[axis].min(p[axis]);
+                        max[axis] = max[axis].max(p[axis]);
+                    }
+                }
+                let mesh = authoring::transform_mesh(
+                    &Mesh {
+                        positions,
+                        triangles: triangles[..nt].to_vec(),
+                        min,
+                        max,
+                    },
+                    &authoring::scale(
+                        stretch[0] as f64,
+                        stretch[1] as f64,
+                        stretch[2] as f64,
+                    ),
+                );
+                (*center, mesh)
+            }
+            Self::Wheel {
+                center,
+                radius,
+                width,
+                segments,
+            } => {
+                let wheel =
+                    authoring::cylinder(*radius, *width, *segments).map_err(|e| e.to_string())?;
+                let axle = authoring::rotation_x(std::f64::consts::FRAC_PI_2);
+                (*center, authoring::transform_mesh(&wheel, &axle))
+            }
+            Self::Barrel {
+                center,
+                radius,
+                length,
+                segments,
+            } => {
+                let barrel =
+                    authoring::cylinder(*radius, *length, *segments).map_err(|e| e.to_string())?;
+                let laid_flat = authoring::rotation_z(std::f64::consts::FRAC_PI_2);
+                (*center, authoring::transform_mesh(&barrel, &laid_flat))
+            }
+            Self::TiltedBox {
+                center,
+                size,
+                pitch_deg,
+                roll_deg,
+                yaw_deg,
+            } => {
+                let panel =
+                    authoring::box_mesh(size[0], size[1], size[2]).map_err(|e| e.to_string())?;
+                let mut rotation = authoring::identity();
+                if *yaw_deg != 0.0 {
+                    rotation = authoring::mat_mul(
+                        &authoring::rotation_y(yaw_deg.to_radians() as f64),
+                        &rotation,
+                    );
+                }
+                if *roll_deg != 0.0 {
+                    rotation = authoring::mat_mul(
+                        &authoring::rotation_z(roll_deg.to_radians() as f64),
+                        &rotation,
+                    );
+                }
+                if *pitch_deg != 0.0 {
+                    rotation = authoring::mat_mul(
+                        &authoring::rotation_x(pitch_deg.to_radians() as f64),
+                        &rotation,
+                    );
+                }
+                (*center, authoring::transform_mesh(&panel, &rotation))
+            }
+            Self::PanelGroup { center, parts } => {
+                let mut positions: Vec<[f32; 3]> = Vec::new();
+                let mut triangles: Vec<[u32; 3]> = Vec::new();
+                for part in parts {
+                    let panel = authoring::box_mesh(
+                        part.size[0],
+                        part.size[1],
+                        part.size[2],
+                    )
+                    .map_err(|e| e.to_string())?;
+                    let mut rotation = authoring::identity();
+                    if part.yaw_deg != 0.0 {
+                        rotation = authoring::mat_mul(
+                            &authoring::rotation_y(part.yaw_deg.to_radians() as f64),
+                            &rotation,
+                        );
+                    }
+                    if part.roll_deg != 0.0 {
+                        rotation = authoring::mat_mul(
+                            &authoring::rotation_z(part.roll_deg.to_radians() as f64),
+                            &rotation,
+                        );
+                    }
+                    if part.pitch_deg != 0.0 {
+                        rotation = authoring::mat_mul(
+                            &authoring::rotation_x(part.pitch_deg.to_radians() as f64),
+                            &rotation,
+                        );
+                    }
+                    let local = authoring::transform_mesh(&panel, &rotation);
+                    let placed = authoring::transform_mesh(
+                        &local,
+                        &authoring::translation(
+                            part.offset[0] as f64,
+                            part.offset[1] as f64,
+                            part.offset[2] as f64,
+                        ),
+                    );
+                    let base = positions.len() as u32;
+                    for triangle in placed.triangles {
+                        triangles.push([
+                            triangle[0] + base,
+                            triangle[1] + base,
+                            triangle[2] + base,
+                        ]);
+                    }
+                    positions.extend_from_slice(&placed.positions);
+                }
+                let mut min = [f32::INFINITY; 3];
+                let mut max = [f32::NEG_INFINITY; 3];
+                for p in &positions {
+                    for axis in 0..3 {
+                        min[axis] = min[axis].min(p[axis]);
+                        max[axis] = max[axis].max(p[axis]);
+                    }
+                }
+                (
+                    *center,
+                    Mesh {
+                        positions,
+                        triangles,
+                        min,
+                        max,
+                    },
+                )
+            }
         };
         Ok(authoring::transform_mesh(
             &mesh,
@@ -349,17 +561,157 @@ pub fn kestrel_flats(
             elevation: 0.048,
         },
     ));
-    scene.push(asset(
+    // The camp is a home on wheels: a rounded pod body on a chassis with
+    // wheels, hitch and awning. Shelter upgrades stretch the pod and add a
+    // canvas annex, keeping the site's original pick identity.
+    const HOME_PROFILE: &[[f32; 2]] = &[
+        [0.0, 0.0],
+        [0.55, 0.0],
+        [0.83, 0.09],
+        [0.85, 0.30],
+        [0.85, 0.62],
+        [0.78, 0.86],
+        [0.52, 1.06],
+        [0.0, 1.13],
+    ];
+    const HOME_BAND_PROFILE: &[[f32; 2]] = &[
+        [0.845, 0.20],
+        [0.912, 0.26],
+        [0.912, 0.32],
+        [0.845, 0.36],
+    ];
+    const ANNEX_PROFILE: &[[f32; 2]] = &[
+        [0.0, 0.0],
+        [0.42, 0.0],
+        [0.62, 0.08],
+        [0.64, 0.50],
+        [0.50, 0.78],
+        [0.0, 0.90],
+    ];
+    let home_stretch_x = 1.95 + upgrades.min(4) as f32 * 0.09;
+    scene.push(parametric(
         "rc:asset/camp-shelter",
-        [0.96, 0.53, 0.35, 1.0],
+        [0.96, 0.92, 0.85, 1.0],
+        ParametricRecipe::Pod {
+            center: [-3.05, 0.52, 2.7],
+            profile: HOME_PROFILE,
+            segments: 18,
+            stretch: [home_stretch_x, 1.42, 1.0],
+        },
+    ));
+    scene.push(parametric(
+        "rc:asset/camp-shelter-band",
+        [0.87, 0.44, 0.20, 1.0],
+        ParametricRecipe::Pod {
+            center: [-3.05, 0.52, 2.7],
+            profile: HOME_BAND_PROFILE,
+            segments: 18,
+            stretch: [home_stretch_x, 1.42, 1.0],
+        },
+    ));
+    let home_half_length = 0.85 * home_stretch_x;
+    scene.push(asset(
+        "rc:asset/camp-shelter-chassis",
+        [0.24, 0.23, 0.22, 1.0],
         vec![
-            roof(
-                [-3.0, 0.0, 2.6],
-                [1.6 + upgrades.min(20) as f32 * 0.25, 0.9, 1.2],
+            block(
+                [-3.05, 0.40, 2.7],
+                [home_half_length * 2.0 + 0.14, 0.14, 1.06],
             ),
-            block([-3.0, 0.02, 3.6], [1.8, 0.06, 0.5]),
+            block([-3.05, 0.52, 2.7], [home_half_length * 2.0 + 0.04, 0.06, 0.9]),
         ],
     ));
+    for (id, z) in [
+        ("rc:asset/camp-shelter-wheel-port", 2.7 - 0.72),
+        ("rc:asset/camp-shelter-wheel-starboard", 2.7 + 0.72),
+    ] {
+        scene.push(parametric(
+            id,
+            [0.12, 0.11, 0.11, 1.0],
+            ParametricRecipe::Wheel {
+                center: [-3.55, 0.30, z],
+                radius: 0.30,
+                width: 0.20,
+                segments: 14,
+            },
+        ));
+    }
+    scene.push(asset(
+        "rc:asset/camp-shelter-hitch",
+        [0.42, 0.41, 0.40, 1.0],
+        vec![
+            block(
+                [-3.05 + home_half_length + 0.05, 0.30, 2.7],
+                [0.75, 0.08, 0.08],
+            ),
+            block(
+                [-3.05 + home_half_length + 0.42, 0.26, 2.7],
+                [0.13, 0.16, 0.13],
+            ),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/camp-shelter-windows",
+        [0.30, 0.43, 0.53, 1.0],
+        vec![
+            block([-3.45, 1.12, 3.56], [0.48, 0.34, 0.05]),
+            block([-2.55, 1.12, 3.56], [0.48, 0.34, 0.05]),
+            block([-3.45, 1.12, 1.84], [0.48, 0.34, 0.05]),
+            block([-2.55, 1.12, 1.84], [0.48, 0.34, 0.05]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/camp-shelter-door",
+        [0.85, 0.40, 0.22, 1.0],
+        vec![block(
+            [-3.05 + home_half_length - 0.03, 0.82, 2.7],
+            [0.06, 0.72, 0.44],
+        )],
+    ));
+    scene.push(parametric(
+        "rc:asset/camp-shelter-awning",
+        [0.97, 0.93, 0.82, 1.0],
+        ParametricRecipe::TiltedBox {
+            center: [-3.05 + home_half_length + 0.02, 1.62, 2.7],
+            size: [0.66, 0.05, 1.42],
+            pitch_deg: 0.0,
+            roll_deg: -16.0,
+            yaw_deg: 0.0,
+        },
+    ));
+    for (id, z) in [
+        ("rc:asset/camp-shelter-awning-post-a", 2.7 - 0.58),
+        ("rc:asset/camp-shelter-awning-post-b", 2.7 + 0.58),
+    ] {
+        scene.push(parametric(
+            id,
+            [0.40, 0.39, 0.38, 1.0],
+            ParametricRecipe::Cylinder {
+                center: [-3.05 + home_half_length + 0.24, 0.78, z],
+                radius: 0.035,
+                height: 1.56,
+                segments: 8,
+            },
+        ));
+    }
+    if upgrades > 0 {
+        let annex_stretch_x = 1.15 + upgrades.min(3) as f32 * 0.07;
+        let annex_half_length = 0.64 * annex_stretch_x;
+        scene.push(parametric(
+            "rc:asset/camp-shelter-annex",
+            [0.65, 0.67, 0.49, 1.0],
+            ParametricRecipe::Pod {
+                center: [
+                    -3.05 - home_half_length - annex_half_length + 0.16,
+                    0.42,
+                    2.7,
+                ],
+                profile: ANNEX_PROFILE,
+                segments: 14,
+                stretch: [annex_stretch_x, 1.35, 1.0],
+            },
+        ));
+    }
     scene.push(asset(
         "rc:asset/camp-platform",
         [0.62, 0.39, 0.25, 1.0],
@@ -368,6 +720,71 @@ pub fn kestrel_flats(
             block([-4.2, 0.25, 2.7], [0.08, 0.5, 0.08]),
             block([-1.8, 0.25, 2.7], [0.08, 0.5, 0.08]),
         ],
+    ));
+    // A long solar shade structure shelters the home-on-wheels bay, as on
+    // the community-ground concept illustration: cream posts, a steel frame
+    // and two tilted panel rows running the full bay. Fixed site
+    // infrastructure, like the lights.
+    const SHADE_PANEL_PARTS: &[PanelPart] = &[
+        PanelPart {
+            offset: [0.0, 0.06, -0.55],
+            size: [4.56, 0.055, 0.94],
+            pitch_deg: 20.0,
+            roll_deg: 0.0,
+            yaw_deg: 0.0,
+        },
+        PanelPart {
+            offset: [0.0, -0.05, 0.55],
+            size: [4.56, 0.055, 0.94],
+            pitch_deg: 20.0,
+            roll_deg: 0.0,
+            yaw_deg: 0.0,
+        },
+        PanelPart {
+            offset: [0.0, 0.10, 0.0],
+            size: [4.6, 0.05, 0.10],
+            pitch_deg: 0.0,
+            roll_deg: 0.0,
+            yaw_deg: 0.0,
+        },
+    ];
+    for (id, x, z) in [
+        ("rc:asset/camp-shade-post-a", -4.45, 1.65),
+        ("rc:asset/camp-shade-post-b", -4.45, 3.75),
+        ("rc:asset/camp-shade-post-c", -1.55, 1.65),
+        ("rc:asset/camp-shade-post-d", -1.55, 3.75),
+        ("rc:asset/camp-shade-post-e", 0.35, 1.65),
+        ("rc:asset/camp-shade-post-f", 0.35, 3.75),
+    ] {
+        scene.push(parametric(
+            id,
+            [0.93, 0.91, 0.86, 1.0],
+            ParametricRecipe::Cylinder {
+                center: [x, 1.3, z],
+                radius: 0.07,
+                height: 2.6,
+                segments: 10,
+            },
+        ));
+    }
+    scene.push(asset(
+        "rc:asset/camp-shade-frame",
+        [0.35, 0.36, 0.37, 1.0],
+        vec![
+            block([-2.05, 2.6, 1.65], [4.8, 0.08, 0.09]),
+            block([-2.05, 2.6, 3.75], [4.8, 0.08, 0.09]),
+            block([-4.45, 2.6, 2.7], [0.09, 0.08, 2.2]),
+            block([-1.55, 2.6, 2.7], [0.09, 0.08, 2.2]),
+            block([0.35, 2.6, 2.7], [0.09, 0.08, 2.2]),
+        ],
+    ));
+    scene.push(parametric(
+        "rc:asset/camp-shade-panels",
+        [0.13, 0.22, 0.36, 1.0],
+        ParametricRecipe::PanelGroup {
+            center: [-2.05, 2.72, 2.7],
+            parts: SHADE_PANEL_PARTS.to_vec(),
+        },
     ));
     scene.push(asset(
         "rc:asset/workshop",
@@ -400,13 +817,20 @@ pub fn kestrel_flats(
             block([3.2, 1.35, -1.17], [1.3, 0.11, 0.12]),
         ],
     ));
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/workshop-chimney",
         [0.69, 0.34, 0.28, 1.0],
-        vec![
-            block([2.34, 2.02, -2.64], [0.38, 1.08, 0.38]),
-            block([2.34, 2.57, -2.64], [0.51, 0.11, 0.51]),
-        ],
+        ParametricRecipe::Cylinder {
+            center: [2.34, 2.02, -2.64],
+            radius: 0.19,
+            height: 1.08,
+            segments: 12,
+        },
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-chimney-cap",
+        [0.83, 0.83, 0.80, 1.0],
+        vec![block([2.34, 2.60, -2.64], [0.46, 0.09, 0.46])],
     ));
     scene.push(asset(
         "rc:asset/workshop-doors",
@@ -418,12 +842,56 @@ pub fn kestrel_flats(
         ],
     ));
     if panels > 0 {
-        scene.push(asset(
+        // Mounted on the workshop's gable slopes: each installed part adds a
+        // framed panel to the south row, then the north row, with rails and
+        // cell faces pitched to the roof plane.
+        let mut array_parts = Vec::new();
+        let mut cell_parts = Vec::new();
+        for i in 0..panels.min(8) {
+            let south = i < 4;
+            let (pitch, z_panel, z_cell) = if south {
+                (30.0_f32, 0.53_f32, 0.556_f32)
+            } else {
+                (-30.0, -0.53, -0.556)
+            };
+            let x = -0.78 + (i % 4) as f32 * 0.62;
+            array_parts.push(PanelPart {
+                offset: [x, 0.0, z_panel],
+                size: [0.56, 0.05, 1.02],
+                pitch_deg: pitch,
+                roll_deg: 0.0,
+                yaw_deg: 0.0,
+            });
+            array_parts.push(PanelPart {
+                offset: [x, -0.047, z_panel * 0.957],
+                size: [0.58, 0.05, 1.10],
+                pitch_deg: pitch,
+                roll_deg: 0.0,
+                yaw_deg: 0.0,
+            });
+            cell_parts.push(PanelPart {
+                offset: [x, 0.052, z_cell],
+                size: [0.46, 0.02, 0.92],
+                pitch_deg: pitch,
+                roll_deg: 0.0,
+                yaw_deg: 0.0,
+            });
+        }
+        scene.push(parametric(
             "rc:asset/solar-array",
             [0.10, 0.27, 0.47, 1.0],
-            (0..panels.min(8))
-                .map(|i| block([2.6 + i as f32 * 1.2, 1.96, -2.2], [1.0, 0.07, 1.3]))
-                .collect(),
+            ParametricRecipe::PanelGroup {
+                center: [3.2, 1.94, -2.2],
+                parts: array_parts,
+            },
+        ));
+        scene.push(parametric(
+            "rc:asset/solar-cells",
+            [0.13, 0.57, 0.80, 1.0],
+            ParametricRecipe::PanelGroup {
+                center: [3.2, 1.94, -2.2],
+                parts: cell_parts,
+            },
         ));
     }
     scene.push(asset(
@@ -431,7 +899,6 @@ pub fn kestrel_flats(
         [0.98, 0.64, 0.31, 1.0],
         vec![
             block([-2.2, 0.52, -3.4], [1.6, 1.0, 1.0]),
-            roof([-2.2, 1.05, -3.4], [2.0, 0.42, 1.4]),
             block([-2.2, 0.72, -2.85], [1.7, 0.12, 0.5]),
         ],
     ));
@@ -695,7 +1162,7 @@ pub fn kestrel_flats(
         ),
         (
             "rc:asset/kestrel-shrub-camp",
-            [-4.61, 0.28, 3.75],
+            [-4.61, 0.28, 4.42],
             [0.50, 0.30, 0.43],
             [0.25, 0.61, 0.33, 1.0],
         ),
@@ -788,38 +1255,23 @@ pub fn kestrel_flats(
             block([3.2, 0.22, -1.235], [0.54, 0.09, 0.035]),
         ],
     ));
-    if panels > 0 {
-        scene.push(asset(
-            "rc:asset/solar-cells",
-            [0.13, 0.57, 0.80, 1.0],
-            (0..panels.min(8))
-                .flat_map(|i| {
-                    (0..3).map(move |j| {
-                        block(
-                            [2.25 + i as f32 * 1.2 + j as f32 * 0.34, 2.015, -2.2],
-                            [0.26, 0.015, 1.02],
-                        )
-                    })
-                })
-                .collect(),
-        ));
-    }
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/market-canopy",
         [0.96, 0.35, 0.32, 1.0],
-        vec![
-            block([-2.75, 1.35, -3.4], [0.45, 0.05, 1.5]),
-            block([-1.88, 1.35, -3.4], [0.45, 0.05, 1.5]),
-            block([-2.2, 1.17, -2.61], [2.1, 0.11, 0.09]),
-        ],
+        ParametricRecipe::Barrel {
+            center: [-2.2, 1.04, -3.4],
+            radius: 0.72,
+            length: 2.2,
+            segments: 16,
+        },
     ));
     scene.push(asset(
         "rc:asset/market-canopy-cream",
         [0.99, 0.89, 0.65, 1.0],
         vec![
-            block([-3.18, 1.36, -3.4], [0.34, 0.07, 1.50]),
-            block([-2.32, 1.36, -3.4], [0.34, 0.07, 1.50]),
-            block([-1.45, 1.36, -3.4], [0.34, 0.07, 1.50]),
+            block([-2.75, 1.02, -2.69], [0.34, 0.15, 0.05]),
+            block([-2.2, 1.02, -2.69], [0.34, 0.15, 0.05]),
+            block([-1.65, 1.02, -2.69], [0.34, 0.15, 0.05]),
         ],
     ));
     scene.push(asset(
@@ -1452,6 +1904,28 @@ pub fn kestrel_flats(
             -0.6,
             [0.62, 0.46, 0.83, 1.0],
         ),
+        (
+            "rc:asset/resident-eve-coat",
+            "rc:asset/resident-eve-head",
+            "rc:asset/resident-eve-boots",
+            "rc:asset/resident-eve-arms",
+            "rc:asset/resident-eve-face",
+            "rc:asset/resident-eve-hair",
+            -2.35,
+            4.1,
+            [0.83, 0.41, 0.34, 1.0],
+        ),
+        (
+            "rc:asset/resident-finn-coat",
+            "rc:asset/resident-finn-head",
+            "rc:asset/resident-finn-boots",
+            "rc:asset/resident-finn-arms",
+            "rc:asset/resident-finn-face",
+            "rc:asset/resident-finn-hair",
+            -1.6,
+            4.4,
+            [0.44, 0.56, 0.40, 1.0],
+        ),
     ] {
         scene.push(parametric(
             body_id,
@@ -2028,15 +2502,17 @@ pub fn saltwind_reach(
     scene.push(asset(
         "rc:asset/saltwind-market",
         [0.99, 0.73, 0.43, 1.0],
-        vec![
-            block([11.8, 0.54, -2.6], [1.7, 1.08, 1.15]),
-            roof([11.8, 1.16, -2.6], [2.1, 0.45, 1.45]),
-        ],
+        vec![block([11.8, 0.54, -2.6], [1.7, 1.08, 1.15])],
     ));
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/saltwind-market-awning",
         [0.43, 0.71, 0.76, 1.0],
-        vec![block([11.8, 1.28, -1.8], [2.15, 0.09, 0.8])],
+        ParametricRecipe::Barrel {
+            center: [11.8, 1.10, -2.6],
+            radius: 0.76,
+            length: 2.2,
+            segments: 16,
+        },
     ));
     scene.push(asset(
         "rc:asset/saltwind-market-stripes",

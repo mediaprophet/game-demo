@@ -79,7 +79,7 @@ bank stones, orchard furrows and crop rows, lavender and windbreaks, plus
 awnings and details on its market, boat, barn and wind pump. Qualia geometry
 authoring builds the new ellipsoid and torus forms, the `.10d` compiler seals
 them with provenance, and the full Portal WASM renderer displays them. The
-opening scene now has 181 visible organs and the HMC has 214 distinct variants
+opening scene now has 181 visible assets and the HMC has 214 distinct variants
 across ten scene states. Browser inspection confirmed both territories and the
 60-check campaign self-test passed. Shapes and colour separation improved;
 surface materials, shadows, character animation and the bright projector
@@ -90,7 +90,7 @@ forms with pale leaning stems, forks, flattened blue-green foliage and hanging
 leaf sprays. It also adds flowering wattle, herbs, planted vegetables and a
 lavender bed. Both full-engine territory views and a closer Kestrel camera view
 were checked in the browser; the 60-check campaign self-test passed. The
-opening scene had 222 organs and the game HMC had 262 variants in that pass. Foliage still
+opening scene had 222 assets and the game HMC had 262 variants in that pass. Foliage still
 needs authored leaf silhouettes, bark and flower surfaces, growth states and
 LOD. These are game-art tasks where the current Qualia asset path suffices;
 any missing generic renderer or `.10d` capability remains upstream work.
@@ -101,7 +101,7 @@ Survey and Walk are in-game HUD controls. Walk samples the same game-owned
 height function through WASM and moves the Qualia camera at eye height with
 WASD and drag-to-look. Its HUD hides the orders panel so the view has usable
 width on compact screens. The current pack has 274 `.10d` variants, with 234
-organs in the opening scene. Browser checks passed 61/61. Ground collision,
+assets in the opening scene. Browser checks passed 61/61. Ground collision,
 navigation, streaming, terrain LOD and biome asset placement are still open.
 
 The later settlement silhouette pass replaces two flat ground slabs with
@@ -109,7 +109,7 @@ sampled Qualia DEM terrain, replaces the main roads with B-spline ribbons,
 and adds an eight-ant trail beside a garden mound. The ground-height Walk
 camera now frames the trail from a distance. Browser inspection showed the
 ants at garden scale, and the campaign self-check passed 61/61. The HMC has
-293 `.10d` variants and 253 opening organs. This is still far from a film
+293 `.10d` variants and 253 opening assets. This is still far from a film
 look: rectangular terrain skirts, box buildings, flat colour, simple lighting
 and static ants are visible limitations. Prioritise the existing QG-12 material,
 light and shadow contract and QG-03/13 animation path, then author detailed
@@ -130,15 +130,16 @@ game meshes against those generic capabilities.
 6. Replace the invisible legacy DOM data view with direct HUD presentation data once the
    canvas migration is proven. Remove old CSS and markup at that point.
 
-## Generic Qualia render gap found in the browser
+## Generic Qualia render gap found in the browser — resolved
 
-`upload_tensor_buffer` provides the ten semantic pick targets used by the game, but it also
-enables visible tensor projectors. The projector pass still draws bright square markers after
-`set_ambient_enabled(false)`, because that switch only controls the particle field. Add a
-generic, independent Portal projector-visibility setting (or a general render-layer mask) while
-preserving the tensor buffer and GPU pick readback. Verify with a non-game fixture that hidden
-projectors do not alter picks, and with a game screenshot that no markers cover the landscape.
-This belongs upstream; removing the tensor upload would sacrifice Qualia picking.
+`upload_tensor_buffer` provides the ten semantic pick targets used by the game. It used to
+force-enable the ambient particle field, so the debug point cloud (fluorescent green nodes)
+resurfaced after every host-side disable and again on GPU re-init re-upload. Resolved: the
+upload no longer touches the switch — ambient is an explicit opt-in via
+`set_ambient_enabled`, guarded by the engine test
+`tensor_upload_does_not_enable_ambient_particle_field`. Tensor sprite projection is
+independently controlled by `set_tensor_projection_enabled` — the game holds both off every
+frame, while the tensor buffer and GPU pick readback stay fully resident.
 
 ## Acceptance checks
 

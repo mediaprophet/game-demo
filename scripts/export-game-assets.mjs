@@ -25,7 +25,7 @@ const cases = [
   ['vibe-beacon', [0, 0, false, false, false, false, false, false, false, false, false, false, false, beacon]],
 ];
 
-for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight']]) {
+for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'community']]) {
 set_art_style(style);
 const styleRoot = style === 0 ? join(root, 'assets', 'generated') :
   join(root, 'assets', 'generated', styleSlug);
@@ -35,24 +35,24 @@ const assets = new Map();
 const scenes = [];
 for (const [name, args] of cases) {
   const scene = scene_build(...args);
-  if (!Array.isArray(scene.organs) || scene.organs.length < 135) {
+  if (!Array.isArray(scene.assets) || scene.assets.length < 135) {
     throw new Error(`${name}: unexpected Qualia scene receipt`);
   }
   const entries = [];
-  for (const organ of scene.organs) {
-    if (!organ.id?.startsWith('rc:asset/') || !(organ.bytes instanceof Uint8Array)) {
+  for (const asset of scene.assets) {
+    if (!asset.id?.startsWith('rc:asset/') || !(asset.bytes instanceof Uint8Array)) {
       throw new Error(`${name}: invalid game asset receipt`);
     }
-    const bytes = Buffer.from(organ.bytes);
+    const bytes = Buffer.from(asset.bytes);
     const sha256 = createHash('sha256').update(bytes).digest('hex');
-    const slug = organ.id.slice('rc:asset/'.length).replace(/[^a-z0-9-]/gi, '-');
+    const slug = asset.id.slice('rc:asset/'.length).replace(/[^a-z0-9-]/gi, '-');
     const file = `${slug}--${sha256.slice(0, 12)}.10d`;
-    const key = `${organ.id}:${sha256}`;
+    const key = `${asset.id}:${sha256}`;
     if (!assets.has(key)) {
       await writeFile(join(out, file), bytes);
-      assets.set(key, { id: organ.id, file: `10d/${file}`, bytes: bytes.length, sha256 });
+      assets.set(key, { id: asset.id, file: `10d/${file}`, bytes: bytes.length, sha256 });
     }
-    entries.push({ id: organ.id, file: `10d/${file}`, rgba: [organ.r, organ.g, organ.b, organ.a] });
+    entries.push({ id: asset.id, file: `10d/${file}`, rgba: [asset.r, asset.g, asset.b, asset.a] });
   }
   scenes.push({ name, assets: entries });
 }
@@ -101,7 +101,11 @@ const buildId = createHash('sha256').update(wasm).digest('hex').slice(0, 16);
 for (const page of ['game.html', 'spike.html']) {
   const pagePath = join(root, 'web', page);
   const html = await readFile(pagePath, 'utf8');
-  const marker = /const WASM_BUILD = '[0-9a-f]{16}';/;
-  if (!marker.test(html)) throw new Error(`${page}: missing WASM build marker`);
-  await writeFile(pagePath, html.replace(marker, `const WASM_BUILD = '${buildId}';`));
+  // The marker may carry a cache-bust suffix (for example the character
+  // roster module); refresh the build hash but keep any suffix intact.
+  const marker = /const WASM_BUILD = '([0-9a-f]{16})([^']*)';/;
+  const match = marker.exec(html);
+  if (!match) throw new Error(`${page}: missing WASM build marker`);
+  await writeFile(pagePath,
+    html.replace(marker, `const WASM_BUILD = '${buildId}${match[2]}';`));
 }

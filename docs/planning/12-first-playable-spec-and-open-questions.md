@@ -20,11 +20,16 @@ feature that answers neither question belongs in a later slice.
 
 ## One-session experience to prototype
 
-**Premise.** In a fictional Australian town, the player arrives with a chosen
-simple shelter and one practical goal: establish a workable place to stay while
-helping the community restore workshop power. This is a scenario premise, not a
-universal starting condition. A short setup offers a few authored starts and a
-skip path; private identity or life-history disclosure is never required.
+**Premise.** In a real Australian locality represented by a dated, attributed
+geographic pack, the player arrives with a chosen simple shelter and one
+practical goal: establish a workable place to stay while helping a community
+project. The geographic base (terrain, waterways, roads, buildings, and public
+facilities) comes from declared sources; characters, dialogue, and scenario
+events are fictional unless individually sourced and consented. Game-built
+changes are visibly separate from the real mapped ground. This is a scenario
+premise, not a universal starting condition. A short setup offers a few
+authored starts and a skip path; private identity or life-history disclosure
+is never required.
 
 **Initial situation.** The workshop has tools and willing contributors, but its
 available power is too limited for a repair task. A shared solar and storage
@@ -97,14 +102,16 @@ not quietly present its result as authoritative.
 
 ## Release cut line
 
-The first **interaction prototype** proves the sequence above with original
-placeholder visuals, deterministic authored dialogue, and one fictional pack.
-Its purpose is to test play and the authority boundary. The **v0.1 technical
-demonstration** additionally proves the verified browser QualiaDB profile,
+The mechanics may be tested with a fictional fixture, but the player-facing
+community-development slice requires one real-place geographic pack with
+source/licence evidence, an attributed map, terrain, waterways, roads and
+buildings/facilities, plus a separate game-scenario overlay. The **v0.1
+technical demonstration** must prove the verified browser QualiaDB profile,
 semantic asset selection, offline persistence, a bounded VibeScript example,
-and a data-shaped pack only if its licence/privacy gate passes. Local LLM
-inference, a real-town pack, a second full presentation profile, multiplayer,
-and broad simulation domains are extensions, subject to their respective gates.
+local projects anchored to the geographic pack, and travel between mapped
+places with recorded time/resource consequences. Local LLM inference, a second
+full presentation profile, multiplayer, and broader simulation domains remain
+extensions subject to their respective gates.
 
 The detailed [implementation plan](04-implementation-plan.md) contains fixtures
 that may be built in parallel or behind a developer flag. Their appearance in a

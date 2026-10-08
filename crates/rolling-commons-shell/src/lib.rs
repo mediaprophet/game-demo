@@ -29,11 +29,66 @@ thread_local! { static ART_STYLE: Cell<u8> = const { Cell::new(0) }; }
 /// Presentation preference only; world state and game rules are unchanged.
 #[wasm_bindgen]
 pub fn set_art_style(style: u8) {
-    ART_STYLE.with(|active| active.set(style.min(1)));
+    ART_STYLE.with(|active| active.set(style.min(2)));
+}
+
+/// Community Grounds: the muted sage, olive, warm tan, terracotta and cream
+/// script sampled from the civics.au community-ground concept illustration.
+/// Object families keep their role colours, so state readings such as
+/// powered windows and online indicators stay legible at overview scale.
+fn community_grounds_color(id: &str, color: [f32; 4]) -> [f32; 4] {
+    let has = |words: &[&str]| words.iter().any(|word| id.contains(word));
+    // State-bearing and character surfaces keep their authored reading.
+    let keep = has(&[
+        "window", "glow", "signal", "indicator", "node", "sign", "eyes",
+        "face", "hair", "boot", "door",
+    ]);
+    let (target, mix) = if keep {
+        ([0.58, 0.53, 0.47], 0.10)
+    } else if has(&["solar", "panel"]) {
+        ([0.15, 0.24, 0.34], 0.42)
+    } else if has(&["awning", "roof", "chimney", "band", "banner", "fascia"])
+        || id.contains("market-canopy")
+    {
+        ([0.75, 0.44, 0.25], 0.42)
+    } else if has(&[
+        "canopy", "crown", "foliage", "leaf", "shoot", "shrub", "herb",
+        "grass", "wattle", "lavender", "orchard", "gum", "flower", "reeds",
+        "windbreak", "veggie", "spray", "bloom", "crop",
+    ]) {
+        ([0.50, 0.56, 0.42], 0.46)
+    } else if has(&["water", "canal", "ripple", "channel", "creek", "trough"]) {
+        ([0.45, 0.57, 0.62], 0.26)
+    } else if has(&["mast", "cable", "rack", "drum", "wheel", "chassis", "light", "pole", "pipe"]) {
+        ([0.55, 0.54, 0.52], 0.22)
+    } else if has(&[
+        "trunk", "stem", "fork", "branch", "bark", "deck", "boards", "fence",
+        "basket", "crate", "stand", "rail", "plank",
+    ]) {
+        ([0.64, 0.52, 0.38], 0.30)
+    } else if has(&["workshop", "hall", "barn", "market", "stall", "shelter", "facade"]) {
+        ([0.92, 0.89, 0.83], 0.22)
+    } else if has(&[
+        "ground", "terrain", "earth", "road", "bank", "meadow", "hill",
+        "skirt", "soil", "furrow", "mound", "boulder", "stone", "path", "bed",
+        "quay",
+    ]) {
+        ([0.62, 0.54, 0.36], 0.40)
+    } else {
+        ([0.60, 0.53, 0.45], 0.15)
+    };
+    let luminance = color[0] * 0.25 + color[1] * 0.58 + color[2] * 0.17;
+    let mut result = color;
+    for axis in 0..3 {
+        let muted = luminance * 0.28 + color[axis] * 0.72;
+        result[axis] = (muted * (1.0 - mix) + target[axis] * mix).clamp(0.0, 1.0);
+    }
+    result
 }
 
 fn style_color(id: &str, color: [f32; 4], style: u8) -> [f32; 4] {
     if style == 0 { return color; }
+    if style == 2 { return community_grounds_color(id, color); }
     // Earthlight: a restrained earth/foliage colour script. The same Qualia
     // geometry and `.10d` surface-reading path carries both styles.
     let foliage = ["crown", "canopy", "foliage", "leaf", "shoot", "shrub", "herb",
@@ -319,7 +374,9 @@ pub fn scene_build(
         Cancellation, GeometryWorkspace,
     };
 
-    fn organ(recipe: &asset_catalog::AssetRecipe) -> Result<(Mesh, JsValue), JsValue> {
+    /// Compile one authored asset recipe into its mesh and `.10d` receipt
+    /// object. The scene is composed of these compiled assets.
+    fn compile_asset(recipe: &asset_catalog::AssetRecipe) -> Result<(Mesh, JsValue), JsValue> {
         let (mesh, source, mime) = if let Some(spec) = &recipe.parametric {
             let mesh = spec
                 .compile()
@@ -419,7 +476,7 @@ pub fn scene_build(
         Ok((mesh, obj.into()))
     }
 
-    let organs = js_sys::Array::new();
+    let assets = js_sys::Array::new();
     let mut min = [f32::INFINITY; 3];
     let mut max = [f32::NEG_INFINITY; 3];
     let mut recipes = asset_catalog::kestrel_flats(
@@ -448,12 +505,12 @@ pub fn scene_build(
         recipe.color = style_color(recipe.id, recipe.color, art_style);
     }
     for recipe in recipes {
-        let (mesh, obj) = organ(&recipe)?;
+        let (mesh, obj) = compile_asset(&recipe)?;
         for axis in 0..3 {
             min[axis] = min[axis].min(mesh.min[axis]);
             max[axis] = max[axis].max(mesh.max[axis]);
         }
-        organs.push(&obj);
+        assets.push(&obj);
     }
     let places = [
         [-3.0, 0.6, 2.6],
@@ -481,7 +538,7 @@ pub fn scene_build(
     }
     let tensor = tensor_buffer_build(&nodes)?;
     let result = js_sys::Object::new();
-    js_sys::Reflect::set(&result, &"organs".into(), &organs)?;
+    js_sys::Reflect::set(&result, &"assets".into(), &assets)?;
     js_sys::Reflect::set(
         &result,
         &"tensor".into(),
@@ -601,12 +658,15 @@ impl GamePortal {
         self.inner.load_10d(bytes)
     }
 
-    /// Load a multi-object scene: `Array<{bytes: .10d, r,g,b,a}>` where each
+    /// Load a multi-asset scene: `Array<{bytes: .10d, r,g,b,a}>` where each
     /// mesh keeps its authored position in the shared coordinate space — one
     /// global normalisation across all objects. This is how a town of
-    /// distinct props composes into one viewport mesh.
-    pub fn load_scene(&mut self, organs: &js_sys::Array) -> Result<JsValue, JsValue> {
-        self.inner.load_body_organs_colored(organs)
+    /// distinct props composes into one viewport mesh. The engine binding
+    /// still carries its legacy anatomy-era name (`load_body_organs_colored`);
+    /// the upstream rename is tracked as QG-20 in
+    /// `docs/planning/19-qualiadb-upstream-gate-work-orders.md`.
+    pub fn load_scene(&mut self, assets: &js_sys::Array) -> Result<JsValue, JsValue> {
+        self.inner.load_body_organs_colored(assets)
     }
 
     /// Render tier: 0 = no webgpu, 1 = canvas2d fallback, 2 = GPU path.
@@ -624,14 +684,23 @@ impl GamePortal {
     /// fallback reads when WebGPU is unavailable.
     pub fn upload_tensor(&mut self, bytes: &[u8]) -> Result<(), JsValue> {
         self.inner.upload_tensor_buffer(bytes)?;
-        // Retain pickable semantic nodes without the bright debug particle field.
+        // Retain pickable semantic nodes without the bright debug particle
+        // field. The frame guard in the page keeps both presentation paths
+        // off even if the engine re-uploads the tensor on GPU re-init.
         self.inner.set_ambient_enabled(false);
+        self.inner.set_tensor_projection_enabled(false);
         Ok(())
     }
 
     /// Toggle tensor point rendering independently from semantic picking.
     pub fn set_tensor_projection_enabled(&mut self, enabled: bool) {
         self.inner.set_tensor_projection_enabled(enabled);
+    }
+
+    /// Toggle the ambient particle field (tensor-node particle cloud).
+    /// Off in this game; exposed so the frame guard can assert it stays off.
+    pub fn set_ambient_enabled(&mut self, enabled: bool) {
+        self.inner.set_ambient_enabled(enabled);
     }
 
     /// Queue a pick at canvas pixel (x, y). CPU fallback resolves
@@ -673,6 +742,20 @@ impl GamePortal {
         self.inner
             .set_lighting(sun[0], sun[1], sun[2], intensity, ambient);
     }
+
+    /// Tunable key/fill/ambient light from the QualiaPortal surface, so a
+    /// visual style can present its own daylight reading without touching
+    /// campaign or rule state.
+    pub fn set_lighting(
+        &mut self,
+        sun_r: f32,
+        sun_g: f32,
+        sun_b: f32,
+        intensity: f32,
+        ambient: f32,
+    ) {
+        self.inner.set_lighting(sun_r, sun_g, sun_b, intensity, ambient);
+    }
 }
 
 // --- Session: deterministic world document + event log ---
@@ -698,6 +781,23 @@ struct ActionDef {
     add: Vec<String>,
     #[serde(default)]
     explain: String,
+    /// Declarative delayed consequences checked after a world-changing action.
+    /// Conditions are SHACL shapes and effects are the same token-triple edits
+    /// as direct actions, so time-gated outcomes remain replayable.
+    #[serde(default, rename = "afterTurn")]
+    after_turn: Vec<TransitionDef>,
+}
+
+#[derive(serde::Deserialize, Clone)]
+struct TransitionDef {
+    #[serde(default)]
+    gate: serde_json::Value,
+    #[serde(rename = "removeN", default)]
+    remove_n: Vec<RemoveSpec>,
+    #[serde(rename = "removeAll", default)]
+    remove_all: Vec<RemoveSpec>,
+    #[serde(default)]
+    add: Vec<String>,
 }
 
 #[derive(serde::Deserialize, Clone)]
@@ -833,6 +933,26 @@ impl GameSession {
         let seq = self.seq;
         for add in &action.add {
             self.lines.push(add.replace("{seq}", &seq.to_string()));
+        }
+        // Time-delayed outcomes (for example, a grant decision arriving the
+        // evening after submission) are data-driven transitions. QualiaDB
+        // SHACL validates each condition against the updated world; effects
+        // share this event's sequence and replay deterministically.
+        for transition in &action.after_turn {
+            let gate_json = serde_json::to_string(&transition.gate).unwrap_or_else(|_| "[]".into());
+            let report = match qualia_core_db::wasm_bridge::validate_shacl_json_wasm(
+                &self.world(), &gate_json,
+            ) {
+                Ok(r) => r,
+                Err(_) => continue,
+            };
+            let ready = js_get(&report, "conforms")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
+            if !ready { continue; }
+            for spec in &transition.remove_all { self.remove_matching(spec, usize::MAX); }
+            for spec in &transition.remove_n { self.remove_matching(spec, spec.n.max(1)); }
+            for add in &transition.add { self.lines.push(add.replace("{seq}", &seq.to_string())); }
         }
         self.lines.push(format!("ev:e{seq} a ev:Event ."));
         self.lines
