@@ -555,19 +555,51 @@ canvas.height = Math.max(540, window.innerHeight);
 const hudCanvas = $('game-hud');
 hudCanvas.width = canvas.width;
 hudCanvas.height = canvas.height;
+const rendererProbe={
+  navigatorGpu:typeof navigator!=='undefined'&&'gpu' in navigator,
+  adapter:false,
+  init:'not-attempted',
+  error:''
+};
 let webgpuAvailable=false;
 try {
   // QualiaPortal owns the canvas2d fallback, but its optional WebGPU arming
   // path must not be called when the browser reports no adapter. Some
   // headless/WebView implementations expose navigator.gpu while returning
   // null from requestAdapter.
-  webgpuAvailable=!!(navigator.gpu&&await navigator.gpu.requestAdapter());
-} catch(e) { note('webgpu probe: '+String(e).slice(0,80)); }
+  rendererProbe.adapter=!!(rendererProbe.navigatorGpu&&await navigator.gpu.requestAdapter());
+  webgpuAvailable=rendererProbe.adapter;
+} catch(e) {
+  rendererProbe.error=String(e).slice(0,120);
+  note('webgpu probe: '+rendererProbe.error);
+}
 if(webgpuAvailable) {
-  try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
-} else note('webgpu unavailable — using QualiaPortal canvas fallback');
+  try {
+    rendererProbe.init=await m.init_webgpu(canvas)?'armed':'rejected';
+    if(rendererProbe.init==='rejected')note('webgpu init rejected — using QualiaPortal canvas fallback');
+  } catch(e) {
+    rendererProbe.init='failed';
+    rendererProbe.error=String(e).slice(0,120);
+    note('webgpu init: '+rendererProbe.error);
+  }
+} else {
+  rendererProbe.init='unavailable';
+  note('webgpu unavailable — using QualiaPortal canvas fallback');
+}
 const portal = new m.GamePortal(canvas);
 const hud = new m.GameHud(hudCanvas);
+function rendererCapability(){
+  const tier=portal.tier();
+  const mode=tier>=2?'webgpu':tier===1?'canvas2d-fallback':'unavailable';
+  const label=tier>=2?'WebGPU active':tier===1?'Canvas2D fallback':'renderer unavailable';
+  return {tier,mode,label};
+}
+function rendererCapabilityText(){
+  const capability=rendererCapability();
+  return `${capability.label}; navigator.gpu=${rendererProbe.navigatorGpu?'yes':'no'}; `+
+    `adapter=${rendererProbe.adapter?'yes':'no'}; init=${rendererProbe.init}; portalTier=${capability.tier}`+
+    (rendererProbe.error?`; detail=${rendererProbe.error}`:'');
+}
 const ART_STYLES=['Storybook','Earthlight','Community Grounds'];
 let artStyle=0;
 try { const savedStyle=Number(localStorage.getItem('maslows-art-style'));
@@ -592,7 +624,7 @@ $('sky-preset').onclick = () => {
   if(artStyle===2)portal.set_lighting(0.58,0.76,0.55,1.32,0.74);
   $('sky-preset').textContent=['','☀ Daylight','◒ Golden hour','☾ Moonlight'][skyPreset];
 };
-$('tier').textContent = 'render tier ' + portal.tier();
+$('tier').textContent = rendererCapability().label;
 
 let camYaw=0.6, camPitch=0.42, camZoom=canvas.width<900?1.9:1.45;
 let camTarget=null, camGoal=null, zoomGoal=null, focusedPlace=null;
@@ -697,9 +729,9 @@ function fallbackSceneQuality(st, tier, hmcReady) {
 function sceneQualityState(st) {
   const args=[st.upgrades,st.parts.length,st.online,st.approved,st.waterOnline,st.gardenActive,
     st.signalOnline,st.bridgeOpen,st.bridgeBraced,st.day>4,st.pumpOnline,st.orchardActive,
-    st.orchardHarvested,st.day,portal.tier(),hmcSceneApi&&!!hmcPack];
+    st.orchardHarvested,st.day,portal.tier(),hmcSceneApi&&!!hmcResidentScene];
   return typeof m.scene_quality_state==='function' ? toObj(m.scene_quality_state(...args)) :
-    fallbackSceneQuality(st,portal.tier(),hmcSceneApi&&!!hmcPack);
+    fallbackSceneQuality(st,portal.tier(),hmcSceneApi&&!!hmcResidentScene);
 }
 function applySceneQuality(bridge, previous) {
   const warm=artStyle===2;
@@ -770,7 +802,9 @@ function selectArtStyle(next){
   rebuild();renderHud();hydrateHmcScenePack();
 }
 
-// rAF render loop — tick drives GPU pick readback too
+// rAF render loop — tick drives GPU pick readback too. The scripted browser
+// self-test renders one frame and then stops so headless runners can collect
+// its DOM report; normal gameplay remains continuously animated.
 let last=performance.now(), tickErrorShown=false;
 (function loop(t){
   if(cameraMode==='walk'&&walkKeys.size&&hudPage!=='walk-site'&&hudPage!=='characters'&&hudPage!=='character-create'){
@@ -805,7 +839,8 @@ let last=performance.now(), tickErrorShown=false;
   portal.set_tensor_projection_enabled(false);
   try { portal.tick(canvas, Math.min(50, t-last)); }
   catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
-  last=t; requestAnimationFrame(loop);
+  last=t;
+  if(!SELFTEST)requestAnimationFrame(loop);
 })(last);
 
 // orbit + pick
@@ -1470,7 +1505,7 @@ function refresh() {
     p.textContent='The campaign has an ending. Explore the map, replay your choices or begin a new campaign.';
     box.appendChild(p);
   }
-  $('tier').textContent = `QualiaPortal tier ${portal.tier()} · 4 land tiles · ${sceneMeshes} .10d meshes`;
+  $('tier').textContent = `${rendererCapability().label} · 4 land tiles · ${sceneMeshes} .10d meshes`;
   renderHud();
 }
 
@@ -1658,17 +1693,22 @@ async function hydrateHmcScenePack() {
     note(`HMC ${parsed.artStyle||'scene'} verified · ${verified-1} assets`);
     if(hmcSceneApi){hmcResidentScene='';refresh();}
     else note('HMC renderer loader unavailable in this package; using compiled .10d fallback');
-  } catch(e) { note(`HMC optional path unavailable: ${String(e).slice(0,120)}`); }
+    return {verified:true,resident:hmcSceneApi&&!!hmcResidentScene,artStyle:parsed.artStyle||'scene'};
+  } catch(e) {
+    note(`HMC optional path unavailable: ${String(e).slice(0,120)}`);
+    return {verified:false,resident:false,error:String(e)};
+  }
 }
 
 await loadCharacters();
 territory=playing().place;walk={x:playing().x,z:playing().z};
 refresh();
-hydrateHmcScenePack();
-note('slice ready — tier ' + portal.tier());
+const hmcHydration=hydrateHmcScenePack();
+note('slice ready — '+rendererCapabilityText());
 
 // Scripted acceptance playthrough for headless verification (?selftest).
 if (new URLSearchParams(location.search).has('selftest')) {
+  const hmcResult=await hmcHydration;
   const testSession = new m.GameSession(SEED, ACTIONS);
   const versionFour=SEED.replace('rc:world rc:contentVersion 5 .','rc:world rc:contentVersion 4 .')
     .split('\n').filter(line=>!line.startsWith('rc:communicationsMast ')).join('\n');
@@ -1679,8 +1719,14 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST deterministic scene bridge: ${bridgeA.scene_key===bridgeB.scene_key&&
     bridgeA.ambient_seed===bridgeB.ambient_seed&&bridgeA.effect_seed===bridgeB.effect_seed&&
     ['dry','flowing','high-tide'].includes(bridgeA.water_state)?'PASS':'FAIL'}`);
-  note(`TEST quality fallback contract: ${[0,1,2].includes(bridgeA.quality_tier)&&
-    (bridgeA.fallback==='webgpu'||bridgeA.fallback==='canvas2d'||bridgeA.fallback==='unavailable')?'PASS':'FAIL'}`);
+  const expectedQuality=bridgeA.quality_tier===2?'webgpu':bridgeA.quality_tier===1?'canvas2d':'unavailable';
+  note(`TEST quality capability: ${[0,1,2].includes(bridgeA.quality_tier)&&bridgeA.fallback===expectedQuality&&
+    ((bridgeA.quality_tier===2&&rendererCapability().mode==='webgpu')||
+     (bridgeA.quality_tier===1&&rendererCapability().mode==='canvas2d-fallback')||
+     (bridgeA.quality_tier===0&&rendererCapability().mode==='unavailable'))?'PASS':'FAIL'} · ${rendererCapabilityText()}`);
+  note(`TEST HMC scene bridge: ${!hmcResult.verified?'FAIL':hmcSceneApi?
+    (hmcResult.resident&&hmcResidentScene===bridgeA.scene_key?'PASS':'FAIL'):
+    'INFO (bundle verified; checked-in package has no HMC renderer export, using compiled .10d fallback)'}`);
   const vibe = toObj(m.vibe_eval_cell('= 1 + 2'));
   note(`TEST VibeScript: ${vibe.ok && String(vibe.value)==='3' ? 'PASS' : 'FAIL'}`);
   const query = toObj(testSession.vibe_query('= world.coins'));
