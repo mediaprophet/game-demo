@@ -319,6 +319,170 @@ pub fn tensor_buffer_build(nodes_flat: &[f32]) -> Result<Vec<u8>, JsValue> {
     Ok(buf)
 }
 
+// --- Deterministic scene presentation bridge -----------------------------
+
+/// Pick the checked-in HMC scene whose authored geometry matches the current
+/// story milestone. This is presentation state only; accepted actions and
+/// their replay tape remain owned by `GameSession` below.
+fn bridge_scene_key(
+    upgrades: u32,
+    parts: u32,
+    online: bool,
+    water_online: bool,
+    bridge_open: bool,
+    bridge_braced: bool,
+    high_tide: bool,
+    pump_online: bool,
+    orchard_active: bool,
+    orchard_harvested: bool,
+    signal_online: bool,
+) -> &'static str {
+    if orchard_harvested {
+        "harvested"
+    } else if bridge_open && pump_online && orchard_active {
+        "thriving"
+    } else if bridge_open {
+        "bridge-open"
+    } else if high_tide && bridge_braced {
+        "braced-crossing"
+    } else if high_tide {
+        "high-tide"
+    } else if signal_online {
+        "signal-online"
+    } else if online {
+        "workshop-online"
+    } else if upgrades > 0 || parts > 0 || water_online {
+        "early-progress"
+    } else {
+        "opening"
+    }
+}
+
+fn bridge_seed(scene: &str, day: u32, water_online: bool, high_tide: bool) -> u32 {
+    // A small integer mixer is deliberate here: no wall clock, random source,
+    // GPU counter, or iteration order enters scene effects.
+    let mut seed = 0x9e37_79b9_u32 ^ day.wrapping_mul(0x85eb_ca6b);
+    for byte in scene.bytes() {
+        seed = (seed ^ u32::from(byte)).wrapping_mul(0xc2b2_ae35);
+        seed = seed.rotate_left(13);
+    }
+    if water_online { seed ^= 0x51ed_0a7e; }
+    if high_tide { seed ^= 0xa771_de5e; }
+    seed ^ (seed >> 16)
+}
+
+#[derive(serde::Serialize)]
+struct SceneQualityBridge {
+    scene_key: &'static str,
+    terrain_phase: &'static str,
+    water_state: &'static str,
+    water_level: f32,
+    water_phase: u32,
+    ambient_seed: u32,
+    effect_seed: u32,
+    water_ripples: bool,
+    shore_foam: bool,
+    harvest_glow: bool,
+    quality_tier: u8,
+    ambient_enabled: bool,
+    hmc_resident: bool,
+    fallback: &'static str,
+    camera_cue: &'static str,
+    camera_focus: i32,
+}
+
+/// Derive all renderer-facing presentation choices from the deterministic
+/// story snapshot. This never mutates the world and never becomes part of the
+/// event log, so saves and replay tapes remain byte-for-byte compatible.
+#[wasm_bindgen]
+pub fn scene_quality_state(
+    upgrades: u32,
+    parts: u32,
+    online: bool,
+    _approved: bool,
+    water_online: bool,
+    garden_active: bool,
+    signal_online: bool,
+    bridge_open: bool,
+    bridge_braced: bool,
+    high_tide: bool,
+    pump_online: bool,
+    orchard_active: bool,
+    orchard_harvested: bool,
+    day: u32,
+    portal_tier: u8,
+    hmc_ready: bool,
+) -> Result<JsValue, JsValue> {
+    let scene_key = bridge_scene_key(
+        upgrades,
+        parts,
+        online,
+        water_online,
+        bridge_open,
+        bridge_braced,
+        high_tide,
+        pump_online,
+        orchard_active,
+        orchard_harvested,
+        signal_online,
+    );
+    let water_state = if high_tide && !bridge_open {
+        "high-tide"
+    } else if water_online {
+        "flowing"
+    } else {
+        "dry"
+    };
+    let water_level = match water_state {
+        "high-tide" => 1.0,
+        "flowing" => 0.62,
+        _ => 0.18,
+    };
+    let quality_tier = if portal_tier >= 2 {
+        2
+    } else if portal_tier >= 1 {
+        1
+    } else {
+        0
+    };
+    let camera_focus = if high_tide && !bridge_open {
+        7
+    } else if !water_online && (upgrades > 0 || parts > 0) {
+        5
+    } else if bridge_open && !pump_online {
+        8
+    } else if orchard_active {
+        9
+    } else {
+        -1
+    };
+    let camera_cue = if camera_focus >= 0 { "survey" } else { "map" };
+    let seed = bridge_seed(scene_key, day, water_online, high_tide);
+    serde_wasm_bindgen::to_value(&SceneQualityBridge {
+        scene_key,
+        terrain_phase: if bridge_open { "connected" } else if high_tide { "flooded" } else if garden_active { "cultivated" } else { "settled" },
+        water_state,
+        water_level,
+        water_phase: day % 8,
+        ambient_seed: seed,
+        effect_seed: seed.rotate_left(7) ^ 0x6d2b_79f5,
+        water_ripples: water_online || high_tide,
+        shore_foam: high_tide || bridge_open,
+        harvest_glow: orchard_harvested,
+        quality_tier,
+        ambient_enabled: quality_tier >= 2,
+        hmc_resident: hmc_ready,
+        fallback: match quality_tier {
+            2 => "webgpu",
+            1 => "canvas2d",
+            _ => "unavailable",
+        },
+        camera_cue,
+        camera_focus,
+    })
+    .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
 /// Verify a `.10d` container read-back: mesh decode + content digest, i.e.
 /// the Q42 manifest linkage the game uses to bind semantic IDs to geometry.
 #[wasm_bindgen]
@@ -666,7 +830,87 @@ impl GamePortal {
     /// the upstream rename is tracked as QG-20 in
     /// `docs/planning/19-qualiadb-upstream-gate-work-orders.md`.
     pub fn load_scene(&mut self, assets: &js_sys::Array) -> Result<JsValue, JsValue> {
+        self.inner.set_preserve_authored_frame(false);
         self.inner.load_body_organs_colored(assets)
+    }
+
+    /// Load one game-authored scene snapshot from its verified HMC pack. The
+    /// manifest selects a bounded scene, while Qualia's bundle reader verifies
+    /// every referenced entry before the portal sees it. If this optional path
+    /// is unavailable in the browser, callers can keep using `load_scene`.
+    pub fn load_hmc_scene(
+        &mut self,
+        hmc_bytes: &[u8],
+        manifest_json: &str,
+        scene_key: &str,
+    ) -> Result<JsValue, JsValue> {
+        #[derive(serde::Deserialize)]
+        struct Manifest {
+            scenes: Vec<Scene>,
+        }
+        #[derive(serde::Deserialize)]
+        struct Scene {
+            name: String,
+            assets: Vec<SceneAsset>,
+        }
+        #[derive(serde::Deserialize)]
+        struct SceneAsset {
+            id: String,
+            file: String,
+            rgba: [f32; 4],
+        }
+
+        if manifest_json.len() > 2_000_000 {
+            return Err(JsValue::from_str("HMC scene manifest exceeds bound"));
+        }
+        let manifest: Manifest = serde_json::from_str(manifest_json)
+            .map_err(|e| JsValue::from_str(&format!("HMC scene manifest: {e}")))?;
+        let scene = manifest
+            .scenes
+            .into_iter()
+            .find(|scene| scene.name == scene_key)
+            .ok_or_else(|| JsValue::from_str("HMC scene key not found"))?;
+        if scene.assets.is_empty() || scene.assets.len() > 512 {
+            return Err(JsValue::from_str("HMC scene asset count is outside bounds"));
+        }
+
+        use qualia_core_db::bundle::BundleReader;
+        let reader = BundleReader::parse(hmc_bytes)
+            .map_err(|e| JsValue::from_str(&format!("HMC scene bundle: {e}")))?;
+        let assets = js_sys::Array::new();
+        for asset in scene.assets {
+            if !asset.file.starts_with("10d/")
+                || !asset.file.ends_with(".10d")
+                || asset.file.contains("..")
+                || !asset.rgba.iter().all(|v| v.is_finite())
+            {
+                return Err(JsValue::from_str("invalid HMC scene asset reference"));
+            }
+            let entry = reader
+                .entries()
+                .iter()
+                .find(|entry| entry.key == asset.file)
+                .ok_or_else(|| JsValue::from_str("HMC scene asset entry not found"))?;
+            if entry.kind != "10d" || !reader.verify_entry(&entry.key) {
+                return Err(JsValue::from_str("HMC scene asset verification failed"));
+            }
+            let bytes = reader
+                .get(&entry.key)
+                .ok_or_else(|| JsValue::from_str("HMC scene asset bytes not found"))?;
+            let object = js_sys::Object::new();
+            js_sys::Reflect::set(&object, &"id".into(), &JsValue::from_str(&asset.id))?;
+            js_sys::Reflect::set(
+                &object,
+                &"bytes".into(),
+                &js_sys::Uint8Array::from(bytes),
+            )?;
+            for (key, value) in ["r", "g", "b", "a"].iter().zip(asset.rgba) {
+                js_sys::Reflect::set(&object, &(*key).into(), &JsValue::from_f64(value as f64))?;
+            }
+            assets.push(&object);
+        }
+        self.inner.set_preserve_authored_frame(false);
+        self.inner.load_body_organs_colored(&assets)
     }
 
     /// Render tier: 0 = no webgpu, 1 = canvas2d fallback, 2 = GPU path.
@@ -1194,6 +1438,39 @@ fn err_obj(kind: &str, detail: &str) -> JsValue {
         JsValue::from_str(&format!("{kind}: {detail}")),
     );
     o.into()
+}
+
+#[cfg(test)]
+mod scene_bridge_tests {
+    use super::{bridge_scene_key, bridge_seed};
+
+    #[test]
+    fn scene_key_advances_only_from_story_facts() {
+        assert_eq!(
+            bridge_scene_key(0, 0, false, false, false, false, false, false, false, false, false),
+            "opening"
+        );
+        assert_eq!(
+            bridge_scene_key(1, 1, false, false, false, false, false, false, false, false, false),
+            "early-progress"
+        );
+        assert_eq!(
+            bridge_scene_key(1, 2, true, true, true, false, false, true, true, false, false),
+            "thriving"
+        );
+        assert_eq!(
+            bridge_scene_key(1, 2, true, true, true, false, false, true, true, true, false),
+            "harvested"
+        );
+    }
+
+    #[test]
+    fn effect_seed_is_repeatable_and_state_sensitive() {
+        let a = bridge_seed("high-tide", 5, false, true);
+        assert_eq!(a, bridge_seed("high-tide", 5, false, true));
+        assert_ne!(a, bridge_seed("high-tide", 6, false, true));
+        assert_ne!(a, bridge_seed("high-tide", 5, true, true));
+    }
 }
 
 /// Replay a tape of accepted action ids against the seed and return the

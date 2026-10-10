@@ -555,7 +555,17 @@ canvas.height = Math.max(540, window.innerHeight);
 const hudCanvas = $('game-hud');
 hudCanvas.width = canvas.width;
 hudCanvas.height = canvas.height;
-try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
+let webgpuAvailable=false;
+try {
+  // QualiaPortal owns the canvas2d fallback, but its optional WebGPU arming
+  // path must not be called when the browser reports no adapter. Some
+  // headless/WebView implementations expose navigator.gpu while returning
+  // null from requestAdapter.
+  webgpuAvailable=!!(navigator.gpu&&await navigator.gpu.requestAdapter());
+} catch(e) { note('webgpu probe: '+String(e).slice(0,80)); }
+if(webgpuAvailable) {
+  try { await m.init_webgpu(canvas); } catch(e) { note('webgpu init: '+String(e).slice(0,80)); }
+} else note('webgpu unavailable — using QualiaPortal canvas fallback');
 const portal = new m.GamePortal(canvas);
 const hud = new m.GameHud(hudCanvas);
 const ART_STYLES=['Storybook','Earthlight','Community Grounds'];
@@ -654,24 +664,97 @@ for (const id of ['kestrel','saltwind','highlands']) {
 
 let sceneMeshes = 0;
 let sceneSource = '';
+let hmcPack = null, hmcManifest = null, hmcResidentScene = '';
+let lastSceneBridge = null;
+const hmcSceneApi = typeof portal.load_hmc_scene === 'function';
+
+// This mirrors the WASM bridge for old checked-in packages. It is intentionally
+// a pure projection of the story facts, so a package rebuild cannot change
+// replay or persistence semantics.
+function fallbackSceneQuality(st, tier, hmcReady) {
+  const sceneKey = st.orchardHarvested ? 'harvested' :
+    st.bridgeOpen && st.pumpOnline && st.orchardActive ? 'thriving' :
+    st.bridgeOpen ? 'bridge-open' : st.day > 4 && st.bridgeBraced ? 'braced-crossing' :
+    st.day > 4 ? 'high-tide' : st.signalOnline ? 'signal-online' :
+    st.online ? 'workshop-online' : st.upgrades > 0 || st.parts.length || st.waterOnline ?
+      'early-progress' : 'opening';
+  const waterState=st.day>4&&!st.bridgeOpen?'high-tide':st.waterOnline?'flowing':'dry';
+  let seed=(0x9e3779b9^Math.imul(st.day,0x85ebca6b))>>>0;
+  for(const byte of sceneKey) { seed=Math.imul((seed^byte.charCodeAt(0))>>>0,0xc2b2ae35)>>>0; seed=((seed<<13)|(seed>>>19))>>>0; }
+  if(st.waterOnline)seed^=0x51ed0a7e;if(st.day>4)seed^=0xa771de5e;seed=(seed^(seed>>>16))>>>0;
+  const focus=st.day>4&&!st.bridgeOpen?7:!st.waterOnline&&(st.upgrades>0||st.parts.length)?5:
+    st.bridgeOpen&&!st.pumpOnline?8:st.orchardActive?9:-1;
+  const qualityTier=tier>=2?2:tier>=1?1:0;
+  return {scene_key:sceneKey,terrain_phase:st.bridgeOpen?'connected':st.day>4?'flooded':st.gardenActive?'cultivated':'settled',
+    water_state:waterState,water_level:waterState==='high-tide'?1:waterState==='flowing'?.62:.18,
+    water_phase:st.day%8,ambient_seed:seed,effect_seed:((seed<<7)|(seed>>>25))^0x6d2b79f5,
+    water_ripples:st.waterOnline||st.day>4,shore_foam:st.day>4||st.bridgeOpen,
+    harvest_glow:st.orchardHarvested,quality_tier:qualityTier,ambient_enabled:qualityTier>=2,
+    hmc_resident:hmcReady,
+    fallback:qualityTier===2?'webgpu':qualityTier===1?'canvas2d':'unavailable',
+    camera_cue:focus>=0?'survey':'map',camera_focus:focus};
+}
+function sceneQualityState(st) {
+  const args=[st.upgrades,st.parts.length,st.online,st.approved,st.waterOnline,st.gardenActive,
+    st.signalOnline,st.bridgeOpen,st.bridgeBraced,st.day>4,st.pumpOnline,st.orchardActive,
+    st.orchardHarvested,st.day,portal.tier(),hmcSceneApi&&!!hmcPack];
+  return typeof m.scene_quality_state==='function' ? toObj(m.scene_quality_state(...args)) :
+    fallbackSceneQuality(st,portal.tier(),hmcSceneApi&&!!hmcPack);
+}
+function applySceneQuality(bridge, previous) {
+  const warm=artStyle===2;
+  const waterLift=bridge.water_state==='high-tide'?0.08:bridge.water_state==='flowing'?0.03:0;
+  const light=warm?[0.58,0.76,0.55,1.32,0.74]:
+    bridge.water_state==='high-tide'?[0.42,0.67,0.92,1.18,0.66]:[0.45,0.85,0.35,1.6,0.82];
+  portal.set_lighting(light[0],light[1],light[2],light[3]+waterLift,light[4]);
+  // The generic tensor particle field is optional decoration. Authored scene
+  // effects remain visible on every tier; only enable the field on the
+  // explicit GPU-quality path and assert the choice again in the frame loop.
+  portal.set_ambient_enabled(bridge.ambient_enabled===true);
+  if(previous&&previous.scene_key!==bridge.scene_key&&cameraMode!=='walk'){
+    if(bridge.camera_focus>=0)focusSite(bridge.camera_focus);
+    else focusTerritory(territory);
+  }
+  lastSceneBridge=bridge;
+}
+function tryLoadHmcScene(bridge) {
+  if(!hmcPack||!hmcManifest||!hmcSceneApi||sceneSource.trim())return false;
+  if(hmcResidentScene===bridge.scene_key)return true;
+  try {
+    const receipt=toObj(portal.load_hmc_scene(hmcPack,JSON.stringify(hmcManifest),bridge.scene_key));
+    sceneMeshes=receipt.organs_loaded||sceneMeshes;
+    hmcResidentScene=bridge.scene_key;
+    return sceneMeshes>0;
+  } catch(e) {
+    note(`HMC scene fallback (${bridge.scene_key}): ${String(e).slice(0,100)}`);
+    hmcResidentScene='';
+    return false;
+  }
+}
 function rebuild() {
   const st = state();
+  const bridge=sceneQualityState(st);
   const scene = m.scene_build(st.upgrades, st.parts.length, st.online, st.approved,
     st.waterOnline, st.gardenActive, st.signalOnline, st.bridgeOpen, st.bridgeBraced, st.day>4,
     st.pumpOnline, st.orchardActive, st.orchardHarvested, sceneSource);
   tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
   worldCenter=scene.worldCenter;worldScale=scene.worldScale;
   placePositions=scene.places;
-  // receipt.organs_loaded is the engine's legacy anatomy-era field name.
-  const receipt = toObj(portal.load_scene(scene.assets));
-  sceneMeshes = receipt.organs_loaded;
+  // Prefer the verified HMC snapshot when the rebuilt shell exposes the
+  // loader. Dynamic compilation remains the checked-in compatibility path.
+  if(!tryLoadHmcScene(bridge)){
+    const receipt = toObj(portal.load_scene(scene.assets));
+    sceneMeshes = receipt.organs_loaded;
+    hmcResidentScene='';
+  }
   if (sceneMeshes !== scene.assets.length)
-    throw new Error(`QualiaDB refused ${scene.assets.length-sceneMeshes} scene meshes`);
+    note(`scene receipt differs from source recipes: ${sceneMeshes}/${scene.assets.length}`);
   portal.upload_tensor(scene.tensor);
   portal.set_tensor_projection_enabled(false);
   if(cameraMode==='walk')placeWalkCamera();
   else if(!camTarget)focusTerritory(territory,true);
   else if(focusedPlace!==null)focusSite(focusedPlace);
+  applySceneQuality(bridge,lastSceneBridge);
   applyCam();
   return st;
 }
@@ -683,7 +766,8 @@ function selectArtStyle(next){
   skyPreset=artStyle===1?2:1;
   portal.set_sky_preset(skyPreset);
   if(artStyle===2)portal.set_lighting(0.58,0.76,0.55,1.32,0.74);
-  rebuild();renderHud();
+  hmcPack=null;hmcManifest=null;hmcResidentScene='';
+  rebuild();renderHud();hydrateHmcScenePack();
 }
 
 // rAF render loop — tick drives GPU pick readback too
@@ -714,11 +798,10 @@ let last=performance.now(), tickErrorShown=false;
     }
     applyCam();
   }
-  // Keep the engine's demo tensor visuals (ambient particle field and node
-  // sprites) off: a GPU re-init inside tick can re-upload the resident
-  // tensor, so assert both presentation toggles every frame. Picking stays
-  // fully available.
-  portal.set_ambient_enabled(false);
+  // Reassert the bridge's optional decoration state because a GPU recovery
+  // can recreate the resident renderer. Picking and authored effects remain
+  // available on the CPU fallback.
+  portal.set_ambient_enabled(lastSceneBridge?.ambient_enabled===true);
   portal.set_tensor_projection_enabled(false);
   try { portal.tick(canvas, Math.min(50, t-last)); }
   catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
@@ -1561,9 +1644,27 @@ $('vibe-preview').onclick = () => {
   }
 };
 
+async function hydrateHmcScenePack() {
+  const slug=artStyle===1?'earthlight':artStyle===2?'community':'scenes';
+  const pack=`./assets/maslows-challenge-${slug}.hmc`;
+  const manifest=`./assets/${slug==='scenes'?'manifest':slug+'-manifest'}.json`;
+  try {
+    const [packResponse,manifestResponse]=await Promise.all([fetch(pack,{cache:'no-store'}),fetch(manifest,{cache:'no-store'})]);
+    if(!packResponse.ok||!manifestResponse.ok)throw new Error(`HTTP ${packResponse.status}/${manifestResponse.status}`);
+    const bytes=new Uint8Array(await packResponse.arrayBuffer()), parsed=await manifestResponse.json();
+    const verified=m.verify_game_hmc(bytes);
+    if(verified!==parsed.assets.length+1)throw new Error(`verified ${verified}, expected ${parsed.assets.length+1}`);
+    hmcPack=bytes;hmcManifest=parsed;
+    note(`HMC ${parsed.artStyle||'scene'} verified · ${verified-1} assets`);
+    if(hmcSceneApi){hmcResidentScene='';refresh();}
+    else note('HMC renderer loader unavailable in this package; using compiled .10d fallback');
+  } catch(e) { note(`HMC optional path unavailable: ${String(e).slice(0,120)}`); }
+}
+
 await loadCharacters();
 territory=playing().place;walk={x:playing().x,z:playing().z};
 refresh();
+hydrateHmcScenePack();
 note('slice ready — tier ' + portal.tier());
 
 // Scripted acceptance playthrough for headless verification (?selftest).
@@ -1574,6 +1675,12 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const migrated=migrateSavedWorld(versionFour);
   note(`TEST prior save migration: ${migrated?.includes('rc:communicationsMast a rc:Relay .')&&migrated.includes('rc:world rc:contentVersion 5 .')?'PASS':'FAIL'}`);
   note(`TEST scene: ${sceneMeshes > 0 ? 'PASS' : 'FAIL'}`);
+  const bridgeA=sceneQualityState(state()), bridgeB=sceneQualityState(state());
+  note(`TEST deterministic scene bridge: ${bridgeA.scene_key===bridgeB.scene_key&&
+    bridgeA.ambient_seed===bridgeB.ambient_seed&&bridgeA.effect_seed===bridgeB.effect_seed&&
+    ['dry','flowing','high-tide'].includes(bridgeA.water_state)?'PASS':'FAIL'}`);
+  note(`TEST quality fallback contract: ${[0,1,2].includes(bridgeA.quality_tier)&&
+    (bridgeA.fallback==='webgpu'||bridgeA.fallback==='canvas2d'||bridgeA.fallback==='unavailable')?'PASS':'FAIL'}`);
   const vibe = toObj(m.vibe_eval_cell('= 1 + 2'));
   note(`TEST VibeScript: ${vibe.ok && String(vibe.value)==='3' ? 'PASS' : 'FAIL'}`);
   const query = toObj(testSession.vibe_query('= world.coins'));
