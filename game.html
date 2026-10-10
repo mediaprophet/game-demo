@@ -212,7 +212,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '93e462b842bcc153-characters-5';
+const WASM_BUILD = 'f9060473cf6dab19-characters-5';
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
 const characters = await import(`./characters.mjs?v=${WASM_BUILD}`);
@@ -557,21 +557,79 @@ hudCanvas.width = canvas.width;
 hudCanvas.height = canvas.height;
 const rendererProbe={
   navigatorGpu:typeof navigator!=='undefined'&&'gpu' in navigator,
-  adapter:false,
+  adapter:'not-attempted',
+  device:'not-attempted',
+  runtime:'not-observed',
+  canvas2d:'not-attempted',
   init:'not-attempted',
   error:''
 };
 let webgpuAvailable=false;
+let probedGpuAdapter=null;
+const boundedWebgpuProbe=async (operation,label,timeoutMs=4000)=>{
+  let timer;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(`${label} timeout`)),timeoutMs);})
+    ]);
+  } finally { clearTimeout(timer); }
+};
 try {
   // QualiaPortal owns the canvas2d fallback, but its optional WebGPU arming
   // path must not be called when the browser reports no adapter. Some
   // headless/WebView implementations expose navigator.gpu while returning
   // null from requestAdapter.
-  rendererProbe.adapter=!!(rendererProbe.navigatorGpu&&await navigator.gpu.requestAdapter());
-  webgpuAvailable=rendererProbe.adapter;
+  if(!rendererProbe.navigatorGpu) {
+    rendererProbe.adapter='refused';
+    rendererProbe.device='refused';
+  } else {
+    probedGpuAdapter=await boundedWebgpuProbe(navigator.gpu.requestAdapter(),'adapter');
+    rendererProbe.adapter=probedGpuAdapter?'confirmed':'refused';
+    if(probedGpuAdapter) {
+      try {
+        // Adapter presence is not device creation. Keep this probe separate
+        // from portal init so the self-test never calls a device merely to
+        // imply that a rendered frame happened.
+        const probedGpuDevice=await boundedWebgpuProbe(probedGpuAdapter.requestDevice(),'device');
+        rendererProbe.device='confirmed';
+        probedGpuDevice.lost.then(info=>{
+          if(rendererProbe.device==='confirmed') {
+            rendererProbe.device='lost';
+            rendererProbe.error=`probe device lost${info?.message?`: ${info.message}`:''}`.slice(0,120);
+          }
+        });
+      } catch(e) {
+        rendererProbe.device='refused';
+        rendererProbe.error=`device: ${String(e)}`.slice(0,120);
+      }
+    } else {
+      rendererProbe.device='refused';
+    }
+  }
+  webgpuAvailable=rendererProbe.adapter==='confirmed';
 } catch(e) {
+  rendererProbe.adapter='error';
+  rendererProbe.device='error';
   rendererProbe.error=String(e).slice(0,120);
   note('webgpu probe: '+rendererProbe.error);
+}
+try {
+  // A detached context is a capability/runtime probe only. It does not claim
+  // the presentation canvas and does not stand in for a portal render.
+  const probeCanvas=document.createElement('canvas');
+  probeCanvas.width=1;probeCanvas.height=1;
+  const probeContext=probeCanvas.getContext('2d');
+  if(!probeContext) rendererProbe.canvas2d='refused';
+  else {
+    probeContext.fillStyle='#123456';
+    probeContext.fillRect(0,0,1,1);
+    const pixel=probeContext.getImageData(0,0,1,1).data;
+    rendererProbe.canvas2d=pixel[0]===18&&pixel[1]===52&&pixel[2]===86?'confirmed':'unobserved';
+  }
+} catch(e) {
+  rendererProbe.canvas2d='error';
+  if(!rendererProbe.error)rendererProbe.error=`canvas2d: ${String(e)}`.slice(0,120);
 }
 if(webgpuAvailable) {
   try {
@@ -590,14 +648,20 @@ const portal = new m.GamePortal(canvas);
 const hud = new m.GameHud(hudCanvas);
 function rendererProducerReport(){
   if(typeof portal.renderer_producer_report==='function'){
-    try{return toObj(portal.renderer_producer_report());}catch(e){note('renderer report: '+String(e).slice(0,100));}
+    try {
+      const report=toObj(portal.renderer_producer_report());
+      return {...report,
+        webgpu_runtime_observed:report.backend==='webgpu'&&report.gpu_execution_observed===true&&report.frame_presented===true,
+        canvas2d_fallback_observed:report.backend==='canvas2d'&&report.frame_presented===true};
+    } catch(e){note('renderer report: '+String(e).slice(0,100));}
   }
   const tier=portal.tier();
   return {backend:tier>=2?'webgpu':tier===1?'pending':'canvas2d',portal_tier:tier,
-    renderer_admitted:false,frame_presented:false,gpu_policy_admitted:tier>=2,
+    renderer_admitted:false,frame_presented:null,gpu_policy_admitted:tier>=2,
     gpu_execution_observed:false,producer_views:{scene_color:false,linear_depth:false,
       motion_vectors:false,reactive_mask:false},temporal_producer_ready:false,
-    temporal_execution_observed:false,fallback:'ordinary-tick'};
+    temporal_execution_observed:false,fallback:'ordinary-tick',
+    webgpu_runtime_observed:false,canvas2d_fallback_observed:false};
 }
 function rendererCapability(){
   const report=rendererProducerReport(),tier=report.portal_tier??portal.tier();
@@ -610,7 +674,8 @@ function rendererCapability(){
 function rendererCapabilityText(){
   const capability=rendererCapability();
   return `${capability.label}; navigator.gpu=${rendererProbe.navigatorGpu?'yes':'no'}; `+
-    `adapter=${rendererProbe.adapter?'yes':'no'}; init=${rendererProbe.init}; portalTier=${capability.tier}`+
+    `adapter=${rendererProbe.adapter}; device=${rendererProbe.device}; init=${rendererProbe.init}; `+
+    `runtime=${rendererProbe.runtime}; canvas2d=${rendererProbe.canvas2d}; portalTier=${capability.tier}`+
     `; policy=${capability.report.gpu_policy_admitted?'admitted':'closed'}`+
     `; gpuExecution=${capability.report.gpu_execution_observed?'observed':'not-observed'}`+
     `; temporal=${capability.report.temporal_execution_observed?'executed':'closed'}`+
@@ -788,7 +853,7 @@ function applySceneQuality(bridge, previous) {
   lastSceneBridge=bridge;
 }
 function tryLoadHmcScene(bridge) {
-  if(!hmcPack||!hmcManifest||!hmcSceneApi||sceneSource.trim())return false;
+  if(!hmcPack||!hmcManifest||!hmcSceneApi)return false;
   if(hmcResidentScene===bridge.scene_key)return true;
   try {
     const receipt=toObj(portal.load_hmc_scene(hmcPack,JSON.stringify(hmcManifest),bridge.scene_key));
@@ -1731,10 +1796,32 @@ async function hydrateHmcScenePack() {
     note(`HMC ${parsed.artStyle||'scene'} verified · ${verified-1} assets`);
     if(hmcSceneApi){hmcResidentScene='';refresh();}
     else note('HMC renderer loader unavailable in this package; using compiled .10d fallback');
-    return {verified:true,resident:hmcSceneApi&&!!hmcResidentScene,artStyle:parsed.artStyle||'scene'};
+    return {verified:true,manifest:true,loader:hmcSceneApi,
+      resident:hmcSceneApi&&!!hmcResidentScene,scene:hmcResidentScene,
+      assetCount:verified-1,artStyle:parsed.artStyle||'scene'};
   } catch(e) {
     note(`HMC optional path unavailable: ${String(e).slice(0,120)}`);
-    return {verified:false,resident:false,error:String(e)};
+    return {verified:false,manifest:false,loader:hmcSceneApi,resident:false,error:String(e)};
+  }
+}
+
+async function verifyWasmPackageHash() {
+  try {
+    const [wasmResponse,manifestResponse]=await Promise.all([
+      fetch('./pkg/rolling_commons_shell_bg.wasm',{cache:'no-store'}),
+      fetch('./assets/manifest.json',{cache:'no-store'})]);
+    if(!wasmResponse.ok||!manifestResponse.ok)
+      throw new Error(`HTTP ${wasmResponse.status}/${manifestResponse.status}`);
+    const [bytes,manifest]=await Promise.all([
+      wasmResponse.arrayBuffer(),manifestResponse.json()]);
+    if(!globalThis.crypto?.subtle)throw new Error('Web Crypto SHA-256 unavailable');
+    const digest=await globalThis.crypto.subtle.digest('SHA-256',bytes);
+    const actual=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
+    const expected=manifest?.wasm?.sha256||'';
+    return {ok:actual===expected,actual,expected,bytes:bytes.byteLength,
+      file:manifest?.wasm?.file||''};
+  } catch(e) {
+    return {ok:false,error:String(e)};
   }
 }
 
@@ -1747,6 +1834,7 @@ note('slice ready — '+rendererCapabilityText());
 // Scripted acceptance playthrough for headless verification (?selftest).
 if (new URLSearchParams(location.search).has('selftest')) {
   const hmcResult=await hmcHydration;
+  const packageHash=await verifyWasmPackageHash();
   const testSession = new m.GameSession(SEED, ACTIONS);
   const versionFour=SEED.replace('rc:world rc:contentVersion 5 .','rc:world rc:contentVersion 4 .')
     .split('\n').filter(line=>!line.startsWith('rc:communicationsMast ')).join('\n');
@@ -1759,15 +1847,22 @@ if (new URLSearchParams(location.search).has('selftest')) {
     ['dry','flowing','high-tide'].includes(bridgeA.water_state)?'PASS':'FAIL'}`);
   const expectedQuality=bridgeA.quality_tier===2?'webgpu':bridgeA.quality_tier===1?'canvas2d':'unavailable';
   const capability=rendererCapability(), report=capability.report;
+  rendererProbe.runtime=report.webgpu_runtime_observed?'observed':
+    report.backend==='webgpu'?'not-observed':'not-admitted';
   const qualityPolicy=[0,1,2].includes(bridgeA.quality_tier)&&bridgeA.fallback===expectedQuality&&
     ((bridgeA.quality_tier===2&&report.gpu_policy_admitted===true)||bridgeA.quality_tier<2);
   note(`TEST quality policy admission: ${qualityPolicy?'PASS':'FAIL'} · ${rendererCapabilityText()}`);
-  note(`TEST actual GPU execution: ${report.gpu_execution_observed?'PASS':'INFO (not observed; fallback remains active)'} · backend=${report.backend}; frames=${report.frame_presented?'presented':'not-presented'}`);
+  note(`TEST WebGPU adapter: ${rendererProbe.adapter==='confirmed'?'PASS':`INFO (${rendererProbe.adapter})`}`);
+  note(`TEST WebGPU device: ${rendererProbe.device==='confirmed'?'PASS':`INFO (${rendererProbe.device})`}`);
+  note(`TEST WebGPU runtime execution: ${report.webgpu_runtime_observed?'PASS':'INFO (not observed; no GPU frame claim)'} · backend=${report.backend}; frames=${report.frame_presented===true?'presented':'not-observed'}`);
+  note(`TEST Canvas2D fallback: ${rendererProbe.canvas2d==='confirmed'?'PASS':'INFO (not available)'} · api=${rendererProbe.canvas2d}; portal=${report.backend}; portalFrame=${report.canvas2d_fallback_observed?'observed':'not-observed'}`);
   const temporal=lastTemporalContract||temporalScheduleContract(bridgeA,null,report);
   note(`TEST temporal producer contract: ${temporal.producer_ready===false&&temporal.executed===false&&
     temporal.fallback==='ordinary-tick'?'PASS':'FAIL'} · policy=${temporal.policy_admitted?'admitted':'closed'}; execution=${temporal.executed?'observed':'not-admitted'}; real motion/reactive views=${temporal.producer_views?.motion_vectors===true&&temporal.producer_views?.reactive_mask===true?'yes':'no'}`);
   const hmcPath=hmcSceneApi&&hmcResult.resident&&hmcResidentScene===bridgeA.scene_key?'resident HMC':'compiled .10d fallback';
-  note(`TEST HMC scene bridge: ${hmcResult.verified&&sceneMeshes>0?'PASS':'FAIL'} · ${hmcResult.verified?'bundle verified; '+hmcPath:'bundle unavailable; compiled fallback '+(sceneMeshes>0?'ready':'missing')}`);
+  note(`TEST HMC bundle verification: ${hmcResult.verified?'PASS':'FAIL'} · entries=${hmcResult.assetCount||0}`);
+  note(`TEST HMC hydration: ${hmcResult.loader?(hmcResult.resident&&hmcResidentScene===bridgeA.scene_key?'PASS':'FAIL'):'INFO (loader unavailable; compiled .10d fallback)'} · ${hmcResult.loader?`resident=${hmcResult.resident?'yes':'no'}`:'refused by checked-in package'}; path=${hmcPath}`);
+  note(`TEST WASM package hash: ${packageHash.ok?'PASS':'FAIL'} · ${packageHash.ok?`${packageHash.actual} (${packageHash.bytes} bytes)`:(packageHash.error||`${packageHash.actual||'missing'} != ${packageHash.expected||'missing'}`)}`);
   const vibe = toObj(m.vibe_eval_cell('= 1 + 2'));
   note(`TEST VibeScript: ${vibe.ok && String(vibe.value)==='3' ? 'PASS' : 'FAIL'}`);
   const query = toObj(testSession.vibe_query('= world.coins'));
