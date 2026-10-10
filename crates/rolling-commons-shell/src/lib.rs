@@ -389,6 +389,8 @@ struct SceneQualityBridge {
     fallback: &'static str,
     camera_cue: &'static str,
     camera_focus: i32,
+    temporal_slice: f32,
+    temporal_window: f32,
 }
 
 /// Derive all renderer-facing presentation choices from the deterministic
@@ -479,6 +481,8 @@ pub fn scene_quality_state(
         },
         camera_cue,
         camera_focus,
+        temporal_slice: (day % 8) as f32,
+        temporal_window: if high_tide { 2.0 } else { 1.0 },
     })
     .map_err(|e| JsValue::from_str(&e.to_string()))
 }
@@ -801,7 +805,7 @@ pub struct GamePortal {
 }
 
 /// Arm the WebGPU path. Await once before constructing the portal; on
-/// `false`/throw the portal keeps its canvas2d (tier-1) fallback.
+/// `false`/throw the portal keeps its CPU/canvas fallback.
 #[wasm_bindgen]
 pub async fn init_webgpu(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
     qualia_core_db::render::portal::portal_init_webgpu(canvas).await
@@ -913,9 +917,177 @@ impl GamePortal {
         self.inner.load_body_organs_colored(&assets)
     }
 
-    /// Render tier: 0 = no webgpu, 1 = canvas2d fallback, 2 = GPU path.
+    /// Render tier: 0 = CPU fallback, 1 = WebGL2 fallback, 2 = WebGPU path.
     pub fn tier(&self) -> u8 {
         self.inner.tier()
+    }
+
+    /// Report renderer admission and observed execution separately from the
+    /// temporal producer handoff. The game owns no GPU texture views, so every
+    /// producer view remains explicitly unavailable until a real host surface
+    /// is supplied upstream.
+    pub fn renderer_producer_report(&self) -> Result<JsValue, JsValue> {
+        let receipt = self.inner.body_render_receipt()?;
+        let renderer = js_get(&receipt, "renderer")
+            .and_then(|value| value.as_string())
+            .unwrap_or_else(|| "none".to_string());
+        let mesh_admitted = js_get(&receipt, "uploaded")
+            .and_then(|value| value.as_bool())
+            .unwrap_or(false)
+            && js_get(&receipt, "vertex_count")
+                .and_then(|value| value.as_f64())
+                .unwrap_or(0.0)
+                > 0.0
+            && js_get(&receipt, "index_count")
+                .and_then(|value| value.as_f64())
+                .unwrap_or(0.0)
+                > 0.0;
+        let frame_presented = js_get(&receipt, "frames_presented")
+            .and_then(|value| value.as_f64())
+            .unwrap_or(0.0)
+            > 0.0;
+        let gpu_policy_admitted = renderer == "webgpu" || self.inner.tier() >= 2;
+        let gpu_execution_observed = renderer == "webgpu" && frame_presented;
+
+        let mut producers = js_sys::Object::new();
+        for key in [
+            "scene_color",
+            "linear_depth",
+            "motion_vectors",
+            "reactive_mask",
+        ] {
+            set(&mut producers, key, JsValue::FALSE);
+        }
+        let fallback = if renderer == "webgpu" {
+            "ordinary-tick"
+        } else {
+            renderer.as_str()
+        };
+        let mut report = js_sys::Object::new();
+        set(&mut report, "backend", JsValue::from_str(&renderer));
+        set(
+            &mut report,
+            "portal_tier",
+            JsValue::from_f64(self.inner.tier() as f64),
+        );
+        set(
+            &mut report,
+            "renderer_admitted",
+            JsValue::from_bool(mesh_admitted),
+        );
+        set(
+            &mut report,
+            "frame_presented",
+            JsValue::from_bool(frame_presented),
+        );
+        set(
+            &mut report,
+            "gpu_policy_admitted",
+            JsValue::from_bool(gpu_policy_admitted),
+        );
+        set(
+            &mut report,
+            "gpu_execution_observed",
+            JsValue::from_bool(gpu_execution_observed),
+        );
+        set(&mut report, "producer_views", producers.into());
+        set(&mut report, "temporal_producer_ready", JsValue::FALSE);
+        set(&mut report, "temporal_execution_observed", JsValue::FALSE);
+        set(
+            &mut report,
+            "fallback",
+            JsValue::from_str(fallback),
+        );
+        Ok(report.into())
+    }
+
+    /// Return the bounded temporal handoff contract for the current scene.
+    /// This is policy and scheduling metadata only: without real motion-vector
+    /// and reactive-mask views, execution is never admitted and the ordinary
+    /// renderer tick remains the fallback.
+    pub fn temporal_schedule_contract(
+        &self,
+        quality_tier: u8,
+        scene_changed: bool,
+        camera_changed: bool,
+    ) -> Result<JsValue, JsValue> {
+        let renderer = self.renderer_producer_report()?;
+        let gpu_policy_admitted = js_get(&renderer, "gpu_policy_admitted")
+            .and_then(|value| value.as_bool())
+            .unwrap_or(false);
+        let policy_admitted = quality_tier >= 2 && gpu_policy_admitted;
+        let reset_history = scene_changed || camera_changed;
+        let reads_history = policy_admitted && !reset_history;
+        let publish_history = policy_admitted;
+        let final_output = policy_admitted;
+        let schedule_valid = policy_admitted
+            && publish_history
+            && final_output
+            && !(reset_history && reads_history);
+
+        let mut schedule = js_sys::Object::new();
+        set(&mut schedule, "enabled", JsValue::from_bool(policy_admitted));
+        set(
+            &mut schedule,
+            "reset_history",
+            JsValue::from_bool(reset_history),
+        );
+        set(
+            &mut schedule,
+            "reads_history",
+            JsValue::from_bool(reads_history),
+        );
+        set(
+            &mut schedule,
+            "publish_history",
+            JsValue::from_bool(publish_history),
+        );
+        set(
+            &mut schedule,
+            "final_output",
+            JsValue::from_bool(final_output),
+        );
+
+        let mut contract = js_sys::Object::new();
+        set(&mut contract, "version", JsValue::from_f64(1.0));
+        set(
+            &mut contract,
+            "policy_admitted",
+            JsValue::from_bool(policy_admitted),
+        );
+        set(
+            &mut contract,
+            "schedule_valid",
+            JsValue::from_bool(schedule_valid),
+        );
+        set(&mut contract, "schedule", schedule.into());
+        set(&mut contract, "producer_views", {
+            let mut producers = js_sys::Object::new();
+            for key in [
+                "scene_color",
+                "linear_depth",
+                "motion_vectors",
+                "reactive_mask",
+            ] {
+                set(&mut producers, key, JsValue::FALSE);
+            }
+            producers.into()
+        });
+        set(&mut contract, "producer_ready", JsValue::FALSE);
+        set(&mut contract, "execution_admitted", JsValue::FALSE);
+        set(&mut contract, "executed", JsValue::FALSE);
+        set(
+            &mut contract,
+            "fallback",
+            JsValue::from_str("ordinary-tick"),
+        );
+        Ok(contract.into())
+    }
+
+    /// Set the deterministic story time slice used by the renderer's
+    /// standpoint. This does not create temporal history or producer views.
+    pub fn set_temporal_slice(&mut self, t_slice: f32, t_window: f32) {
+        self.inner.set_temporal_slice(t_slice, t_window);
     }
 
     /// Render one frame; `dt_ms` is elapsed milliseconds since the last tick.
