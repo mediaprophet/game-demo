@@ -91,3 +91,16 @@ This document reconciles:
 - [x] **B5.3: Performance & Telemetry Harness:**
   - Bounded VRAM allocations, uniform belt staging, and telemetry reporting verified.
   - Fixed buffer residency test: `portal_fixed_buffer_residency_covers_all_persistent_uniforms ... ok`.
+---
+
+### Wave 6: Dynamic VibeScript Authoring & Host Capabilities — 100% COMPLETE & VERIFIED
+- [x] **V6.1: Pure VibeScript Procedural Scene Authoring DSL:**
+  - Expanded `vibe_scene_recipe` and `ParametricRecipe` for `water`/`water_plane`, `vegetation`/`grass`, `box`/`cube`, and `probe`/`light_probe`.
+  - Content authors can author dynamic scenes purely in `.vibe` scripts without JavaScript.
+  - Verified under `cargo check --target wasm32-unknown-unknown -p rolling-commons-shell` (0 errors).
+- [x] **V6.2: Pure VibeScript Feature Admission & Quality Policy:**
+  - Added `admit_feature`, `select_vegetation_density`, `select_water_quality`, and `select_temporal_mode` in `graphics_backend.vibe`.
+  - Verified under `test_vibe_graphics_backend_policy_evaluation ... ok`.
+- [x] **V6.3: Standard Library Host Invocation Handlers (`pipeline_caps.rs`):**
+  - Registered `Render.temporal_set_mode`, `Render.temporal_status`, `Render.set_environment_probe`, `Render.water_set_parameters`, `Render.vegetation_push_collider`, `Render.vegetation_clear_colliders`, and `Render.texture_transcode_caps`.
+  - Verified under `test_temporal_set_mode_and_status ... ok` and `test_environment_probe_and_water_and_vegetation ... ok`.
