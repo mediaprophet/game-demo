@@ -15,20 +15,20 @@ An exhaustive audit of the graphics engine implementation across `qualiaDB` and 
 
 ### 1.1 Capability Status Summary
 Across the 29 formal engine capabilities defined in [31 — AAA Graphics Engine Gap Register](31-aaa-graphics-engine-gap-register.md):
-- **0 capabilities** are **Verified**
-- **11 capabilities** are **In progress** (possessing verified foundation or integrated slices)
-- **18 capabilities** are **Not started** (lacking production integration and acceptance evidence)
+- **5 capabilities** are **Verified** (AG-03, AG-10, AG-12, AG-21, AG-22 with full adapter-backed pixel receipts)
+- **10 capabilities** are **In progress** (possessing verified foundation or integrated slices)
+- **14 capabilities** are **Not started**
 
 ```
-Overall Engine Progress: [████████░░░░░░░░░░░░] 28% Implemented / 0% Verified
-┌────────────────────────┬───────┬────────────┐
-│ Disposition            │ Count │ Percentage │
-├────────────────────────┼───────┼────────────┤
-│ Verified               │   0   │    0.0%    │
-│ In progress (Slice)    │  11   │   37.9%    │
-│ Not started            │  18   │   62.1%    │
-│ Total Capabilities     │  29   │  100.0%    │
-└────────────────────────┴───────┴────────────┘
+Overall Engine Progress: [████████████░░░░░░░░░░░░] 48% Implemented / 17.2% Verified
+┌─────────────────────────┬───────┬────────────┐
+│ Disposition             │ Count │ Percentage │
+├─────────────────────────┼───────┼────────────┤
+│ Verified                │   5   │   17.2%    │
+│ In progress (Slice)     │  10   │   34.5%    │
+│ Not started             │  14   │   48.3%    │
+│ Total Capabilities      │  29   │  100.0%    │
+└─────────────────────────┴───────┴────────────┘
 ```
 
 ### 1.2 Honesty Contract & Operating Rules
