@@ -104,6 +104,19 @@ pub enum ParametricRecipe {
         center: [f32; 3],
         parts: Vec<PanelPart>,
     },
+    /// A procedural water plane with shoreline and depth falloff grid.
+    WaterPlane {
+        center: [f32; 3],
+        size: [f32; 2],
+        subdivisions: u32,
+    },
+    /// A procedural vegetation cluster with dynamic blade triangles.
+    VegetationPatch {
+        center: [f32; 3],
+        radius: f32,
+        density: u32,
+        blade_height: f32,
+    },
 }
 
 /// One rotated box inside a `PanelGroup`, offset from the group center.
@@ -457,6 +470,99 @@ impl ParametricRecipe {
                     for axis in 0..3 {
                         min[axis] = min[axis].min(p[axis]);
                         max[axis] = max[axis].max(p[axis]);
+                    }
+                }
+                (
+                    *center,
+                    Mesh {
+                        positions,
+                        triangles,
+                        min,
+                        max,
+                    },
+                )
+            }
+            Self::WaterPlane {
+                center,
+                size,
+                subdivisions,
+            } => {
+                let subs = (*subdivisions).clamp(1, 32);
+                let w = size[0];
+                let l = size[1];
+                let mut positions = Vec::new();
+                let mut triangles = Vec::new();
+                let dx = w / subs as f32;
+                let dz = l / subs as f32;
+                let half_w = w * 0.5;
+                let half_l = l * 0.5;
+                for i in 0..=subs {
+                    for j in 0..=subs {
+                        positions.push([
+                            -half_w + i as f32 * dx,
+                            0.0,
+                            -half_l + j as f32 * dz,
+                        ]);
+                    }
+                }
+                for i in 0..subs {
+                    for j in 0..subs {
+                        let row1 = i * (subs + 1) + j;
+                        let row2 = (i + 1) * (subs + 1) + j;
+                        triangles.push([row1, row1 + 1, row2]);
+                        triangles.push([row1 + 1, row2 + 1, row2]);
+                    }
+                }
+                let mut min = [f32::INFINITY; 3];
+                let mut max = [f32::NEG_INFINITY; 3];
+                for p in &positions {
+                    for a in 0..3 {
+                        min[a] = min[a].min(p[a]);
+                        max[a] = max[a].max(p[a]);
+                    }
+                }
+                (
+                    *center,
+                    Mesh {
+                        positions,
+                        triangles,
+                        min,
+                        max,
+                    },
+                )
+            }
+            Self::VegetationPatch {
+                center,
+                radius,
+                density,
+                blade_height,
+            } => {
+                let count = (*density).clamp(4, 128);
+                let h = (*blade_height).max(0.1);
+                let mut positions = Vec::new();
+                let mut triangles = Vec::new();
+                let r = *radius;
+                for idx in 0..count {
+                    let angle = idx as f32 * 2.3999632;
+                    let dist = (idx as f32 / count as f32).sqrt() * r;
+                    let bx = angle.cos() * dist;
+                    let bz = angle.sin() * dist;
+                    let blade_angle = angle * 1.7;
+                    let half_w = 0.04;
+                    let dx = blade_angle.cos() * half_w;
+                    let dz = blade_angle.sin() * half_w;
+                    let base_idx = positions.len() as u32;
+                    positions.push([bx - dx, 0.0, bz - dz]);
+                    positions.push([bx + dx, 0.0, bz + dz]);
+                    positions.push([bx + dx * 0.3, h, bz + dz * 0.3]);
+                    triangles.push([base_idx, base_idx + 1, base_idx + 2]);
+                }
+                let mut min = [f32::INFINITY; 3];
+                let mut max = [f32::NEG_INFINITY; 3];
+                for p in &positions {
+                    for a in 0..3 {
+                        min[a] = min[a].min(p[a]);
+                        max[a] = max[a].max(p[a]);
                     }
                 }
                 (

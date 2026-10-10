@@ -1555,7 +1555,54 @@ fn vibe_scene_recipe(src: &str) -> Result<asset_catalog::AssetRecipe, String> {
             height: number("height", 0.1, 2.4)?,
             segments: 24,
         },
-        _ => return Err("scene kind must be sphere or cylinder".into()),
+        Some(vibe::Value::String(kind)) if kind == "water" || kind == "water_plane" => {
+            let width = number("width", 0.5, 20.0).unwrap_or(8.0);
+            let length = number("length", 0.5, 20.0).unwrap_or(8.0);
+            ParametricRecipe::WaterPlane {
+                center,
+                size: [width, length],
+                subdivisions: 16,
+            }
+        }
+        Some(vibe::Value::String(kind)) if kind == "vegetation" || kind == "grass" => {
+            let radius = number("radius", 0.2, 8.0).unwrap_or(2.0);
+            let density = number("density", 4.0, 128.0).unwrap_or(32.0) as u32;
+            let blade_height = number("blade_height", 0.1, 4.0).unwrap_or(1.0);
+            ParametricRecipe::VegetationPatch {
+                center,
+                radius,
+                density,
+                blade_height,
+            }
+        }
+        Some(vibe::Value::String(kind)) if kind == "box" || kind == "cube" => {
+            let size_x = number("size_x", 0.1, 6.0)
+                .or_else(|_| number("size", 0.1, 6.0))
+                .unwrap_or(1.0);
+            let size_y = number("size_y", 0.1, 6.0)
+                .or_else(|_| number("size", 0.1, 6.0))
+                .unwrap_or(1.0);
+            let size_z = number("size_z", 0.1, 6.0)
+                .or_else(|_| number("size", 0.1, 6.0))
+                .unwrap_or(1.0);
+            ParametricRecipe::TiltedBox {
+                center,
+                size: [size_x, size_y, size_z],
+                pitch_deg: 0.0,
+                roll_deg: 0.0,
+                yaw_deg: 0.0,
+            }
+        }
+        Some(vibe::Value::String(kind)) if kind == "probe" || kind == "light_probe" => {
+            let radius = number("radius", 0.1, 3.0).unwrap_or(0.3);
+            ParametricRecipe::Sphere {
+                center,
+                radius,
+                latitude: 12,
+                longitude: 16,
+            }
+        }
+        _ => return Err("scene kind must be sphere, cylinder, water, vegetation, box, or probe".into()),
     };
     Ok(AssetRecipe {
         id: "rc:asset/vibe-preview",
@@ -1686,4 +1733,46 @@ pub fn vibe_eval_cell(src: &str) -> JsValue {
 #[wasm_bindgen]
 pub fn vibe_invoke(id: &str, args_json: &str) -> JsValue {
     vibe_wasm::capability_invoke(id, args_json)
+}
+
+#[cfg(test)]
+mod vibe_scene_expansion_tests {
+    use super::*;
+
+    #[test]
+    fn test_vibe_scene_recipe_water_and_vegetation() {
+        let water_vibe = r#"{
+            kind: "water",
+            x: 0.0, y: 0.2, z: 0.0,
+            width: 6.0, length: 6.0,
+            r: 0.1, g: 0.5, b: 0.8
+        }"#;
+        let recipe = vibe_scene_recipe(water_vibe).expect("water vibe recipe should parse");
+        assert!(recipe.parametric.is_some());
+        let mesh = recipe.parametric.unwrap().compile().expect("water plane compiles");
+        assert!(!mesh.positions.is_empty());
+        assert!(!mesh.triangles.is_empty());
+
+        let veg_vibe = r#"{
+            kind: "vegetation",
+            x: 1.0, y: 0.1, z: -1.0,
+            radius: 2.5, density: 16.0, blade_height: 1.2,
+            r: 0.2, g: 0.8, b: 0.3
+        }"#;
+        let recipe = vibe_scene_recipe(veg_vibe).expect("veg vibe recipe should parse");
+        assert!(recipe.parametric.is_some());
+        let mesh = recipe.parametric.unwrap().compile().expect("veg patch compiles");
+        assert_eq!(mesh.positions.len(), 16 * 3);
+        assert_eq!(mesh.triangles.len(), 16);
+
+        let box_vibe = r#"{
+            kind: "box",
+            x: -1.0, y: 0.5, z: 1.0,
+            size: 1.2,
+            r: 0.9, g: 0.7, b: 0.2
+        }"#;
+        let recipe = vibe_scene_recipe(box_vibe).expect("box vibe recipe should parse");
+        let mesh = recipe.parametric.unwrap().compile().expect("box compiles");
+        assert!(!mesh.positions.is_empty());
+    }
 }
