@@ -82,6 +82,13 @@ export class GamePortal {
      */
     load_10d(bytes: Uint8Array): any;
     /**
+     * Load one game-authored scene snapshot from its verified HMC pack. The
+     * manifest selects a bounded scene, while Qualia's bundle reader verifies
+     * every referenced entry before the portal sees it. If this optional path
+     * is unavailable in the browser, callers can keep using `load_scene`.
+     */
+    load_hmc_scene(hmc_bytes: Uint8Array, manifest_json: string, scene_key: string): any;
+    /**
      * Load a multi-asset scene: `Array<{bytes: .10d, r,g,b,a}>` where each
      * mesh keeps its authored position in the shared coordinate space — one
      * global normalisation across all objects. This is how a town of
@@ -103,6 +110,13 @@ export class GamePortal {
      */
     queue_pick(x: number, y: number, canvas_w: number, canvas_h: number): boolean;
     /**
+     * Report renderer admission and observed execution separately from the
+     * temporal producer handoff. The game owns no GPU texture views, so every
+     * producer view remains explicitly unavailable until a real host surface
+     * is supplied upstream.
+     */
+    renderer_producer_report(): any;
+    /**
      * Toggle the ambient particle field (tensor-node particle cloud).
      * Off in this game; exposed so the frame guard can assert it stays off.
      */
@@ -117,15 +131,27 @@ export class GamePortal {
     set_lighting(sun_r: number, sun_g: number, sun_b: number, intensity: number, ambient: number): void;
     set_sky_preset(preset: number): void;
     /**
+     * Set the deterministic story time slice used by the renderer's
+     * standpoint. This does not create temporal history or producer views.
+     */
+    set_temporal_slice(t_slice: number, t_window: number): void;
+    /**
      * Toggle tensor point rendering independently from semantic picking.
      */
     set_tensor_projection_enabled(enabled: boolean): void;
+    /**
+     * Return the bounded temporal handoff contract for the current scene.
+     * This is policy and scheduling metadata only: without real motion-vector
+     * and reactive-mask views, execution is never admitted and the ordinary
+     * renderer tick remains the fallback.
+     */
+    temporal_schedule_contract(quality_tier: number, scene_changed: boolean, camera_changed: boolean): any;
     /**
      * Render one frame; `dt_ms` is elapsed milliseconds since the last tick.
      */
     tick(canvas: HTMLCanvasElement, dt_ms: number): void;
     /**
-     * Render tier: 0 = no webgpu, 1 = canvas2d fallback, 2 = GPU path.
+     * Render tier: 0 = CPU fallback, 1 = WebGL2 fallback, 2 = WebGPU path.
      */
     tier(): number;
     /**
@@ -266,6 +292,16 @@ export class QualiaPortal {
      */
     collapse_node_q(index: number): void;
     /**
+     * Compact ABI-v2 records by stable visible indices into caller-owned bytes, preserving IDs.
+     */
+    compact_mesh_instance_records(source_records: Uint8Array, visible_indices: Uint32Array, compacted_output: Uint8Array): number;
+    /**
+     * Complete a host recovery attempt. The host reports `webgpu`, `webgl2`,
+     * or `canvas2d`; recovered GPU backends re-upload the retained reduced
+     * mesh and full semantic tensor on the next frame.
+     */
+    complete_graphics_recovery(backend: string): void;
+    /**
      * Pending ICP commands in the SPSC ring.
      */
     control_pending(): number;
@@ -273,6 +309,12 @@ export class QualiaPortal {
      * Allocate zeroed acoustic SAB with Q3AS header.
      */
     create_acoustic_sab(): SharedArrayBuffer;
+    /**
+     * Select visible source instances without allocating. Bounds use three floats per record,
+     * transforms use 16 column-major floats, and the view-projection matrix uses 16 floats.
+     * Invalid bounds fail open; returned indices preserve source order.
+     */
+    cull_mesh_instance_indices(bounds_min: Float32Array, bounds_max: Float32Array, transforms_column_major: Float32Array, view_projection_column_major: Float32Array, visible_indices: Uint32Array): number;
     /**
      * Phase 2 — visible **deterministic refusal**: slide the artefact along +X (prismatic joint)
      * into a world bound; the admission gate refuses poses that would leave the bound, so the
@@ -289,6 +331,36 @@ export class QualiaPortal {
     drain_sonic_tokens(max: number): any;
     encode_geometry(json: string): any;
     epistemic_q(): number;
+    /**
+     * Configured compensation in stops (EV), including while GPU rendering is unavailable.
+     */
+    exposure_compensation(): number;
+    /**
+     * True while an active WebGPU or WebGL2 path applies scene exposure and the SDR transform.
+     */
+    exposure_transform_available(): boolean;
+    /**
+     * The last hardware backend refused even reduced geometry. The host must
+     * replace the context-bound canvas and settle on Canvas2D for this scene.
+     */
+    graphics_recovery_canvas_only(): boolean;
+    /**
+     * True when the browser host must replace the context-bound canvas and
+     * recreate a renderer before ticking this portal again.
+     */
+    graphics_recovery_requested(): boolean;
+    /**
+     * True only while the HDR bloom composite path is active.
+     */
+    hdr_exposure_available(): boolean;
+    /**
+     * Compatibility alias for hosts using the original HDR-specific API name.
+     */
+    hdr_exposure_compensation(): number;
+    /**
+     * True when the active WebGPU or WebGL2 scene target preserves radiance above SDR white.
+     */
+    hdr_scene_available(): boolean;
     last_parsed(): any | undefined;
     /**
      * P9.2 — Load a `.10d` container asset: parse the section table, extract
@@ -357,8 +429,22 @@ export class QualiaPortal {
      * per-organ JS `Uint8Array` copy (critical on phones).
      */
     load_body_organs_colored(organs: Array<any>): any;
+    /**
+     * Load one verified `.10d` mesh from an HMC bundle and retain its digest-backed
+     * residency identity. Replaying the same asset returns the existing receipt without
+     * rebuilding the GPU mesh; a different digest replaces the resident mesh.
+     */
+    load_hmc_mesh(hmc_bytes: Uint8Array, asset_key: string): any;
     load_json_scene(json: string): any;
     load_q42(bytes: Uint8Array): any;
+    /**
+     * Byte stride of the packed mesh-instance record ABI exposed by `set_mesh_instances`.
+     */
+    mesh_instance_record_stride(): number;
+    /**
+     * Version of the packed ABI accepted by `set_mesh_instances`.
+     */
+    mesh_instance_record_version(): number;
     mount_qapp(root_id: string): void;
     /**
      * Frame the camera on a tensor node (`Maps_to_node`).
@@ -377,6 +463,11 @@ export class QualiaPortal {
      * what is actually in the loaded pack, not a hardcoded list. Read-only.
      */
     pack_manifest(bytes: Uint8Array): any;
+    /**
+     * Build the packed ABI from caller-owned column-major transforms and low/high ID words.
+     * Output must hold `instance_count * mesh_instance_record_stride()` bytes.
+     */
+    pack_mesh_instance_records(transforms_column_major: Float32Array, semantic_id_words: Uint32Array, packed_output: Uint8Array): number;
     /**
      * Returns selected tensor index, or `-1` if none / pick still pending.
      */
@@ -399,11 +490,18 @@ export class QualiaPortal {
     push_sonic_token_raw(raw: bigint): boolean;
     resize(canvas: HTMLCanvasElement, width: number, height: number): void;
     sample_telemetry(): any;
+    screen_space_ao_available(): boolean;
+    screen_space_ao_height(): number;
+    screen_space_ao_width(): number;
     /**
      * Queue GPU picking at canvas pixel `(x, y)`. Result available after the next `tick`.
      */
     select_node_at(x: number, y: number, canvas_w: number, canvas_h: number): void;
     selected_node_index(): number;
+    /**
+     * Selected mesh semantic identity as hexadecimal, or an empty string while absent/pending.
+     */
+    selected_semantic_id(): string;
     /**
      * Enable or mute U3 AcousticPlane (automatically off in Reserve mode).
      */
@@ -438,9 +536,25 @@ export class QualiaPortal {
     set_clear_color(r: number, g: number, b: number, a: number): void;
     set_display_mode(mode: string): void;
     /**
+     * Configure manual exposure compensation in stops (EV), clamped to -8…+8.
+     * The configured value is retained while the GPU output path is unavailable.
+     */
+    set_exposure_compensation(ev: number): boolean;
+    /**
+     * Compatibility alias for hosts using the original HDR-specific API name.
+     */
+    set_hdr_exposure_compensation(ev: number): boolean;
+    /**
      * Configure directional sun lighting (direction vector, sun intensity, and ambient intensity).
      */
     set_lighting(sun_x: number, sun_y: number, sun_z: number, sun_intensity: number, ambient_intensity: number): void;
+    /**
+     * Replace the current WebGPU mesh instance stream from caller-owned packed records.
+     * Each 128-byte record is the native `GpuInstanceRecord` ABI: column-major world transform,
+     * inverse-transpose normal frame, low/high `u32` semantic identity words, orientation sign,
+     * and zero padding. Callers may compact by CPU visibility indices before passing this slice.
+     */
+    set_mesh_instances(abi_version: number, packed_records: Uint8Array): number;
     /**
      * Apply an authored atmospheric sky preset:
      * - 0: Cyber-Dark / Deep Void
@@ -452,6 +566,18 @@ export class QualiaPortal {
      * camera and the mesh share one frame.
      */
     set_preserve_authored_frame(on: boolean): void;
+    /**
+     * Configure screen-space AO radius and strength. Radius and bias use world units.
+     */
+    set_screen_space_ao(radius: number, strength: number, bias: number): void;
+    /**
+     * Enable the budgeted half-resolution screen-space AO pass when available.
+     */
+    set_screen_space_ao_enabled(enabled: boolean): void;
+    /**
+     * Select 4-tap low, 8-tap default, or 12-tap quality AO evaluation.
+     */
+    set_screen_space_ao_sample_count(samples: number): void;
     set_sky_preset(preset: number): void;
     /**
      * Human-Centric observer standpoint IPC (independent of camera lens).
@@ -467,6 +593,12 @@ export class QualiaPortal {
      * Show or hide semantic tensor nodes while retaining uploaded data for picking.
      */
     set_tensor_projection_enabled(on: boolean): void;
+    /**
+     * Set linear-light temperature/tint biases in stops, each bounded to -1…+1.
+     * Temperature warms red while cooling blue; positive tint favours green.
+     * The value is retained and replayed when a renderer is initialized or recovered.
+     */
+    set_white_balance(temperature_ev: number, tint_ev: number): boolean;
     sonic_token_pending(): number;
     spatial_encode(json: string): any;
     standpoint_class(): number;
@@ -488,6 +620,10 @@ export class QualiaPortal {
      */
     upload_mesh_asset(bytes: Uint8Array, hint: string): number;
     upload_tensor_buffer(bytes: Uint8Array): void;
+    /**
+     * Configured temperature/tint bias in stops, including while graphics is unavailable.
+     */
+    white_balance(): Float32Array;
     /**
      * Write posed positions into one vertex span of the resident body mesh.
      * Generic: any app can move a part over time without a full re-upload.
@@ -1237,7 +1373,7 @@ export function init_shared_webgpu(): Promise<void>;
 
 /**
  * Arm the WebGPU path. Await once before constructing the portal; on
- * `false`/throw the portal keeps its canvas2d (tier-1) fallback.
+ * `false`/throw the portal keeps its CPU/canvas fallback.
  */
 export function init_webgpu(canvas: HTMLCanvasElement): Promise<boolean>;
 
@@ -1650,6 +1786,16 @@ export function portal_webgpu_canvas_claimed(): boolean;
 export function predict_receptor_binding_wasm(): number;
 
 /**
+ * Probe browser graphics APIs without claiming the page's presentation canvas.
+ *
+ * `selected_backend` is a recommendation from API/adapter availability only;
+ * actual initialization can still fail because of surface compatibility,
+ * memory pressure, or device loss. Callers must use the result of
+ * `portal_init_webgpu` / `portal_init_webgl2` as the final selection receipt.
+ */
+export function probe_portal_graphics(): Promise<any>;
+
+/**
  * Project a VibeScript program source to canonical form.
  * Parses the source, then re-projects it from the AST.
  * This is the core of projectional authoring: structure → text.
@@ -1685,6 +1831,11 @@ export function read_hmc_bundle_entry_wasm(bundle_bytes: Uint8Array, key: string
  * request (see the JS `VFS` class) on cache miss.
  */
 export function read_opfs_block(block_index: number): Promise<any>;
+
+/**
+ * Select the next recovery backend using the shared VibeScript policy.
+ */
+export function recommend_graphics_recovery(webgpu_retry_allowed: boolean, webgl2_allowed: boolean): string;
 
 /**
  * Release resident model weights and tear down the WebGPU engine instance.
@@ -1735,6 +1886,13 @@ export function sample_packed_quins_wasm(db_bytes: Uint8Array, max_quins: number
  * JavaScript supplies only game state and displays the result.
  */
 export function scene_build(upgrades: number, parts: number, online: boolean, approved: boolean, water_online: boolean, garden_active: boolean, signal_online: boolean, bridge_open: boolean, bridge_braced: boolean, high_tide: boolean, pump_online: boolean, orchard_active: boolean, orchard_harvested: boolean, vibe_scene: string): any;
+
+/**
+ * Derive all renderer-facing presentation choices from the deterministic
+ * story snapshot. This never mutates the world and never becomes part of the
+ * event log, so saves and replay tapes remain byte-for-byte compatible.
+ */
+export function scene_quality_state(upgrades: number, parts: number, online: boolean, _approved: boolean, water_online: boolean, garden_active: boolean, signal_online: boolean, bridge_open: boolean, bridge_braced: boolean, high_tide: boolean, pump_online: boolean, orchard_active: boolean, orchard_harvested: boolean, day: number, portal_tier: number, hmc_ready: boolean): any;
 
 export function sequence_alignment(input_json: string): string;
 
@@ -2282,16 +2440,20 @@ export interface InitOutput {
     readonly gamehud_set_camera_target: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
     readonly gamehud_set_document_json: (a: number, b: number, c: number) => [number, number];
     readonly gameportal_load_10d: (a: number, b: number, c: number) => [number, number, number];
+    readonly gameportal_load_hmc_scene: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number];
     readonly gameportal_load_scene: (a: number, b: any) => [number, number, number];
     readonly gameportal_new: (a: any) => [number, number, number];
     readonly gameportal_poll_pick: (a: number) => number;
     readonly gameportal_queue_pick: (a: number, b: number, c: number, d: number, e: number) => number;
+    readonly gameportal_renderer_producer_report: (a: number) => [number, number, number];
     readonly gameportal_set_ambient_enabled: (a: number, b: number) => void;
     readonly gameportal_set_camera: (a: number, b: number, c: number, d: number) => [number, number];
     readonly gameportal_set_camera_target: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
     readonly gameportal_set_lighting: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly gameportal_set_sky_preset: (a: number, b: number) => void;
+    readonly gameportal_set_temporal_slice: (a: number, b: number, c: number) => void;
     readonly gameportal_set_tensor_projection_enabled: (a: number, b: number) => void;
+    readonly gameportal_temporal_schedule_contract: (a: number, b: number, c: number, d: number) => [number, number, number];
     readonly gameportal_tick: (a: number, b: any, c: number) => [number, number];
     readonly gameportal_tier: (a: number) => number;
     readonly gameportal_upload_tensor: (a: number, b: number, c: number) => [number, number];
@@ -2307,6 +2469,7 @@ export interface InitOutput {
     readonly pinned_qualiadb_revision: () => [number, number];
     readonly rules_load_n3: (a: number, b: number) => any;
     readonly scene_build: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number) => [number, number, number];
+    readonly scene_quality_state: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number) => [number, number, number];
     readonly session_replay: (a: number, b: number, c: number, d: number, e: any) => [number, number, number];
     readonly set_art_style: (a: number) => void;
     readonly tensor_buffer_build: (a: number, b: number) => [number, number, number, number];
@@ -2352,14 +2515,49 @@ export interface InitOutput {
     readonly project_source: (a: number, b: number) => any;
     readonly run_cell_bytecode: (a: number, b: number) => any;
     readonly run_program_bytecode: (a: number, b: number, c: number, d: number, e: number, f: number) => any;
+    readonly __wbg_federatednodemanager_free: (a: number, b: number) => void;
+    readonly __wbg_get_wasmoffloadintent_opcode: (a: number) => number;
+    readonly __wbg_get_wasmoffloadintent_payload_size: (a: number) => number;
+    readonly __wbg_get_wasmoffloadintent_priority: (a: number) => number;
+    readonly __wbg_set_wasmoffloadintent_opcode: (a: number, b: number) => void;
+    readonly __wbg_set_wasmoffloadintent_payload_size: (a: number, b: number) => void;
+    readonly __wbg_set_wasmoffloadintent_priority: (a: number, b: number) => void;
+    readonly __wbg_wasmoffloadintent_free: (a: number, b: number) => void;
+    readonly __wbg_wasmq42session_free: (a: number, b: number) => void;
+    readonly __wbg_wasmsimulationworld_free: (a: number, b: number) => void;
     readonly cas_differentiate_wasm: (a: any) => [number, number, number];
     readonly cas_evaluate_wasm: (a: any) => [number, number, number];
     readonly cas_expand_wasm: (a: any) => [number, number, number];
     readonly cas_factor_wasm: (a: any) => [number, number, number];
     readonly cas_simplify_wasm: (a: any) => [number, number, number];
     readonly cas_solve_quadratic_wasm: (a: any) => [number, number, number];
-    readonly design_dummies_wasm: (a: any) => [number, number, number];
-    readonly evaluate_inference_guard_wasm: (a: any) => [number, number, number];
+    readonly causal_caused_wasm: (a: any) => [number, number, number];
+    readonly check_subsumption_wasm: (a: any) => [number, number, number];
+    readonly compile_query_to_json: (a: number, b: number) => [number, number];
+    readonly compile_shacl_turtle_wasm: (a: number, b: number) => [number, number, number];
+    readonly device_storage_policy_wasm: () => [number, number, number];
+    readonly enforce_rights_ontology: (a: bigint) => number;
+    readonly enumerate_stable_models_wasm: (a: any) => [number, number, number];
+    readonly estimate_browser_storage: () => any;
+    readonly evaluate_deontic_wasm: (a: any) => [number, number, number];
+    readonly evaluate_epistemic_wasm: (a: any) => [number, number, number];
+    readonly evaluate_ltl_trace_wasm: (a: any) => [number, number, number];
+    readonly execute_ntriples_query: (a: number, b: number, c: number, d: number, e: number) => [number, number];
+    readonly federatednodemanager_discover_capabilities: (a: number) => number;
+    readonly federatednodemanager_new: () => number;
+    readonly federatednodemanager_offload_intent: (a: number, b: number) => [number, number, number, number];
+    readonly forward_chain_wasm: (a: any) => [number, number, number];
+    readonly fuzzy_t_norm_wasm: (a: any) => [number, number, number];
+    readonly get_engine_info: () => [number, number, number];
+    readonly get_engine_version: () => [number, number];
+    readonly get_shacl_capability_manifest_wasm: () => any;
+    readonly init_offscreen_renderer: (a: number, b: number, c: number) => any;
+    readonly init_shared_webgpu: () => any;
+    readonly intercept_computational_opcode: (a: number, b: number) => number;
+    readonly intercept_pharmacogenomics_intent: (a: number, b: number) => number;
+    readonly is_opfs_block_cached: (a: number) => any;
+    readonly jsonld_context_digest_wasm: () => [number, number, number];
+    readonly jural_correlative_wasm: (a: any) => [number, number, number];
     readonly la_determinant_wasm: (a: any) => [number, number, number];
     readonly la_eigen_symmetric_wasm: (a: any) => [number, number, number];
     readonly la_eigenvalues_wasm: (a: any) => [number, number, number];
@@ -2368,300 +2566,10 @@ export interface InitOutput {
     readonly la_solve_wasm: (a: any) => [number, number, number];
     readonly la_svd_wasm: (a: any) => [number, number, number];
     readonly la_transpose_wasm: (a: any) => [number, number, number];
-    readonly num_airy_wasm: (a: any) => [number, number, number];
-    readonly num_arithmetic_functions_wasm: (a: any) => [number, number, number];
-    readonly num_bessel_i_wasm: (a: any) => [number, number, number];
-    readonly num_bessel_j_wasm: (a: any) => [number, number, number];
-    readonly num_bessel_k_wasm: (a: any) => [number, number, number];
-    readonly num_bessel_y_wasm: (a: any) => [number, number, number];
-    readonly num_binomial_wasm: (a: any) => [number, number, number];
-    readonly num_combinatorics_wasm: (a: any) => [number, number, number];
-    readonly num_cubic_spline_wasm: (a: any) => [number, number, number];
-    readonly num_divisors_wasm: (a: any) => [number, number, number];
-    readonly num_factorial_wasm: (a: any) => [number, number, number];
-    readonly num_gcd_lcm_wasm: (a: any) => [number, number, number];
-    readonly num_is_prime_wasm: (a: any) => [number, number, number];
-    readonly num_lagrange_eval_wasm: (a: any) => [number, number, number];
-    readonly num_linear_interp_wasm: (a: any) => [number, number, number];
-    readonly num_minimize_wasm: (a: any) => [number, number, number];
-    readonly num_mod_inverse_wasm: (a: any) => [number, number, number];
-    readonly num_mod_pow_wasm: (a: any) => [number, number, number];
-    readonly num_newton_eval_wasm: (a: any) => [number, number, number];
-    readonly num_next_prime_wasm: (a: any) => [number, number, number];
-    readonly num_orthopoly_wasm: (a: any) => [number, number, number];
-    readonly num_partitions_wasm: (a: any) => [number, number, number];
-    readonly num_poly_fit_wasm: (a: any) => [number, number, number];
-    readonly num_prime_factorize_wasm: (a: any) => [number, number, number];
-    readonly num_zeta_wasm: (a: any) => [number, number, number];
-    readonly ols_multiple_wasm: (a: any) => [number, number, number];
-    readonly stats_breusch_pagan_wasm: (a: any) => [number, number, number];
-    readonly stats_chow_test_wasm: (a: any) => [number, number, number];
-    readonly stats_durbin_watson_wasm: (a: any) => [number, number, number];
-    readonly stats_influence_wasm: (a: any) => [number, number, number];
-    readonly stats_jarque_bera_wasm: (a: any) => [number, number, number];
-    readonly stats_lda_wasm: (a: any) => [number, number, number];
-    readonly stats_logit_wasm: (a: any) => [number, number, number];
-    readonly stats_mahalanobis_outliers_wasm: (a: any) => [number, number, number];
-    readonly stats_outlier_screen_univariate_wasm: (a: any) => [number, number, number];
-    readonly stats_ramsey_reset_wasm: (a: any) => [number, number, number];
-    readonly stats_residual_runs_wasm: (a: any) => [number, number, number];
-    readonly stats_residual_symmetry_wasm: (a: any) => [number, number, number];
-    readonly stats_spurious_guard_wasm: (a: any) => [number, number, number];
-    readonly stats_stepwise_backward_wasm: (a: any) => [number, number, number];
-    readonly stats_vif_wasm: (a: any) => [number, number, number];
-    readonly transform_series_wasm: (a: any) => [number, number, number];
-    readonly verify_regression_model_wasm: (a: any) => [number, number, number];
-    readonly xform_dft: (a: any) => [number, number, number];
-    readonly xform_idft: (a: any) => [number, number, number];
-    readonly xform_laplace_numeric: (a: any) => [number, number, number];
-    readonly xform_laplace_table: (a: any) => [number, number, number];
-    readonly xform_z_geometric: (a: any) => [number, number, number];
-    readonly xform_z_transform: (a: any) => [number, number, number];
-    readonly xform_z_unit_step: (a: any) => [number, number, number];
-    readonly __wbg_qualiahud_free: (a: number, b: number) => void;
-    readonly clinical_risk: (a: number, b: number) => [number, number, number, number];
-    readonly geometric_algebra_operation: (a: number, b: number) => [number, number, number, number];
-    readonly ode_solver: (a: number, b: number) => [number, number, number, number];
-    readonly organic_chemistry: (a: number, b: number) => [number, number, number, number];
-    readonly qualiahud_focus_next: (a: number, b: number) => [number, number];
-    readonly qualiahud_focused_action: (a: number) => [number, number];
-    readonly qualiahud_hit_test: (a: number, b: number, c: number) => [number, number];
-    readonly qualiahud_new: (a: any) => [number, number, number];
-    readonly qualiahud_paint: (a: number) => void;
-    readonly qualiahud_set_camera_target: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
-    readonly qualiahud_set_document_json: (a: number, b: number, c: number) => [number, number];
-    readonly sequence_alignment: (a: number, b: number) => [number, number, number, number];
-    readonly thermodynamics_mcmc: (a: number, b: number) => [number, number, number, number];
-    readonly align_sequences_wasm: (a: any) => [number, number, number];
-    readonly causal_caused_wasm: (a: any) => [number, number, number];
-    readonly check_subsumption_wasm: (a: any) => [number, number, number];
-    readonly compute_molecular_descriptors_wasm: (a: any) => [number, number, number];
-    readonly compute_reaction_metrics_wasm: (a: any) => [number, number, number];
-    readonly compute_thermochemistry_wasm: (a: any) => [number, number, number];
-    readonly detect_functional_groups_wasm: (a: any) => [number, number, number];
-    readonly enumerate_stable_models_wasm: (a: any) => [number, number, number];
-    readonly evaluate_deontic_wasm: (a: any) => [number, number, number];
-    readonly evaluate_epistemic_wasm: (a: any) => [number, number, number];
-    readonly evaluate_lipinski_wasm: (a: any) => [number, number, number];
-    readonly evaluate_ltl_trace_wasm: (a: any) => [number, number, number];
-    readonly fuzzy_t_norm_wasm: (a: any) => [number, number, number];
-    readonly jural_correlative_wasm: (a: any) => [number, number, number];
-    readonly route_paraconsistent_wasm: (a: any) => [number, number, number];
-    readonly stats_anova_wasm: (a: any) => [number, number, number];
-    readonly stats_chi_square_gof_wasm: (a: any) => [number, number, number];
-    readonly stats_chi_square_independence_wasm: (a: any) => [number, number, number];
-    readonly stats_chi_squared_dist_wasm: (a: any) => [number, number, number];
-    readonly stats_correlation_wasm: (a: any) => [number, number, number];
-    readonly stats_describe_wasm: (a: any) => [number, number, number];
-    readonly stats_fisher_f_wasm: (a: any) => [number, number, number];
-    readonly stats_friedman_wasm: (a: any) => [number, number, number];
-    readonly stats_linear_regression_wasm: (a: any) => [number, number, number];
-    readonly stats_mcnemar_wasm: (a: any) => [number, number, number];
-    readonly stats_normal_wasm: (a: any) => [number, number, number];
-    readonly stats_one_sample_t_wasm: (a: any) => [number, number, number];
-    readonly stats_paired_t_wasm: (a: any) => [number, number, number];
-    readonly stats_quantile_wasm: (a: any) => [number, number, number];
-    readonly stats_students_t_wasm: (a: any) => [number, number, number];
-    readonly stats_two_sample_t_wasm: (a: any) => [number, number, number];
-    readonly stit_brought_about_wasm: (a: any) => [number, number, number];
-    readonly validate_fasta_wasm: (a: any) => [number, number, number];
-    readonly values_check_wasm: (a: any) => [number, number, number];
-    readonly values_consent_non_coerced_wasm: (a: any) => [number, number, number];
-    readonly values_harm_below_ceiling_wasm: (a: any) => [number, number, number];
-    readonly predict_receptor_binding_wasm: () => number;
-    readonly crypto_aead_decrypt: (a: any) => [number, number, number];
-    readonly crypto_aead_encrypt: (a: any) => [number, number, number];
-    readonly crypto_blake3: (a: any) => [number, number, number];
-    readonly crypto_hkdf_sha256: (a: any) => [number, number, number];
-    readonly crypto_sha256: (a: any) => [number, number, number];
-    readonly crypto_sha3_256: (a: any) => [number, number, number];
-    readonly crypto_sha512: (a: any) => [number, number, number];
-    readonly estimate_browser_storage: () => any;
-    readonly get_engine_info: () => [number, number, number];
-    readonly get_engine_version: () => [number, number];
-    readonly init_offscreen_renderer: (a: number, b: number, c: number) => any;
-    readonly init_shared_webgpu: () => any;
-    readonly is_opfs_block_cached: (a: number) => any;
     readonly list_capabilities_wasm: () => [number, number, number];
+    readonly list_hmc_bundle_entries_wasm: (a: number, b: number) => [number, number, number];
     readonly list_native_only_capabilities_wasm: () => [number, number, number];
     readonly pack_quins_into_superblock: (a: bigint, b: bigint, c: number, d: number) => [number, number, number];
-    readonly read_opfs_block: (a: number) => any;
-    readonly resolve_lww_wasm: (a: any, b: any) => [number, number, number];
-    readonly verify_law_package_wasm: (a: number, b: number, c: number, d: number) => number;
-    readonly verify_superblock_ecc: (a: number, b: number) => [number, number];
-    readonly write_opfs_block: (a: number, b: number, c: number) => any;
-    readonly __wbg_federatednodemanager_free: (a: number, b: number) => void;
-    readonly __wbg_get_wasmoffloadintent_opcode: (a: number) => number;
-    readonly __wbg_get_wasmoffloadintent_payload_size: (a: number) => number;
-    readonly __wbg_get_wasmoffloadintent_priority: (a: number) => number;
-    readonly __wbg_qualiaportal_free: (a: number, b: number) => void;
-    readonly __wbg_set_wasmoffloadintent_opcode: (a: number, b: number) => void;
-    readonly __wbg_set_wasmoffloadintent_payload_size: (a: number, b: number) => void;
-    readonly __wbg_set_wasmoffloadintent_priority: (a: number, b: number) => void;
-    readonly __wbg_wasmoffloadintent_free: (a: number, b: number) => void;
-    readonly __wbg_webengine_free: (a: number, b: number) => void;
-    readonly compileGgufToP64: (a: any, b: number) => [number, number, number];
-    readonly create_canvas: (a: number, b: number) => [number, number, number];
-    readonly enforce_rights_ontology: (a: bigint) => number;
-    readonly exact_bigint_add: (a: any) => [number, number, number];
-    readonly exact_bigint_divmod: (a: any) => [number, number, number];
-    readonly exact_bigint_factorial: (a: any) => [number, number, number];
-    readonly exact_bigint_gcd: (a: any) => [number, number, number];
-    readonly exact_bigint_mul: (a: any) => [number, number, number];
-    readonly exact_bigint_pow: (a: any) => [number, number, number];
-    readonly exact_rational_add: (a: any) => [number, number, number];
-    readonly exact_rational_mul: (a: any) => [number, number, number];
-    readonly federatednodemanager_discover_capabilities: (a: number) => number;
-    readonly federatednodemanager_new: () => number;
-    readonly federatednodemanager_offload_intent: (a: number, b: number) => [number, number, number, number];
-    readonly getBrowserExecutionReceipt: () => [number, number, number];
-    readonly getEngineVersion: () => [number, number];
-    readonly getResidentTokenizerVocab: () => number;
-    readonly getWasmBackend: () => [number, number];
-    readonly getWebgpuInitStatus: () => [number, number];
-    readonly inferWasmAsync: (a: number, b: number, c: any) => any;
-    readonly inferWasmAsyncMeasured: (a: number, b: number, c: number, d: any) => any;
-    readonly inferWasmStreaming: (a: number, b: number, c: any) => any;
-    readonly inferWasmStreamingWithChatGraph: (a: number, b: number, c: number, d: number, e: number, f: number, g: any) => any;
-    readonly inferWasmStreamingWithContext: (a: number, b: number, c: number, d: number, e: any) => any;
-    readonly inferWasmWithContext: (a: number, b: number, c: number, d: number) => any;
-    readonly infer_wasm: (a: number, b: number) => any;
-    readonly init_panic_hook: () => void;
-    readonly initializeCpuWasmEngine: (a: any) => any;
-    readonly initializeCpuWasmEngineWithContext: (a: any, b: number) => any;
-    readonly initialize_webgpu_engine: (a: any) => any;
-    readonly intercept_computational_opcode: (a: number, b: number) => number;
-    readonly intercept_pharmacogenomics_intent: (a: number, b: number) => number;
-    readonly isWasmEngineReady: () => number;
-    readonly isWebgpuEngineReady: () => number;
-    readonly p64FormatVersion: () => number;
-    readonly portal_abort_webgpu: () => void;
-    readonly portal_init_webgl2: (a: any) => [number, number, number];
-    readonly portal_init_webgpu: (a: any) => any;
-    readonly portal_webgpu_canvas_claimed: () => number;
-    readonly qualiaportal_acoustic_enabled: (a: number) => number;
-    readonly qualiaportal_acoustic_sab_byte_length: (a: number) => number;
-    readonly qualiaportal_acoustic_sidecar_pinned: (a: number) => number;
-    readonly qualiaportal_acoustic_uniform_bytes: (a: number) => [number, number, number];
-    readonly qualiaportal_acoustic_uniform_float_count: (a: number) => number;
-    readonly qualiaportal_acoustic_uniform_floats: (a: number) => [number, number, number];
-    readonly qualiaportal_ambient_intensity: (a: number) => number;
-    readonly qualiaportal_animate_artefact: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
-    readonly qualiaportal_artefact_refused: (a: number) => number;
-    readonly qualiaportal_bake_cqt_sidecar_demo: (a: number, b: number) => [number, number, number];
-    readonly qualiaportal_bake_stft_sidecar_demo: (a: number, b: number) => [number, number, number];
-    readonly qualiaportal_body_render_receipt: (a: number) => [number, number, number];
-    readonly qualiaportal_budget_collapses_3d: (a: number, b: number) => number;
-    readonly qualiaportal_camera_pitch: (a: number) => number;
-    readonly qualiaportal_camera_target_x: (a: number) => number;
-    readonly qualiaportal_camera_target_y: (a: number) => number;
-    readonly qualiaportal_camera_target_z: (a: number) => number;
-    readonly qualiaportal_camera_yaw: (a: number) => number;
-    readonly qualiaportal_camera_zoom: (a: number) => number;
-    readonly qualiaportal_collapse_node_q: (a: number, b: number) => [number, number];
-    readonly qualiaportal_control_pending: (a: number) => number;
-    readonly qualiaportal_create_acoustic_sab: (a: number) => [number, number, number];
-    readonly qualiaportal_demo_artefact_refusal: (a: number) => void;
-    readonly qualiaportal_drain_control_commands: (a: number, b: number) => number;
-    readonly qualiaportal_drain_sonic_tokens: (a: number, b: number) => [number, number, number];
-    readonly qualiaportal_encode_geometry: (a: number, b: number, c: number) => [number, number, number];
-    readonly qualiaportal_epistemic_q: (a: number) => number;
-    readonly qualiaportal_last_parsed: (a: number) => any;
-    readonly qualiaportal_load_10d: (a: number, b: number, c: number) => [number, number, number];
-    readonly qualiaportal_load_10d_colored: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number];
-    readonly qualiaportal_load_body_from_qualia_bundle: (a: number, b: number, c: number) => [number, number, number];
-    readonly qualiaportal_load_body_from_qualia_bundle_mixed: (a: number, b: number, c: number, d: any, e: any) => [number, number, number];
-    readonly qualiaportal_load_body_organs_colored: (a: number, b: any) => [number, number, number];
-    readonly qualiaportal_load_json_scene: (a: number, b: number, c: number) => [number, number, number];
-    readonly qualiaportal_load_q42: (a: number, b: number, c: number) => [number, number, number];
-    readonly qualiaportal_mount_qapp: (a: number, b: number, c: number) => [number, number];
-    readonly qualiaportal_navigate_to_node: (a: number, b: number) => [number, number];
-    readonly qualiaportal_new: (a: any) => [number, number, number];
-    readonly qualiaportal_observe_node_at: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
-    readonly qualiaportal_operational_mode: (a: number) => number;
-    readonly qualiaportal_pack_manifest: (a: number, b: number, c: number) => [number, number, number];
-    readonly qualiaportal_poll_selected_node: (a: number) => number;
-    readonly qualiaportal_project_resident_plane2d: (a: number, b: number) => [number, number];
-    readonly qualiaportal_publish_acoustic_sab: (a: number, b: any) => [number, number];
-    readonly qualiaportal_push_control_command: (a: number, b: bigint) => number;
-    readonly qualiaportal_push_sonic_token_raw: (a: number, b: bigint) => number;
-    readonly qualiaportal_resize: (a: number, b: any, c: number, d: number) => [number, number];
-    readonly qualiaportal_sample_telemetry: (a: number) => [number, number, number];
-    readonly qualiaportal_select_node_at: (a: number, b: number, c: number, d: number, e: number) => [number, number];
-    readonly qualiaportal_set_acoustic_enabled: (a: number, b: number) => void;
-    readonly qualiaportal_set_ambient_enabled: (a: number, b: number) => void;
-    readonly qualiaportal_set_body_fit_json: (a: number, b: number, c: number) => void;
-    readonly qualiaportal_set_camera: (a: number, b: number, c: number, d: number) => [number, number];
-    readonly qualiaportal_set_camera_pan: (a: number, b: number, c: number, d: number) => [number, number];
-    readonly qualiaportal_set_camera_target: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
-    readonly qualiaportal_set_clear_color: (a: number, b: number, c: number, d: number, e: number) => void;
-    readonly qualiaportal_set_display_mode: (a: number, b: number, c: number) => [number, number];
-    readonly qualiaportal_set_lighting: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-    readonly qualiaportal_set_preserve_authored_frame: (a: number, b: number) => void;
-    readonly qualiaportal_set_sky_preset: (a: number, b: number) => void;
-    readonly qualiaportal_set_standpoint: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
-    readonly qualiaportal_set_telemetry: (a: number, b: number, c: number) => [number, number];
-    readonly qualiaportal_set_temporal_slice: (a: number, b: number, c: number) => void;
-    readonly qualiaportal_set_tensor_projection_enabled: (a: number, b: number) => void;
-    readonly qualiaportal_sonic_token_pending: (a: number) => number;
-    readonly qualiaportal_spatial_encode: (a: number, b: number, c: number) => [number, number, number];
-    readonly qualiaportal_standpoint_class: (a: number) => number;
-    readonly qualiaportal_stop_artefact_animation: (a: number) => void;
-    readonly qualiaportal_sun_intensity: (a: number) => number;
-    readonly qualiaportal_t_slice: (a: number) => number;
-    readonly qualiaportal_t_window: (a: number) => number;
-    readonly qualiaportal_tick: (a: number, b: any, c: number) => [number, number];
-    readonly qualiaportal_tier: (a: number) => number;
-    readonly qualiaportal_upload_mesh_asset: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
-    readonly qualiaportal_upload_tensor_buffer: (a: number, b: number, c: number) => [number, number];
-    readonly qualiaportal_write_part_vertices: (a: number, b: number, c: number, d: number) => void;
-    readonly releaseWebgpuEngine: () => any;
-    readonly serialize_float64_array: (a: number, b: number) => any;
-    readonly serialize_float_array: (a: number, b: number) => any;
-    readonly verifyFirstLayerQuant: () => any;
-    readonly wasm_convex_hull_2d: (a: number, b: number) => [number, number, number];
-    readonly wasm_delaunay_triangulation_2d: (a: number, b: number) => [number, number, number];
-    readonly wasmoffloadintent_new: (a: number, b: number, c: number) => number;
-    readonly wasmoffloadintent_with_string_payload: (a: number, b: number, c: number, d: number) => number;
-    readonly webengine_last_parsed: (a: number) => any;
-    readonly webengine_load_json_scene: (a: number, b: number, c: number) => [number, number, number];
-    readonly webengine_load_q42: (a: number, b: number, c: number) => [number, number, number];
-    readonly webengine_mount_qapp: (a: number, b: number, c: number) => [number, number];
-    readonly webengine_new: () => [number, number, number];
-    readonly webengine_render_to_canvas: (a: number) => [number, number];
-    readonly webizen_poll_agreements: () => [number, number];
-    readonly webizen_propose_agreement: (a: any, b: number, c: number, d: number, e: number, f: number) => bigint;
-    readonly webizen_sign_agreement: (a: bigint, b: number, c: number) => void;
-    readonly compileGgufToQ42: (a: any, b: number) => [number, number, number];
-    readonly qualiaportal_selected_node_index: (a: number) => number;
-    readonly prune_and_validate_mesh: (a: bigint) => number;
-    readonly q42FormatVersion: () => number;
-    readonly __wbg_wasmq42session_free: (a: number, b: number) => void;
-    readonly __wbg_wasmsimulationworld_free: (a: number, b: number) => void;
-    readonly black_scholes_wasm: (a: any) => [number, number, number];
-    readonly calculate_leontief_multipliers_wasm: (a: any) => [number, number, number];
-    readonly calculate_welfare_metrics_wasm: (a: any) => [number, number, number];
-    readonly compile_query_to_json: (a: number, b: number) => [number, number];
-    readonly compile_shacl_turtle_wasm: (a: number, b: number) => [number, number, number];
-    readonly compute_ols_diagnostics_wasm: (a: any) => [number, number, number];
-    readonly compute_pid_step_wasm: (a: any) => [number, number, number];
-    readonly execute_ntriples_query: (a: number, b: number, c: number, d: number, e: number) => [number, number];
-    readonly forward_chain_wasm: (a: any) => [number, number, number];
-    readonly geometry_convex_hull_2: (a: any) => [number, number, number];
-    readonly geometry_delaunay_2: (a: any) => [number, number, number];
-    readonly geometry_execute_json: (a: number, b: number) => [number, number, number, number];
-    readonly geometry_nearest_site: (a: number, b: number, c: number, d: number) => number;
-    readonly geometry_orientation_2: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
-    readonly geometry_orientation_2_sign: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
-    readonly geometry_voronoi_2: (a: any) => [number, number, number];
-    readonly get_shacl_capability_manifest_wasm: () => any;
-    readonly graph_fuzzy_similarity: (a: any) => [number, number, number];
-    readonly graph_kge_predict: (a: any) => [number, number, number];
-    readonly graph_kge_score: (a: any) => [number, number, number];
-    readonly graph_shortest_path: (a: any) => [number, number, number];
-    readonly graph_spreading_activation: (a: any) => [number, number, number];
-    readonly jsonld_context_digest_wasm: () => [number, number, number];
-    readonly list_hmc_bundle_entries_wasm: (a: number, b: number) => [number, number, number];
     readonly package_exposure_manifest_wasm: (a: number, b: number, c: number, d: number) => [number, number, number];
     readonly parse_cbor_ld_wasm: (a: number, b: number) => any;
     readonly parse_csv_wasm: (a: any) => [number, number, number];
@@ -2672,21 +2580,31 @@ export interface InitOutput {
     readonly parse_rdf_document_wasm: (a: number, b: number, c: number, d: number) => [number, number, number];
     readonly parse_turtle_wasm: (a: number, b: number) => any;
     readonly parse_yaml_ld_q42_wasm: (a: number, b: number, c: number, d: bigint, e: number, f: bigint) => [number, number, number];
+    readonly plan_device_storage_wasm: (a: any) => [number, number, number];
     readonly rdfc10_graph_hash_wasm: (a: any) => [number, number, number];
     readonly read_hmc_bundle_entry_wasm: (a: number, b: number, c: number, d: number) => [number, number, number, number];
-    readonly run_semantic_simulation: (a: any) => [number, number, number];
+    readonly read_opfs_block: (a: number) => any;
+    readonly resolve_lww_wasm: (a: any, b: any) => [number, number, number];
+    readonly route_paraconsistent_wasm: (a: any) => [number, number, number];
     readonly sample_packed_quins_wasm: (a: number, b: number, c: number) => [number, number, number, number];
     readonly serialize_csv_wasm: (a: any) => [number, number, number];
+    readonly serialize_float64_array: (a: number, b: number) => any;
+    readonly serialize_float_array: (a: number, b: number) => any;
     readonly serialize_json_wasm: (a: any) => [number, number, number];
     readonly serialize_rdf_wasm: (a: any) => [number, number, number];
-    readonly simulate_gbm_path_wasm: (a: any) => [number, number, number];
     readonly solid_negotiate_accept_wasm: (a: number, b: number) => [number, number, number];
-    readonly solve_ode_exponential_decay_wasm: (a: any) => [number, number, number];
-    readonly solve_sat_wasm: (a: any) => [number, number, number];
+    readonly stit_brought_about_wasm: (a: any) => [number, number, number];
     readonly validate_shacl_constraint_wasm: (a: any) => [number, number, number];
     readonly validate_shacl_graph_wasm: (a: number, b: number, c: number, d: number) => [number, number, number];
     readonly validate_shacl_json_wasm: (a: number, b: number, c: number, d: number) => [number, number, number];
-    readonly verify_regression_model_receipt_wasm: (a: any) => [number, number, number];
+    readonly values_check_wasm: (a: any) => [number, number, number];
+    readonly values_consent_non_coerced_wasm: (a: any) => [number, number, number];
+    readonly values_harm_below_ceiling_wasm: (a: any) => [number, number, number];
+    readonly verify_backup_manifest_wasm: (a: any, b: number, c: number) => [number, number, number];
+    readonly verify_law_package_wasm: (a: number, b: number, c: number, d: number) => number;
+    readonly verify_superblock_ecc: (a: number, b: number) => [number, number];
+    readonly wasmoffloadintent_new: (a: number, b: number, c: number) => number;
+    readonly wasmoffloadintent_with_string_payload: (a: number, b: number, c: number, d: number) => number;
     readonly wasmq42session_active_quin_count: (a: number) => number;
     readonly wasmq42session_advance_tick: (a: number, b: bigint) => void;
     readonly wasmq42session_commit_transaction: (a: number, b: bigint, c: bigint) => [number, number, number];
@@ -2712,29 +2630,303 @@ export interface InitOutput {
     readonly wasmsimulationworld_register_agent: (a: number, b: bigint, c: bigint, d: bigint) => number;
     readonly wasmsimulationworld_step_tick: (a: number) => number;
     readonly wasmsimulationworld_submit_command: (a: number, b: bigint, c: number, d: bigint, e: number, f: bigint, g: bigint, h: bigint) => [number, number];
-    readonly check_drug_interactions_wasm: (a: any) => [number, number, number];
-    readonly compute_framingham_risk_wasm: (a: any) => [number, number, number];
-    readonly design_encode_wasm: (a: number, b: number) => [number, number, number];
-    readonly device_storage_policy_wasm: () => [number, number, number];
-    readonly export_tensor_buffer_wasm: (a: number, b: number) => [number, number, number];
-    readonly export_tensor_slice_wasm: (a: number) => [number, number, number];
-    readonly geosparql_operation_wasm: (a: number, b: number) => [number, number, number];
-    readonly plan_device_storage_wasm: (a: any) => [number, number, number];
-    readonly sample_browser_telemetry_wasm: () => [number, number, number];
-    readonly spatial_encode_wasm: (a: number, b: number) => [number, number, number];
+    readonly webizen_poll_agreements: () => [number, number];
+    readonly webizen_propose_agreement: (a: any, b: number, c: number, d: number, e: number, f: number) => bigint;
+    readonly webizen_sign_agreement: (a: bigint, b: number, c: number) => void;
+    readonly write_opfs_block: (a: number, b: number, c: number) => any;
+    readonly prune_and_validate_mesh: (a: bigint) => number;
+    readonly compileGgufToP64: (a: any, b: number) => [number, number, number];
+    readonly crypto_aead_decrypt: (a: any) => [number, number, number];
+    readonly crypto_aead_encrypt: (a: any) => [number, number, number];
+    readonly crypto_blake3: (a: any) => [number, number, number];
+    readonly crypto_hkdf_sha256: (a: any) => [number, number, number];
+    readonly crypto_sha256: (a: any) => [number, number, number];
+    readonly crypto_sha3_256: (a: any) => [number, number, number];
+    readonly crypto_sha512: (a: any) => [number, number, number];
+    readonly evaluate_inference_guard_wasm: (a: any) => [number, number, number];
+    readonly getBrowserExecutionReceipt: () => [number, number, number];
+    readonly getEngineVersion: () => [number, number];
+    readonly getResidentTokenizerVocab: () => number;
+    readonly getWasmBackend: () => [number, number];
+    readonly getWebgpuInitStatus: () => [number, number];
+    readonly inferWasmAsync: (a: number, b: number, c: any) => any;
+    readonly inferWasmAsyncMeasured: (a: number, b: number, c: number, d: any) => any;
+    readonly inferWasmStreaming: (a: number, b: number, c: any) => any;
+    readonly inferWasmStreamingWithChatGraph: (a: number, b: number, c: number, d: number, e: number, f: number, g: any) => any;
+    readonly inferWasmStreamingWithContext: (a: number, b: number, c: number, d: number, e: any) => any;
+    readonly inferWasmWithContext: (a: number, b: number, c: number, d: number) => any;
+    readonly infer_wasm: (a: number, b: number) => any;
+    readonly initializeCpuWasmEngine: (a: any) => any;
+    readonly initializeCpuWasmEngineWithContext: (a: any, b: number) => any;
+    readonly initialize_webgpu_engine: (a: any) => any;
+    readonly isWasmEngineReady: () => number;
+    readonly isWebgpuEngineReady: () => number;
+    readonly p64FormatVersion: () => number;
+    readonly probe_portal_graphics: () => any;
+    readonly recommend_graphics_recovery: (a: number, b: number) => [number, number];
+    readonly releaseWebgpuEngine: () => any;
+    readonly verifyFirstLayerQuant: () => any;
+    readonly q42FormatVersion: () => number;
+    readonly compileGgufToQ42: (a: any, b: number) => [number, number, number];
+    readonly num_airy_wasm: (a: any) => [number, number, number];
+    readonly num_arithmetic_functions_wasm: (a: any) => [number, number, number];
+    readonly num_bessel_i_wasm: (a: any) => [number, number, number];
+    readonly num_bessel_j_wasm: (a: any) => [number, number, number];
+    readonly num_bessel_k_wasm: (a: any) => [number, number, number];
+    readonly num_bessel_y_wasm: (a: any) => [number, number, number];
+    readonly num_binomial_wasm: (a: any) => [number, number, number];
+    readonly num_combinatorics_wasm: (a: any) => [number, number, number];
+    readonly num_cubic_spline_wasm: (a: any) => [number, number, number];
+    readonly num_divisors_wasm: (a: any) => [number, number, number];
+    readonly num_factorial_wasm: (a: any) => [number, number, number];
+    readonly num_gcd_lcm_wasm: (a: any) => [number, number, number];
+    readonly num_is_prime_wasm: (a: any) => [number, number, number];
+    readonly num_lagrange_eval_wasm: (a: any) => [number, number, number];
+    readonly num_linear_interp_wasm: (a: any) => [number, number, number];
+    readonly num_minimize_wasm: (a: any) => [number, number, number];
+    readonly num_mod_inverse_wasm: (a: any) => [number, number, number];
+    readonly num_mod_pow_wasm: (a: any) => [number, number, number];
+    readonly num_newton_eval_wasm: (a: any) => [number, number, number];
+    readonly num_next_prime_wasm: (a: any) => [number, number, number];
+    readonly num_orthopoly_wasm: (a: any) => [number, number, number];
+    readonly num_partitions_wasm: (a: any) => [number, number, number];
+    readonly num_poly_fit_wasm: (a: any) => [number, number, number];
+    readonly num_prime_factorize_wasm: (a: any) => [number, number, number];
+    readonly num_zeta_wasm: (a: any) => [number, number, number];
+    readonly stats_anova_wasm: (a: any) => [number, number, number];
+    readonly stats_chi_square_gof_wasm: (a: any) => [number, number, number];
+    readonly stats_chi_square_independence_wasm: (a: any) => [number, number, number];
+    readonly stats_chi_squared_dist_wasm: (a: any) => [number, number, number];
+    readonly stats_correlation_wasm: (a: any) => [number, number, number];
+    readonly stats_describe_wasm: (a: any) => [number, number, number];
+    readonly stats_fisher_f_wasm: (a: any) => [number, number, number];
+    readonly stats_friedman_wasm: (a: any) => [number, number, number];
+    readonly stats_linear_regression_wasm: (a: any) => [number, number, number];
+    readonly stats_mcnemar_wasm: (a: any) => [number, number, number];
+    readonly stats_normal_wasm: (a: any) => [number, number, number];
+    readonly stats_one_sample_t_wasm: (a: any) => [number, number, number];
+    readonly stats_paired_t_wasm: (a: any) => [number, number, number];
+    readonly stats_quantile_wasm: (a: any) => [number, number, number];
+    readonly stats_students_t_wasm: (a: any) => [number, number, number];
+    readonly stats_two_sample_t_wasm: (a: any) => [number, number, number];
     readonly units_constant: (a: any) => [number, number, number];
     readonly units_convert: (a: any) => [number, number, number];
     readonly units_list_constants: (a: any) => [number, number, number];
     readonly units_list_units: (a: any) => [number, number, number];
     readonly units_quantity_op: (a: any) => [number, number, number];
+    readonly __wbg_qualiahud_free: (a: number, b: number) => void;
+    readonly __wbg_qualiaportal_free: (a: number, b: number) => void;
+    readonly __wbg_webengine_free: (a: number, b: number) => void;
+    readonly create_canvas: (a: number, b: number) => [number, number, number];
+    readonly design_encode_wasm: (a: number, b: number) => [number, number, number];
+    readonly export_tensor_buffer_wasm: (a: number, b: number) => [number, number, number];
+    readonly export_tensor_slice_wasm: (a: number) => [number, number, number];
+    readonly geosparql_operation_wasm: (a: number, b: number) => [number, number, number];
+    readonly init_panic_hook: () => void;
+    readonly portal_abort_webgpu: () => void;
+    readonly portal_init_webgl2: (a: any) => [number, number, number];
+    readonly portal_init_webgpu: (a: any) => any;
+    readonly portal_webgpu_canvas_claimed: () => number;
+    readonly qualiahud_focus_next: (a: number, b: number) => [number, number];
+    readonly qualiahud_focused_action: (a: number) => [number, number];
+    readonly qualiahud_hit_test: (a: number, b: number, c: number) => [number, number];
+    readonly qualiahud_new: (a: any) => [number, number, number];
+    readonly qualiahud_paint: (a: number) => void;
+    readonly qualiahud_set_camera_target: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
+    readonly qualiahud_set_document_json: (a: number, b: number, c: number) => [number, number];
+    readonly qualiaportal_acoustic_enabled: (a: number) => number;
+    readonly qualiaportal_acoustic_sab_byte_length: (a: number) => number;
+    readonly qualiaportal_acoustic_sidecar_pinned: (a: number) => number;
+    readonly qualiaportal_acoustic_uniform_bytes: (a: number) => [number, number, number];
+    readonly qualiaportal_acoustic_uniform_float_count: (a: number) => number;
+    readonly qualiaportal_acoustic_uniform_floats: (a: number) => [number, number, number];
+    readonly qualiaportal_ambient_intensity: (a: number) => number;
+    readonly qualiaportal_animate_artefact: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
+    readonly qualiaportal_artefact_refused: (a: number) => number;
+    readonly qualiaportal_bake_cqt_sidecar_demo: (a: number, b: number) => [number, number, number];
+    readonly qualiaportal_bake_stft_sidecar_demo: (a: number, b: number) => [number, number, number];
+    readonly qualiaportal_body_render_receipt: (a: number) => [number, number, number];
+    readonly qualiaportal_budget_collapses_3d: (a: number, b: number) => number;
+    readonly qualiaportal_camera_pitch: (a: number) => number;
+    readonly qualiaportal_camera_target_x: (a: number) => number;
+    readonly qualiaportal_camera_target_y: (a: number) => number;
+    readonly qualiaportal_camera_target_z: (a: number) => number;
+    readonly qualiaportal_camera_yaw: (a: number) => number;
+    readonly qualiaportal_camera_zoom: (a: number) => number;
+    readonly qualiaportal_collapse_node_q: (a: number, b: number) => [number, number];
+    readonly qualiaportal_compact_mesh_instance_records: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: any) => [number, number, number];
+    readonly qualiaportal_complete_graphics_recovery: (a: number, b: number, c: number) => void;
+    readonly qualiaportal_control_pending: (a: number) => number;
+    readonly qualiaportal_create_acoustic_sab: (a: number) => [number, number, number];
+    readonly qualiaportal_cull_mesh_instance_indices: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: any) => [number, number, number];
+    readonly qualiaportal_demo_artefact_refusal: (a: number) => void;
+    readonly qualiaportal_drain_control_commands: (a: number, b: number) => number;
+    readonly qualiaportal_drain_sonic_tokens: (a: number, b: number) => [number, number, number];
+    readonly qualiaportal_encode_geometry: (a: number, b: number, c: number) => [number, number, number];
+    readonly qualiaportal_epistemic_q: (a: number) => number;
+    readonly qualiaportal_exposure_compensation: (a: number) => number;
+    readonly qualiaportal_exposure_transform_available: (a: number) => number;
+    readonly qualiaportal_graphics_recovery_canvas_only: (a: number) => number;
+    readonly qualiaportal_graphics_recovery_requested: (a: number) => number;
+    readonly qualiaportal_hdr_exposure_available: (a: number) => number;
+    readonly qualiaportal_hdr_scene_available: (a: number) => number;
+    readonly qualiaportal_last_parsed: (a: number) => any;
+    readonly qualiaportal_load_10d: (a: number, b: number, c: number) => [number, number, number];
+    readonly qualiaportal_load_10d_colored: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number];
+    readonly qualiaportal_load_body_from_qualia_bundle: (a: number, b: number, c: number) => [number, number, number];
+    readonly qualiaportal_load_body_from_qualia_bundle_mixed: (a: number, b: number, c: number, d: any, e: any) => [number, number, number];
+    readonly qualiaportal_load_body_organs_colored: (a: number, b: any) => [number, number, number];
+    readonly qualiaportal_load_hmc_mesh: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
+    readonly qualiaportal_load_json_scene: (a: number, b: number, c: number) => [number, number, number];
+    readonly qualiaportal_load_q42: (a: number, b: number, c: number) => [number, number, number];
+    readonly qualiaportal_mesh_instance_record_stride: (a: number) => number;
+    readonly qualiaportal_mesh_instance_record_version: (a: number) => number;
+    readonly qualiaportal_mount_qapp: (a: number, b: number, c: number) => [number, number];
+    readonly qualiaportal_navigate_to_node: (a: number, b: number) => [number, number];
+    readonly qualiaportal_new: (a: any) => [number, number, number];
+    readonly qualiaportal_observe_node_at: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
+    readonly qualiaportal_operational_mode: (a: number) => number;
+    readonly qualiaportal_pack_manifest: (a: number, b: number, c: number) => [number, number, number];
+    readonly qualiaportal_pack_mesh_instance_records: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: any) => [number, number, number];
+    readonly qualiaportal_poll_selected_node: (a: number) => number;
+    readonly qualiaportal_project_resident_plane2d: (a: number, b: number) => [number, number];
+    readonly qualiaportal_publish_acoustic_sab: (a: number, b: any) => [number, number];
+    readonly qualiaportal_push_control_command: (a: number, b: bigint) => number;
+    readonly qualiaportal_push_sonic_token_raw: (a: number, b: bigint) => number;
+    readonly qualiaportal_resize: (a: number, b: any, c: number, d: number) => [number, number];
+    readonly qualiaportal_sample_telemetry: (a: number) => [number, number, number];
+    readonly qualiaportal_screen_space_ao_available: (a: number) => number;
+    readonly qualiaportal_screen_space_ao_height: (a: number) => number;
+    readonly qualiaportal_screen_space_ao_width: (a: number) => number;
+    readonly qualiaportal_select_node_at: (a: number, b: number, c: number, d: number, e: number) => [number, number];
+    readonly qualiaportal_selected_semantic_id: (a: number) => [number, number];
+    readonly qualiaportal_set_acoustic_enabled: (a: number, b: number) => void;
+    readonly qualiaportal_set_ambient_enabled: (a: number, b: number) => void;
+    readonly qualiaportal_set_body_fit_json: (a: number, b: number, c: number) => void;
+    readonly qualiaportal_set_camera: (a: number, b: number, c: number, d: number) => [number, number];
+    readonly qualiaportal_set_camera_pan: (a: number, b: number, c: number, d: number) => [number, number];
+    readonly qualiaportal_set_camera_target: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
+    readonly qualiaportal_set_clear_color: (a: number, b: number, c: number, d: number, e: number) => void;
+    readonly qualiaportal_set_display_mode: (a: number, b: number, c: number) => [number, number];
+    readonly qualiaportal_set_exposure_compensation: (a: number, b: number) => number;
+    readonly qualiaportal_set_hdr_exposure_compensation: (a: number, b: number) => number;
+    readonly qualiaportal_set_lighting: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+    readonly qualiaportal_set_mesh_instances: (a: number, b: number, c: number, d: number) => [number, number, number];
+    readonly qualiaportal_set_preserve_authored_frame: (a: number, b: number) => void;
+    readonly qualiaportal_set_screen_space_ao: (a: number, b: number, c: number, d: number) => void;
+    readonly qualiaportal_set_screen_space_ao_enabled: (a: number, b: number) => void;
+    readonly qualiaportal_set_screen_space_ao_sample_count: (a: number, b: number) => void;
+    readonly qualiaportal_set_sky_preset: (a: number, b: number) => void;
+    readonly qualiaportal_set_standpoint: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
+    readonly qualiaportal_set_telemetry: (a: number, b: number, c: number) => [number, number];
+    readonly qualiaportal_set_temporal_slice: (a: number, b: number, c: number) => void;
+    readonly qualiaportal_set_tensor_projection_enabled: (a: number, b: number) => void;
+    readonly qualiaportal_set_white_balance: (a: number, b: number, c: number) => number;
+    readonly qualiaportal_sonic_token_pending: (a: number) => number;
+    readonly qualiaportal_spatial_encode: (a: number, b: number, c: number) => [number, number, number];
+    readonly qualiaportal_standpoint_class: (a: number) => number;
+    readonly qualiaportal_stop_artefact_animation: (a: number) => void;
+    readonly qualiaportal_sun_intensity: (a: number) => number;
+    readonly qualiaportal_t_slice: (a: number) => number;
+    readonly qualiaportal_t_window: (a: number) => number;
+    readonly qualiaportal_tick: (a: number, b: any, c: number) => [number, number];
+    readonly qualiaportal_tier: (a: number) => number;
+    readonly qualiaportal_upload_mesh_asset: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
+    readonly qualiaportal_upload_tensor_buffer: (a: number, b: number, c: number) => [number, number];
+    readonly qualiaportal_white_balance: (a: number) => [number, number];
+    readonly qualiaportal_write_part_vertices: (a: number, b: number, c: number, d: number) => void;
+    readonly sample_browser_telemetry_wasm: () => [number, number, number];
+    readonly spatial_encode_wasm: (a: number, b: number) => [number, number, number];
+    readonly webengine_last_parsed: (a: number) => any;
+    readonly webengine_load_json_scene: (a: number, b: number, c: number) => [number, number, number];
+    readonly webengine_load_q42: (a: number, b: number, c: number) => [number, number, number];
+    readonly webengine_mount_qapp: (a: number, b: number, c: number) => [number, number];
+    readonly webengine_new: () => [number, number, number];
+    readonly webengine_render_to_canvas: (a: number) => [number, number];
+    readonly qualiaportal_selected_node_index: (a: number) => number;
+    readonly qualiaportal_hdr_exposure_compensation: (a: number) => number;
+    readonly black_scholes_wasm: (a: any) => [number, number, number];
+    readonly calculate_leontief_multipliers_wasm: (a: any) => [number, number, number];
+    readonly calculate_welfare_metrics_wasm: (a: any) => [number, number, number];
+    readonly clinical_risk: (a: number, b: number) => [number, number, number, number];
+    readonly compute_molecular_descriptors_wasm: (a: any) => [number, number, number];
+    readonly compute_ols_diagnostics_wasm: (a: any) => [number, number, number];
+    readonly compute_pid_step_wasm: (a: any) => [number, number, number];
+    readonly compute_reaction_metrics_wasm: (a: any) => [number, number, number];
+    readonly compute_thermochemistry_wasm: (a: any) => [number, number, number];
+    readonly design_dummies_wasm: (a: any) => [number, number, number];
+    readonly detect_functional_groups_wasm: (a: any) => [number, number, number];
+    readonly evaluate_lipinski_wasm: (a: any) => [number, number, number];
+    readonly geometric_algebra_operation: (a: number, b: number) => [number, number, number, number];
+    readonly graph_fuzzy_similarity: (a: any) => [number, number, number];
+    readonly graph_kge_predict: (a: any) => [number, number, number];
+    readonly graph_kge_score: (a: any) => [number, number, number];
+    readonly graph_shortest_path: (a: any) => [number, number, number];
+    readonly graph_spreading_activation: (a: any) => [number, number, number];
+    readonly ode_solver: (a: number, b: number) => [number, number, number, number];
+    readonly ols_multiple_wasm: (a: any) => [number, number, number];
+    readonly organic_chemistry: (a: number, b: number) => [number, number, number, number];
+    readonly run_semantic_simulation: (a: any) => [number, number, number];
+    readonly sequence_alignment: (a: number, b: number) => [number, number, number, number];
+    readonly simulate_gbm_path_wasm: (a: any) => [number, number, number];
+    readonly solve_ode_exponential_decay_wasm: (a: any) => [number, number, number];
+    readonly solve_sat_wasm: (a: any) => [number, number, number];
+    readonly stats_breusch_pagan_wasm: (a: any) => [number, number, number];
+    readonly stats_chow_test_wasm: (a: any) => [number, number, number];
+    readonly stats_durbin_watson_wasm: (a: any) => [number, number, number];
+    readonly stats_influence_wasm: (a: any) => [number, number, number];
+    readonly stats_jarque_bera_wasm: (a: any) => [number, number, number];
+    readonly stats_lda_wasm: (a: any) => [number, number, number];
+    readonly stats_logit_wasm: (a: any) => [number, number, number];
+    readonly stats_mahalanobis_outliers_wasm: (a: any) => [number, number, number];
+    readonly stats_outlier_screen_univariate_wasm: (a: any) => [number, number, number];
+    readonly stats_ramsey_reset_wasm: (a: any) => [number, number, number];
+    readonly stats_residual_runs_wasm: (a: any) => [number, number, number];
+    readonly stats_residual_symmetry_wasm: (a: any) => [number, number, number];
+    readonly stats_spurious_guard_wasm: (a: any) => [number, number, number];
+    readonly stats_stepwise_backward_wasm: (a: any) => [number, number, number];
+    readonly stats_vif_wasm: (a: any) => [number, number, number];
+    readonly thermodynamics_mcmc: (a: number, b: number) => [number, number, number, number];
+    readonly transform_series_wasm: (a: any) => [number, number, number];
+    readonly verify_regression_model_receipt_wasm: (a: any) => [number, number, number];
+    readonly verify_regression_model_wasm: (a: any) => [number, number, number];
+    readonly xform_dft: (a: any) => [number, number, number];
+    readonly xform_idft: (a: any) => [number, number, number];
+    readonly xform_laplace_numeric: (a: any) => [number, number, number];
+    readonly xform_laplace_table: (a: any) => [number, number, number];
+    readonly xform_z_geometric: (a: any) => [number, number, number];
+    readonly xform_z_transform: (a: any) => [number, number, number];
+    readonly xform_z_unit_step: (a: any) => [number, number, number];
+    readonly align_sequences_wasm: (a: any) => [number, number, number];
+    readonly check_drug_interactions_wasm: (a: any) => [number, number, number];
+    readonly compute_framingham_risk_wasm: (a: any) => [number, number, number];
+    readonly geometry_convex_hull_2: (a: any) => [number, number, number];
+    readonly geometry_delaunay_2: (a: any) => [number, number, number];
+    readonly geometry_execute_json: (a: number, b: number) => [number, number, number, number];
+    readonly geometry_nearest_site: (a: number, b: number, c: number, d: number) => number;
+    readonly geometry_orientation_2: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+    readonly geometry_orientation_2_sign: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
+    readonly geometry_voronoi_2: (a: any) => [number, number, number];
+    readonly validate_fasta_wasm: (a: any) => [number, number, number];
     readonly validate_fhir_observation_wasm: (a: any) => [number, number, number];
-    readonly verify_backup_manifest_wasm: (a: any, b: number, c: number) => [number, number, number];
-    readonly wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_: (a: number, b: number, c: any) => [number, number];
-    readonly wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_5147e1cd83daddce___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_: (a: number, b: number, c: any) => [number, number];
-    readonly wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_5147e1cd83daddce___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__2: (a: number, b: number, c: any) => [number, number];
-    readonly wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_5147e1cd83daddce___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__3: (a: number, b: number, c: any) => [number, number];
-    readonly wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___js_sys_4665151f90cca40___Function_fn_wasm_bindgen_2b06ec36d7f4b29___JsValue_____wasm_bindgen_2b06ec36d7f4b29___sys__Undefined___js_sys_4665151f90cca40___Function_fn_wasm_bindgen_2b06ec36d7f4b29___JsValue_____wasm_bindgen_2b06ec36d7f4b29___sys__Undefined_______true_: (a: number, b: number, c: any, d: any) => void;
-    readonly wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke_______true_: (a: number, b: number) => void;
+    readonly wasm_convex_hull_2d: (a: number, b: number) => [number, number, number];
+    readonly wasm_delaunay_triangulation_2d: (a: number, b: number) => [number, number, number];
+    readonly predict_receptor_binding_wasm: () => number;
+    readonly exact_bigint_add: (a: any) => [number, number, number];
+    readonly exact_bigint_divmod: (a: any) => [number, number, number];
+    readonly exact_bigint_factorial: (a: any) => [number, number, number];
+    readonly exact_bigint_gcd: (a: any) => [number, number, number];
+    readonly exact_bigint_mul: (a: any) => [number, number, number];
+    readonly exact_bigint_pow: (a: any) => [number, number, number];
+    readonly exact_rational_add: (a: any) => [number, number, number];
+    readonly exact_rational_mul: (a: any) => [number, number, number];
+    readonly wasm_bindgen_1f387482baa8dba0___convert__closures_____invoke___wasm_bindgen_1f387482baa8dba0___JsValue__core_608f92abc48d28da___result__Result_____wasm_bindgen_1f387482baa8dba0___JsError___true_: (a: number, b: number, c: any) => [number, number];
+    readonly wasm_bindgen_1f387482baa8dba0___convert__closures_____invoke___wasm_bindgen_1f387482baa8dba0___sys__JsOption_wgpu_68e89ab5128c11d9___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_608f92abc48d28da___result__Result_____wasm_bindgen_1f387482baa8dba0___JsError___true_: (a: number, b: number, c: any) => [number, number];
+    readonly wasm_bindgen_1f387482baa8dba0___convert__closures_____invoke___wasm_bindgen_1f387482baa8dba0___sys__JsOption_wgpu_68e89ab5128c11d9___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_608f92abc48d28da___result__Result_____wasm_bindgen_1f387482baa8dba0___JsError___true__3: (a: number, b: number, c: any) => [number, number];
+    readonly wasm_bindgen_1f387482baa8dba0___convert__closures_____invoke___wasm_bindgen_1f387482baa8dba0___sys__JsOption_wgpu_68e89ab5128c11d9___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_608f92abc48d28da___result__Result_____wasm_bindgen_1f387482baa8dba0___JsError___true__4: (a: number, b: number, c: any) => [number, number];
+    readonly wasm_bindgen_1f387482baa8dba0___convert__closures_____invoke___js_sys_bbf2500d766b050c___Function_fn_wasm_bindgen_1f387482baa8dba0___JsValue_____wasm_bindgen_1f387482baa8dba0___sys__Undefined___js_sys_bbf2500d766b050c___Function_fn_wasm_bindgen_1f387482baa8dba0___JsValue_____wasm_bindgen_1f387482baa8dba0___sys__Undefined_______true_: (a: number, b: number, c: any, d: any) => void;
+    readonly wasm_bindgen_1f387482baa8dba0___convert__closures_____invoke___wgpu_68e89ab5128c11d9___backend__webgpu__webgpu_sys__gen_GpuDeviceLostInfo__GpuDeviceLostInfo______true_: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen_1f387482baa8dba0___convert__closures_____invoke_______true_: (a: number, b: number) => void;
     readonly __wbindgen_malloc: (a: number, b: number) => number;
     readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
     readonly __wbindgen_exn_store: (a: number) => void;
