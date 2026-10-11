@@ -23,8 +23,8 @@ for (const [manifestPath, packPath] of styles) {
     throw new Error(`${manifestPath} WASM digest ${actualDigest} != ${wasmSha}`);
   if (!Array.isArray(manifest.scenes) || manifest.scenes.length !== 40)
     throw new Error(`${manifestPath} should contain all 40 authored scene states`);
-  if (!Array.isArray(manifest.assets) || manifest.assets.length !== 585)
-    throw new Error(`${manifestPath} should contain the current 585-asset catalog`);
+  if (!Array.isArray(manifest.assets) || manifest.assets.length !== 630)
+    throw new Error(`${manifestPath} should contain the current 630-asset catalog`);
   const packInfo = await stat(resolve(root, packPath));
   if (packInfo.size < 100_000) throw new Error(`${packPath} is missing or unexpectedly small`);
 }
@@ -44,5 +44,5 @@ for (const marker of [
 }
 
 console.log(`PASS release WASM: ${wasm.byteLength.toLocaleString()} bytes, SHA-256 ${wasmSha}`);
-console.log('PASS Storybook, Earthlight, Community Grounds: 40 scene states, 585 assets each, matching WASM digest');
+console.log('PASS Storybook, Earthlight, Community Grounds: 40 scene states, 630 assets each, matching WASM digest');
 console.log('PASS Australia trip map, art-style selector, renderer-quality selector, Direct Drive dashboard');

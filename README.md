@@ -107,6 +107,23 @@ produce, and a distinct lavender patch. The planting is authored in the game
 repository and compiled and rendered by Qualia; it remains stylized geometry
 rather than botanically detailed foliage.
 
+The touring drive now loads a checked VibeScript module from
+`web/fixtures/drive-simulation.vibe`. That module owns steering and speed
+response, dawn/dusk and night hazard range, safe and emergency stops, thermal
+load, oil/coolant heat, engine damage, following-traffic buildup, and mirror
+visibility. The browser supplies control intent and samples terrain, road and
+selected-place fauna; it presents the state returned by the WASM-hosted
+VibeScript runtime. Existing UI action IDs are also wrapped as VibeScript
+command cells before the QualiaDB SHACL action gate applies them.
+
+The Australian planting set now includes full-height genus-level eucalypt and
+Acacia silhouettes beside the existing smaller species groups. Their placement
+remains part of the illustrative profile, not evidence that all plants occur
+together at one real locality. The workshop shell is now assembled from its
+rear, side and front walls around a usable interior, with a framed window,
+entry step, ventilation, service panel, conduit and downpipe rather than a
+single solid block.
+
 The four-tile build passes both campaign endings and replay
 self-tests. The full Qualia WebGPU canvas now renders on the published game;
 [QG-12](docs/planning/19-qualiadb-upstream-gate-work-orders.md) records the

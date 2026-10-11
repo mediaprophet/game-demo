@@ -5,7 +5,7 @@
 
 use qualia_core_db::render::scene_primitives::Primitive;
 
-use crate::asset_catalog::{AssetRecipe, ParametricRecipe};
+use crate::asset_catalog::{material_family_for, AssetRecipe, ParametricRecipe};
 
 const fn stem(start: [f32; 3], end: [f32; 3], radius: f32) -> ParametricRecipe {
     ParametricRecipe::Stem {
@@ -26,22 +26,28 @@ const fn body(center: [f32; 3], radii: [f32; 3]) -> ParametricRecipe {
 }
 
 fn mesh(id: &str, color: [f32; 4], shape: ParametricRecipe) -> AssetRecipe {
+    let asset_id = format!("rc:asset/fauna/{id}");
+    let material_family = material_family_for(&asset_id);
     AssetRecipe {
-        id: format!("rc:asset/fauna/{id}"),
+        id: asset_id,
         parts: Vec::new(),
         parametric: Some(shape),
         color,
+        material_family,
         vibe_source: None,
         render_role: "opaque".to_string(),
     }
 }
 
 fn primitives(id: &str, color: [f32; 4], parts: Vec<Primitive>) -> AssetRecipe {
+    let asset_id = format!("rc:asset/fauna/{id}");
+    let material_family = material_family_for(&asset_id);
     AssetRecipe {
-        id: format!("rc:asset/fauna/{id}"),
+        id: asset_id,
         parts,
         parametric: None,
         color,
+        material_family,
         vibe_source: None,
         render_role: "opaque".to_string(),
     }

@@ -794,10 +794,17 @@ pub fn asset_verify_10d(bytes: &[u8]) -> Result<JsValue, JsValue> {
     use qualia_core_db::render::compile_10d::{compiled_digest, decode_10d_mesh};
 
     let mesh = decode_10d_mesh(bytes).map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
+    let (materials, material_ranges) = match qualia_core_db::container_10d::material_container_counts(bytes) {
+        Ok(counts) => counts,
+        Err(qualia_core_db::container_10d::MaterialContainerError::Missing) => (0, 0),
+        Err(error) => return Err(JsValue::from_str(&format!("material section: {error:?}"))),
+    };
     #[derive(serde::Serialize)]
     struct Verified {
         vertices: usize,
         triangles: usize,
+        materials: usize,
+        material_ranges: usize,
         digest: u32,
         min: [f32; 3],
         max: [f32; 3],
@@ -805,6 +812,8 @@ pub fn asset_verify_10d(bytes: &[u8]) -> Result<JsValue, JsValue> {
     serde_wasm_bindgen::to_value(&Verified {
         vertices: mesh.vertex_count(),
         triangles: mesh.triangle_count(),
+        materials,
+        material_ranges,
         digest: compiled_digest(bytes),
         min: mesh.min,
         max: mesh.max,
@@ -940,74 +949,25 @@ pub fn scene_build(
             .collect();
         let bytes = compile_mesh_to_10d_with_surface_reading(&mesh, Some(&provenance), &reading)
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
-        // Keep the authored SRD1 vertex colour while giving Qualia's PBR
-        // material system a stable material family for this asset.
-        let family = if recipe.id.contains("solar") || recipe.id.contains("panel") {
-            ("solar-glass", 0.46, 0.23)
-        } else if recipe.id.contains("wheel")
-            || recipe.id.contains("tyre")
-            || recipe.id.contains("boot")
-        {
-            ("rubber", 0.0, 0.84)
-        } else if recipe.id.contains("window") || recipe.id.contains("glass") {
-            ("framed-glass", 0.08, 0.24)
-        } else if [
-            "metal", "mast", "steel", "pipe", "tank", "battery", "gutter", "rail", "frame",
-        ]
-        .iter()
-        .any(|word| recipe.id.contains(word))
-        {
-            ("galvanised-metal", 0.62, 0.34)
-        } else if [
-            "wood", "trunk", "stem", "branch", "bark", "bed", "bench", "crate", "fence", "deck",
-            "board", "plank", "shelf", "tool",
-        ]
-        .iter()
-        .any(|word| recipe.id.contains(word))
-        {
-            ("weathered-timber", 0.02, 0.78)
-        } else if [
-            "foliage",
-            "canopy",
-            "crown",
-            "leaf",
-            "shoot",
-            "flower",
-            "gum",
-            "wattle",
-            "grass",
-            "crop",
-            "cone",
-            "bottlebrush",
-            "saltbush",
-            "kangaroo-paw",
-        ]
-        .iter()
-        .any(|word| recipe.id.contains(word))
-        {
-            ("living-foliage", 0.0, 0.88)
-        } else if [
-            "ground", "terrain", "soil", "path", "road", "hill", "earth", "mound",
-        ]
-        .iter()
-        .any(|word| recipe.id.contains(word))
-        {
-            ("soil-and-gravel", 0.0, 0.96)
-        } else if recipe.id.contains("/fauna/") {
-            ("fur-and-hide", 0.0, 0.91)
-        } else if ["resident", "hand", "head", "face", "hair", "pants", "coat"]
-            .iter()
-            .any(|word| recipe.id.contains(word))
-        {
-            ("cloth-and-skin", 0.0, 0.82)
-        } else {
-            ("painted-metal", 0.12, 0.52)
-        };
+        // Family and factors are authored on each game recipe. The Qualia
+        // scene loader retains this record when it merges the .10d meshes.
+        let family = recipe.material_family;
         let mut material = qualia_core_db::container_10d::MaterialRecord::legacy_default();
-        material.id = qualia_core_db::q_hash(&format!("urn:rolling-commons:material:{}", family.0));
+        material.id = qualia_core_db::q_hash(&format!("urn:rolling-commons:material:{}", family.id));
         material.base_color = [1.0; 4];
-        material.metallic = family.1;
-        material.roughness = family.2;
+        // The per-vertex SurfaceReading carries the authored recipe palette
+        // and ground variation. Keep that colour in the PBR path as well as
+        // retaining the shared roughness/metallic response in MAT4.
+        material.multiply_vertex_color = true;
+        material.metallic = family.metallic;
+        material.roughness = family.roughness;
+        material.wind_animated = family.id == "living-foliage";
+        if family.id == "framed-glass" {
+            material.opacity_mode = qualia_core_db::container_10d::OpacityMode::Blend;
+            material.base_color[3] = 0.44;
+            material.double_sided = true;
+            material.casts_shadow = false;
+        }
         let ranges = [qualia_core_db::container_10d::SubmeshRange {
             first_index: 0,
             index_count: (mesh.triangles.len() * 3) as u32,
@@ -1028,7 +988,7 @@ pub fn scene_build(
             &"renderRole".into(),
             &JsValue::from_str(&recipe.render_role),
         )?;
-        js_sys::Reflect::set(&obj, &"materialFamily".into(), &JsValue::from_str(family.0))?;
+        js_sys::Reflect::set(&obj, &"materialFamily".into(), &JsValue::from_str(family.id))?;
         js_sys::Reflect::set(
             &obj,
             &"bytes".into(),
@@ -1096,7 +1056,8 @@ pub fn scene_build(
     ];
     let mut nodes = Vec::with_capacity(places.len() * 10);
     let site_positions = js_sys::Array::new();
-    for point in places {
+    let pick_targets = js_sys::Array::new();
+    for (place_index, point) in places.into_iter().enumerate() {
         let p = portal_point(min, max, point).map(|v| v * (1.7 / 1.6));
         nodes.extend_from_slice(&[0.0, 0.0, 4.0, p[0], p[1], p[2], 0.0, 1.0, 0.7, 0.5]);
         let site = js_sys::Object::new();
@@ -1104,6 +1065,67 @@ pub fn scene_build(
             js_sys::Reflect::set(&site, &(*key).into(), &JsValue::from_f64(value as f64))?;
         }
         site_positions.push(&site);
+        let target = js_sys::Object::new();
+        js_sys::Reflect::set(
+            &target,
+            &"placeIndex".into(),
+            &JsValue::from_f64(place_index as f64),
+        )?;
+        js_sys::Reflect::set(&target, &"label".into(), &JsValue::from_str("Community site"))?;
+        pick_targets.push(&target);
+    }
+    // Mesh-adjacent semantic nodes turn visible props into direct entry points
+    // for the corresponding place/activity instead of relying on the tiny HUD.
+    let hotspots: [(&str, [f32; 3], usize, &str, &str); 5] = [
+        (
+            "workshop-repair-bench",
+            [3.24, 0.92, -0.91],
+            3,
+            "Workshop repair bench",
+            "workshop-repair",
+        ),
+        (
+            "hydroponic-grow-bed",
+            [-3.0, 0.48, -3.30],
+            6,
+            "Hydroponic growing table",
+            "",
+        ),
+        (
+            "touring-camp-rig",
+            [-3.0, 0.95, 2.70],
+            0,
+            "Touring camp and rig",
+            "",
+        ),
+        (
+            "orchard-harvest-crates",
+            [18.3, 0.46, 4.45],
+            9,
+            "Orchard harvest",
+            "fruit-harvest",
+        ),
+        (
+            "orchard-preparation-table",
+            [16.7, 0.78, 3.55],
+            9,
+            "Produce preparation table",
+            "shared-meal",
+        ),
+    ];
+    for (id, point, place_index, label, activity_id) in hotspots {
+        let p = portal_point(min, max, point).map(|v| v * (1.7 / 1.6));
+        nodes.extend_from_slice(&[0.0, 0.0, 1.2, p[0], p[1], p[2], 0.0, 1.0, 0.7, 0.5]);
+        let target = js_sys::Object::new();
+        js_sys::Reflect::set(&target, &"id".into(), &JsValue::from_str(id))?;
+        js_sys::Reflect::set(
+            &target,
+            &"placeIndex".into(),
+            &JsValue::from_f64(place_index as f64),
+        )?;
+        js_sys::Reflect::set(&target, &"label".into(), &JsValue::from_str(label))?;
+        js_sys::Reflect::set(&target, &"activityId".into(), &JsValue::from_str(activity_id))?;
+        pick_targets.push(&target);
     }
     let tensor = tensor_buffer_build(&nodes)?;
     let result = js_sys::Object::new();
@@ -1147,6 +1169,7 @@ pub fn scene_build(
         &JsValue::from_f64((1.7 / span) as f64),
     )?;
     js_sys::Reflect::set(&result, &"places".into(), &site_positions)?;
+    js_sys::Reflect::set(&result, &"pickTargets".into(), &pick_targets)?;
     Ok(result.into())
 }
 
@@ -1288,6 +1311,15 @@ fn load_scene_assets(
         .or_else(|| js_get(&receipt, "organs_loaded"))
         .and_then(|value| value.as_f64())
         .unwrap_or(0.0);
+    let material_pipeline = js_get(&receipt, "material_pipeline")
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false);
+    let materials_loaded = js_get(&receipt, "materials_loaded")
+        .and_then(|value| value.as_f64())
+        .unwrap_or(0.0);
+    let material_ranges = js_get(&receipt, "material_ranges")
+        .and_then(|value| value.as_f64())
+        .unwrap_or(0.0);
     let object = js_sys::Object::new();
     for (key, value) in [
         (
@@ -1310,6 +1342,21 @@ fn load_scene_assets(
     ] {
         js_sys::Reflect::set(&object, &key.into(), &value)?;
     }
+    js_sys::Reflect::set(
+        &object,
+        &"material_pipeline".into(),
+        &JsValue::from_bool(material_pipeline),
+    )?;
+    js_sys::Reflect::set(
+        &object,
+        &"materials_loaded".into(),
+        &JsValue::from_f64(materials_loaded),
+    )?;
+    js_sys::Reflect::set(
+        &object,
+        &"material_ranges".into(),
+        &JsValue::from_f64(material_ranges),
+    )?;
     Ok(object.into())
 }
 
@@ -1855,6 +1902,28 @@ impl GamePortal {
         self.inner
             .set_lighting(sun_r, sun_g, sun_b, intensity, ambient);
     }
+
+    /// Tune the engine-owned animated water pass without rebuilding the scene.
+    pub fn set_water_surface(
+        &mut self,
+        r: f32,
+        g: f32,
+        b: f32,
+        alpha: f32,
+        wave_amplitude: f32,
+        wave_frequency: f32,
+        quality: u32,
+    ) {
+        self.inner.set_water_surface(
+            r,
+            g,
+            b,
+            alpha,
+            wave_amplitude,
+            wave_frequency,
+            quality,
+        );
+    }
 }
 
 // --- Session: deterministic world document + event log ---
@@ -1917,6 +1986,87 @@ pub struct GameSession {
     /// Accepted action ids in order — the replay tape.
     events: Vec<String>,
     seq: u32,
+}
+
+/// A checked VibeScript program that owns the driving simulation rules.
+/// The browser submits sampled world facts and control intent, then renders
+/// the returned state; it does not implement the vehicle or thermal model.
+#[wasm_bindgen]
+pub struct GameDriveSimulation {
+    program: vibe::Program,
+}
+
+#[wasm_bindgen]
+impl GameDriveSimulation {
+    #[wasm_bindgen(constructor)]
+    pub fn new(source: &str) -> Result<GameDriveSimulation, JsValue> {
+        let program = vibe::load_program(source)
+            .map_err(|error| JsValue::from_str(&format!("VibeScript drive module: {error}")))?;
+        Ok(GameDriveSimulation { program })
+    }
+
+    /// Return the initial driving state and handling profile authored by the
+    /// loaded VibeScript module. The browser maps this record to HUD fields;
+    /// route, rig and thermal defaults stay with the simulation rules.
+    pub fn setup(&self, rig_id: u8) -> JsValue {
+        let mut host = vibe::LocalHost::default();
+        let mut env = vibe::Env::default();
+        match vibe::eval_function(
+            &self.program,
+            "drive_setup",
+            vec![vibe::Value::F64(rig_id as f64)],
+            &mut host,
+            &mut env,
+        ) {
+            Ok(value) => vibe_value_to_js(&value),
+            Err(error) => err_obj("VibeScript drive setup", &error.to_string()),
+        }
+    }
+
+    /// Evaluate exactly one deterministic simulation tick using the checked
+    /// VibeScript module loaded at construction. Input and output use records
+    /// so the authored policy can grow without expanding the WASM ABI.
+    pub fn step(&self, input_json: &str) -> JsValue {
+        if input_json.len() > 16_384 {
+            return err_obj("VibeScript drive input", "record exceeds the 16 KiB bound");
+        }
+        let input: serde_json::Value = match serde_json::from_str(input_json) {
+            Ok(value) => value,
+            Err(error) => return err_obj("VibeScript drive input", &error.to_string()),
+        };
+        let mut host = vibe::LocalHost::default();
+        let mut env = vibe::Env::default();
+        match vibe::eval_function(
+            &self.program,
+            "drive_step",
+            vec![json_to_vibe(&input)],
+            &mut host,
+            &mut env,
+        ) {
+            Ok(value) => vibe_value_to_js(&value),
+            Err(error) => err_obj("VibeScript drive tick", &error.to_string()),
+        }
+    }
+}
+
+fn json_to_vibe(value: &serde_json::Value) -> vibe::Value {
+    match value {
+        serde_json::Value::Null => vibe::Value::Null,
+        serde_json::Value::Bool(value) => vibe::Value::Bool(*value),
+        serde_json::Value::Number(value) => {
+            vibe::Value::F64(value.as_f64().unwrap_or_default())
+        }
+        serde_json::Value::String(value) => vibe::Value::String(value.clone()),
+        serde_json::Value::Array(values) => {
+            vibe::Value::List(values.iter().map(json_to_vibe).collect())
+        }
+        serde_json::Value::Object(values) => vibe::Value::Record(
+            values
+                .iter()
+                .map(|(key, value)| (key.clone(), json_to_vibe(value)))
+                .collect(),
+        ),
+    }
 }
 
 #[wasm_bindgen]
@@ -1989,17 +2139,22 @@ impl GameSession {
     /// triples: the existing Qualia SHACL gate remains the only proposal path.
     pub fn vibe_propose(&mut self, src: &str) -> JsValue {
         match eval_vibe(src, Some(self)) {
-            Ok(vibe::Value::String(id)) => self.propose(&id),
+            Ok(vibe::Value::String(id)) => self.apply_action(&id),
             Ok(_) => err_obj("VibeScript", "command cell must return an action id string"),
             Err(e) => err_obj("VibeScript", &e),
         }
     }
 
-    /// Propose an action by catalogue id. The engine validates the gate
-    /// against the current world; on `conforms` the declared triple edits are
-    /// applied and an `ev:` event line is appended (event-sourced, so a
-    /// replay of the tape must reproduce this exact world text).
+    /// Compatibility entry point for UI hosts and deterministic replay. Even
+    /// this action-id form is converted to a VibeScript command cell before it
+    /// can reach the QualiaDB SHACL gate.
     pub fn propose(&mut self, action_id: &str) -> JsValue {
+        let source = format!("= {}", serde_json::to_string(action_id).unwrap_or_default());
+        self.vibe_propose(&source)
+    }
+
+    /// The only path that applies a catalogued game action.
+    fn apply_action(&mut self, action_id: &str) -> JsValue {
         let Some(action) = self.actions.iter().find(|a| a.id == action_id).cloned() else {
             return err_obj("unknown action", action_id);
         };
@@ -2305,6 +2460,7 @@ fn vibe_scene_recipe(src: &str) -> Result<asset_catalog::AssetRecipe, String> {
         parts: Vec::new(),
         parametric: Some(shape),
         color,
+        material_family: asset_catalog::material_family_for("rc:asset/vibe-preview"),
         vibe_source: Some(src.to_string()),
         render_role: "opaque".to_string(),
     })

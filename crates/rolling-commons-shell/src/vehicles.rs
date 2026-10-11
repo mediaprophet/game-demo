@@ -5,7 +5,7 @@
 
 use qualia_core_db::render::scene_primitives::Primitive;
 
-use crate::asset_catalog::{AssetRecipe, ParametricRecipe};
+use crate::asset_catalog::{material_family_for, AssetRecipe, ParametricRecipe};
 
 const VEHICLE_X: f32 = 2.35;
 const VEHICLE_Z: f32 = 4.65;
@@ -31,22 +31,26 @@ fn box_part(center: [f32; 3], size: [f32; 3]) -> Primitive {
 }
 
 fn asset(id: String, color: [f32; 4], parts: Vec<Primitive>) -> AssetRecipe {
+    let material_family = material_family_for(&id);
     AssetRecipe {
         id,
         parts,
         parametric: None,
         color,
+        material_family,
         vibe_source: None,
         render_role: "opaque".to_string(),
     }
 }
 
 fn mesh_part(id: String, color: [f32; 4], recipe: ParametricRecipe) -> AssetRecipe {
+    let material_family = material_family_for(&id);
     AssetRecipe {
         id,
         parts: Vec::new(),
         parametric: Some(recipe),
         color,
+        material_family,
         vibe_source: None,
         render_role: "opaque".to_string(),
     }
@@ -74,14 +78,15 @@ fn wheels(prefix: &str, x: f32, axle_z: &[f32], radius: f32) -> Vec<AssetRecipe>
 fn four_wheel_drive(prefix: &str, color: [f32; 4], cab_color: [f32; 4]) -> Vec<AssetRecipe> {
     let x = VEHICLE_X;
     let z = VEHICLE_Z;
-    let body = asset(
+    let body = mesh_part(
         format!("rc:asset/rig/{prefix}/body"),
         color,
-        vec![
-            box_part([x, 0.66, z], [1.64, 0.63, 2.48]),
-            box_part([x, 1.03, z - 0.77], [1.52, 0.29, 0.83]),
-            box_part([x, 0.91, z + 0.80], [1.48, 0.17, 0.69]),
-        ],
+        ParametricRecipe::Pod {
+            center: [x, 0.67, z],
+            profile: TOURING_BODY_PROFILE,
+            segments: 40,
+            stretch: [0.84, 0.34, 1.25],
+        },
     );
     let cabin = mesh_part(
         format!("rc:asset/rig/{prefix}/cabin"),
@@ -142,7 +147,7 @@ fn caravan(prefix: &str) -> Vec<AssetRecipe> {
             center: [x, 0.31, z],
             profile: TOURING_BODY_PROFILE,
             segments: 32,
-            stretch: [0.92, 1.42, 1.62],
+            stretch: [0.90, 1.38, 1.58],
         },
     );
     let running_gear = asset(
@@ -227,22 +232,25 @@ fn sedan(prefix: &str) -> Vec<AssetRecipe> {
     let x = VEHICLE_X;
     let z = VEHICLE_Z;
     let mut out = vec![
-        asset(
+        mesh_part(
             format!("rc:asset/rig/{prefix}/body"),
             [0.56, 0.65, 0.65, 1.0],
-            vec![
-                box_part([x, 0.59, z], [1.69, 0.53, 2.80]),
-                box_part([x, 0.89, z - 0.81], [1.57, 0.23, 0.79]),
-                box_part([x, 0.85, z + 0.93], [1.48, 0.20, 0.60]),
-            ],
+            ParametricRecipe::Pod {
+                center: [x, 0.59, z],
+                profile: TOURING_BODY_PROFILE,
+                segments: 40,
+                stretch: [0.84, 0.31, 1.40],
+            },
         ),
-        asset(
+        mesh_part(
             format!("rc:asset/rig/{prefix}/cabin"),
             [0.67, 0.73, 0.70, 1.0],
-            vec![
-                box_part([x, 1.02, z + 0.06], [1.34, 0.47, 1.30]),
-                box_part([x, 1.27, z + 0.06], [1.10, 0.07, 1.08]),
-            ],
+            ParametricRecipe::Pod {
+                center: [x, 0.97, z + 0.07],
+                profile: TOURING_BODY_PROFILE,
+                segments: 36,
+                stretch: [0.68, 0.40, 0.68],
+            },
         ),
         asset(
             format!("rc:asset/rig/{prefix}/chassis"),

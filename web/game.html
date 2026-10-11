@@ -617,7 +617,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = 'df2357979af893e4-community-overhaul';
+const WASM_BUILD = '3ca0c643bb536dac-community-overhaul';
 window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 window.setWorldLoading('Starting the Qualia engine','Initialising the Australian world renderer');
@@ -629,13 +629,24 @@ const {CHARACTER_NAMES,CHARACTER_ARCS,CHARACTER_TRAITS,CHARACTER_PLACES,characte
   nearbyRadius,walkSpeed,characterChapter,encodeCharacters,decodeCharacters}=characters;
  $('pin').textContent = 'QualiaDB · ' + m.pinned_qualiadb_revision().slice(0,8);
 
-const [SEED, ACTIONS, VIBE_SCENE, INVESTMENT_TAXONOMY_TEXT, ACTIVITY_MODULES_TEXT, PLACE_PACKAGE_TEXT] = await Promise.all(
-  ['fixtures/seed.ttl', 'fixtures/actions.json', 'fixtures/community-beacon.vibe', 'fixtures/investment-taxonomy.json',
-    'fixtures/scenarios/community-grounds-v1.json', 'fixtures/places/fictional-community-v1.json']
+const [SEED, ACTIONS, VIBE_SCENE, VIBE_DRIVE_TEXT, INVESTMENT_TAXONOMY_TEXT, ACTIVITY_MODULES_TEXT, PLACE_PACKAGE_TEXT] = await Promise.all(
+  ['fixtures/seed.ttl', 'fixtures/actions.json', 'fixtures/community-beacon.vibe', 'fixtures/drive-simulation.vibe',
+    'fixtures/investment-taxonomy.json', 'fixtures/scenarios/community-grounds-v1.json', 'fixtures/places/fictional-community-v1.json']
     .map(async u => (await fetch(u, {cache:'no-store'})).text()));
 const INVESTMENT_TAXONOMY = JSON.parse(INVESTMENT_TAXONOMY_TEXT);
 $('vibe-scene').value = VIBE_SCENE.trim();
 let session = new m.GameSession(SEED, ACTIONS);
+// The checked-in browser package can briefly lag the source API while a
+// release build is being prepared. Keep the rest of the game usable in that
+// window, and never emulate the VibeScript drive rules in the page.
+const driveSimulation = typeof m.GameDriveSimulation === 'function'
+  ? new m.GameDriveSimulation(VIBE_DRIVE_TEXT) : null;
+const driveModeAvailable = driveSimulation !== null;
+const driveModeButton = document.querySelector('[data-game-view="drive"]');
+if (!driveModeAvailable && driveModeButton) {
+  driveModeButton.disabled = true;
+  driveModeButton.title = 'This WASM package predates the VibeScript drive module. Update the compiled package to enable driving.';
+}
 const catalog = JSON.parse(ACTIONS).actions;
 const ACTIVITY_PACKAGE = JSON.parse(ACTIVITY_MODULES_TEXT);
 const ACTIVITY_MODULES = ACTIVITY_PACKAGE.modules;
@@ -1156,12 +1167,6 @@ function rendererCapabilityText(){
 }
 const ART_STYLES=['Storybook','Earthlight','Community Grounds'];
 const VEHICLE_RIGS=['Campervan','4WD + caravan','Car + camper trailer','4WD + roof-top tent'];
-const RIG_DRIVING=[
-  {topSpeed:4.0,acceleration:2.0,braking:3.7,steering:0.72,shoulder:1.8,load:0.28,queue:2},
-  {topSpeed:3.0,acceleration:1.25,braking:2.25,steering:0.48,shoulder:1.25,load:0.76,queue:5},
-  {topSpeed:3.4,acceleration:1.55,braking:2.7,steering:0.58,shoulder:1.35,load:0.56,queue:4},
-  {topSpeed:4.2,acceleration:2.1,braking:3.9,steering:0.82,shoulder:2.0,load:0.38,queue:1}
-];
 let ECOLOGY_PROFILE={id:'se-corridor-reference',label:'South-east travel corridor · illustrative',
   scope:'Noosa coast to Melbourne coast; inland toward the South Australian border',
   status:'authored encounter showcase; local species presence varies',
@@ -1212,16 +1217,36 @@ $('tier').textContent = rendererCapability().label;
 
 let camYaw=0.6, camPitch=0.42, camZoom=canvas.width<900?1.9:1.45;
 let camTarget=null, camGoal=null, zoomGoal=null, focusedPlace=null;
-let territory='kestrel', tileCenters={}, placePositions=[];
+let territory='kestrel', tileCenters={}, placePositions=[], scenePickTargets=[];
 let cameraMode='map', driveView='first-person', walk={x:0,z:0}, worldCenter={x:0,y:0,z:0}, worldScale=1;
 let qualityPreference=2;
 try{const storedQuality=Number(localStorage.getItem('maslows-graphics-quality'));if([0,1,2].includes(storedQuality))qualityPreference=storedQuality;}catch{}
+function driveStateFromVibe(rigId){
+  if(!driveSimulation) return {x:-5.45,z:0.48,heading:-Math.PI/2,speed:0,distance:0,
+    warning:'',hazardStops:0,emergencyStops:0,lastWarning:'',period:'dusk',oilTempC:94,
+    coolantTempC:89,ambientC:32,gradePercent:0,thermalLoad:0.32,roadSurface:'sealed',
+    engineHealth:100,overheatSeconds:0,engineWarning:'',oilTrend:'steady',coolantTrend:'steady',
+    trafficQueue:0,mirrorReveal:false,mirrorQueue:0,mirrorBlocked:false,topSpeed:0,
+    acceleration:0,braking:0,steering:0,shoulder:0,rigLoad:0,trailer:false};
+  const setup=toObj(driveSimulation.setup(rigId));
+  if(!setup||setup.ok===false||setup.error)throw new Error(setup?.error||'VibeScript returned no drive setup');
+  return {x:setup.x,z:setup.z,heading:setup.heading,speed:setup.speed,distance:setup.distance,
+    warning:setup.warning,hazardStops:setup.hazard_stops,emergencyStops:setup.emergency_stops,
+    lastWarning:setup.last_warning,period:setup.period,oilTempC:setup.oil_temp,
+    coolantTempC:setup.coolant_temp,ambientC:setup.ambient_c,gradePercent:setup.grade_percent,
+    thermalLoad:setup.thermal_load,roadSurface:setup.road_surface,engineHealth:setup.engine_health,
+    overheatSeconds:setup.overheat_seconds,engineWarning:setup.engine_warning,
+    oilTrend:setup.oil_trend,coolantTrend:setup.coolant_trend,trafficQueue:setup.traffic_queue,
+    mirrorReveal:setup.mirror_reveal,mirrorQueue:setup.mirror_queue,mirrorBlocked:setup.mirror_blocked,
+    topSpeed:setup.top_speed,acceleration:setup.acceleration,braking:setup.braking,
+    steering:setup.steering,shoulder:setup.shoulder,rigLoad:setup.rig_load,trailer:setup.trailer};
+}
 const DRIVE_PERIODS=['dawn','day','dusk','night'];
 const DRIVE_LIGHTING={
   dawn:[1.00,0.63,0.40,0.88,0.34],day:[0.88,0.91,0.78,1.18,0.68],
   dusk:[1.00,0.48,0.28,0.78,0.28],night:[0.48,0.58,0.90,0.38,0.19]
 };
-let drive={heading:-Math.PI/2,speed:0,distance:0,warning:'',hazardStops:0,emergencyStops:0,lastWarning:'',period:'dusk'};
+let drive=driveStateFromVibe(vehicleRig);
 // Versioned review fixtures keep camera and presentation setup out of campaign state.
 let graphicsReviewFixture=null;
 try {
@@ -1326,6 +1351,10 @@ function applyGraphicsViewContext(view){
 function applyGraphicsReviewCamera(){
   if(!graphicsView||graphicsViewApplied)return;
   if(graphicsView.cameraMode==='drive'){
+    if(!driveModeAvailable){
+      note('Skipped the aerial-drive review pose: the served WASM package is missing the VibeScript drive module.');
+      graphicsViewApplied=true;return;
+    }
     applyGraphicsViewContext(graphicsView);
     setCameraMode('drive');
     driveView=graphicsView.driveView;
@@ -1431,6 +1460,10 @@ function placeDriveCamera(){
   applyCam();
 }
 function setCameraMode(mode){
+  if(mode==='drive'&&!driveModeAvailable){
+    note('Driving is temporarily unavailable because the served WASM package does not contain the VibeScript drive module.');
+    return;
+  }
   if(mode!==cameraMode)portal.invalidate_temporal_history?.();
   cameraMode=mode;camGoal=null;zoomGoal=null;
   if(mode==='walk'){
@@ -1441,13 +1474,10 @@ function setCameraMode(mode){
   }else if(mode==='drive'){
     // The first driving slice is a short, authored inland road through the
     // connected Kestrel/Saltwind demo ground. Geographic packs can replace it.
-    const priorPeriod=drive.period||'dusk', rig=RIG_DRIVING[vehicleRig];
+    const priorPeriod=drive.period||'dusk';
     driveView='first-person';
-    walk={x:-5.45,z:0.48};drive={heading:-Math.PI/2,speed:0,distance:0,
-      warning:'',hazardStops:0,emergencyStops:0,lastWarning:'',period:priorPeriod,
-      oilTempC:94,coolantTempC:89,ambientC:26,gradePercent:0,thermalLoad:0.32,roadSurface:'sealed',
-      engineHealth:100,overheatSeconds:0,engineWarning:'',oilTrend:'steady',coolantTrend:'steady',
-      trafficQueue:rig.queue};
+    drive=driveStateFromVibe(vehicleRig);drive.period=priorPeriod;
+    walk={x:drive.x,z:drive.z};
     hudPage='orders';walkKeys.clear();
     camPitch=0.045;camYaw=drive.heading;placeDriveCamera();
   }else{
@@ -1471,64 +1501,17 @@ function applyDriveLighting(){
   const light=DRIVE_LIGHTING[drive.period]||DRIVE_LIGHTING.dusk;
   portal.set_lighting(light[0],light[1],light[2],light[3],light[4]);
 }
-function driveAmbientC(){return {dawn:20,day:38,dusk:32,night:25}[drive.period]??28;}
-function roadSurfaceAt(x){
-  if(x<0)return {name:'sealed',roughness:0.04};
-  if(x<5.8)return {name:'worn bitumen',roughness:0.10};
-  if(x<9.1)return {name:'bridge deck',roughness:0.07};
-  if(x<15.5)return {name:'graded gravel',roughness:0.20};
-  return {name:'corrugated gravel',roughness:0.34};
-}
-function updateVehicleThermals(dt,throttle,reverse){
-  if(dt<=0)return;
-  const rig=RIG_DRIVING[vehicleRig],ambient=driveAmbientC(),surface=roadSurfaceAt(walk.x);
-  const heading=reverse?-1:1;
-  const heightHere=m.terrain_height_world(walk.x,walk.z);
-  const heightAhead=m.terrain_height_world(walk.x+heading*0.55,walk.z);
-  const grade=Math.max(-0.18,Math.min(0.18,(heightAhead-heightHere)/0.55));
-  drive.ambientC=ambient;drive.gradePercent=grade*100;drive.roadSurface=surface.name;
-  const load=Math.max(0.12,Math.min(1.85,0.22+(throttle?0.55:0.08)+
-    Math.abs(drive.speed)/rig.topSpeed*0.16+Math.max(0,grade)*10+surface.roughness*0.60+rig.load));
-  drive.thermalLoad=load;
-  const airflow=Math.min(12,Math.abs(drive.speed)*1.35);
-  const targetOil=ambient+62+load*30-airflow;
-  const targetCoolant=ambient+42+load*23-airflow*0.62;
-  drive.oilTrend=targetOil-drive.oilTempC>1.0?'rising':targetOil-drive.oilTempC< -1.0?'cooling':'steady';
-  drive.coolantTrend=targetCoolant-drive.coolantTempC>1.0?'rising':
-    targetCoolant-drive.coolantTempC< -1.0?'cooling':'steady';
-  drive.oilTempC+=(targetOil-drive.oilTempC)*(1-Math.exp(-dt*0.028));
-  drive.coolantTempC+=(targetCoolant-drive.coolantTempC)*(1-Math.exp(-dt*0.040));
-  const critical=drive.oilTempC>=142||drive.coolantTempC>=114;
-  const elevated=drive.oilTempC>=128||drive.coolantTempC>=104;
-  drive.engineWarning=critical?'CRITICAL ENGINE TEMP · ease off, stop safely and let it cool':
-    elevated?'Engine temperature rising · reduce load and watch the next climb':'';
-  drive.overheatSeconds=critical?drive.overheatSeconds+dt:Math.max(0,drive.overheatSeconds-dt*2);
-  if(drive.overheatSeconds>10){
-    drive.engineHealth=Math.max(0,drive.engineHealth-dt*1.2);
-    if(drive.engineHealth===0){drive.speed=0;drive.engineWarning='ENGINE FAILURE · temperature damage ended the drive';}
-  }
-  const trailer=vehicleRig===1||vehicleRig===2;
-  const trafficTarget=trailer?4.2:3.4;
-  if(Math.abs(drive.speed)<trafficTarget-0.35)
-    drive.trafficQueue=Math.min(7,drive.trafficQueue+dt*(trailer?0.035:0.018));
-  else drive.trafficQueue=Math.max(0,drive.trafficQueue-dt*0.045);
-}
 function rearMirrorReadout(){
   const mirror=rearMirrorState();
-  if(vehicleRig===1||vehicleRig===2)
+  if(drive.trailer)
     return mirror.bendReveal?`Bend reveal · ${mirror.queued} vehicles in the mirror line`:
       `Trailer blocks centre view · ${mirror.queued} vehicles following`;
   return mirror.bendReveal?`Bend reveal · ${mirror.queued} vehicles behind`:
     `${mirror.queued} vehicles in the rear view`;
 }
 function rearMirrorState(){
-  const delta=0.35;
-  const slope=(driveRoadCenterZ(walk.x+delta)-driveRoadCenterZ(walk.x-delta))/(2*delta);
-  const roadHeading=-Math.PI/2-Math.atan(slope);
-  const headingError=Math.atan2(Math.sin(drive.heading-roadHeading),Math.cos(drive.heading-roadHeading));
-  const bendReveal=Math.abs(headingError)>0.11||Math.abs((walkKeys.has('d')?1:0)-(walkKeys.has('a')?1:0))>0;
-  const queued=Math.round(drive.trafficQueue||0);
-  return {bendReveal,queued,blocked:(vehicleRig===1||vehicleRig===2)&&!bendReveal};
+  return {bendReveal:drive.mirrorReveal===true,queued:drive.mirrorQueue||0,
+    blocked:drive.mirrorBlocked===true};
 }
 function engineTempColor(temp,elevated,critical){
   return temp>=critical?'#e35b4e':temp>=elevated?'#e8b24f':'#69c294';
@@ -1581,6 +1564,7 @@ for (const id of ['kestrel','saltwind','highlands']) {
 let sceneMeshes = 0;
 let sceneSource = '';
 let hmcPack = null, hmcManifest = null, hmcResidentScene = '';
+let hmcSceneReceipt = null;
 let lastSceneBridge = null;
 let lastTemporalContract = null;
 const hmcSceneApi = typeof portal.load_hmc_scene === 'function';
@@ -1656,6 +1640,10 @@ function applySceneQuality(bridge, previous) {
   const light=warm?[0.58,0.76,0.55,1.32,0.74]:
     bridge.water_state==='high-tide'?[0.42,0.67,0.92,1.18,0.66]:[0.45,0.85,0.35,1.6,0.82];
   portal.set_lighting(light[0],light[1],light[2],light[3]+waterLift,light[4]);
+  const water=bridge.water_state==='high-tide'?[0.12,0.29,0.36,0.96]:
+    bridge.water_state==='flowing'?[0.12,0.39,0.42,0.92]:[0.22,0.36,0.34,0.48];
+  portal.set_water_surface?.(water[0],water[1],water[2],water[3],
+    bridge.water_state==='flowing'?0.018:0.011,1.25,bridge.quality_tier);
   // The generic tensor particle field is optional decoration. Authored scene
   // effects remain visible on every tier; only enable the field on the
   // explicit GPU-quality path and assert the choice again in the frame loop.
@@ -1682,7 +1670,13 @@ function tryLoadHmcScene(bridge) {
   try {
     const receipt=toObj(portal.load_hmc_scene(hmcPack,JSON.stringify(hmcManifest),residentKey));
     sceneMeshes=receipt.organs_loaded||sceneMeshes;
+    hmcSceneReceipt=receipt;
     hmcResidentScene=residentKey;
+    if(receipt.material_pipeline&&receipt.materials_loaded>0){
+      note(`Qualia PBR scene active · ${receipt.materials_loaded} shared materials across ${receipt.material_ranges} surfaces`);
+    }else if(receipt.materials_loaded>0){
+      note(`Qualia scene materials retained · renderer using ${receipt.renderer||'supported fallback'}`);
+    }
     return sceneMeshes>0;
   } catch(e) {
     note(`HMC scene fallback (${bridge.scene_key}): ${String(e).slice(0,100)}`);
@@ -1701,11 +1695,14 @@ function rebuild() {
   tileCenters=Object.fromEntries(scene.tiles.map(t=>[t.id,t]));
   worldCenter=scene.worldCenter;worldScale=scene.worldScale;
   placePositions=scene.places;
+  scenePickTargets=scene.pickTargets?.length?scene.pickTargets:
+    PLACES.map((_,placeIndex)=>({placeIndex,label:PLACE_MARKERS[placeIndex]?.[0]||'Community site'}));
   // Prefer the verified HMC snapshot when the rebuilt shell exposes the
   // loader. Dynamic compilation remains the checked-in compatibility path.
   if(!tryLoadHmcScene(bridge)){
     const receipt = toObj(portal.load_scene(scene.assets));
     sceneMeshes = receipt.organs_loaded;
+    hmcSceneReceipt=receipt;
     hmcResidentScene='';
   }
   if (sceneMeshes !== scene.assets.length)
@@ -1742,6 +1739,14 @@ function selectArtStyle(next){
 function selectVehicleRig(next){
   vehicleRig=((next%VEHICLE_RIGS.length)+VEHICLE_RIGS.length)%VEHICLE_RIGS.length;
   m.set_vehicle_rig?.(vehicleRig);
+  if(cameraMode==='drive'){
+    const profile=driveStateFromVibe(vehicleRig);
+    drive.topSpeed=profile.topSpeed;drive.acceleration=profile.acceleration;
+    drive.braking=profile.braking;drive.steering=profile.steering;
+    drive.shoulder=profile.shoulder;drive.rigLoad=profile.rigLoad;
+    drive.trailer=profile.trailer;drive.trafficQueue=profile.trafficQueue;
+    drive.mirrorQueue=profile.mirrorQueue;drive.mirrorBlocked=profile.mirrorBlocked;
+  }
   if(!VISUAL_REVIEW_REQUESTED)try { localStorage.setItem('maslows-vehicle-rig',String(vehicleRig)); } catch {}
   hmcResidentScene='';
   rebuild();renderHud();
@@ -1780,74 +1785,52 @@ async function loadEcologyProfile(){
   }
 }
 
-function driveRoadCenterZ(x){
-  // These smooth centre lines follow the visible Kestrel and Saltwind road
-  // ribbons. Their heading change drives the mirror's bend-reveal behaviour.
-  if(x<6)return 0.48-0.25*Math.sin(((x+6.1)/12.1)*Math.PI*2);
-  if(x<9)return 0.48;
-  if(x<9.6)return 0.48+(x-9.0)*0.12;
-  const progress=Math.max(0,Math.min(1,(x-9.6)/12.7));
-  return 0.54-0.29*Math.sin(progress*Math.PI*2);
-}
 function stepDrive(dt){
-  const rig=RIG_DRIVING[vehicleRig], engineReady=drive.engineHealth>0;
-  const throttle=engineReady&&(walkKeys.has('w')||walkKeys.has('arrowup'));
-  const reverse=engineReady&&(walkKeys.has('s')||walkKeys.has('arrowdown'));
-  const steer=(walkKeys.has('d')?1:0)-(walkKeys.has('a')?1:0);
-  const brake=walkKeys.has(' ');
-  if(throttle)drive.speed=Math.min(rig.topSpeed,drive.speed+rig.acceleration*dt);
-  if(reverse||brake)drive.speed=Math.max(reverse?-1.0:0,drive.speed-rig.braking*dt);
-  if(!throttle&&!reverse&&!brake)drive.speed=Math.abs(drive.speed)<0.025?0:
-    drive.speed-Math.sign(drive.speed)*Math.min(Math.abs(drive.speed),0.26*dt);
-  if(steer)drive.heading+=steer*rig.steering*dt*(0.22+Math.min(1,Math.abs(drive.speed)/rig.topSpeed));
-  const previous={...walk}, direction=drive.speed<0?-1:1;
-  const distance=Math.abs(drive.speed)*dt;
-  walk.x+=-Math.sin(drive.heading)*distance*direction;
-  walk.z+=-Math.cos(drive.heading)*distance*direction;
-  const offRoad=Math.abs(walk.z-driveRoadCenterZ(walk.x));
-  if(offRoad>rig.shoulder){
-    walk=previous;drive.speed*=0.68;
-    drive.warning='Loose shoulder · steer back toward the road';
-  }else{
-    drive.warning='';
-    if(offRoad>0.72&&Math.abs(drive.speed)>2.2)drive.speed*=0.985;
-  }
-  const detectionRange=drive.period==='dawn'||drive.period==='dusk'?8.0:
-    drive.period==='night'?9.5:4.5;
-  const nearby=ROAD_HAZARDS.map(h=>({hazard:h,distance:Math.hypot(walk.x-h.x,walk.z-h.z)}))
-    .filter(item=>ECOLOGY_PROFILE.fauna.includes(item.hazard.profileKey)&&
-      item.distance<item.hazard.radius+detectionRange)
-    .sort((a,b)=>a.distance-b.distance)[0]?.hazard;
-  if(nearby){
-    const twilight=drive.period==='dawn'||drive.period==='dusk';
-    const riskContext=twilight?'Dawn/dusk wildlife · longer scan':
+  if(!driveSimulation||cameraMode!=='drive')return;
+  const reverse=walkKeys.has('s')||walkKeys.has('arrowdown');
+  const heightHere=m.terrain_height_world(walk.x,walk.z);
+  const heightAhead=m.terrain_height_world(walk.x+0.55,walk.z);
+  const heightBehind=m.terrain_height_world(walk.x-0.55,walk.z);
+  const input={dt,x:walk.x,z:walk.z,heading:drive.heading,speed:drive.speed,
+    rig_id:vehicleRig,
+    throttle:walkKeys.has('w')||walkKeys.has('arrowup'),
+    reverse,brake:walkKeys.has(' '),steer:(walkKeys.has('d')?1:0)-(walkKeys.has('a')?1:0),
+    terrain_height:heightHere,terrain_height_ahead:heightAhead,
+    terrain_height_behind:heightBehind,terrain_sample_distance:0.55,
+    crossing_open:state().bridgeOpen,period:drive.period,
+    hazards:ROAD_HAZARDS.map(h=>({id:h.id,label:h.label,taxon:h.taxon,
+      x:h.x,z:h.z,radius:h.radius,selected:ECOLOGY_PROFILE.fauna.includes(h.profileKey)})),
+    oil_temp:drive.oilTempC,coolant_temp:drive.coolantTempC,
+    engine_health:drive.engineHealth,overheat_seconds:drive.overheatSeconds,
+    traffic_queue:drive.trafficQueue,hazard_stops:drive.hazardStops,
+    emergency_stops:drive.emergencyStops,last_warning:drive.lastWarning||''};
+  const step=toObj(driveSimulation.step(JSON.stringify(input)));
+  if(!step||step.error||step.ok===false)throw new Error(`VibeScript drive step failed: ${step?.error||step?.detail||'invalid result'}`);
+  walk={x:step.x,z:step.z};drive.speed=step.speed;drive.heading=step.heading;
+  drive.distance+=step.distance_delta;drive.warning=step.warning||'';
+  drive.hazardStops=step.hazard_stops;drive.emergencyStops=step.emergency_stops;
+  drive.lastWarning=step.last_warning;drive.ambientC=step.ambient_c;
+  drive.gradePercent=step.grade_percent;drive.roadSurface=step.road_surface;
+  drive.thermalLoad=step.thermal_load;drive.oilTempC=step.oil_temp;
+  drive.coolantTempC=step.coolant_temp;drive.oilTrend=step.oil_trend;
+  drive.coolantTrend=step.coolant_trend;drive.engineHealth=step.engine_health;
+  drive.overheatSeconds=step.overheat_seconds;drive.engineWarning=step.engine_warning;
+  drive.trafficQueue=step.traffic_queue;drive.mirrorReveal=step.mirror_reveal;
+  drive.mirrorQueue=step.mirror_queue;drive.mirrorBlocked=step.mirror_blocked;
+  drive.topSpeed=step.top_speed;drive.acceleration=step.acceleration;
+  drive.braking=step.braking;drive.steering=step.steering;
+  drive.shoulder=step.shoulder;drive.rigLoad=step.rig_load;drive.trailer=step.trailer;
+  if(step.warning==='loose-shoulder')drive.warning='Loose shoulder · steer back toward the road';
+  else if(step.warning==='crossing-closed')drive.warning='Canal crossing closed · secure the bridge before driving through';
+  else if(step.warning==='route-end')drive.warning='End of the local demo road · regional destinations need a loaded place pack';
+  else if(step.warning==='hazard-near'){
+    const riskContext=drive.period==='dawn'||drive.period==='dusk'?'Dawn/dusk wildlife · longer scan':
       drive.period==='night'?'Night visibility · longer scan':'Road hazard';
-    drive.warning=`${riskContext} · ${nearby.label} · ${nearby.taxon} · slow and give space`;
-    if(Math.hypot(walk.x-nearby.x,walk.z-nearby.z)<nearby.radius+0.38){
-      walk=previous;
-      const emergencySpeed=twilight?1.6:drive.period==='night'?1.4:2.1;
-      if(Math.abs(drive.speed)>emergencySpeed){
-        drive.warning=`Emergency stop · ${nearby.label} · collision risk avoided`;
-        if(drive.lastWarning!==nearby.id){drive.emergencyStops++;drive.lastWarning=nearby.id;
-          note(`Driving event · ${drive.warning}`);}
-      }else{
-        drive.warning=`Safe stop · ${nearby.label} on the road`;
-        if(drive.lastWarning!==nearby.id){drive.hazardStops++;drive.lastWarning=nearby.id;
-          note(`Driving event · ${drive.warning}`);}
-      }
-      drive.speed=0;
-    }
-  }
-  const crossingClosed=!state().bridgeOpen&&walk.x>=5.85;
-  if(crossingClosed){
-    walk=previous;drive.speed=0;drive.warning='Canal crossing closed · secure the bridge before driving through';
-  }else if(walk.x<=-5.65||walk.x>=22.15){
-    walk.x=Math.max(-5.65,Math.min(22.15,walk.x));drive.speed=0;
-    drive.warning='End of the local demo road · regional destinations need a loaded place pack';
-  }
-  drive.distance+=Math.hypot(walk.x-previous.x,walk.z-previous.z);
-  updateVehicleThermals(dt,throttle,reverse);
-  drive.heading=((drive.heading+Math.PI*3)%(Math.PI*2))-Math.PI;
+    drive.warning=`${riskContext} · ${step.road_warning} · ${step.road_taxon} · slow and give space`;
+  }else if(step.warning==='emergency-stop')drive.warning=`Emergency stop · ${step.road_warning} · collision risk avoided`;
+  else if(step.warning==='safe-stop')drive.warning=`Safe stop · ${step.road_warning} on the road`;
+  if(step.hazard_event)note(`Driving event · ${drive.warning}`);
+  if(step.warning==='engine-failed')drive.warning=drive.engineWarning;
   camYaw=drive.heading;placeDriveCamera();
 }
 
@@ -1943,7 +1926,12 @@ canvas.addEventListener('pointerup', e=>{
       canvas.width, canvas.height);
     const readPick = (tries) => {
       const i=portal.poll_pick();
-      if(i>=0 && i<PLACES.length) inspect(PLACES[i]);
+      if(i>=0 && i<scenePickTargets.length){
+        const target=scenePickTargets[i];
+        if(target.activityId)handleHudAction(`activity:open:${target.activityId}`);
+        else inspect(PLACES[target.placeIndex]);
+        if(target.label)note(`Selected ${target.label}`);
+      }
       else if(tries>0) setTimeout(()=>readPick(tries-1),50);
       else $('why').style.display='none';
     };
@@ -2006,7 +1994,7 @@ function renderHud() {
     if(warning.textContent!==warningText)warning.textContent=warningText;
     warning.classList.toggle('is-warn',drive.oilTempC>=128||drive.coolantTempC>=104);
     warning.classList.toggle('is-critical',drive.oilTempC>=142||drive.coolantTempC>=114||drive.engineHealth<=0);
-    $('drive-context').textContent=`Ambient ${Math.round(drive.ambientC)} °C · grade ${drive.gradePercent.toFixed(1)}% · ${drive.roadSurface} surface · load ${Math.round(drive.thermalLoad*100)}%`;
+    $('drive-context').textContent=`VibeScript simulation · ambient ${Math.round(drive.ambientC)} °C · grade ${drive.gradePercent.toFixed(1)}% · ${drive.roadSurface} surface · load ${Math.round(drive.thermalLoad*100)}%`;
     $('mirror-status').textContent=rearMirrorReadout();
     $('rear-mirror').setAttribute('aria-label',rearMirrorReadout());
     $('rig-choice').value=String(vehicleRig);
@@ -2097,7 +2085,7 @@ function renderHud() {
     focusedPlace===null?`${cameraMode.toUpperCase()} VIEW`:
       PLACE_MARKERS[focusedPlace][0].toUpperCase(),18,compact?157:114,compact?280:395,23);
   if(cameraMode==='drive'){
-    const rig=RIG_DRIVING[vehicleRig],compactDriveWidth=compact?Math.max(170,W-286):W-64;
+    const compactDriveWidth=compact?Math.max(170,W-286):W-64;
     const thermal=engineThermalReadout(),oilColor=engineTempColor(drive.oilTempC,128,142),
       coolantColor=engineTempColor(drive.coolantTempC,104,114);
     panel(16,H-256,W-32,248);
@@ -2118,7 +2106,7 @@ function renderHud() {
       engineTempFraction(drive.coolantTempC,65,125),false,coolantColor);
     label(`${drive.ambientC.toFixed(0)}°C ambient · ${drive.gradePercent>=0?'+':''}${drive.gradePercent.toFixed(1)}% grade · ${drive.roadSurface}`,
       32,H-76,W-64,17);
-    label(`ENGINE LOAD ${(drive.thermalLoad*100).toFixed(0)}% · HEALTH ${drive.engineHealth.toFixed(0)}% · ${rig.shoulder.toFixed(1)} m shoulder allowance`,
+    label(`ENGINE LOAD ${(drive.thermalLoad*100).toFixed(0)}% · HEALTH ${drive.engineHealth.toFixed(0)}% · ${drive.shoulder.toFixed(1)} m shoulder allowance`,
       32,H-56,W-64,17);
     const timeWidth=compact?132:184,viewX=compact?178:232,
       viewWidth=compact?140:172,exitWidth=compact?96:112;
@@ -3149,9 +3137,44 @@ if (new URLSearchParams(location.search).has('selftest')) {
   const hmcPath=hmcSceneApi&&hmcResult.resident&&hmcResidentScene===expectedHmcScene?'resident HMC':'compiled .10d fallback';
   note(`TEST HMC bundle verification: ${hmcResult.verified?'PASS':'FAIL'} · entries=${hmcResult.assetCount||0}`);
   note(`TEST HMC hydration: ${hmcResult.loader?(hmcResult.resident&&hmcResidentScene===expectedHmcScene?'PASS':'FAIL'):'INFO (loader unavailable; compiled .10d fallback)'} · ${hmcResult.loader?`resident=${hmcResult.resident?'yes':'no'}`:'refused by checked-in package'}; path=${hmcPath}`);
+  const materialReceipt=hmcSceneReceipt||{};
+  note(`TEST Qualia PBR scene upload: ${materialReceipt.materials_loaded>0?
+    (materialReceipt.material_pipeline?'PASS':'FALLBACK'):'FAIL'} · materials=${materialReceipt.materials_loaded||0}, ranges=${materialReceipt.material_ranges||0}, backend=${materialReceipt.renderer||'unknown'}`);
   note(`TEST WASM package hash: ${packageHash.ok?'PASS':'FAIL'} · ${packageHash.ok?`${packageHash.actual} (${packageHash.bytes} bytes)`:(packageHash.error||`${packageHash.actual||'missing'} != ${packageHash.expected||'missing'}`)}`);
   const vibe = toObj(m.vibe_eval_cell('= 1 + 2'));
   note(`TEST VibeScript: ${vibe.ok && String(vibe.value)==='3' ? 'PASS' : 'FAIL'}`);
+  if(driveSimulation){
+  const driveSetup=toObj(driveSimulation.setup(1));
+  const driveInput={dt:0.05,rig_id:1,x:7.2,z:0.48,heading:-Math.PI/2,speed:0,
+    throttle:true,reverse:false,brake:false,steer:0,
+    terrain_height:0.0,terrain_height_ahead:0.0,terrain_height_behind:0.0,
+    terrain_sample_distance:0.55,crossing_open:true,period:'dusk',hazards:[],
+    oil_temp:94,coolant_temp:89,engine_health:100,overheat_seconds:0,
+    traffic_queue:4,hazard_stops:0,emergency_stops:0,last_warning:''};
+  const driveStraight=toObj(driveSimulation.step(JSON.stringify(driveInput)));
+  const driveHazard=toObj(driveSimulation.step(JSON.stringify({...driveInput,
+    throttle:false,x:0,speed:1.4,hazards:[
+      {selected:false,x:0.01,z:0.48,radius:1.0,id:'profile-excluded',label:'excluded fauna',taxon:'ignored'},
+      {selected:true,x:0.1,z:0.48,radius:0.6,id:'test-kangaroo',label:'kangaroo',taxon:'Macropodidae'}]})));
+  const driveHot=toObj(driveSimulation.step(JSON.stringify({...driveInput,
+    throttle:false,x:20,speed:3.0,terrain_height_ahead:0.099,oil_temp:144,coolant_temp:116,
+    overheat_seconds:10.0,traffic_queue:4.0})));
+  note(`TEST VibeScript touring setup: ${driveSetup.top_speed===3&&driveSetup.trailer&&
+    driveSetup.shoulder===1.25?'PASS':'FAIL'}`);
+  note(`TEST VibeScript drive tick and rig response: ${driveStraight.x>0&&driveStraight.speed>0&&
+    driveStraight.mirror_blocked&&driveStraight.mirror_queue>=4&&
+    driveStraight.road_surface==='bridge deck'?'PASS':'FAIL'}`);
+  note(`TEST VibeScript dawn/dusk fauna stop: ${driveHazard.warning==='safe-stop'&&driveHazard.speed===0&&
+    driveHazard.hazard_stops===1?'PASS':'FAIL'}`);
+  note(`TEST VibeScript hot-climb engine damage: ${driveHot.engine_health<100&&
+    driveHot.oil_temp>=142&&driveHot.engine_warning.includes('CRITICAL')?'PASS':'FAIL'}`);
+  }else{
+    note('TEST VibeScript drive: BLOCKED · served WASM package predates GameDriveSimulation');
+  }
+  const proposalAdapter = new m.GameSession(SEED,ACTIONS);
+  const adaptedProposal = toObj(proposalAdapter.propose('recordAppropriation'));
+  note(`TEST action-id adapter passes through VibeScript: ${adaptedProposal.ok&&
+    toObj(proposalAdapter.events()).includes('recordAppropriation')?'PASS':'FAIL'}`);
   const query = toObj(testSession.vibe_query('= world.coins'));
   note(`TEST Vibe world query: ${query.ok && query.value===12 ? 'PASS' : 'FAIL'}`);
   const scriptBlock = toObj(testSession.vibe_propose('= "startGarden"'));

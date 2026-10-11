@@ -34,7 +34,7 @@ const record = (name, pass, detail="") => {
 
 const tInit0 = performance.now();
 let m;
-const WASM_BUILD = 'df2357979af893e4';
+const WASM_BUILD = '3ca0c643bb536dac';
 try {
   m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
   await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});

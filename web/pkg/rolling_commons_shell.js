@@ -164,6 +164,63 @@ export class FederatedNodeManager {
 if (Symbol.dispose) FederatedNodeManager.prototype[Symbol.dispose] = FederatedNodeManager.prototype.free;
 
 /**
+ * A checked VibeScript program that owns the driving simulation rules.
+ * The browser submits sampled world facts and control intent, then renders
+ * the returned state; it does not implement the vehicle or thermal model.
+ */
+export class GameDriveSimulation {
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        GameDriveSimulationFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_gamedrivesimulation_free(ptr, 0);
+    }
+    /**
+     * @param {string} source
+     */
+    constructor(source) {
+        const ptr0 = passStringToWasm0(source, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.gamedrivesimulation_new(ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        this.__wbg_ptr = ret[0];
+        GameDriveSimulationFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * Return the initial driving state and handling profile authored by the
+     * loaded VibeScript module. The browser maps this record to HUD fields;
+     * route, rig and thermal defaults stay with the simulation rules.
+     * @param {number} rig_id
+     * @returns {any}
+     */
+    setup(rig_id) {
+        const ret = wasm.gamedrivesimulation_setup(this.__wbg_ptr, rig_id);
+        return ret;
+    }
+    /**
+     * Evaluate exactly one deterministic simulation tick using the checked
+     * VibeScript module loaded at construction. Input and output use records
+     * so the authored policy can grow without expanding the WASM ABI.
+     * @param {string} input_json
+     * @returns {any}
+     */
+    step(input_json) {
+        const ptr0 = passStringToWasm0(input_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.gamedrivesimulation_step(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+}
+if (Symbol.dispose) GameDriveSimulation.prototype[Symbol.dispose] = GameDriveSimulation.prototype.free;
+
+/**
  * Qualia's generic in-viewport HUD. Game rules remain in `GameSession`.
  */
 export class GameHud {
@@ -498,6 +555,19 @@ export class GamePortal {
         wasm.gameportal_set_tensor_projection_enabled(this.__wbg_ptr, enabled);
     }
     /**
+     * Tune the engine-owned animated water pass without rebuilding the scene.
+     * @param {number} r
+     * @param {number} g
+     * @param {number} b
+     * @param {number} alpha
+     * @param {number} wave_amplitude
+     * @param {number} wave_frequency
+     * @param {number} quality
+     */
+    set_water_surface(r, g, b, alpha, wave_amplitude, wave_frequency, quality) {
+        wasm.gameportal_set_water_surface(this.__wbg_ptr, r, g, b, alpha, wave_amplitude, wave_frequency, quality);
+    }
+    /**
      * Return a bounded temporal schedule with current renderer-owned producer evidence.
      * @param {number} quality_tier
      * @param {boolean} scene_changed
@@ -584,10 +654,9 @@ export class GameSession {
         return this;
     }
     /**
-     * Propose an action by catalogue id. The engine validates the gate
-     * against the current world; on `conforms` the declared triple edits are
-     * applied and an `ev:` event line is appended (event-sourced, so a
-     * replay of the tape must reproduce this exact world text).
+     * Compatibility entry point for UI hosts and deterministic replay. Even
+     * this action-id form is converted to a VibeScript command cell before it
+     * can reach the QualiaDB SHACL gate.
      * @param {string} action_id
      * @returns {any}
      */
@@ -9026,6 +9095,9 @@ const CompiledCellFinalization = (typeof FinalizationRegistry === 'undefined')
 const FederatedNodeManagerFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_federatednodemanager_free(ptr, 1));
+const GameDriveSimulationFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_gamedrivesimulation_free(ptr, 1));
 const GameHudFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_gamehud_free(ptr, 1));

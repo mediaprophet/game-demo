@@ -133,6 +133,24 @@ pub enum ParametricRecipe {
         size: [f32; 2],
         subdivisions: u32,
     },
+    /// A continuous, naturally curving water surface lofted along a cubic
+    /// Qualia B-spline. The renderer supplies the animated wave shading.
+    Waterway {
+        control: &'static [[f32; 2]],
+        width: f32,
+        elevation: f32,
+        segments: u32,
+        across: u32,
+    },
+    /// Tapered, curved margins that join a waterway into its surrounding
+    /// ground instead of leaving a rectangular blue cutout.
+    WaterwayBanks {
+        control: &'static [[f32; 2]],
+        water_width: f32,
+        bank_width: f32,
+        elevation: f32,
+        segments: u32,
+    },
     /// A procedural vegetation cluster with dynamic blade triangles.
     VegetationPatch {
         center: [f32; 3],
@@ -214,6 +232,31 @@ fn mesh_bounds(positions: &[[f32; 3]]) -> ([f32; 3], [f32; 3]) {
         }
     }
     (min, max)
+}
+
+fn sampled_spline(control: &[[f32; 2]], segments: u32) -> Result<Vec<Point3>, String> {
+    if control.len() != 4 || control.iter().flatten().any(|value| !value.is_finite()) {
+        return Err("a curved waterway needs four finite cubic control points".into());
+    }
+    let curve: Vec<Point3> = control
+        .iter()
+        .map(|point| Point3::new(point[0] as f64, point[1] as f64, 0.0))
+        .collect();
+    (0..=segments.clamp(8, 256))
+        .map(|step| {
+            parametric_cad::bspline_eval(
+                &curve,
+                3,
+                step as f64 / segments.clamp(8, 256) as f64,
+            )
+                .map_err(|error| format!("waterway curve: {error:?}"))
+        })
+        .collect()
+}
+
+fn mesh_from_positions(positions: Vec<[f32; 3]>, triangles: Vec<[u32; 3]>) -> Mesh {
+    let (min, max) = mesh_bounds(&positions);
+    Mesh { positions, triangles, min, max }
 }
 
 fn tapered_limb_mesh(limb: LimbSegment, radial_segments: usize) -> Result<Mesh, String> {
@@ -796,6 +839,113 @@ impl ParametricRecipe {
                     },
                 )
             }
+            Self::Waterway {
+                control,
+                width,
+                elevation,
+                segments,
+                across,
+            } => {
+                if !width.is_finite() || *width <= 0.1 || !elevation.is_finite() {
+                    return Err("curved waterway dimensions are invalid".into());
+                }
+                let path = sampled_spline(control, *segments)?;
+                let longitudinal = path.len() - 1;
+                let across = (*across).clamp(2, 16) as usize;
+                let mut left = vec![Point3::new(0.0, 0.0, 0.0); path.len()];
+                let mut right = left.clone();
+                parametric_cad::offset_polyline(&path, *width as f64 * 0.5, &mut left)
+                    .map_err(|error| format!("waterway left edge: {error:?}"))?;
+                parametric_cad::offset_polyline(&path, -*width as f64 * 0.5, &mut right)
+                    .map_err(|error| format!("waterway right edge: {error:?}"))?;
+                let mut positions = Vec::with_capacity(path.len() * (across + 1));
+                for index in 0..path.len() {
+                    for column in 0..=across {
+                        let t = column as f64 / across as f64;
+                        let ripple = ((index as f32 / longitudinal as f32)
+                            * std::f32::consts::TAU
+                            * 2.0)
+                            .sin()
+                            * 0.0025;
+                        positions.push([
+                            (left[index].x * (1.0 - t) + right[index].x * t) as f32,
+                            *elevation + ripple,
+                            (left[index].y * (1.0 - t) + right[index].y * t) as f32,
+                        ]);
+                    }
+                }
+                let mut triangles = Vec::with_capacity(longitudinal * across * 6);
+                let row = across + 1;
+                for index in 0..longitudinal {
+                    for column in 0..across {
+                        let a = (index * row + column) as u32;
+                        let b = a + row as u32;
+                        let c = a + 1;
+                        let d = b + 1;
+                        triangles.extend([[a, b, c], [c, b, d]]);
+                    }
+                }
+                ([0.0; 3], mesh_from_positions(positions, triangles))
+            }
+            Self::WaterwayBanks {
+                control,
+                water_width,
+                bank_width,
+                elevation,
+                segments,
+            } => {
+                if !water_width.is_finite()
+                    || *water_width <= 0.1
+                    || !bank_width.is_finite()
+                    || *bank_width <= 0.1
+                    || !elevation.is_finite()
+                {
+                    return Err("curved waterway bank dimensions are invalid".into());
+                }
+                let path = sampled_spline(control, *segments)?;
+                let longitudinal = path.len() - 1;
+                const ACROSS: usize = 8;
+                let row = ACROSS + 1;
+                let mut positions = Vec::with_capacity(path.len() * row * 2);
+                let mut triangles = Vec::with_capacity(longitudinal * ACROSS * 12);
+                for side in [1.0_f64, -1.0] {
+                    let mut offsets = Vec::with_capacity(ACROSS + 1);
+                    for column in 0..=ACROSS {
+                        let fraction = column as f64 / ACROSS as f64;
+                        let distance = *water_width as f64 * 0.5 + *bank_width as f64 * fraction;
+                        let mut edge = vec![Point3::new(0.0, 0.0, 0.0); path.len()];
+                        parametric_cad::offset_polyline(&path, side * distance, &mut edge)
+                            .map_err(|error| format!("waterway bank edge: {error:?}"))?;
+                        offsets.push(edge);
+                    }
+                    let base = positions.len() as u32;
+                    for index in 0..path.len() {
+                        let t = index as f32 / longitudinal as f32;
+                        for column in 0..=ACROSS {
+                            let fraction = column as f32 / ACROSS as f32;
+                            let crest = (fraction * std::f32::consts::PI).sin();
+                            let along = (t * std::f32::consts::TAU * 1.7 + side as f32).sin();
+                            let y = *elevation - 0.028 + crest * 0.082 + along * crest * 0.008;
+                            let point = offsets[column][index];
+                            positions.push([point.x as f32, y, point.y as f32]);
+                        }
+                    }
+                    for index in 0..longitudinal {
+                        for column in 0..ACROSS {
+                            let a = base + (index * row + column) as u32;
+                            let b = a + row as u32;
+                            let c = a + 1;
+                            let d = b + 1;
+                            if side > 0.0 {
+                                triangles.extend([[a, c, b], [b, c, d]]);
+                            } else {
+                                triangles.extend([[a, b, c], [b, d, c]]);
+                            }
+                        }
+                    }
+                }
+                ([0.0; 3], mesh_from_positions(positions, triangles))
+            }
             Self::VegetationPatch {
                 center,
                 radius,
@@ -848,11 +998,106 @@ impl ParametricRecipe {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct MaterialFamily {
+    pub id: &'static str,
+    pub metallic: f32,
+    pub roughness: f32,
+}
+
+pub const SOLAR_GLASS: MaterialFamily = MaterialFamily { id: "solar-glass", metallic: 0.46, roughness: 0.23 };
+pub const RUBBER: MaterialFamily = MaterialFamily { id: "rubber", metallic: 0.0, roughness: 0.84 };
+pub const FRAMED_GLASS: MaterialFamily = MaterialFamily { id: "framed-glass", metallic: 0.08, roughness: 0.24 };
+pub const GALVANISED_METAL: MaterialFamily = MaterialFamily { id: "galvanised-metal", metallic: 0.62, roughness: 0.34 };
+pub const WEATHERED_TIMBER: MaterialFamily = MaterialFamily { id: "weathered-timber", metallic: 0.02, roughness: 0.78 };
+pub const LIVING_FOLIAGE: MaterialFamily = MaterialFamily { id: "living-foliage", metallic: 0.0, roughness: 0.88 };
+pub const SOIL_AND_GRAVEL: MaterialFamily = MaterialFamily { id: "soil-and-gravel", metallic: 0.0, roughness: 0.96 };
+pub const FUR_AND_HIDE: MaterialFamily = MaterialFamily { id: "fur-and-hide", metallic: 0.0, roughness: 0.91 };
+pub const CLOTH_AND_SKIN: MaterialFamily = MaterialFamily { id: "cloth-and-skin", metallic: 0.0, roughness: 0.82 };
+pub const WEATHERED_CONCRETE: MaterialFamily = MaterialFamily { id: "weathered-concrete", metallic: 0.0, roughness: 0.93 };
+pub const PAINTED_METAL: MaterialFamily = MaterialFamily { id: "painted-metal", metallic: 0.12, roughness: 0.52 };
+pub const LIME_RENDER: MaterialFamily = MaterialFamily { id: "lime-render", metallic: 0.0, roughness: 0.91 };
+pub const TERRACOTTA: MaterialFamily = MaterialFamily { id: "terracotta", metallic: 0.0, roughness: 0.82 };
+pub const SHADE_CANVAS: MaterialFamily = MaterialFamily { id: "shade-canvas", metallic: 0.0, roughness: 0.89 };
+
+/// Existing recipe IDs get a first shared family; hero recipes can override
+/// it at construction time. Material assignment is stored on the recipe and
+/// travels with its compiled asset instead of being redetected at render time.
+pub(crate) fn material_family_for(id: &str) -> MaterialFamily {
+    let component = id.rsplit('/').next().unwrap_or(id);
+    let has = |words: &[&str]| {
+        words.iter().any(|word| {
+            component
+                .split(|character: char| character == '-' || character == '_')
+                .any(|token| token == *word)
+        })
+    };
+
+    if component.contains("solar-cell") || component.contains("solar-panel") {
+        SOLAR_GLASS
+    } else if has(&["wheel", "tyre", "tire", "rubber", "boot"])
+        || id.contains("/wheel-")
+        || id.contains("/tyre-")
+    {
+        RUBBER
+    } else if has(&["glass", "glazing"])
+        || (has(&["window", "windows"]) && !has(&["frame"]))
+    {
+        FRAMED_GLASS
+    } else if id.contains("/flora/") && has(&["trunk", "stem", "branch", "bark", "wood"]) {
+        WEATHERED_TIMBER
+    } else if id.contains("/flora/") {
+        LIVING_FOLIAGE
+    } else if has(&["shade", "awning", "canvas", "tent", "canopy"])
+        && !has(&["frame", "metal"])
+    {
+        SHADE_CANVAS
+    } else if has(&[
+        "metal", "mast", "steel", "pipe", "tank", "battery", "gutter", "rail", "frame",
+        "vice", "press", "fascia", "chassis", "array", "grid",
+    ]) {
+        GALVANISED_METAL
+    } else if has(&[
+        "wood", "timber", "trunk", "stem", "branch", "bark", "bed", "bench", "crate", "fence",
+        "deck", "board", "plank", "shelf", "tool", "door", "brace",
+    ]) {
+        WEATHERED_TIMBER
+    } else if has(&[
+        "foliage", "canopy", "crown", "leaf", "shoot", "flower", "gum", "wattle", "grass",
+        "crop", "cone", "bottlebrush", "saltbush", "kangaroo-paw", "shrub",
+    ]) {
+        LIVING_FOLIAGE
+    } else if component == "workshop-roof-panels" {
+        GALVANISED_METAL
+    } else if has(&[
+        "ground", "terrain", "soil", "path", "road", "hill", "earth", "mound", "rock", "boulder",
+        "bank", "canal", "creek", "meadow",
+    ])
+    {
+        SOIL_AND_GRAVEL
+    } else if id.contains("/fauna/") {
+        FUR_AND_HIDE
+    } else if id.contains("resident")
+        || has(&["hand", "head", "face", "hair", "pants", "coat", "shirt", "dress"])
+    {
+        CLOTH_AND_SKIN
+    } else if has(&["floor", "concrete", "masonry", "cement", "slab"]) {
+        WEATHERED_CONCRETE
+    } else if has(&["roof", "tile", "terracotta", "chimney"]) {
+        TERRACOTTA
+    } else if has(&["wall", "workshop", "hall", "shelter"]) {
+        LIME_RENDER
+    } else {
+        PAINTED_METAL
+    }
+}
+
 pub struct AssetRecipe {
     pub id: String,
     pub parts: Vec<Primitive>,
     pub parametric: Option<ParametricRecipe>,
     pub color: [f32; 4],
+    pub material_family: MaterialFamily,
     pub vibe_source: Option<String>,
     /// Renderer-owned pass role carried beside the `.10d` payload in HMC.
     pub render_role: String,
@@ -867,11 +1112,21 @@ fn roof(center: [f32; 3], size: [f32; 3]) -> Primitive {
 }
 
 fn asset(id: &str, color: [f32; 4], parts: Vec<Primitive>) -> AssetRecipe {
+    asset_with_family(id, color, parts, material_family_for(id))
+}
+
+fn asset_with_family(
+    id: &str,
+    color: [f32; 4],
+    parts: Vec<Primitive>,
+    material_family: MaterialFamily,
+) -> AssetRecipe {
     AssetRecipe {
         id: id.to_string(),
         parts,
         parametric: None,
         color,
+        material_family,
         vibe_source: None,
         render_role: "opaque".to_string(),
     }
@@ -883,6 +1138,7 @@ fn parametric(id: &str, color: [f32; 4], recipe: ParametricRecipe) -> AssetRecip
         parts: Vec::new(),
         parametric: Some(recipe),
         color,
+        material_family: material_family_for(id),
         vibe_source: None,
         render_role: "opaque".to_string(),
     }
@@ -894,8 +1150,8 @@ fn water_surface(id: &str, color: [f32; 4], recipe: ParametricRecipe) -> AssetRe
     result
 }
 
-/// First-pass blockout kit. Keep IDs stable when replacing geometry with
-/// finished, independently packaged assets. Dimensions are scene metres.
+/// Authored scene recipes in metres; QualiaDB compiles each into its shared
+/// mesh, material and `.10d` path. Stable IDs preserve picks and project links.
 pub fn kestrel_flats(
     upgrades: u32,
     panels: u32,
@@ -940,7 +1196,7 @@ pub fn kestrel_flats(
         [0.78, 0.55, 0.37, 1.0],
         ParametricRecipe::Ribbon {
             control: &[[-6.1, 0.45], [-2.8, 0.16], [2.5, 0.86], [6.0, 0.48]],
-            width: 1.15,
+            width: 2.05,
             elevation: 0.046,
         },
     ));
@@ -949,7 +1205,7 @@ pub fn kestrel_flats(
         [0.77, 0.56, 0.39, 1.0],
         ParametricRecipe::Ribbon {
             control: &[[1.7, -4.35], [1.38, -2.60], [1.88, -0.45], [1.38, 0.42]],
-            width: 0.82,
+            width: 1.46,
             elevation: 0.048,
         },
     ));
@@ -1185,8 +1441,23 @@ pub fn kestrel_flats(
             [0.93, 0.65, 0.41, 1.0]
         },
         vec![
-            block([3.2, 0.8, -2.2], [2.4, 1.6, 1.8]),
+            // Compose the shed shell from walls around a usable interior.
+            // The former single solid box read as a blockout at ground level.
+            block([3.2, 0.78, -3.04], [2.42, 1.50, 0.16]),
+            block([2.04, 0.78, -2.24], [0.16, 1.50, 1.60]),
+            block([4.36, 0.78, -2.24], [0.16, 1.50, 1.60]),
+            block([2.54, 0.76, -1.43], [0.84, 1.46, 0.16]),
+            block([3.98, 0.76, -1.43], [0.88, 1.46, 0.16]),
+            block([3.22, 1.51, -1.43], [0.62, 0.12, 0.17]),
             block([4.62, 0.49, -2.47], [0.9, 0.98, 1.15]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-floor",
+        [0.47, 0.45, 0.39, 1.0],
+        vec![
+            block([3.2, 0.035, -2.20], [2.24, 0.07, 1.45]),
+            block([3.2, 0.055, -1.38], [1.18, 0.11, 0.30]),
         ],
     ));
     scene.push(asset(
@@ -1224,13 +1495,62 @@ pub fn kestrel_flats(
         vec![block([2.34, 2.60, -2.64], [0.46, 0.09, 0.46])],
     ));
     scene.push(asset(
-        "rc:asset/workshop-doors",
-        [0.24, 0.42, 0.52, 1.0],
+        "rc:asset/workshop-window-glazing",
+        [0.22, 0.52, 0.60, 1.0],
+        vec![block([2.53, 1.00, -1.328], [0.43, 0.44, 0.035])],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-window-frame",
+        [0.27, 0.36, 0.37, 1.0],
         vec![
-            block([3.2, 0.65, -1.27], [1.15, 1.3, 0.05]),
-            block([2.55, 0.8, -1.25], [0.07, 1.6, 0.07]),
-            block([3.85, 0.8, -1.25], [0.07, 1.6, 0.07]),
+            // Framed front window beside the entry.
+            block([2.53, 1.00, -1.302], [0.035, 0.50, 0.055]),
+            block([2.53, 1.00, -1.302], [0.50, 0.035, 0.055]),
         ],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-entry-step",
+        [0.72, 0.60, 0.45, 1.0],
+        vec![block([3.20, 0.06, -1.18], [1.18, 0.12, 0.42])],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-service-details",
+        [0.37, 0.43, 0.40, 1.0],
+        vec![
+            // Vent slots, switchboard face, cable conduit, and a downpipe make
+            // the energy workshop legible as a working community facility.
+            block([4.08, 1.19, -1.317], [0.34, 0.07, 0.035]),
+            block([4.08, 1.06, -1.317], [0.34, 0.07, 0.035]),
+            block([4.08, 0.93, -1.317], [0.34, 0.07, 0.035]),
+            block([4.13, 0.73, -1.306], [0.24, 0.27, 0.05]),
+            block([4.31, 0.82, -1.23], [0.035, 0.50, 0.04]),
+            block([2.02, 0.60, -2.94], [0.055, 1.15, 0.075]),
+        ],
+    ));
+    scene.push(parametric(
+        "rc:asset/workshop-folding-timber-doors",
+        [0.52, 0.37, 0.23, 1.0],
+        ParametricRecipe::PanelGroup {
+            center: [3.2, 0.68, -1.29],
+            parts: vec![
+                // Leave the repair bay open; the folded leaves sit by the
+                // jambs instead of closing its only visible entrance.
+                PanelPart {
+                    offset: [-0.30, 0.0, 0.0],
+                    size: [0.12, 1.30, 0.06],
+                    pitch_deg: 0.0,
+                    roll_deg: 0.0,
+                    yaw_deg: -64.0,
+                },
+                PanelPart {
+                    offset: [0.30, 0.0, 0.0],
+                    size: [0.12, 1.30, 0.06],
+                    pitch_deg: 0.0,
+                    roll_deg: 0.0,
+                    yaw_deg: 64.0,
+                },
+            ],
+        },
     ));
     // An open, two-bay repair canopy gives the hub the working depth seen in
     // the Community Grounds reference. These are compiled as ordinary
@@ -1249,6 +1569,23 @@ pub fn kestrel_flats(
             block([3.20, 1.76, -0.79], [2.42, 0.08, 0.09]),
         ],
     ));
+    for (bay, z) in [("outer", -0.38), ("inner", -1.28)] {
+        for (side, x, direction) in [
+            ("left", 2.03, 1.0_f32),
+            ("right", 4.37, -1.0_f32),
+        ] {
+            scene.push(parametric(
+                &format!("rc:asset/workshop-timber-knee-brace-{bay}-{side}"),
+                [0.45, 0.34, 0.23, 1.0],
+                ParametricRecipe::Stem {
+                    start: [x, 0.98, z],
+                    end: [x + direction * 0.38, 1.59, z],
+                    radius: 0.055,
+                    segments: 8,
+                },
+            ));
+        }
+    }
     scene.push(parametric(
         "rc:asset/workshop-bay-canopy",
         [0.84, 0.79, 0.67, 1.0],
@@ -1315,6 +1652,41 @@ pub fn kestrel_flats(
             block([3.90, 0.84, -2.55], [0.18, 0.20, 0.17]),
             block([4.18, 0.84, -2.56], [0.18, 0.20, 0.18]),
             block([4.38, 1.31, -2.55], [0.22, 0.20, 0.17]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-vice-and-jigs",
+        [0.25, 0.28, 0.27, 1.0],
+        vec![
+            block([2.31, 0.82, -0.91], [0.25, 0.07, 0.17]),
+            block([2.31, 0.89, -0.91], [0.22, 0.075, 0.12]),
+            block([2.31, 0.96, -0.91], [0.25, 0.04, 0.10]),
+            block([2.31, 0.82, -0.91], [0.06, 0.16, 0.06]),
+            block([2.31, 0.78, -0.91], [0.31, 0.025, 0.025]),
+            block([2.16, 0.78, -0.91], [0.025, 0.06, 0.025]),
+            block([2.48, 0.78, -0.91], [0.025, 0.06, 0.025]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-drill-press",
+        [0.39, 0.42, 0.41, 1.0],
+        vec![
+            block([3.95, 0.81, -0.91], [0.38, 0.06, 0.30]),
+            block([3.95, 0.94, -0.91], [0.30, 0.035, 0.22]),
+            block([3.95, 1.16, -0.91], [0.07, 0.46, 0.07]),
+            block([4.02, 1.34, -0.91], [0.28, 0.07, 0.09]),
+            block([4.12, 1.24, -0.91], [0.06, 0.20, 0.06]),
+            block([3.95, 1.02, -0.91], [0.035, 0.16, 0.035]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-spares-crates",
+        [0.60, 0.39, 0.20, 1.0],
+        vec![
+            block([2.34, 0.39, -2.63], [0.46, 0.43, 0.40]),
+            block([2.34, 0.64, -2.63], [0.50, 0.05, 0.43]),
+            block([2.34, 0.39, -2.40], [0.38, 0.30, 0.035]),
+            block([2.34, 0.39, -2.86], [0.38, 0.30, 0.035]),
         ],
     ));
     if panels > 0 {
@@ -1466,18 +1838,28 @@ pub fn kestrel_flats(
             block([-5.55, 0.35, -0.5], [0.08, 0.6, 0.08]),
         ],
     ));
+    let mut garden_bed_frame = Vec::new();
+    for (x, z) in [(-4.8_f32, -4.2_f32), (-4.8, -3.3), (-3.0, -4.2)] {
+        garden_bed_frame.extend([
+            block([x, 0.16, z - 0.235], [1.42, 0.16, 0.085]),
+            block([x, 0.16, z + 0.235], [1.42, 0.16, 0.085]),
+            block([x - 0.665, 0.16, z], [0.085, 0.16, 0.48]),
+            block([x + 0.665, 0.16, z], [0.085, 0.16, 0.48]),
+        ]);
+        for dx in [-0.66_f32, 0.66] {
+            for dz in [-0.23_f32, 0.23] {
+                garden_bed_frame.push(block([x + dx, 0.14, z + dz], [0.095, 0.24, 0.095]));
+            }
+        }
+    }
     scene.push(asset(
         "rc:asset/garden-beds",
         if garden_active {
-            [0.48, 0.35, 0.22, 1.0]
+            [0.56, 0.40, 0.25, 1.0]
         } else {
-            [0.36, 0.27, 0.18, 1.0]
+            [0.43, 0.31, 0.20, 1.0]
         },
-        vec![
-            block([-4.8, 0.09, -4.2], [1.4, 0.18, 0.55]),
-            block([-4.8, 0.09, -3.3], [1.4, 0.18, 0.55]),
-            block([-3.0, 0.09, -4.2], [1.4, 0.18, 0.55]),
-        ],
+        garden_bed_frame,
     ));
     // One raised plot is a small water-connected growing channel. Keep its
     // frame in the ordinary scene so offline states still show the hardware.
@@ -1770,23 +2152,40 @@ pub fn kestrel_flats(
             },
         ));
     }
-    scene.push(asset(
-        "rc:asset/footpaths",
-        [0.94, 0.80, 0.59, 1.0],
-        vec![
-            block([-4.1, 0.04, 1.15], [0.72, 0.055, 4.2]),
-            block([-3.85, 0.04, -1.7], [2.6, 0.055, 0.62]),
-            block([3.2, 0.04, -0.9], [0.68, 0.055, 1.75]),
-            block([0.0, 0.04, -3.9], [0.62, 0.055, 2.1]),
-        ],
-    ));
-    scene.push(asset(
+    for (id, control, width, elevation) in [
+        (
+            "rc:asset/path-to-garden",
+            &[[-4.1_f32, 1.2], [-4.55, -0.7], [-4.72, -2.8], [-4.05, -5.1]][..],
+            0.66,
+            0.046,
+        ),
+        (
+            "rc:asset/path-garden-to-workshop",
+            &[[-3.75_f32, -2.25], [-2.10, -1.53], [0.65, -0.50], [2.82, -0.45]][..],
+            0.54,
+            0.052,
+        ),
+        (
+            "rc:asset/path-commons-arc",
+            &[[-4.1_f32, 1.18], [-2.02, 1.76], [0.96, 1.55], [3.18, 0.58]][..],
+            0.48,
+            0.053,
+        ),
+    ] {
+        scene.push(parametric(
+            id,
+            [0.88, 0.73, 0.53, 1.0],
+            ParametricRecipe::Ribbon { control, width, elevation },
+        ));
+    }
+    scene.push(parametric(
         "rc:asset/road-markings",
         [0.88, 0.79, 0.48, 1.0],
-        (-5..=5)
-            .step_by(2)
-            .map(|x| block([x as f32, 0.041, 0.5], [0.7, 0.012, 0.045]))
-            .collect(),
+        ParametricRecipe::Ribbon {
+            control: &[[-6.1, 0.45], [-2.8, 0.16], [2.5, 0.86], [6.0, 0.48]],
+            width: 0.035,
+            elevation: 0.052,
+        },
     ));
     scene.push(asset(
         "rc:asset/workshop-roof-panels",
@@ -1889,17 +2288,60 @@ pub fn kestrel_flats(
             }))
             .collect(),
     ));
+    for (name, x, z, length) in [
+        ("north", -4.8_f32, -4.2_f32, 1.32_f32),
+        ("centre", -4.8, -3.3, 1.32),
+        ("east", -3.0, -4.2, 1.32),
+    ] {
+        scene.push(parametric(
+            &format!("rc:asset/garden-dripline-pipe-{name}"),
+            [0.26, 0.37, 0.34, 1.0],
+            ParametricRecipe::Stem {
+                start: [x - length * 0.5, 0.235, z + 0.17],
+                end: [x + length * 0.5, 0.235, z + 0.17],
+                radius: 0.025,
+                segments: 8,
+            },
+        ));
+    }
+    scene.push(parametric(
+        "rc:asset/garden-irrigation-main-pipe",
+        [0.39, 0.43, 0.39, 1.0],
+        ParametricRecipe::Stem {
+            start: [-5.0, 0.56, -0.55],
+            end: [-5.68, 0.245, -0.72],
+            radius: 0.045,
+            segments: 8,
+        },
+    ));
     if garden_active {
-        scene.push(asset(
+        let mut seedlings = Vec::new();
+        for (plant, (x, z)) in [
+            (-5.2_f32, -4.2_f32), (-4.7, -4.2), (-4.2, -4.2), (-3.4, -4.2),
+            (-2.9, -4.2), (-2.4, -4.2), (-5.0, -3.3), (-4.55, -3.3), (-4.1, -3.3),
+        ].into_iter().enumerate() {
+            for leaf in 0..9 {
+                let angle = leaf as f32 * std::f32::consts::TAU / 9.0
+                    + plant as f32 * 0.61;
+                let reach = 0.12 + ((leaf * 5 + plant * 3) % 7) as f32 * 0.018;
+                seedlings.push(EllipsoidInstance {
+                    center: [x + angle.cos() * reach, 0.34 + (leaf % 3) as f32 * 0.018,
+                        z + angle.sin() * reach * 0.62],
+                    radii: [0.075, 0.035, 0.18 + (leaf % 4) as f32 * 0.018],
+                    pitch_deg: 18.0 + (leaf % 4) as f32 * 7.0,
+                    yaw_deg: angle.to_degrees(),
+                    roll_deg: (plant as f32 - leaf as f32 * 0.35) * 2.5,
+                });
+            }
+        }
+        scene.push(parametric(
             "rc:asset/garden-shoots",
-            [0.27, 0.78, 0.26, 1.0],
-            [
-                (-4.2, &[-5.2_f32, -4.7, -4.2, -3.4, -2.9, -2.4][..]),
-                (-3.3, &[-5.2_f32, -4.7, -4.2][..]),
-            ]
-                .into_iter()
-                .flat_map(|(z, xs)| xs.iter().copied().map(move |x| block([x, 0.36, z], [0.12, 0.31, 0.15])))
-                .collect(),
+            [0.27, 0.69, 0.27, 1.0],
+            ParametricRecipe::EllipsoidCluster {
+                instances: seedlings,
+                latitude: 8,
+                longitude: 11,
+            },
         ));
         // Three compact cultivated heads bring a softer silhouette to the
         // trough. They are garden crops, not a claim about native wetland flora.
@@ -1958,17 +2400,26 @@ pub fn kestrel_flats(
                 [0.28, 0.55, 0.31, 1.0],
             ),
         ] {
-            if id.ends_with("chard-b") {
-                continue;
+            let mut leaves = Vec::with_capacity(16);
+            for leaf in 0..16 {
+                let angle = leaf as f32 * std::f32::consts::TAU / 16.0;
+                let reach = 0.16 + ((leaf * 7 + 3) % 9) as f32 * 0.012;
+                leaves.push(EllipsoidInstance {
+                    center: [x + angle.cos() * reach, 0.40 + (leaf % 4) as f32 * 0.025,
+                        z + angle.sin() * reach * 0.72],
+                    radii: [0.12, 0.043, 0.24 + (leaf % 5) as f32 * 0.014],
+                    pitch_deg: 16.0 + (leaf % 5) as f32 * 8.0,
+                    yaw_deg: angle.to_degrees() + (leaf % 3) as f32 * 7.0,
+                    roll_deg: angle.sin() * 13.0,
+                });
             }
             scene.push(parametric(
                 id,
                 hue,
-                ParametricRecipe::Ellipsoid {
-                    center: [x, 0.42, z],
-                    radii: [0.66, 0.20, 0.28],
+                ParametricRecipe::EllipsoidCluster {
+                    instances: leaves,
                     latitude: 7,
-                    longitude: 11,
+                    longitude: 10,
                 },
             ));
         }
@@ -2954,6 +3405,83 @@ pub fn kestrel_flats(
     scene
 }
 
+#[cfg(test)]
+mod material_family_tests {
+    use super::*;
+
+    #[test]
+    fn waterways_and_banks_follow_a_curved_qualia_spline() {
+        const CONTROL: &[[f32; 2]] = &[[0.0, 0.0], [1.0, 2.0], [3.0, -2.0], [4.0, 0.0]];
+        let water = ParametricRecipe::Waterway {
+            control: CONTROL,
+            width: 1.8,
+            elevation: 0.2,
+            segments: 24,
+            across: 8,
+        }
+        .compile()
+        .unwrap();
+        assert_eq!(water.positions.len(), 25 * 9);
+        assert_eq!(water.triangles.len(), 24 * 8 * 2);
+        assert!(water
+            .positions
+            .iter()
+            .all(|point| point.iter().all(|v| v.is_finite())));
+        let centerline: Vec<[f32; 3]> = water
+            .positions
+            .chunks_exact(9)
+            .map(|row| row[4])
+            .collect();
+        let z_span = centerline
+            .iter()
+            .map(|point| point[2])
+            .fold(f32::NEG_INFINITY, f32::max)
+            - centerline
+                .iter()
+                .map(|point| point[2])
+                .fold(f32::INFINITY, f32::min);
+        assert!(
+            z_span > 0.2,
+            "the water centerline must curve rather than stay a rectangle"
+        );
+
+        let banks = ParametricRecipe::WaterwayBanks {
+            control: CONTROL,
+            water_width: 1.8,
+            bank_width: 1.2,
+            elevation: 0.2,
+            segments: 24,
+        }
+        .compile()
+        .unwrap();
+        assert_eq!(banks.positions.len(), 2 * 25 * 9);
+        assert!(banks.triangles.len() > water.triangles.len());
+        assert!(banks
+            .positions
+            .iter()
+            .all(|point| point.iter().all(|v| v.is_finite())));
+    }
+
+    #[test]
+    fn botanical_anatomy_keeps_bark_and_foliage_distinct() {
+        assert_eq!(material_family_for("rc:asset/flora/eucalypt-gum/trunk").id, "weathered-timber");
+        assert_eq!(
+            material_family_for("rc:asset/flora/eucalypt-gum/blue-grey-leaves-0").id,
+            "living-foliage"
+        );
+    }
+
+    #[test]
+    fn settlement_parts_use_their_authored_surface_family() {
+        assert_eq!(material_family_for("rc:asset/solar-cells").id, "solar-glass");
+        assert_eq!(material_family_for("rc:asset/solar-array").id, "galvanised-metal");
+        assert_eq!(material_family_for("rc:asset/workshop-window-glazing").id, "framed-glass");
+        assert_eq!(material_family_for("rc:asset/workshop-window-frame").id, "galvanised-metal");
+        assert_eq!(material_family_for("rc:asset/workshop-roof").id, "terracotta");
+        assert_eq!(material_family_for("rc:asset/camp-shade-panels").id, "shade-canvas");
+    }
+}
+
 /// Saltwind Reach is a second authored territory sharing the same scene
 /// coordinates, event world and QualiaPortal viewport as Kestrel Flats.
 /// The water crossing is a visual state of the rule-gated bridge project.
@@ -3107,6 +3635,20 @@ pub fn saltwind_reach(
             },
         ));
     }
+    const CANAL_CONTROL: &[[f32; 2]] = &[
+        [8.05, -7.0], [8.72, -2.15], [7.28, 2.20], [8.02, 7.0],
+    ];
+    scene.push(parametric(
+        "rc:asset/channel-banks",
+        [0.62, 0.64, 0.43, 1.0],
+        ParametricRecipe::WaterwayBanks {
+            control: CANAL_CONTROL,
+            water_width: 2.15,
+            bank_width: 1.05,
+            elevation: if high_tide { 0.08 } else { 0.01 },
+            segments: 64,
+        },
+    ));
     scene.push(water_surface(
         "rc:asset/channel",
         if high_tide {
@@ -3114,10 +3656,12 @@ pub fn saltwind_reach(
         } else {
             [0.23, 0.67, 0.75, 1.0]
         },
-        ParametricRecipe::WaterPlane {
-            center: [8.0, if high_tide { 0.08 } else { 0.0 }, 0.0],
-            size: [2.0, 14.0],
-            subdivisions: 8,
+        ParametricRecipe::Waterway {
+            control: CANAL_CONTROL,
+            width: 2.15,
+            elevation: if high_tide { 0.08 } else { 0.01 },
+            segments: 64,
+            across: 8,
         },
     ));
     scene.push(asset(
@@ -3245,7 +3789,7 @@ pub fn saltwind_reach(
         [0.89, 0.72, 0.50, 1.0],
         ParametricRecipe::Ribbon {
             control: &[[9.6, 0.55], [13.0, 0.25], [18.8, 0.83], [22.3, 0.50]],
-            width: 1.25,
+            width: 2.35,
             elevation: 0.049,
         },
     ));
@@ -3254,19 +3798,33 @@ pub fn saltwind_reach(
         [0.88, 0.71, 0.51, 1.0],
         ParametricRecipe::Ribbon {
             control: &[[16.0, -4.20], [15.65, -2.6], [16.25, -0.55], [16.0, 0.48]],
-            width: 0.88,
+            width: 1.65,
             elevation: 0.050,
         },
     ));
-    scene.push(asset(
-        "rc:asset/saltwind-footpaths",
-        [0.97, 0.85, 0.65, 1.0],
-        vec![
-            block([12.3, 0.04, -2.0], [0.7, 0.05, 3.1]),
-            block([19.0, 0.04, -2.1], [0.7, 0.05, 3.0]),
-            block([17.5, 0.04, 3.4], [3.8, 0.05, 0.65]),
-        ],
-    ));
+    for (id, control, width) in [
+        (
+            "rc:asset/saltwind-path-north-meadow",
+            &[[11.5_f32, -4.6], [12.8, -3.7], [13.4, -1.7], [15.2, -0.7]][..],
+            0.72,
+        ),
+        (
+            "rc:asset/saltwind-path-crossing",
+            &[[10.2_f32, 1.2], [12.5, 1.8], [14.6, 2.1], [16.0, 0.9]][..],
+            0.66,
+        ),
+        (
+            "rc:asset/saltwind-path-orchard",
+            &[[15.3_f32, 2.1], [16.8, 2.8], [18.5, 3.6], [20.4, 4.6]][..],
+            0.76,
+        ),
+    ] {
+        scene.push(parametric(
+            id,
+            [0.91, 0.79, 0.59, 1.0],
+            ParametricRecipe::Ribbon { control, width, elevation: 0.052 },
+        ));
+    }
     scene.push(asset(
         "rc:asset/saltwind-barn",
         [0.92, 0.49, 0.38, 1.0],
@@ -3693,13 +4251,29 @@ pub fn northern_highlands() -> Vec<AssetRecipe> {
             },
         ));
     }
+    const CREEK_CONTROL: &[[f32; 2]] = &[
+        [8.02, -21.0], [8.48, -16.4], [7.55, -11.3], [8.08, -7.0],
+    ];
+    scene.push(parametric(
+        "rc:asset/highland-creek-banks",
+        [0.57, 0.67, 0.46, 1.0],
+        ParametricRecipe::WaterwayBanks {
+            control: CREEK_CONTROL,
+            water_width: 1.82,
+            bank_width: 1.45,
+            elevation: 0.02,
+            segments: 56,
+        },
+    ));
     scene.push(water_surface(
         "rc:asset/highland-creek",
         [0.28, 0.63, 0.73, 1.0],
-        ParametricRecipe::WaterPlane {
-            center: [8.0, 0.02, -14.0],
-            size: [2.0, 14.0],
-            subdivisions: 8,
+        ParametricRecipe::Waterway {
+            control: CREEK_CONTROL,
+            width: 1.82,
+            elevation: 0.02,
+            segments: 56,
+            across: 8,
         },
     ));
     for (id, x, z, radii) in [

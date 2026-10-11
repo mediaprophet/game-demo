@@ -1,0 +1,224 @@
+module <https://civics.au/game/modules/community_drive>;
+import "vibe:0.1/math" as m;
+
+pure fn choose_float(condition: bool, when_true: f64, when_false: f64) -> f64 {
+    if condition { return when_true; }
+    return when_false;
+}
+
+pure fn choose_text(condition: bool, when_true: string, when_false: string) -> string {
+    if condition { return when_true; }
+    return when_false;
+}
+
+pure fn trend(target: f64, current: f64) -> string {
+    if target - current > 1.0 { return "rising"; }
+    if target - current < -1.0 { return "cooling"; }
+    return "steady";
+}
+
+pure fn ambient_for_period(period: string) -> f64 {
+    if period == "dawn" { return 20.0; }
+    if period == "day" { return 38.0; }
+    if period == "dusk" { return 32.0; }
+    if period == "night" { return 25.0; }
+    return 28.0;
+}
+
+pure fn drive_rig_profile(rig_id: f64) -> Record {
+    if rig_id < 0.5 { return { top_speed: 4.0, acceleration: 2.0, braking: 3.7, steering: 0.72, shoulder: 1.8, load: 0.28, queue: 2.0, trailer: false }; }
+    if rig_id < 1.5 { return { top_speed: 3.0, acceleration: 1.25, braking: 2.25, steering: 0.48, shoulder: 1.25, load: 0.76, queue: 5.0, trailer: true }; }
+    if rig_id < 2.5 { return { top_speed: 3.4, acceleration: 1.55, braking: 2.7, steering: 0.58, shoulder: 1.35, load: 0.56, queue: 4.0, trailer: true }; }
+    return { top_speed: 4.2, acceleration: 2.1, braking: 3.9, steering: 0.82, shoulder: 2.0, load: 0.38, queue: 1.0, trailer: false };
+}
+
+pure fn drive_setup(rig_id: f64) -> Record {
+    let rig = drive_rig_profile(rig_id);
+    return {
+        x: -5.45, z: 0.48, heading: -1.5707963267948966, speed: 0.0,
+        distance: 0.0, period: "dusk", warning: "", hazard_stops: 0.0,
+        emergency_stops: 0.0, last_warning: "", oil_temp: 94.0,
+        coolant_temp: 89.0, ambient_c: 32.0, grade_percent: 0.0,
+        thermal_load: 0.32, road_surface: "sealed", engine_health: 100.0,
+        overheat_seconds: 0.0, engine_warning: "", oil_trend: "steady",
+        coolant_trend: "steady", traffic_queue: rig.queue,
+        mirror_reveal: false, mirror_queue: rig.queue, mirror_blocked: rig.trailer,
+        top_speed: rig.top_speed, acceleration: rig.acceleration,
+        braking: rig.braking, steering: rig.steering, shoulder: rig.shoulder,
+        rig_load: rig.load, trailer: rig.trailer
+    };
+}
+
+pure fn road_center_z(x: f64) -> f64 {
+    if x < 6.0 { return 0.48 - 0.25 * m.sin(((x + 6.1) / 12.1) * 6.283185307179586); }
+    if x < 9.0 { return 0.48; }
+    if x < 9.6 { return 0.48 + (x - 9.0) * 0.12; }
+    let progress = m.clamp((x - 9.6) / 12.7, 0.0, 1.0);
+    return 0.54 - 0.29 * m.sin(progress * 6.283185307179586);
+}
+
+pure fn road_heading_at(x: f64) -> f64 {
+    let slope = (road_center_z(x + 0.35) - road_center_z(x - 0.35)) / 0.7;
+    return -1.5707963267948966 - m.atan2(slope, 1.0);
+}
+
+pure fn road_surface_at(x: f64) -> Record {
+    if x < 0.0 { return { name: "sealed", roughness: 0.04 }; }
+    if x < 5.8 { return { name: "worn bitumen", roughness: 0.10 }; }
+    if x < 9.1 { return { name: "bridge deck", roughness: 0.07 }; }
+    if x < 15.5 { return { name: "graded gravel", roughness: 0.20 }; }
+    return { name: "corrugated gravel", roughness: 0.34 };
+}
+
+// One deterministic simulation tick. The browser supplies sampled terrain,
+// road, weather, rig and hazard facts; VibeScript owns the driving rules.
+pure fn drive_step(input: Record) budget(steps: 10000) -> Record {
+    let rig = drive_rig_profile(input.rig_id);
+    let dt = m.clamp(input.dt, 0.0, 0.05);
+    let ambient = ambient_for_period(input.period);
+    let speed = input.speed;
+    let throttle = input.engine_health > 0.0 && input.throttle;
+    let reverse = input.engine_health > 0.0 && input.reverse;
+    let braking = reverse || input.brake;
+    let powered = choose_float(throttle,
+        m.min(rig.top_speed, speed + rig.acceleration * dt), speed);
+    let reversed = choose_float(reverse,
+        m.max(-1.0, powered - rig.braking * dt), powered);
+    let stopped = choose_float(input.brake && !reverse,
+        m.max(0.0, reversed - rig.braking * dt), reversed);
+    let coasted = choose_float(!throttle && !braking,
+        choose_float(m.abs(speed) < 0.025, 0.0,
+            speed - choose_float(speed > 0.0, 1.0, -1.0) * m.min(m.abs(speed), 0.26 * dt)),
+        stopped);
+    let steer_scale = 0.22 + m.min(1.0, m.abs(coasted) / m.max(0.1, rig.top_speed));
+    let heading = input.heading + input.steer * rig.steering * dt * steer_scale;
+    let direction = choose_float(coasted < 0.0, -1.0, 1.0);
+    let travel = m.abs(coasted) * dt * direction;
+    let center_z = road_center_z(input.x);
+    let candidate_x = input.x - m.sin(heading) * travel;
+    let candidate_z = input.z - m.cos(heading) * travel;
+    let off_road = m.abs(candidate_z - center_z);
+    let left_shoulder = off_road > rig.shoulder;
+    let road_speed = choose_float(left_shoulder, coasted * 0.68,
+        choose_float(off_road > 0.72 && m.abs(coasted) > 2.2, coasted * 0.985, coasted));
+    let shoulder_x = choose_float(left_shoulder, input.x, candidate_x);
+    let shoulder_z = choose_float(left_shoulder, input.z, candidate_z);
+
+    let twilight = input.period == "dawn" || input.period == "dusk";
+    let detection_range = choose_float(twilight, 8.0,
+        choose_float(input.period == "night", 9.5, 4.5));
+    // Filtered candidates are data from the selected local ecology profile.
+    // Selection and nearest-encounter resolution are simulation rules, so
+    // they stay in VibeScript instead of leaking into the browser host.
+    let mut hazard_distance: f64 = 1.0e12;
+    let mut hazard_radius: f64 = 0.0;
+    let mut hazard_id: string = "";
+    let mut hazard_label: string = "";
+    let mut hazard_taxon: string = "";
+    for hazard in input.hazards {
+        if hazard.selected {
+            let dx = candidate_x - hazard.x;
+            let dz = candidate_z - hazard.z;
+            let candidate_distance = m.sqrt(dx * dx + dz * dz);
+            if candidate_distance < hazard_distance {
+                hazard_distance = candidate_distance;
+                hazard_radius = hazard.radius;
+                hazard_id = hazard.id;
+                hazard_label = hazard.label;
+                hazard_taxon = hazard.taxon;
+            }
+        }
+    }
+    let hazard_available = hazard_id != "";
+    let hazard_near = hazard_available && hazard_distance < hazard_radius + detection_range;
+    let hazard_collision = hazard_near && hazard_distance < hazard_radius + 0.38;
+    let emergency_speed = choose_float(twilight, 1.6,
+        choose_float(input.period == "night", 1.4, 2.1));
+    let emergency_stop = hazard_collision && m.abs(road_speed) > emergency_speed;
+    let safe_stop = hazard_collision && !emergency_stop;
+    let hazard_stop = emergency_stop || safe_stop;
+    let hazard_x = choose_float(hazard_stop, input.x, shoulder_x);
+    let hazard_z = choose_float(hazard_stop, input.z, shoulder_z);
+    let hazard_speed = choose_float(hazard_stop, 0.0, road_speed);
+
+    let crossing_closed = !input.crossing_open && hazard_x >= 5.85;
+    let crossing_x = choose_float(crossing_closed, input.x, hazard_x);
+    let crossing_z = choose_float(crossing_closed, input.z, hazard_z);
+    let crossing_speed = choose_float(crossing_closed, 0.0, hazard_speed);
+    let at_end = crossing_x <= -5.65 || crossing_x >= 22.15;
+    let next_x = m.clamp(crossing_x, -5.65, 22.15);
+    let next_z = crossing_z;
+    let next_speed = choose_float(at_end, 0.0, crossing_speed);
+
+    let warning = choose_text(input.engine_health <= 0.0,
+        "engine-failed", choose_text(crossing_closed, "crossing-closed",
+        choose_text(at_end, "route-end", choose_text(emergency_stop, "emergency-stop",
+        choose_text(safe_stop, "safe-stop", choose_text(hazard_near, "hazard-near",
+        choose_text(left_shoulder, "loose-shoulder", "")))))));
+    let hazard_event = hazard_stop && input.last_warning != hazard_id;
+    let next_last_warning = choose_text(hazard_stop, hazard_id, input.last_warning);
+    let hazard_stops = input.hazard_stops + choose_float(safe_stop && hazard_event, 1.0, 0.0);
+    let emergency_stops = input.emergency_stops + choose_float(emergency_stop && hazard_event, 1.0, 0.0);
+
+    let terrain_delta = choose_float(reverse,
+        input.terrain_height_behind - input.terrain_height,
+        input.terrain_height_ahead - input.terrain_height);
+    let grade = m.clamp(terrain_delta / m.max(0.1, input.terrain_sample_distance), -0.18, 0.18);
+    let surface = road_surface_at(input.x);
+    let load = m.clamp(0.22 + choose_float(throttle, 0.55, 0.08)
+        + m.abs(next_speed) / m.max(0.1, rig.top_speed) * 0.16
+        + m.max(0.0, grade) * 10.0 + surface.roughness * 0.60 + rig.load,
+        0.12, 1.85);
+    let airflow = m.min(12.0, m.abs(next_speed) * 1.35);
+    let target_oil = ambient + 62.0 + load * 30.0 - airflow;
+    let target_coolant = ambient + 42.0 + load * 23.0 - airflow * 0.62;
+    let oil_trend = trend(target_oil, input.oil_temp);
+    let coolant_trend = trend(target_coolant, input.coolant_temp);
+    let oil_temp = input.oil_temp + (target_oil - input.oil_temp) * (1.0 - m.exp(-dt * 0.028));
+    let coolant_temp = input.coolant_temp + (target_coolant - input.coolant_temp) * (1.0 - m.exp(-dt * 0.040));
+    let critical = oil_temp >= 142.0 || coolant_temp >= 114.0;
+    let elevated = oil_temp >= 128.0 || coolant_temp >= 104.0;
+    let overheat = choose_float(critical, input.overheat_seconds + dt,
+        m.max(0.0, input.overheat_seconds - dt * 2.0));
+    let health = choose_float(overheat > 10.0,
+        m.max(0.0, input.engine_health - dt * 1.2), input.engine_health);
+    let final_speed = choose_float(health <= 0.0, 0.0, next_speed);
+    let engine_warning = choose_text(health <= 0.0,
+        "ENGINE FAILURE · temperature damage ended the drive",
+        choose_text(critical, "CRITICAL ENGINE TEMP · ease off, stop safely and let it cool",
+        choose_text(elevated, "Engine temperature rising · reduce load and watch the next climb", "")));
+
+    let trailer = rig.trailer;
+    let traffic_target = choose_float(trailer, 4.2, 3.4);
+    let traffic_gain = choose_float(trailer, 0.035, 0.018);
+    let traffic_queue = choose_float(m.abs(final_speed) < traffic_target - 0.35,
+        m.min(7.0, input.traffic_queue + dt * traffic_gain),
+        m.max(0.0, input.traffic_queue - dt * 0.045));
+    let heading_delta = heading - road_heading_at(input.x);
+    let heading_error = m.abs(m.atan2(m.sin(heading_delta), m.cos(heading_delta)));
+    let mirror_reveal = heading_error > 0.11 || input.steer != 0.0;
+    let mirror_queue = m.floor(traffic_queue + 0.5);
+    let mirror_blocked = trailer && !mirror_reveal;
+    let distance_delta = m.sqrt((next_x - input.x) * (next_x - input.x)
+        + (next_z - input.z) * (next_z - input.z));
+    let road_warning = choose_text(hazard_near, hazard_label, "");
+
+    return {
+        x: next_x, z: next_z, heading: heading, speed: final_speed,
+        distance_delta: distance_delta, warning: warning, road_warning: road_warning,
+        road_taxon: choose_text(hazard_near, hazard_taxon, ""),
+        hazard_event: hazard_event, hazard_id: hazard_id,
+        last_warning: next_last_warning, hazard_stops: hazard_stops,
+        emergency_stops: emergency_stops, ambient_c: ambient,
+        grade_percent: grade * 100.0, road_surface: surface.name,
+        thermal_load: load, oil_temp: oil_temp, coolant_temp: coolant_temp,
+        oil_trend: oil_trend, coolant_trend: coolant_trend,
+        engine_health: health, overheat_seconds: overheat,
+        engine_warning: engine_warning, traffic_queue: traffic_queue,
+        mirror_reveal: mirror_reveal, mirror_queue: mirror_queue,
+        mirror_blocked: mirror_blocked, road_center_z: center_z,
+        top_speed: rig.top_speed, acceleration: rig.acceleration,
+        braking: rig.braking, steering: rig.steering, shoulder: rig.shoulder,
+        rig_load: rig.load, trailer: rig.trailer
+    };
+}

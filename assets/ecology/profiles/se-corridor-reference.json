@@ -110,7 +110,8 @@
       "roadkill-crows", "kookaburra", "snake", "goanna"
     ],
     "floraSelection": [
-      "coastal-bottlebrush", "banksia", "grass-tree", "saltbush", "kangaroo-paw"
+      "eucalypt-gum", "golden-wattle", "coastal-bottlebrush", "banksia",
+      "grass-tree", "saltbush", "kangaroo-paw"
     ],
     "placementMode": "authored-demo-fixture",
     "allowOccurrenceDrivenRoadHazards": false,
