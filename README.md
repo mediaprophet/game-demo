@@ -69,11 +69,13 @@ garden once water is available.
 The page also exposes VibeScript cells for live world snapshot queries,
 SHACL-gated order proposals, and a bounded scene asset that compiles through
 Qualia computational geometry to a provenance-bearing `.10d` mesh.
-Kestrel Flats has 198 always-present original `.10d` scene assets; the
-Saltwind Reach tile adds 74 more plus state variants. Two generated northern
-highland tiles add 12 terrain, creek, rock and shrub assets, for 284 in the
-opening scene. The 340-variant HMC includes sampled settlement terrain,
-curved road ribbons, a garden ant trail, and their state variants. The connected scene uses
+Generated Storybook, Earthlight and Community Grounds HMC packs each contain
+578 distinct `.10d` assets across 40 world-state, touring-rig and Australian
+ecology-profile combinations. Opening-scene fixtures contain 477–487 assets,
+depending on the selected touring rig. Packs include four touring rigs and
+profile-selected Australian fauna and flora; the broad sample corridor remains
+illustrative until its regional ecology and geography are sourced and reviewed.
+The connected scene uses
 QualiaPortal's camera target and daylight sky APIs. State variants live in
 the game-owned catalog. Rounded assets use Qualia's computational
 geometry authoring and parametric CAD; all scene assets retain source
@@ -110,11 +112,70 @@ self-tests. The full Qualia WebGPU canvas now renders on the published game;
 [QG-12](docs/planning/19-qualiadb-upstream-gate-work-orders.md) records the
 earlier renderer gate and its reproduction.
 
-The in-game Qualia HUD offers Map, Survey and ground-level Walk cameras.
-Select Highlands to inspect the generated ridge and creek valley; in Walk,
-drag to look and use WASD to move (Shift to run). The terrain mesh comes from
-Qualia's geospatial heightfield builder. Camera position and ground height are
-presentation state and do not change the campaign or replay.
+The in-game Qualia HUD offers Map, Survey, Walk, Direct Drive and Activities
+modes. Walk uses WASD and drag-look; Direct Drive adds throttle, reverse/braking
+and steering for the selected campervan, 4WD/caravan, car/camper-trailer or
+4WD/roof-top-tent rig. Its HUD button or **V** key switches between first
+person and an aerial route-follow view on the local demo road. Its Kestrel–Saltwind route and goat/horse road-hazard
+actors are local illustrative fixtures, not a real-world route or
+geolocated occurrence feed. The first ecology profile is the broad Noosa–
+Melbourne coast corridor with inland coverage toward the South Australian
+border; regional data remains separately scoped. See the [ecology data
+contract](docs/art/australian-ecology-data-contract.md) and [Australia route
+plan](docs/planning/29-australia-world-atlas-and-osm-pack.md).
+Campervan, caravan and 4WD cabin shells use rounded Qualia parametric geometry;
+the roof-top tent has a gabled silhouette, with glazing, chassis, wheels and
+roof loads authored as separate assets.
+
+The illustrative plant collection now has bottlebrush, banksia, grass-tree,
+saltbush and kangaroo-paw models. Place ecology profiles select stable flora
+and fauna keys; the corridor showcase does not claim these groups co-occur at
+one locality.
+
+Direct Drive shows separate road-hazard and simulated engine-temperature
+alerts, rising/cooling oil and coolant gauges, ambient temperature, road grade,
+surface, engine load and engine condition. Towing rigs build a traffic queue;
+the simulated rear mirror is partly blocked by the trailer and reveals more of
+the queue around the authored bends. Sustained full load in hot weather or on
+climbs can overheat and damage the simulated engine. Ten repeatable review
+cameras and a 30-second, read-only showcase route are defined in
+`web/fixtures/graphics/review-cameras.json`. The route tours the hub, workshop,
+garden, touring rig, water crossing, highlands, local aerial drive, the fictional
+place graph, resident choice mode and workshop repair mode; Escape or **End showcase**
+returns to the original camera without changing the campaign.
+`?graphics-view=<view-id>` uses the seed world, disables save/load and campaign edits,
+and loads a named read-only review state.
+
+The Activities panel contains versioned resident-conversation, fruit-harvest,
+workshop-repair, shared-meal and fictional housekeeping-practice modules.
+Choices use the existing Qualia campaign gates and event tape, so their state
+replays with the rest of the game. The scenario contract and fixture are in
+`docs/schemas/community-scenario-module.v1.schema.json` and
+`web/fixtures/scenarios/community-grounds-v1.json`; the housekeeping vignette
+does not represent a real employer or venue.
+
+The Places HUD page reads a versioned, normalized place graph and opens the
+campaign's distinct site targets. Its Kestrel/Saltwind entries are explicitly
+fictional and schematic. The game-side package contract is
+`docs/schemas/community-place-pack.v1.schema.json`; its offline structural and
+render-artifact integrity validator is
+`scripts/validate-community-place-pack.mjs`. The current fixture contains no
+Australian boundary or route data. Once Observatory exports are ready, reviewed
+QualiaDB adapters can produce packs for any coverage and connect locality,
+town/site, route, terrain, ecology and render-tile data without freezing the
+producer's RDF/Q42 or enhancement syntax.
+Validate a package with `node scripts/validate-community-place-pack.mjs <unpacked-directory-or-place-pack.json>`.
+
+An illustrated Australian loader appears on initial online entry and while
+switching visual styles. It reports preparation/download/validation stages,
+shows actual pack-byte progress when available, respects reduced motion, and
+keeps a retry path visible after fatal startup failure. Observatory's future
+Q42/RDF, Qualia Logic and VibeScript exports have a provisional manifest and
+integrity-validation scaffold; no unfinished source syntax is interpreted.
+
+The terrain mesh comes from Qualia's geospatial heightfield builder. Camera
+position and ground height are presentation state and do not change the
+campaign or replay.
 
 Check out QualiaDB beside this repository at the commit in [`qualia.ref`](qualia.ref).
 Build with `scripts/build-game.ps1` to produce the full Qualia WASM package in
@@ -194,6 +255,8 @@ committee membership, site access, or authority to spend shared funds.
 
 The planning set is the current source of truth:
 
+- [Community Grounds graphics overhaul — comprehensive implementation handoff](docs/planning/35-community-grounds-graphics-overhaul.md), using the supplied Community Grounds illustration as the primary visual target
+- [Australian ecology and roadside fauna data contract](docs/art/australian-ecology-data-contract.md), including the first Noosa–Melbourne/inland South Australian corridor profile and the public-data import path
 - [Decision register](docs/planning/00-decision-register.md)
 - [Product vision](docs/planning/01-product-vision.md)
 - [First-playable spec and open questions](docs/planning/12-first-playable-spec-and-open-questions.md)

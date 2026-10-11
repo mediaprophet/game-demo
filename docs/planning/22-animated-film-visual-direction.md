@@ -1,5 +1,13 @@
 # Animated-film visual direction
 
+**Updated direction, 2026-10-11:** The user has selected the supplied
+[Community Grounds illustration](../reference/communitygrounds.jpg) as the
+primary target. Follow [35 — Community Grounds graphics overhaul](35-community-grounds-graphics-overhaul.md)
+for production specifications and execution order. Its illustrated realism,
+believable human proportions and detailed working infrastructure supersede
+the earlier film-based direction below wherever they conflict. This document
+otherwise remains historical context for the selectable styles.
+
 The reference is the **overall finish of DreamWorks' *Antz***, not a request to
 make an ant-themed game. The garden ants are optional environmental life in
 *Maslows Challenge*. The people, buildings, plants, hills and water carry the

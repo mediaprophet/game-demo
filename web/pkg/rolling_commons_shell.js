@@ -321,7 +321,7 @@ export class GamePortal {
     /**
      * Load a multi-asset scene: `Array<{bytes: .10d, r,g,b,a}>` where each
      * mesh keeps its authored position in the shared coordinate space — one
-     * global normalisation across all objects. This is how a town of
+     * authored scale across all objects. This is how a town of
      * distinct props composes into one viewport mesh. The engine binding
      * still carries its legacy anatomy-era name (`load_body_organs_colored`);
      * the upstream rename is tracked as QG-20 in
@@ -371,10 +371,7 @@ export class GamePortal {
         return ret !== 0;
     }
     /**
-     * Report renderer admission and observed execution separately from the
-     * temporal producer handoff. The game owns no GPU texture views, so every
-     * producer view remains explicitly unavailable until a real host surface
-     * is supplied upstream.
+     * Report active renderer resources and actual temporal execution receipts.
      * @returns {any}
      */
     renderer_producer_report() {
@@ -391,6 +388,12 @@ export class GamePortal {
      */
     set_ambient_enabled(enabled) {
         wasm.gameportal_set_ambient_enabled(this.__wbg_ptr, enabled);
+    }
+    /**
+     * @param {boolean} enabled
+     */
+    set_auto_temporal_enabled(enabled) {
+        wasm.gameportal_set_auto_temporal_enabled(this.__wbg_ptr, enabled);
     }
     /**
      * @param {number} yaw
@@ -418,6 +421,22 @@ export class GamePortal {
         }
     }
     /**
+     * @param {Float32Array} packed_probes
+     * @param {Float32Array} fallback_radiance
+     * @returns {boolean}
+     */
+    set_environment_probe_data(packed_probes, fallback_radiance) {
+        const ptr0 = passArrayF32ToWasm0(packed_probes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArrayF32ToWasm0(fallback_radiance, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.gameportal_set_environment_probe_data(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] !== 0;
+    }
+    /**
      * Tunable key/fill/ambient light from the QualiaPortal surface, so a
      * visual style can present its own daylight reading without touching
      * campaign or rule state.
@@ -429,6 +448,32 @@ export class GamePortal {
      */
     set_lighting(sun_r, sun_g, sun_b, intensity, ambient) {
         wasm.gameportal_set_lighting(this.__wbg_ptr, sun_r, sun_g, sun_b, intensity, ambient);
+    }
+    /**
+     * @param {number} radius
+     * @param {number} strength
+     * @param {number} bias
+     */
+    set_screen_space_ao(radius, strength, bias) {
+        wasm.gameportal_set_screen_space_ao(this.__wbg_ptr, radius, strength, bias);
+    }
+    /**
+     * @param {boolean} enabled
+     */
+    set_screen_space_ao_enabled(enabled) {
+        wasm.gameportal_set_screen_space_ao_enabled(this.__wbg_ptr, enabled);
+    }
+    /**
+     * @param {number} samples
+     */
+    set_screen_space_ao_sample_count(samples) {
+        wasm.gameportal_set_screen_space_ao_sample_count(this.__wbg_ptr, samples);
+    }
+    /**
+     * @param {boolean} enabled
+     */
+    set_shadows_enabled(enabled) {
+        wasm.gameportal_set_shadows_enabled(this.__wbg_ptr, enabled);
     }
     /**
      * @param {number} preset
@@ -453,10 +498,7 @@ export class GamePortal {
         wasm.gameportal_set_tensor_projection_enabled(this.__wbg_ptr, enabled);
     }
     /**
-     * Return the bounded temporal handoff contract for the current scene.
-     * This is policy and scheduling metadata only: without real motion-vector
-     * and reactive-mask views, execution is never admitted and the ordinary
-     * renderer tick remains the fallback.
+     * Return a bounded temporal schedule with current renderer-owned producer evidence.
      * @param {number} quality_tier
      * @param {boolean} scene_changed
      * @param {boolean} camera_changed
@@ -830,7 +872,7 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
-     * Cold-path Anatomy lifecycle receipt. Success requires a retained upload
+     * Cold-path Scene / Anatomy lifecycle receipt. Success requires a retained upload
      * and at least one presented renderer frame.
      * @returns {any}
      */
@@ -1089,6 +1131,9 @@ export class QualiaPortal {
         const ret = wasm.qualiaportal_hdr_scene_available(this.__wbg_ptr);
         return ret !== 0;
     }
+    invalidate_temporal_history() {
+        wasm.qualiaportal_invalidate_temporal_history(this.__wbg_ptr);
+    }
     /**
      * @returns {any | undefined}
      */
@@ -1138,6 +1183,20 @@ export class QualiaPortal {
         const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.qualiaportal_load_10d_colored(this.__wbg_ptr, ptr0, len0, r, g, b, a);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * Load a multi-asset scene: `Array<{bytes: .10d, r,g,b,a, id?}>` (QG-20).
+     * General scene asset loader for environment/game scenes, town layouts,
+     * vehicles, and user props.
+     * @param {Array<any>} assets
+     * @returns {any}
+     */
+    load_assets_colored(assets) {
+        const ret = wasm.qualiaportal_load_assets_colored(this.__wbg_ptr, assets);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }
@@ -1257,6 +1316,18 @@ export class QualiaPortal {
         const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.qualiaportal_load_q42(this.__wbg_ptr, ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * Generic scene asset alias for [`Self::load_assets_colored`] (QG-20).
+     * @param {Array<any>} assets
+     * @returns {any}
+     */
+    load_scene_assets(assets) {
+        const ret = wasm.qualiaportal_load_scene_assets(this.__wbg_ptr, assets);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }
@@ -1442,10 +1513,28 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Generic scene alias for [`Self::body_render_receipt`] (QG-20).
+     * @returns {any}
+     */
+    scene_render_receipt() {
+        const ret = wasm.qualiaportal_scene_render_receipt(this.__wbg_ptr);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
      * @returns {boolean}
      */
     screen_space_ao_available() {
         const ret = wasm.qualiaportal_screen_space_ao_available(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    screen_space_ao_enabled() {
+        const ret = wasm.qualiaportal_screen_space_ao_enabled(this.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -1514,6 +1603,12 @@ export class QualiaPortal {
      */
     set_ambient_enabled(on) {
         wasm.qualiaportal_set_ambient_enabled(this.__wbg_ptr, on);
+    }
+    /**
+     * @param {boolean} enabled
+     */
+    set_auto_temporal_enabled(enabled) {
+        wasm.qualiaportal_set_auto_temporal_enabled(this.__wbg_ptr, enabled);
     }
     /**
      * Replace the person-authored body fit. Pass JSON matching wellfare `BodyFit`.
@@ -1586,6 +1681,22 @@ export class QualiaPortal {
         }
     }
     /**
+     * @param {Float32Array} packed_probes
+     * @param {Float32Array} fallback_radiance
+     * @returns {boolean}
+     */
+    set_environment_probe_data(packed_probes, fallback_radiance) {
+        const ptr0 = passArrayF32ToWasm0(packed_probes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArrayF32ToWasm0(fallback_radiance, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.qualiaportal_set_environment_probe_data(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] !== 0;
+    }
+    /**
      * Configure manual exposure compensation in stops (EV), clamped to -8…+8.
      * The configured value is retained while the GPU output path is unavailable.
      * @param {number} ev
@@ -1648,7 +1759,6 @@ export class QualiaPortal {
         wasm.qualiaportal_set_preserve_authored_frame(this.__wbg_ptr, on);
     }
     /**
-     * Configure screen-space AO radius and strength. Radius and bias use world units.
      * @param {number} radius
      * @param {number} strength
      * @param {number} bias
@@ -1664,11 +1774,16 @@ export class QualiaPortal {
         wasm.qualiaportal_set_screen_space_ao_enabled(this.__wbg_ptr, enabled);
     }
     /**
-     * Select 4-tap low, 8-tap default, or 12-tap quality AO evaluation.
      * @param {number} samples
      */
     set_screen_space_ao_sample_count(samples) {
         wasm.qualiaportal_set_screen_space_ao_sample_count(this.__wbg_ptr, samples);
+    }
+    /**
+     * @param {boolean} enabled
+     */
+    set_shadows_enabled(enabled) {
+        wasm.qualiaportal_set_shadows_enabled(this.__wbg_ptr, enabled);
     }
     /**
      * @param {number} preset
@@ -1722,6 +1837,35 @@ export class QualiaPortal {
         wasm.qualiaportal_set_tensor_projection_enabled(this.__wbg_ptr, on);
     }
     /**
+     * Replace the water surface mesh using world-space XYZ triples and triangle indices.
+     * @param {Float32Array} positions_xyz
+     * @param {Uint32Array} indices
+     * @returns {boolean}
+     */
+    set_water_geometry(positions_xyz, indices) {
+        const ptr0 = passArrayF32ToWasm0(positions_xyz, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray32ToWasm0(indices, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.qualiaportal_set_water_geometry(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] !== 0;
+    }
+    /**
+     * @param {number} r
+     * @param {number} g
+     * @param {number} b
+     * @param {number} alpha
+     * @param {number} wave_amplitude
+     * @param {number} wave_frequency
+     * @param {number} quality
+     */
+    set_water_surface(r, g, b, alpha, wave_amplitude, wave_frequency, quality) {
+        wasm.qualiaportal_set_water_surface(this.__wbg_ptr, r, g, b, alpha, wave_amplitude, wave_frequency, quality);
+    }
+    /**
      * Set linear-light temperature/tint biases in stops, each bounded to -1…+1.
      * Temperature warms red while cooling blue; positive tint favours green.
      * The value is retained and replayed when a renderer is initialized or recovered.
@@ -1731,6 +1875,13 @@ export class QualiaPortal {
      */
     set_white_balance(temperature_ev, tint_ev) {
         const ret = wasm.qualiaportal_set_white_balance(this.__wbg_ptr, temperature_ev, tint_ev);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    shadows_available() {
+        const ret = wasm.qualiaportal_shadows_available(this.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -1785,6 +1936,13 @@ export class QualiaPortal {
      */
     t_window() {
         const ret = wasm.qualiaportal_t_window(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {any}
+     */
+    temporal_graphics_receipt() {
+        const ret = wasm.qualiaportal_temporal_graphics_receipt(this.__wbg_ptr);
         return ret;
     }
     /**
@@ -2741,6 +2899,74 @@ export function compile_cell_bytecode(src) {
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.compile_cell_bytecode(ptr0, len0);
     return ret;
+}
+
+/**
+ * Compile one feature from a caller-supplied OSM Overpass JSON snapshot into
+ * a provenance-bearing `.10d` mesh. This function performs no network access;
+ * acquisition and consent belong to the caller, and the snapshot can be
+ * authored offline. `style` is `marker`, `line`, or `area`; `size_m` is the
+ * marker radius or line width and is ignored for area fills.
+ * @param {string} overpass_json
+ * @param {string} feature_type
+ * @param {bigint} feature_id
+ * @param {number} origin_lat
+ * @param {number} origin_lon
+ * @param {number} origin_alt_m
+ * @param {string} style
+ * @param {number} size_m
+ * @param {number} vertical_offset_m
+ * @returns {Uint8Array}
+ */
+export function compile_osm_feature_10d(overpass_json, feature_type, feature_id, origin_lat, origin_lon, origin_alt_m, style, size_m, vertical_offset_m) {
+    const ptr0 = passStringToWasm0(overpass_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(feature_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(style, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ret = wasm.compile_osm_feature_10d(ptr0, len0, ptr1, len1, feature_id, origin_lat, origin_lon, origin_alt_m, ptr2, len2, size_m, vertical_offset_m);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v4;
+}
+
+/**
+ * Compile one OSM feature and clip every emitted triangle to an exact local
+ * tile rectangle. Bounds are `[min_east, min_north, max_east, max_north]` in
+ * metres relative to the supplied WGS84 origin. No network access occurs.
+ * @param {string} overpass_json
+ * @param {string} feature_type
+ * @param {bigint} feature_id
+ * @param {number} origin_lat
+ * @param {number} origin_lon
+ * @param {number} origin_alt_m
+ * @param {string} style
+ * @param {number} size_m
+ * @param {number} vertical_offset_m
+ * @param {number} min_east
+ * @param {number} min_north
+ * @param {number} max_east
+ * @param {number} max_north
+ * @returns {Uint8Array}
+ */
+export function compile_osm_feature_10d_in_tile(overpass_json, feature_type, feature_id, origin_lat, origin_lon, origin_alt_m, style, size_m, vertical_offset_m, min_east, min_north, max_east, max_north) {
+    const ptr0 = passStringToWasm0(overpass_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(feature_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(style, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ret = wasm.compile_osm_feature_10d_in_tile(ptr0, len0, ptr1, len1, feature_id, origin_lat, origin_lon, origin_alt_m, ptr2, len2, size_m, vertical_offset_m, min_east, min_north, max_east, max_north);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v4;
 }
 
 /**
@@ -5467,6 +5693,43 @@ export function set_art_style(style) {
 }
 
 /**
+ * Select fauna render keys from a reviewed locality profile. Unknown keys
+ * stay in the source profile as data and do not become guessed 3D species.
+ * @param {string} selection_json
+ */
+export function set_fauna_selection(selection_json) {
+    const ptr0 = passStringToWasm0(selection_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.set_fauna_selection(ptr0, len0);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
+ * Select original Australian plant groups from a reviewed locality profile.
+ * Unknown keys remain source-profile data and do not receive guessed models.
+ * @param {string} selection_json
+ */
+export function set_flora_selection(selection_json) {
+    const ptr0 = passStringToWasm0(selection_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.set_flora_selection(ptr0, len0);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
+ * Select a presentation-only touring combination: campervan, 4WD/caravan,
+ * car/camper-trailer, or 4WD/roof-top tent.
+ * @param {number} rig
+ */
+export function set_vehicle_rig(rig) {
+    wasm.set_vehicle_rig(rig);
+}
+
+/**
  * Simulates a GBM price path and returns the full series together with
  * min_price, max_price, and final_price.
  * @param {any} val
@@ -6174,6 +6437,21 @@ export function validate_fhir_observation_wasm(val) {
 }
 
 /**
+ * Cold-path release gate: verify every embedded .10d mesh and material graph.
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
+export function validate_game_hmc(bytes) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.validate_game_hmc(ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] >>> 0;
+}
+
+/**
  * @param {any} val
  * @returns {any}
  */
@@ -6841,6 +7119,9 @@ function __wbg_get_imports() {
         },
         __wbg_clear_dadcb3e2929388b0: function(arg0, arg1) {
             arg0.clear(arg1 >>> 0);
+        },
+        __wbg_clip_8ac1823db730edf8: function(arg0) {
+            arg0.clip();
         },
         __wbg_closePath_47136fd7a8a2f043: function(arg0) {
             arg0.closePath();
@@ -7730,6 +8011,9 @@ function __wbg_get_imports() {
             const ret = arg0.reason;
             return (__wbindgen_enum_GpuDeviceLostReason.indexOf(ret) + 1 || 3) - 1;
         },
+        __wbg_rect_ec6fe62084b85fe8: function(arg0, arg1, arg2, arg3, arg4) {
+            arg0.rect(arg1, arg2, arg3, arg4);
+        },
         __wbg_renderbufferStorage_3049e13db5c4e60e: function(arg0, arg1, arg2, arg3, arg4) {
             arg0.renderbufferStorage(arg1 >>> 0, arg2 >>> 0, arg3, arg4);
         },
@@ -7747,6 +8031,12 @@ function __wbg_get_imports() {
         __wbg_resolve_d82363d90af6928a: function(arg0) {
             const ret = Promise.resolve(arg0);
             return ret;
+        },
+        __wbg_restore_6d0b3ce5b0ed7f95: function(arg0) {
+            arg0.restore();
+        },
+        __wbg_save_38619d761125d8ce: function(arg0) {
+            arg0.save();
         },
         __wbg_setAttribute_8bccfbabf2a83682: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
             arg0.setAttribute(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
@@ -8517,32 +8807,32 @@ function __wbg_get_imports() {
             return ret;
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2215, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2239, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1487, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1511, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1488, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1512, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuDeviceLostInfo__GpuDeviceLostInfo______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000004: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1487, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1511, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__3);
             return ret;
         },
         __wbindgen_cast_0000000000000005: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1487, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1511, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__4);
             return ret;
         },
         __wbindgen_cast_0000000000000006: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 769, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 793, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke_______true_);
             return ret;
         },

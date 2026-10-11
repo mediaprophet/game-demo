@@ -5409,6 +5409,57 @@
         "rc:player rc:unpaidKnowledgeContribution rc:solarProject .",
         "rc:player rc:retainsKnowledge rc:solarIntegration ."
       ]
+    },
+    {
+      "id": "activity.housekeeping.linen-first",
+      "label": "Prioritise the guest's linen request",
+      "explain": "Record the choice to answer a guest request before completing the room reset.",
+      "gate": [{
+        "targetClass": "rc:Resident",
+        "path": "rc:housekeepingPriority",
+        "constraints": [{ "kind": "maxCount", "num": 0 }]
+      }],
+      "add": ["rc:player rc:housekeepingPriority \"linen-first\" ."]
+    },
+    {
+      "id": "activity.housekeeping.hygiene-first",
+      "label": "Prioritise the hygiene check",
+      "explain": "Record the choice to finish the hygiene check before restocking the room.",
+      "gate": [{
+        "targetClass": "rc:Resident",
+        "path": "rc:housekeepingPriority",
+        "constraints": [{ "kind": "maxCount", "num": 0 }]
+      }],
+      "add": ["rc:player rc:housekeepingPriority \"hygiene-first\" ."]
+    },
+    {
+      "id": "activity.housekeeping.checklist-first",
+      "label": "Prioritise the room checklist",
+      "explain": "Record the choice to sequence room tasks against the checklist.",
+      "gate": [{
+        "targetClass": "rc:Resident",
+        "path": "rc:housekeepingPriority",
+        "constraints": [{ "kind": "maxCount", "num": 0 }]
+      }],
+      "add": ["rc:player rc:housekeepingPriority \"checklist-first\" ."]
+    },
+    {
+      "id": "activity.housekeeping.complete",
+      "label": "Finish the housekeeping practice shift",
+      "explain": "Choose a priority first, then record completion. This fictional practice activity does not create currency or a real work record.",
+      "gate": [
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:housekeepingPriority",
+          "constraints": [{ "kind": "minCount", "num": 1 }]
+        },
+        {
+          "targetClass": "rc:Resident",
+          "path": "rc:housekeepingShift",
+          "constraints": [{ "kind": "maxCount", "num": 0 }]
+        }
+      ],
+      "add": ["rc:player rc:housekeepingShift \"complete\" ."]
     }
   ]
 }

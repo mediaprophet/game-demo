@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://civics.au/schemas/game/community-scenario-module-1.json",
+  "title": "Community simulation scenario module",
+  "description": "Versioned interactive story or work activity that delegates state changes to the shared game action ledger.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "moduleSet", "modules"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "moduleSet": { "type": "string", "minLength": 1 },
+    "modules": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/module" } }
+  },
+  "$defs": {
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "title", "mode", "place", "roles", "objective", "entry", "toolsMaterials", "duration", "accessibility", "provenance", "startNodeId", "nodes"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,79}$" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "mode": { "enum": ["interpersonal", "agriculture", "hospitality", "workshop", "food", "craft", "repair", "other"] },
+        "availability": { "enum": ["playable", "design_only"] },
+        "place": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["localityId", "siteId", "scope", "status"],
+          "properties": {
+            "localityId": { "type": "string", "minLength": 1 },
+            "siteId": { "type": "string", "minLength": 1 },
+            "scope": { "enum": ["site", "scenario", "locality"] },
+            "status": { "enum": ["fictional_fixture", "source_linked", "pending_locality"] }
+          }
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label", "actor"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "label": { "type": "string", "minLength": 1 },
+              "actor": { "enum": ["player", "fictional_character", "facilitator", "group"] }
+            }
+          }
+        },
+        "objective": { "type": "string", "minLength": 1 },
+        "entry": { "type": "string", "minLength": 1 },
+        "toolsMaterials": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "duration": { "type": "string", "minLength": 1 },
+        "accessibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["interaction", "keyboard", "reducedMotion"],
+          "properties": {
+            "interaction": { "type": "string", "minLength": 1 },
+            "keyboard": { "type": "boolean" },
+            "reducedMotion": { "type": "boolean" }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "sourceIds", "note"],
+          "properties": {
+            "kind": { "enum": ["synthetic_demo", "game_authored", "project_source", "public_dataset"] },
+            "sourceIds": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "note": { "type": "string", "minLength": 1 }
+          }
+        },
+        "startNodeId": { "type": "string", "minLength": 1 },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "prompt", "choices"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "prompt": { "type": "string", "minLength": 1 },
+              "completionText": { "type": "string" },
+              "choices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["id", "label", "actionId", "outcome", "nextNodeId"],
+                  "properties": {
+                    "id": { "type": "string", "minLength": 1 },
+                    "label": { "type": "string", "minLength": 1 },
+                    "actionId": { "type": "string", "minLength": 1 },
+                    "outcome": { "type": "string", "minLength": 1 },
+                    "nextNodeId": { "type": ["string", "null"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

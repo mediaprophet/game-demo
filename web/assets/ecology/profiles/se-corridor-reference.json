@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "id": "se-corridor-reference",
+  "name": "South-east Australian travel corridor",
+  "scope": {
+    "kind": "broad-user-described-corridor",
+    "anchors": [
+      "Noosa, Queensland",
+      "Melbourne, Victoria",
+      "South Australian border"
+    ],
+    "description": "Coastal travel from Noosa to Melbourne, with inland coverage toward the South Australian border.",
+    "spatialBoundary": null,
+    "boundaryStatus": "approximate; needs a versioned source boundary before place-specific data claims"
+  },
+  "coverage": {
+    "extent": "multi-region corridor across eastern and south-eastern Australia",
+    "rule": "Regional packs and source observations select local content; corridor membership alone does not imply species presence at a scene.",
+    "firstPlayableGround": "fictional Kestrel Flats and Saltwind Reach demo road"
+  },
+  "roadHazards": [
+    {
+      "taxonId": "Capra hircus",
+      "commonName": "goat",
+      "context": "user-reported road hazard in some inland parts of the corridor",
+      "placement": "illustrative demo road actor; not an exact real-world occurrence",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "goat"
+    },
+    {
+      "taxonId": "Equus caballus",
+      "commonName": "horse",
+      "context": "user-reported road hazard in some inland parts of the corridor",
+      "placement": "illustrative demo road actor; not an exact real-world occurrence",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "horse"
+    },
+    {
+      "taxonId": "Oryctolagus cuniculus",
+      "commonName": "rabbit",
+      "context": "user-reported road hazard across parts of the corridor",
+      "placement": "illustrative demo road actor; not an exact real-world occurrence",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "rabbit"
+    },
+    {
+      "taxonId": "Macropodidae",
+      "commonName": "kangaroo",
+      "context": "user-reported road hazard; local species varies by place",
+      "placement": "illustrative demo road actor; species unresolved pending place profile",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "kangaroo"
+    },
+    {
+      "taxonId": "Macropodidae",
+      "commonName": "wallaby",
+      "context": "user-reported road hazard; local species varies by place",
+      "placement": "illustrative demo road actor; species unresolved pending place profile",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "wallaby"
+    },
+    {
+      "taxonId": "Vombatidae",
+      "commonName": "wombat",
+      "context": "user-reported road hazard; local species varies by place",
+      "placement": "illustrative demo road actor; species unresolved pending place profile",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "wombat"
+    },
+    {
+      "taxonId": "Cervidae",
+      "commonName": "deer",
+      "context": "user-reported road hazard; local species varies by place",
+      "placement": "illustrative demo road actor; species unresolved pending place profile",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "deer"
+    },
+    {
+      "taxonId": "Corvidae",
+      "commonName": "crows feeding on roadkill",
+      "context": "user-reported roadside scene around animals already hit on roads",
+      "placement": "illustrative roadside carcass and scavenger scene; non-graphic and not an exact sighting",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "roadkill-crows"
+    },
+    {
+      "taxonId": "Dacelo novaeguineae",
+      "commonName": "laughing kookaburra",
+      "context": "user-reported roadside fauna",
+      "placement": "illustrative roadside perch; not an exact real-world occurrence",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "kookaburra"
+    },
+    {
+      "taxonId": "Serpentes",
+      "commonName": "snake",
+      "context": "user-reported road hazard; local species varies by place",
+      "placement": "illustrative road-edge actor; species unresolved pending place profile",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "snake"
+    },
+    {
+      "taxonId": "Varanidae",
+      "commonName": "goanna",
+      "context": "user-reported road hazard; local species varies by place",
+      "placement": "illustrative road-edge actor; species unresolved pending place profile",
+      "evidenceStatus": "player-provided regional context",
+      "renderKey": "goanna"
+    }
+  ],
+  "render": {
+    "faunaSelection": [
+      "goat",
+      "horse",
+      "rabbit",
+      "kangaroo",
+      "wallaby",
+      "wombat",
+      "deer",
+      "roadkill-crows",
+      "kookaburra",
+      "snake",
+      "goanna"
+    ],
+    "floraSelection": [
+      "coastal-bottlebrush",
+      "banksia",
+      "grass-tree",
+      "saltbush",
+      "kangaroo-paw"
+    ],
+    "placementMode": "authored-demo-fixture",
+    "allowOccurrenceDrivenRoadHazards": false,
+    "demonstrationNote": "The combined flora and fauna lists showcase Australian model families across the broad user-described corridor on a fictional route. They do not assert co-occurrence at one real locality; authored regional place packs should select only source-supported local taxa."
+  },
+  "sources": [
+    {
+      "system": "Atlas of Living Australia",
+      "role": "future regional occurrence snapshots and taxonomic resolution",
+      "snapshot": null,
+      "status": "not yet imported"
+    },
+    {
+      "system": "IBRA v7",
+      "role": "versioned Australian bioregion and subregion framework",
+      "snapshot": null,
+      "status": "boundary product not yet imported"
+    },
+    {
+      "system": "National Vegetation Information System",
+      "role": "national vegetation context at source-product scale",
+      "snapshot": null,
+      "status": "vegetation product not yet imported"
+    }
+  ],
+  "provenancePolicy": {
+    "keepSourceSnapshotsOffline": true,
+    "recordDownloadDOIAndPerRecordLicence": true,
+    "doNotExportSensitiveCoordinates": true,
+    "occurrenceIsNotRoadRiskEvidence": true,
+    "redistributionReviewRequired": true
+  }
+}

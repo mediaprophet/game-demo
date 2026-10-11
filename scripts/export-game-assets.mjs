@@ -4,12 +4,23 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile, mkdir, readdir, unlink } from 'node:fs/promises';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import init, { pack_game_hmc, scene_build, set_art_style, verify_game_hmc } from '../web/pkg/rolling_commons_shell.js';
+import init, { pack_game_hmc, scene_build, set_art_style, set_vehicle_rig, set_fauna_selection, set_flora_selection,
+  validate_game_hmc } from '../web/pkg/rolling_commons_shell.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const wasmPath = join(root, 'web', 'pkg', 'rolling_commons_shell_bg.wasm');
 const wasm = await readFile(wasmPath);
 await init({ module_or_path: wasm });
+// The checked-in first profile is a broad illustrative corridor scenario.
+// Place-profile keys select known render recipes; unknown taxa remain data-only.
+const ecologyProfile = JSON.parse(await readFile(join(root, 'assets', 'ecology', 'profiles',
+  'se-corridor-reference.json'), 'utf8'));
+const publicProfiles = join(root, 'web', 'assets', 'ecology', 'profiles');
+await mkdir(publicProfiles, { recursive: true });
+await writeFile(join(publicProfiles, 'se-corridor-reference.json'),
+  JSON.stringify(ecologyProfile, null, 2) + '\n');
+set_fauna_selection(JSON.stringify(ecologyProfile.render.faunaSelection));
+set_flora_selection(JSON.stringify(ecologyProfile.render.floraSelection || []));
 
 const beacon = (await readFile(join(root, 'web', 'fixtures', 'community-beacon.vibe'), 'utf8')).trim();
 const cases = [
@@ -26,22 +37,28 @@ const cases = [
 ];
 
 for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'community']]) {
-set_art_style(style);
-const styleRoot = style === 0 ? join(root, 'assets', 'generated') :
-  join(root, 'assets', 'generated', styleSlug);
-const out = join(styleRoot, '10d');
-await mkdir(out, { recursive: true });
-const assets = new Map();
-const scenes = [];
-for (const [name, args] of cases) {
+  set_art_style(style);
+  const styleRoot = style === 0 ? join(root, 'assets', 'generated') :
+    join(root, 'assets', 'generated', styleSlug);
+  const out = join(styleRoot, '10d');
+  await mkdir(out, { recursive: true });
+  const assets = new Map();
+  const scenes = [];
+  for (const [name, args] of cases) {
+    for (const rig of [0, 1, 2, 3]) {
+      set_vehicle_rig(rig);
+      set_fauna_selection(JSON.stringify(ecologyProfile.render.faunaSelection));
+      set_flora_selection(JSON.stringify(ecologyProfile.render.floraSelection || []));
   const scene = scene_build(...args);
+      const sceneName = `${name}-rig-${rig}-ecology-${ecologyProfile.id}`;
   if (!Array.isArray(scene.assets) || scene.assets.length < 135) {
-    throw new Error(`${name}: unexpected Qualia scene receipt`);
+    throw new Error(`${sceneName}: unexpected Qualia scene receipt`);
   }
   const entries = [];
   for (const asset of scene.assets) {
-    if (!asset.id?.startsWith('rc:asset/') || !(asset.bytes instanceof Uint8Array)) {
-      throw new Error(`${name}: invalid game asset receipt`);
+    if (!asset.id?.startsWith('rc:asset/') || !(asset.bytes instanceof Uint8Array) ||
+        typeof asset.materialFamily !== 'string' || !asset.materialFamily) {
+      throw new Error(`${sceneName}: invalid game asset receipt`);
     }
     const bytes = Buffer.from(asset.bytes);
     const sha256 = createHash('sha256').update(bytes).digest('hex');
@@ -50,52 +67,64 @@ for (const [name, args] of cases) {
     const key = `${asset.id}:${sha256}`;
     if (!assets.has(key)) {
       await writeFile(join(out, file), bytes);
-      assets.set(key, { id: asset.id, file: `10d/${file}`, bytes: bytes.length, sha256 });
+      assets.set(key, { id: asset.id, file: `10d/${file}`, bytes: bytes.length, sha256,
+        rgba: [asset.r, asset.g, asset.b, asset.a], renderRole: asset.renderRole || 'opaque',
+        materialFamily: asset.materialFamily });
     }
-    entries.push({ id: asset.id, file: `10d/${file}`, rgba: [asset.r, asset.g, asset.b, asset.a] });
+    entries.push(key);
   }
-  scenes.push({ name, assets: entries });
-}
+  scenes.push({ name: sceneName, vehicleRig: rig, ecologyProfile: ecologyProfile.id, assetKeys: entries });
+    }
+  }
 
-const manifest = {
+  const globalAssets = [...assets.entries()].sort((a, b) => a[1].file.localeCompare(b[1].file));
+  const assetIndex = new Map(globalAssets.map(([key], index) => [key, index]));
+  const manifest = {
   format: 'maslows-challenge-asset-export-v1',
   artStyle: styleSlug,
   generator: 'scripts/export-game-assets.mjs',
-  sourceRecipes: 'crates/rolling-commons-shell/src/asset_catalog.rs',
+  sourceRecipes: ['crates/rolling-commons-shell/src/asset_catalog.rs',
+    'crates/rolling-commons-shell/src/vehicles.rs',
+    'crates/rolling-commons-shell/src/fauna.rs',
+    'crates/rolling-commons-shell/src/flora.rs',
+    'assets/ecology/profiles/se-corridor-reference.json'],
   wasm: { file: 'web/pkg/rolling_commons_shell_bg.wasm', sha256: createHash('sha256').update(wasm).digest('hex') },
-  assets: [...assets.values()].sort((a, b) => a.file.localeCompare(b.file)),
-  scenes,
-};
-const manifestText = JSON.stringify(manifest, null, 2) + '\n';
-await writeFile(join(styleRoot, 'manifest.json'), manifestText);
+  assets: globalAssets.map(([, asset]) => asset),
+  scenes: scenes.map(({ assetKeys, ...scene }) => ({
+    ...scene,
+    assetIndices: assetKeys.map(key => assetIndex.get(key)),
+  })),
+  };
+  const manifestText = JSON.stringify(manifest, null, 2) + '\n';
+  await writeFile(join(styleRoot, 'manifest.json'), manifestText);
 
-const entries = await Promise.all(manifest.assets.map(async (asset) => ({
-  key: asset.file,
-  bytes: new Uint8Array(await readFile(join(styleRoot, asset.file))),
-})));
+  const entries = await Promise.all(manifest.assets.map(async (asset) => ({
+    key: asset.file,
+    bytes: new Uint8Array(await readFile(join(styleRoot, asset.file))),
+  })));
 // Keep the checked-in manifest readable; pack the same data compactly so
 // growing scene catalogs stay within the game shell's bounded HMC input.
-const pack = pack_game_hmc(entries, JSON.stringify(manifest));
-if (verify_game_hmc(pack) !== manifest.assets.length + 1) {
-  throw new Error('Qualia HMC reader rejected an entry');
-}
-const packDir = join(root, 'web', 'assets');
-await mkdir(packDir, { recursive: true });
-await writeFile(join(packDir, style === 0 ? 'manifest.json' : `${styleSlug}-manifest.json`), manifestText);
-const packPath = join(packDir, style === 0 ? 'maslows-challenge-scenes.hmc' :
-  `maslows-challenge-${styleSlug}.hmc`);
-await writeFile(packPath, Buffer.from(pack));
+  const pack = pack_game_hmc(entries, JSON.stringify(manifest));
+  if (validate_game_hmc(pack) !== manifest.assets.length + 1) {
+    throw new Error('Qualia HMC reader rejected an entry');
+  }
+  const packDir = join(root, 'web', 'assets');
+  await mkdir(packDir, { recursive: true });
+  await writeFile(join(packDir, style === 0 ? 'manifest.json' : `${styleSlug}-manifest.json`), manifestText);
+  const packPath = join(packDir, style === 0 ? 'maslows-challenge-scenes.hmc' :
+    `maslows-challenge-${styleSlug}.hmc`);
+  await writeFile(packPath, Buffer.from(pack));
 // The directory contains generated exports only. Keep it aligned with the
 // verified manifest so old variants cannot masquerade as current game assets.
-const assetRoot = resolve(out);
-const currentFiles = new Set(manifest.assets.map(asset => basename(asset.file)));
-for (const entry of await readdir(assetRoot, { withFileTypes: true })) {
-  if (!entry.isFile() || !entry.name.endsWith('.10d') || currentFiles.has(entry.name)) continue;
-  const stalePath = resolve(assetRoot, entry.name);
-  if (dirname(stalePath) !== assetRoot) throw new Error(`Asset outside export directory: ${stalePath}`);
-  await unlink(stalePath);
-}
-console.log(`Exported ${styleSlug}: ${manifest.assets.length} distinct .10d assets across ${scenes.length} scene states and Qualia HMC ${relative(root, packPath)}`);
+  const assetRoot = resolve(out);
+  const currentFiles = new Set(manifest.assets.map(asset => basename(asset.file)));
+  for (const entry of await readdir(assetRoot, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith('.10d') || currentFiles.has(entry.name)) continue;
+    const stalePath = resolve(assetRoot, entry.name);
+    if (dirname(stalePath) !== assetRoot) throw new Error(`Asset outside export directory: ${stalePath}`);
+    await unlink(stalePath);
+  }
+  console.log(`Exported ${styleSlug}: ${manifest.assets.length} distinct .10d assets across ${scenes.length} scene states and Qualia HMC ${relative(root, packPath)}`);
 }
 const buildId = createHash('sha256').update(wasm).digest('hex').slice(0, 16);
 for (const page of ['game.html', 'spike.html']) {
@@ -109,3 +138,118 @@ for (const page of ['game.html', 'spike.html']) {
   await writeFile(pagePath,
     html.replace(marker, `const WASM_BUILD = '${buildId}${match[2]}';`));
 }
+
+// Keep the authoring/review register tied to the actual three shipped style
+// manifests instead of leaving a hand-maintained inventory at an old count.
+const registerStyles = [
+  ['Storybook', 'manifest.json'],
+  ['Earthlight', 'earthlight-manifest.json'],
+  ['Community Grounds', 'community-manifest.json'],
+];
+const register = new Map();
+const isOneOf = (value, terms) => terms.some(term => value.includes(term));
+function assetFamily(id) {
+  const key = id.toLowerCase();
+  if (key.startsWith('rc:asset/fauna/')) return 'Australian fauna';
+  if (key.startsWith('rc:asset/flora/')) return 'Australian flora';
+  if (key.startsWith('rc:asset/rig/')) return 'Touring rigs';
+  if (isOneOf(key, ['gum-', 'wattle-', 'tree-', 'grass', 'herb-', 'flower-', 'lavender',
+    'orchard-', 'crop-', 'reed', 'shrub', 'foliage', 'canopy-'])) return 'Australian flora';
+  if (isOneOf(key, ['terrain-', 'meadow', 'ridge', 'hill-', 'footpath', 'road-', 'bridge',
+    'canal-', 'creek', 'water-', 'ripple', 'quay'])) return 'Terrain and water';
+  if (isOneOf(key, ['workshop', 'hall-', 'barn-', 'market-stall', 'shed-', 'shelter']))
+    return 'Buildings';
+  if (isOneOf(key, ['solar-', 'battery', 'mast-', 'wind-pump', 'tank-', 'purification']))
+    return 'Infrastructure';
+  return 'Props and furnishing';
+}
+function assetSite(id) {
+  const key = id.toLowerCase();
+  if (key.startsWith('rc:asset/fauna/')) return 'Australian corridor drive fixture';
+  if (key.startsWith('rc:asset/flora/')) return 'Australian native planting showcase';
+  if (key.startsWith('rc:asset/rig/')) return 'Touring vehicle system';
+  if (key.includes('saltwind') || isOneOf(key, ['barn-', 'orchard-', 'market-stall',
+    'wind-pump', 'trade-boat', 'quay'])) return 'Saltwind Reach';
+  if (isOneOf(key, ['highland', 'ridge-', 'hill-'])) return 'Northern Highlands';
+  if (key.includes('canal') || key.includes('bridge')) return 'Canal crossing';
+  if (key.includes('workshop')) return 'Kestrel Flats workshop';
+  if (key.includes('camp-')) return 'Kestrel Flats mobile camp';
+  if (isOneOf(key, ['garden-', 'herb-', 'flower-', 'lavender', 'veggie-', 'hydroponic']))
+    return 'Kestrel Flats garden';
+  return 'Kestrel Flats commons';
+}
+function sourceRecipe(id) {
+  const key = id.toLowerCase();
+  if (key.startsWith('rc:asset/fauna/')) return 'crates/rolling-commons-shell/src/fauna.rs';
+  if (key.startsWith('rc:asset/flora/')) return 'crates/rolling-commons-shell/src/flora.rs';
+  if (key.startsWith('rc:asset/rig/')) return 'crates/rolling-commons-shell/src/vehicles.rs';
+  if (isOneOf(key, ['terrain-', 'meadow', 'ridge', 'hill-']))
+    return 'crates/rolling-commons-shell/src/asset_catalog.rs; terrain.rs';
+  return 'crates/rolling-commons-shell/src/asset_catalog.rs';
+}
+function finishTask(family) {
+  if (family === 'Australian fauna') return 'Review species form, scale and place-profile selection against Australian source and locality evidence.';
+  if (family === 'Australian flora') return 'Review Australian plant silhouette, seasonal state, placement density and ground clearance.';
+  if (family === 'Touring rigs') return 'Review recognisable vehicle family, towing proportions, glazing, mirrors and tyre contact.';
+  if (family === 'Terrain and water') return 'Review continuous ground, banks, paths, water edges and terrain seam at gameplay distance.';
+  if (family === 'Buildings') return 'Review reference composition, structural detail, usable depth and campaign state variants.';
+  if (family === 'Infrastructure') return 'Review physical connections, material response and state-dependent operation cues.';
+  return 'Review activity placement, material definition, scale, clearance and interaction readability.';
+}
+function csvCell(value) {
+  return `"${String(value).replaceAll('"', '""')}"`;
+}
+
+for (const [style, manifestName] of registerStyles) {
+  const manifest = JSON.parse(await readFile(join(root, 'web', 'assets', manifestName), 'utf8'));
+  const styleFiles = new Map();
+  manifest.assets.forEach((asset, index) => {
+    const item = register.get(asset.id) ?? {
+      id: asset.id,
+      family: assetFamily(asset.id),
+      site: assetSite(asset.id),
+      source: sourceRecipe(asset.id),
+      roles: new Set(),
+      materials: new Set(),
+      states: new Set(),
+      files: new Map(),
+    };
+    item.roles.add(asset.renderRole || 'unspecified');
+    item.materials.add(asset.materialFamily || 'unspecified');
+    const variants = item.files.get(style) ?? [];
+    variants.push(`${asset.file} [sha256 ${asset.sha256}; ${asset.bytes} bytes]`);
+    item.files.set(style, variants);
+    register.set(asset.id, item);
+    styleFiles.set(index, asset.id);
+  });
+  for (const scene of manifest.scenes) {
+    for (const index of new Set(scene.assetIndices || [])) {
+      const id = styleFiles.get(index);
+      if (id) register.get(id).states.add(scene.name);
+    }
+  }
+}
+
+const registerHeader = [
+  'Stable asset ID', 'Parent semantic site', 'Family', 'Source recipe', 'Scene states',
+  'Material families', 'Render roles', 'LOD policy', 'Current disposition', 'Replacement/finish task',
+  'Capture', 'Acceptance', 'Storybook files', 'Earthlight files', 'Community Grounds files',
+];
+const registerRows = [...register.values()].sort((a, b) => a.id.localeCompare(b.id)).map(item => [
+  item.id,
+  item.site,
+  item.family,
+  item.source,
+  [...item.states].sort().join('; '),
+  [...item.materials].sort().join('; '),
+  [...item.roles].sort().join('; '),
+  'Single exported mesh; distance LOD chain pending',
+  'Visual review pending; not accepted against the reference',
+  finishTask(item.family),
+  'Pending named-view capture',
+  'Pending human review against docs/planning/35 §8 rubric',
+  ...registerStyles.map(([style]) => (item.files.get(style) || []).sort().join('; ')),
+]);
+await writeFile(join(root, 'docs', 'art', 'asset-replacement-register.csv'),
+  `${[registerHeader, ...registerRows].map(row => row.map(csvCell).join(',')).join('\n')}\n`);
+console.log(`Updated asset review register: ${register.size} stable IDs across ${registerStyles.length} styles`);

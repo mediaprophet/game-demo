@@ -136,14 +136,301 @@
   #scene, #game-hud { position:absolute; inset:0; width:100%; height:100%; max-height:none;
     border:0; border-radius:0; display:block; }
   #game-hud { z-index:2; pointer-events:none; }
+  .world-loader { position:fixed; z-index:1000; inset:0; display:grid; place-items:center; padding:clamp(12px,3vw,36px);
+    color:#f8f1df; background:radial-gradient(ellipse at 50% 5%,#496b68 0,#203e43 48%,#122a32 100%);
+    opacity:1; visibility:visible; transition:opacity .42s ease,visibility .42s ease; }
+  .world-loader.is-dismissed { opacity:0; visibility:hidden; pointer-events:none; }
+  .loader-card { width:min(940px,100%); overflow:hidden; border:1px solid #e7d8b566; border-radius:26px;
+    background:linear-gradient(150deg,#25484a,#18353c 68%,#173137); box-shadow:0 26px 90px #07181dbb; }
+  .loader-landscape { position:relative; height:clamp(180px,34vh,290px); overflow:hidden; background:#89b8b0; }
+  .loader-landscape svg { display:block; width:100%; height:100%; }
+  .loader-sun-glow { transform-origin:790px 70px; animation:loader-sun-breathe 5s ease-in-out infinite; }
+  .loader-leaves { transform-box:fill-box; transform-origin:bottom center; animation:loader-leaf-sway 4.6s ease-in-out infinite alternate; }
+  .loader-leaves.delay { animation-delay:-2.4s; }
+  .loader-road-dash { animation:loader-road-drift 8s linear infinite; }
+  .loader-rig { animation:loader-rig-bob 2.8s ease-in-out infinite; }
+  .loader-ground-copy { position:absolute; top:15px; left:18px; padding:7px 11px; border:1px solid #ffffff88;
+    border-radius:999px; color:#fff8e7; background:#1d4146b8; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+  .loader-copy { padding:clamp(20px,4vw,34px) clamp(20px,5vw,48px) 28px; }
+  .loader-eyebrow { margin:0 0 8px; color:#f3c879; font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+  .loader-copy h1 { margin:0; color:#fff6df; font:700 clamp(25px,4vw,37px)/1.1 Georgia,serif; }
+  .loader-description { max-width:58ch; margin:10px 0 18px; color:#d7e5d9; font-size:14px; }
+  .loader-status-row { display:flex; gap:14px; align-items:center; }
+  .loader-compass { position:relative; flex:0 0 30px; width:30px; height:30px; border:2px solid #d9b775;
+    border-radius:50%; box-shadow:0 0 0 5px #d9b7751c; }
+  .loader-compass::before,.loader-compass::after { content:""; position:absolute; top:5px; left:12px; width:3px; height:17px;
+    border-radius:4px; background:#f2c46e; transform:rotate(34deg); animation:loader-compass-turn 5s linear infinite; }
+  .loader-compass::after { width:2px; height:13px; top:7px; left:13px; background:#f4e7c8; transform:rotate(-34deg); }
+  .loader-status { min-width:0; flex:1; }
+  .loader-stage { display:block; color:#fff3d7; font-size:13px; font-weight:800; }
+  .loader-message { display:block; margin-top:2px; color:#bed2c8; font-size:12px; }
+  .loader-progress { height:7px; margin-top:17px; overflow:hidden; border-radius:99px; background:#0f292e; box-shadow:inset 0 1px 3px #05181b99; }
+  .loader-progress span { display:block; width:36%; height:100%; border-radius:inherit;
+    background:linear-gradient(90deg,#6eaf8a,#f1ca7d,#d97652); box-shadow:0 0 16px #f0c77988; }
+  .loader-progress.is-indeterminate span { animation:loader-progress-sweep 1.8s ease-in-out infinite; }
+  .loader-progress:not(.is-indeterminate) span { width:var(--load-progress,0%); transition:width .16s linear; animation:none; }
+  .loader-retry { display:none; margin:17px 0 0 44px; border:1px solid #e8c679; color:#17383a;
+    background:linear-gradient(#ffe2a2,#eeb76b); }
+  .world-loader.has-error .loader-retry { display:inline-block; }
+  @keyframes loader-progress-sweep { from { transform:translateX(-120%); } to { transform:translateX(300%); } }
+  @keyframes loader-sun-breathe { 0%,100% { opacity:.72; transform:scale(.94); } 50% { opacity:1; transform:scale(1.05); } }
+  @keyframes loader-leaf-sway { from { transform:rotate(-2.5deg); } to { transform:rotate(2.5deg); } }
+  @keyframes loader-road-drift { to { stroke-dashoffset:-110; } }
+  @keyframes loader-rig-bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2px); } }
+  @keyframes loader-compass-turn { to { transform:rotate(394deg); } }
+  @media(max-width:600px) { .world-loader { padding:12px; } .loader-card { border-radius:20px; }
+    .loader-landscape { height:clamp(160px,28vh,220px); } .loader-copy { padding:20px 20px 23px; }
+    .loader-description { margin-bottom:15px; } }
+  @media(prefers-reduced-motion:reduce) { .world-loader *, .world-loader *::before, .world-loader *::after {
+    animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; } }
+  /* The 3D canvas is the game board; the surrounding controls stay real HTML so
+     the map, trip, vehicle and activity flows remain readable and accessible. */
+  :root { color-scheme:dark; --bg:#101d20; --surface:#18282a; --surface2:#203536;
+    --line:#38504c; --text:#f5eedb; --muted:#b7c5b8; --accent:#f0bd70;
+    --good:#94d4a1; --warning:#ffc078; }
+  body { min-height:100vh; overflow:auto; color:var(--text);
+    background:radial-gradient(ellipse at 18% 0%,#2a4946 0,#172d30 40%,#0d191d 100%); }
+  header { position:sticky; top:0; z-index:20; min-height:70px; padding:10px clamp(14px,2.2vw,32px);
+    display:flex !important; gap:20px; align-items:center; flex-wrap:nowrap;
+    background:#102327ed; border-bottom:1px solid #79958a38; backdrop-filter:blur(18px); }
+  .brand strong { color:#fff6df; font-size:21px; }
+  header .eyebrow { color:#f2c779; }
+  .header-meta { margin-left:auto; flex-wrap:nowrap; }
+  .quality-choice,.art-style-choice { max-width:154px; padding:6px 8px; color:#e8ecdf; border:1px solid #ffffff33;
+    border-radius:8px; background:#193538; font:700 11px system-ui,sans-serif; }
+  .badge { color:#d4ded0; border-color:#ffffff22; background:#ffffff09; }
+  .header-mode-nav { display:flex; align-items:center; gap:5px; }
+  .header-mode-nav button { padding:8px 11px; color:#e4eadd; border:1px solid transparent;
+    background:transparent; box-shadow:none; font-size:13px; white-space:nowrap; }
+  .header-mode-nav button:hover,.header-mode-nav button[aria-current="page"] {
+    color:#fff1cf; background:#ffffff12; border-color:#f0bd704c; transform:none; }
+  .header-mode-nav button[aria-current="page"] { box-shadow:inset 0 -2px #efc276; }
+  .header-meta #pin { max-width:152px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .route-stop button[aria-pressed="true"] { color:#263732; background:linear-gradient(#ffe4a6,#f3bc6d);
+    border-color:#efc276; }
+  main { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(310px,365px);
+    align-items:start; gap:14px; width:100%; max-width:1900px; margin:0 auto;
+    padding:14px clamp(10px,1.5vw,24px) 28px; }
+  .world-column,.side-column { display:grid !important; min-width:0; gap:12px; align-content:start; }
+  .side-column { max-height:calc(100vh - 90px); overflow:auto; padding-right:3px; scrollbar-color:#536b61 transparent; }
+  .territory-nav { display:flex !important; gap:7px; flex-wrap:nowrap; }
+  .territory-nav button { min-width:0; flex:1; padding:8px 10px; background:#1b3033;
+    color:#e2e8d9; border:1px solid #48615b; box-shadow:none; text-align:center; white-space:nowrap; }
+  .territory-nav button[aria-current="true"] { color:#2a3935; background:linear-gradient(#ffe4a6,#f3bc6d);
+    border-color:#f0bd70; }
+  .scene-shell { width:100%; height:min(69vh,790px); min-height:440px; border:1px solid #9fb8a464;
+    border-radius:20px; background:radial-gradient(ellipse at 50% 35%,#41615a,#172c32 73%);
+    box-shadow:0 24px 60px #020a0c66, inset 0 1px #ffffff1f; }
+  #scene { position:absolute; inset:0; width:100%; height:100%; max-height:none; }
+  #game-hud { position:absolute; inset:0; z-index:2; width:100%; height:100%; pointer-events:none; }
+  .world-column > .panel { display:block !important; }
+  #resource-bar { display:grid !important; }
+  #inspector { display:block !important; }
+  .panel { color:var(--text); background:linear-gradient(145deg,#1b2d2feF,#142427f5);
+    border:1px solid #82998a35; border-radius:15px; padding:15px;
+    box-shadow:0 10px 28px #06101235,inset 0 1px #ffffff08; }
+  .panel h2 { color:#fff3d6; font-size:19px; }
+  .panel h3 { color:#efc681; }
+  .muted,.campaign-count { color:#b4c3ba; }
+  .dispatch { background:linear-gradient(130deg,#273b35,#182d2d 75%); border-color:#b39a614a; }
+  .dispatch button { background:linear-gradient(#f0ce88,#d9a65f); color:#2c3430;
+    border-color:#e8bf77; box-shadow:0 3px 0 #94704b; }
+  .campaign-meter { background:#304642; }
+  .campaign-meter span { background:linear-gradient(90deg,#83c9a0,#edc476); }
+  .objective,.finale-option { color:#edf0df; background:#203436; border-color:#ffffff19; }
+  .objective.done { background:#234338; }
+  .resource { color:#f4eedf; background:#203637 !important; border-color:#ffffff17; }
+  .resource span { color:#b7c7bd; }
+  button { background:linear-gradient(145deg,#34524b,#263e3d); color:#f5eedb;
+    border:1px solid #718b79; box-shadow:0 2px 0 #0b1719; }
+  button:hover { background:linear-gradient(145deg,#49695b,#304a47); border-color:#efc276; }
+  .utility-buttons { gap:7px; }
+  #why { color:#f9ecdd; background:#47372d; }
+  #log div { border-color:#ffffff18; }
+  .scene-label,.scene-help { display:block !important; }
+  .scene-label { top:13px; left:13px; color:#f7efdc; border:1px solid #f8efd280;
+    border-radius:11px; background:#10282bd9; box-shadow:0 4px 18px #07141566; }
+  .scene-help { left:13px; right:auto; bottom:13px; max-width:70%; color:#e4ede1;
+    border:1px solid #d6e2d12a; border-radius:10px; background:#10282bd9; }
+  .route-planner { display:none; }
+  body.trip-planning .route-planner { display:block; }
+  .route-planner .route-map { display:none; }
+  .atlas-overlay { position:absolute; z-index:5; inset:0; display:none; overflow:hidden; color:#f5eedb;
+    padding:clamp(16px,3vw,36px); background:radial-gradient(ellipse at 42% 35%,#31524e,#172e32 72%,#122428); }
+  body.trip-planning .atlas-overlay { display:grid; grid-template-rows:auto minmax(0,1fr) auto; }
+  body.trip-planning #scene,body.trip-planning #game-hud,body.trip-planning .scene-label,
+  body.trip-planning .scene-help { display:none !important; }
+  .atlas-heading { display:flex; gap:18px; align-items:end; justify-content:space-between; }
+  .atlas-heading h2 { margin:2px 0 0; color:#fff4d9; font:700 clamp(18px,2.2vw,28px)/1.15 Georgia,serif; }
+  .atlas-heading p { margin:0; color:#c0d0c4; font-size:12px; }
+  .atlas-drawing { width:100%; height:100%; min-height:0; }
+  .atlas-drawing svg { display:block; width:100%; height:100%; }
+  .atlas-caption { display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; color:#bdcbbf; font-size:11px; }
+  .atlas-caption strong { color:#f2cb80; }
+  .atlas-dot { display:inline-block; width:9px; height:9px; margin-right:5px; border-radius:50%; background:#f3c779; }
+  .atlas-dot.inland { background:#a9d4a7; }
+  .atlas-stop { cursor:pointer; outline:none; }
+  .atlas-stop circle { transition:transform .15s,fill .15s; transform-box:fill-box; transform-origin:center; }
+  .atlas-stop:hover circle,.atlas-stop:focus circle,.atlas-stop[aria-pressed="true"] circle { transform:scale(1.5); fill:#fff0b1; }
+  .atlas-stop:focus { outline:none; }
+  .atlas-stop:focus text,.atlas-stop[aria-pressed="true"] text { fill:#fff0b1; font-weight:900; }
+  .route-planner .route-eyebrow { margin:0; color:#efc681; font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+  .route-planner h2 { margin:4px 0 2px; }
+  .route-map { display:block; width:100%; height:180px; margin:10px 0 6px;
+    overflow:visible; border:1px solid #c4d2b721; border-radius:12px;
+    background:radial-gradient(ellipse at 50% 45%,#2b4943,#162b2f); }
+  .route-stops { display:grid; gap:6px; }
+  .route-stop { display:grid; grid-template-columns:25px minmax(0,1fr) auto; gap:8px; align-items:center;
+    padding:8px; border:1px solid #ffffff17; border-radius:10px; background:#ffffff07; }
+  .route-stop .stop-index { display:grid; width:23px; height:23px; place-items:center; border-radius:50%;
+    color:#233a34; background:#edc375; font-size:11px; font-weight:900; }
+  .route-stop strong { display:block; color:#f5eedb; font-size:12px; }
+  .route-stop small { display:block; color:#aebfb5; font-size:10px; }
+  .route-stop button { padding:5px 7px; font-size:11px; }
+  .source-note { margin:9px 0 0; color:#aebfb5; font-size:11px; }
+  .drive-panel[hidden] { display:none !important; }
+  .drive-panel .rig-choice { width:100%; margin:6px 0 12px; padding:9px 11px; color:#f4eedf;
+    border:1px solid #738d7b; border-radius:9px; background:#203638; font:inherit; }
+  .thermal-row { display:grid; grid-template-columns:72px 1fr 44px; gap:9px; align-items:center; margin:10px 0; }
+  .thermal-row label { color:#c3d0c4; font-size:12px; }
+  .thermal-row output { color:#fff0cf; font:700 12px ui-monospace,monospace; text-align:right; }
+  .thermal-track { height:9px; overflow:hidden; border:1px solid #ffffff21; border-radius:8px; background:#102326; }
+  .thermal-track span { display:block; height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,#78c899,#e9c875,#e07858); transition:width .3s; }
+  .engine-warning { min-height:20px; margin:8px 0; color:#a9c9ac; font-size:12px; }
+  .engine-warning.is-warn { color:#ffc078; }
+  .engine-warning.is-critical { color:#ff806c; font-weight:800; }
+  .mirror-scene { position:relative; height:54px; margin-top:9px; overflow:hidden; border:1px solid #9cb39d55;
+    border-radius:9px; background:linear-gradient(#597970 0 45%,#233e3c 46% 100%); }
+  .mirror-scene::before { content:"REAR VIEW · FOLLOWING TRAFFIC"; position:absolute; z-index:1; top:5px; left:8px;
+    color:#ecf0dbb5; font-size:8px; font-weight:800; letter-spacing:.1em; }
+  .mirror-vehicle { position:absolute; bottom:8px; width:11px; height:12px; border-radius:3px 3px 2px 2px;
+    background:#d7c7a0; box-shadow:-4px 7px 0 -2px #111a18,4px 7px 0 -2px #111a18; }
+  .mirror-vehicle:nth-child(1) { left:28%; transform:scale(.65); opacity:.6; }
+  .mirror-vehicle:nth-child(2) { left:48%; transform:scale(.82); opacity:.8; }
+  .mirror-vehicle:nth-child(3) { left:68%; }
+  .drive-context { color:#b3c2b6; font-size:11px; }
+  .mode-chip { display:inline-flex; gap:6px; align-items:center; color:#dce8d7; font-size:11px; }
+  .mode-chip::before { content:""; width:7px; height:7px; border-radius:50%; background:#eebd70; box-shadow:0 0 10px #eebd7088; }
+  @media(max-width:1120px) { header { flex-wrap:wrap; } .header-mode-nav { order:3; width:100%; overflow:auto; }
+    .header-meta { gap:5px; } main { grid-template-columns:minmax(0,1fr) 300px; }
+    .scene-shell { height:64vh; min-height:400px; } }
+  @media(max-width:800px) { header { position:relative; gap:9px; } .header-meta { margin-left:auto; }
+    main { grid-template-columns:1fr; } .side-column { max-height:none; overflow:visible; }
+    .scene-shell { height:65vh; min-height:370px; } .territory-nav button { padding:8px 5px; font-size:12px; }
+    .header-mode-nav { gap:2px; } .header-mode-nav button { flex:1; padding:8px 7px; } }
+  @media(max-width:520px) { header { padding:10px 12px; } .brand strong { font-size:18px; }
+    .header-meta .badge:nth-child(n+3) { display:none; } main { padding:8px; gap:9px; }
+    .scene-shell { height:55vh; min-height:340px; border-radius:14px; }
+    .territory-nav { overflow:auto; } .territory-nav button { flex:none; min-width:110px; }
+    .scene-help { max-width:calc(100% - 26px); font-size:10px; } }
 </style>
 </head>
 <body>
-<header>
+<section class="world-loader" id="world-loader" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="loader-title" aria-describedby="loader-description" aria-busy="true">
+  <div class="loader-card">
+    <div class="loader-landscape">
+      <svg viewBox="0 0 1000 350" role="img" aria-label="An illustrated Australian road crossing open country beneath gum trees">
+        <defs>
+          <linearGradient id="loader-sky" x2="0" y2="1"><stop stop-color="#79aaa8"/><stop offset="1" stop-color="#f0d69b"/></linearGradient>
+          <linearGradient id="loader-hills" x2="0" y2="1"><stop stop-color="#748d70"/><stop offset="1" stop-color="#9eaa76"/></linearGradient>
+          <linearGradient id="loader-road" x2="0" y2="1"><stop stop-color="#a78a68"/><stop offset="1" stop-color="#665b4c"/></linearGradient>
+        </defs>
+        <rect width="1000" height="350" fill="url(#loader-sky)"/>
+        <circle class="loader-sun-glow" cx="790" cy="72" r="54" fill="#ffe8ad" opacity=".82"/>
+        <path d="M0 214 Q120 155 236 198T470 184T720 201T1000 169V350H0Z" fill="#869b76"/>
+        <path d="M0 244 Q155 183 286 226T560 215T820 230T1000 207V350H0Z" fill="url(#loader-hills)"/>
+        <path d="M0 275 Q185 230 360 262T692 246T1000 263V350H0Z" fill="#81986b"/>
+        <path d="M0 294 Q160 261 328 282T665 276T1000 288V350H0Z" fill="#5e7c5d"/>
+        <path d="M0 326 Q155 291 324 310T644 300T1000 315V350H0Z" fill="#406953"/>
+        <g fill="#38594b" opacity=".86">
+          <path d="M74 252h9v-92h-9zM63 178q15-37 32-1-18 12-32 1zm-5-17q16-34 34 0-18 11-34 0zm4-17q15-31 29 1-16 10-29-1z"/>
+          <path d="M908 269h9v-121h-9zM890 172q21-43 42 0-22 14-42 0zm3-23q18-39 37 0-19 12-37 0zm5-20q17-34 31 1-17 11-31-1z"/>
+        </g>
+        <g class="loader-leaves" fill="#456b56"><path d="M63 178q-28-17-24-35 25-1 32 28 3-29 23-36 14 23-12 47 28-17 41-3-8 25-44 21-25 9-45-1z"/></g>
+        <g class="loader-leaves delay" fill="#53745a"><path d="M890 172q-28-18-22-37 24 0 31 29 3-30 23-37 15 23-12 48 28-17 41-2-9 25-45 20-23 10-44-1z"/></g>
+        <path d="M574 350 Q598 318 659 287 Q727 254 765 224 Q797 199 794 178" fill="none" stroke="#c7aa7d" stroke-width="69"/>
+        <path d="M574 350 Q598 318 659 287 Q727 254 765 224 Q797 199 794 178" fill="none" stroke="url(#loader-road)" stroke-width="59"/>
+        <path class="loader-road-dash" d="M574 350 Q598 318 659 287 Q727 254 765 224 Q797 199 794 178" fill="none" stroke="#ead6a9" stroke-width="3" stroke-dasharray="16 20"/>
+        <g class="loader-rig" transform="translate(618 269)">
+          <path d="M0 29h71l-7-25H26L15 13H4z" fill="#e8dfca" stroke="#52645b" stroke-width="3"/>
+          <path d="M29 7h30l5 17H25z" fill="#7fa7a3" stroke="#52645b" stroke-width="2"/>
+          <path d="M3 16h16v-7h-8z" fill="#d5cbb5" stroke="#52645b" stroke-width="2"/>
+          <circle cx="17" cy="31" r="8" fill="#31423e"/><circle cx="17" cy="31" r="3" fill="#c9b78e"/>
+          <circle cx="58" cy="31" r="8" fill="#31423e"/><circle cx="58" cy="31" r="3" fill="#c9b78e"/>
+          <path d="M75 22h44l-4 14H78z" fill="#eee4d0" stroke="#52645b" stroke-width="3"/>
+          <path d="M82 25h27v8H82z" fill="#80aaa6"/>
+          <circle cx="88" cy="37" r="6" fill="#31423e"/><circle cx="109" cy="37" r="6" fill="#31423e"/>
+          <path d="M66 26h10" stroke="#d4b877" stroke-width="3"/>
+        </g>
+        <path d="M0 335q28-18 56 0t56-1m784 7q30-22 62-1t42-1" fill="none" stroke="#d1c280" stroke-width="4" opacity=".7"/>
+      </svg>
+      <span class="loader-ground-copy">Australia · a world of local places</span>
+    </div>
+    <div class="loader-copy">
+      <p class="loader-eyebrow">Maslows Challenge · community simulation</p>
+      <h1 id="loader-title">Preparing your place</h1>
+      <p class="loader-description" id="loader-description">Loading the game, its Australian environment and the community around you.</p>
+      <div class="loader-status-row" role="status" aria-live="polite">
+        <span class="loader-compass" aria-hidden="true"></span>
+        <span class="loader-status"><strong class="loader-stage" id="loader-stage">Starting the game</strong><span class="loader-message" id="loader-message">Preparing the Qualia graphics engine</span></span>
+      </div>
+      <div class="loader-progress is-indeterminate" id="loader-progress" role="progressbar" aria-label="Loading game world" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Preparing the game world"><span id="loader-progress-fill"></span></div>
+      <button class="loader-retry" id="loader-retry" type="button" onclick="location.reload()">Retry loading</button>
+    </div>
+  </div>
+</section>
+<script>
+(()=>{
+  const root=document.getElementById('world-loader'),stage=document.getElementById('loader-stage'),
+    message=document.getElementById('loader-message'),bar=document.getElementById('loader-progress'),
+    fill=document.getElementById('loader-progress-fill');
+  let shownAt=performance.now(),restoreFocus=null;
+  window.setWorldLoading=(label,detail,progress=null)=>{
+    if(root.classList.contains('is-dismissed')){
+      restoreFocus=document.activeElement;
+      document.querySelector('header')?.setAttribute('inert','');document.querySelector('main')?.setAttribute('inert','');
+    }
+    shownAt=performance.now();root.classList.remove('is-dismissed','has-error');root.removeAttribute('inert');root.setAttribute('aria-hidden','false');
+    root.setAttribute('aria-busy','true');root.focus({preventScroll:true});stage.textContent=label;message.textContent=detail;
+    if(Number.isFinite(progress)){const value=Math.max(0,Math.min(100,progress));bar.classList.remove('is-indeterminate');
+      bar.setAttribute('aria-valuenow',String(Math.round(value)));bar.setAttribute('aria-valuetext',`${Math.round(value)} percent · ${detail}`);fill.style.setProperty('--load-progress',`${value}%`);}
+    else {bar.classList.add('is-indeterminate');bar.removeAttribute('aria-valuenow');bar.setAttribute('aria-valuetext',detail);fill.style.removeProperty('--load-progress');}
+  };
+  window.showWorldLoading=(label,detail)=>window.setWorldLoading(label,detail);
+  window.finishWorldLoading=async(detail='Your place is ready')=>{
+    stage.textContent='Ready to explore';message.textContent=detail;bar.classList.remove('is-indeterminate');
+    bar.setAttribute('aria-valuenow','100');bar.setAttribute('aria-valuetext','100 percent · ready');fill.style.setProperty('--load-progress','100%');
+    root.setAttribute('aria-busy','false');await new Promise(resolve=>setTimeout(resolve,Math.max(0,420-(performance.now()-shownAt))));
+    document.querySelector('header')?.removeAttribute('inert');document.querySelector('main')?.removeAttribute('inert');
+    if(restoreFocus instanceof HTMLElement&&restoreFocus!==document.body&&restoreFocus.isConnected){
+      restoreFocus.focus({preventScroll:true});
+    } else {
+      (document.querySelector("header button[data-game-view='world']")||document.querySelector("button")||document.body).focus({preventScroll:true});
+    }
+    root.blur();
+    root.setAttribute('inert','');
+    root.classList.add('is-dismissed');root.setAttribute('aria-hidden','true');
+    restoreFocus=null;
+  };
+  window.failWorldLoading=detail=>{root.classList.add('has-error');root.setAttribute('aria-busy','false');
+    stage.textContent='The game could not start';message.textContent=detail||'Check your connection, then retry loading.';
+    document.getElementById('loader-retry')?.focus({preventScroll:true});};
+  window.addEventListener('unhandledrejection',event=>{if(!root.classList.contains('is-dismissed'))window.failWorldLoading('A required game or world file did not finish loading. Check your connection and retry.');});
+  window.addEventListener('error',()=>{if(!root.classList.contains('is-dismissed'))window.failWorldLoading('The game encountered an error while loading. Check your connection and retry.');},true);
+})();
+</script>
+<header inert>
   <div class="brand"><span class="eyebrow">An SDGs game · community strategy</span><strong>Maslows Challenge</strong></div>
-  <div class="header-meta"><span class="badge" id="day">Day 1</span><span class="badge" id="tide">Low tide</span><span class="badge" id="pin"></span><span class="badge" id="tier"></span></div>
+  <nav class="header-mode-nav" aria-label="Game modes">
+    <button data-game-view="world" aria-current="page">Community</button>
+    <button data-game-view="trip">Trip map</button>
+    <button data-game-view="drive">Drive</button>
+    <button data-game-view="walk">Explore</button>
+    <button data-game-view="activities">Activities</button>
+  </nav>
+  <div class="header-meta"><select id="art-style" class="art-style-choice" aria-label="Environment art style"><option value="2">Community Grounds</option><option value="1">Earthlight</option><option value="0">Storybook</option></select><select id="quality-profile" class="quality-choice" aria-label="Graphics quality"><option value="0">Economy</option><option value="1">Balanced</option><option value="2">High detail</option></select><span class="badge" id="day">Day 1</span><span class="badge" id="tide">Low tide</span><span class="badge" id="pin"></span><span class="badge" id="tier"></span></div>
 </header>
-<main>
+<main inert>
   <div class="world-column">
     <nav class="territory-nav" aria-label="Territories">
       <button id="tile-kestrel" aria-current="true">01 · Kestrel Flats</button>
@@ -154,6 +441,24 @@
     <div class="scene-shell">
       <canvas id="scene" width="960" height="600" aria-label="QualiaDB three-dimensional view of Kestrel Flats"></canvas>
       <canvas id="game-hud" width="960" height="600" tabindex="0" aria-label="Maslows Challenge in-game menu and world controls"></canvas>
+      <section class="atlas-overlay" id="atlas-overlay" aria-label="Australia trip-planning map">
+        <div class="atlas-heading"><div><span class="eyebrow">Australia · trip planning</span><h2>Noosa to Melbourne · coastal corridor and inland options</h2></div><p>Schematic · not for navigation</p></div>
+        <div class="atlas-drawing">
+          <svg viewBox="0 0 360 180" role="img" aria-label="Australia silhouette with a schematic route from Noosa along the east coast to Melbourne and inland toward the South Australian border">
+            <path d="M92 40 L110 33 124 38 142 32 155 39 170 31 186 35 199 29 214 34 227 30 241 37 252 35 266 45 277 47 285 60 282 73 290 85 281 98 278 112 265 122 260 137 246 146 235 155 218 161 202 161 187 156 170 163 155 158 140 161 126 151 112 147 102 135 95 120 86 109 80 94 83 81 77 68 83 55 Z" fill="#6c8776" stroke="#b1c29e" stroke-opacity=".72" stroke-width="1.3"/>
+            <path d="M248 167 l5 3 -2 6 -6 -1z" fill="#6c8776" stroke="#b1c29e" stroke-opacity=".6"/>
+            <path d="M93 41 C121 60 161 63 191 69 C215 75 235 62 260 48M100 88 C137 91 166 102 192 127 C207 139 218 148 235 155" fill="none" stroke="#b6c5aa" stroke-opacity=".36" stroke-width="1" stroke-dasharray="2 4"/>
+            <text x="118" y="104" fill="#dbe3cf" opacity=".54" font-family="system-ui,sans-serif" font-size="8" letter-spacing="1.2">AUSTRALIA</text>
+            <path d="M260 49 C270 61 264 73 270 84 C277 98 267 109 269 121 C269 135 253 146 244 154 C239 159 232 161 226 161" fill="none" stroke="#f0bd70" stroke-width="3" stroke-linecap="round"/>
+            <path d="M226 161 C211 160 199 155 187 151" fill="none" stroke="#a4d0a4" stroke-width="3" stroke-dasharray="5 5"/>
+            <g class="atlas-stop" data-route-stop="noosa" role="button" tabindex="0" aria-label="Select Noosa departure"><circle cx="260" cy="49" r="4.2" fill="#f4cd82" stroke="#182d2f" stroke-width="2"/><text x="264" y="46" fill="#fff3d4" font-family="system-ui,sans-serif" font-size="7">NOOSA</text></g>
+            <g class="atlas-stop" data-route-stop="nsw" role="button" tabindex="0" aria-label="Select New South Wales coast and inland options"><circle cx="270" cy="84" r="3.8" fill="#f4cd82" stroke="#182d2f" stroke-width="2"/><text x="274" y="83" fill="#fff3d4" font-family="system-ui,sans-serif" font-size="7">NSW COAST</text></g>
+            <g class="atlas-stop" data-route-stop="melbourne" role="button" tabindex="0" aria-label="Select Melbourne trip end"><circle cx="226" cy="161" r="4.2" fill="#f4cd82" stroke="#182d2f" stroke-width="2"/><text x="229" y="157" fill="#fff3d4" font-family="system-ui,sans-serif" font-size="7">MELBOURNE</text></g>
+            <g class="atlas-stop" data-route-stop="sa-border" role="button" tabindex="0" aria-label="Select inland leg toward South Australian border"><circle cx="187" cy="151" r="3.8" fill="#a4d0a4" stroke="#182d2f" stroke-width="2"/><text x="111" y="151" fill="#fff3d4" font-family="system-ui,sans-serif" font-size="7">INLAND · SA BORDER</text></g>
+          </svg>
+        </div>
+        <div class="atlas-caption"><span><i class="atlas-dot"></i>Illustrative east-coast trip spine</span><span><i class="atlas-dot inland"></i>Inland planning leg</span><strong id="atlas-feedback" aria-live="polite">Choose a stop to review its trip-planning context.</strong></div>
+      </section>
       <div class="scene-label"><span class="eyebrow" id="territory-step">Territory 01</span><strong id="territory-name">Kestrel Flats</strong></div>
       <div class="scene-help">Choose a territory · Drag to orbit · Wheel to zoom · Click a site to inspect</div>
       <div class="scene-victory" id="scene-victory" hidden></div>
@@ -163,6 +468,56 @@
     <div class="panel"><h2>Event journal</h2><div id="log" role="log" aria-live="polite"></div></div>
   </div>
   <div class="side-column">
+    <section class="panel drive-panel" id="drive-dashboard" hidden aria-labelledby="drive-title">
+      <span class="eyebrow">Direct Drive · vehicle systems</span>
+      <h2 id="drive-title">Touring rig &amp; engine</h2>
+      <label class="muted" for="rig-choice">Current touring setup</label>
+      <select class="rig-choice" id="rig-choice" aria-label="Choose touring vehicle and camping rig">
+        <option value="0">Campervan</option>
+        <option value="1">4WD + caravan</option>
+        <option value="2">Car + camper trailer</option>
+        <option value="3">4WD + roof-top tent</option>
+      </select>
+      <div class="thermal-row"><label>Oil temp</label><div class="thermal-track" id="oil-meter" role="progressbar" aria-label="Engine oil temperature" aria-valuemin="60" aria-valuemax="150"><span id="oil-fill"></span></div><output id="oil-readout">— °C</output></div>
+      <div class="thermal-row"><label>Coolant</label><div class="thermal-track" id="coolant-meter" role="progressbar" aria-label="Engine coolant temperature" aria-valuemin="60" aria-valuemax="120"><span id="coolant-fill"></span></div><output id="coolant-readout">— °C</output></div>
+      <p class="engine-warning" id="engine-warning" role="status">Engine temperatures are monitored during the drive.</p>
+      <p class="drive-context" id="drive-context">Ambient heat · grade · road surface · load</p>
+      <div class="mirror-scene" id="rear-mirror" role="img" aria-label="Rear-view mirror simulation showing vehicles following the touring rig"><i class="mirror-vehicle"></i><i class="mirror-vehicle"></i><i class="mirror-vehicle"></i></div>
+      <p class="drive-context" id="mirror-status">Rear mirror · watching the road behind</p>
+    </section>
+    <section class="panel route-planner" id="route-planner" aria-labelledby="route-title">
+      <p class="route-eyebrow">Australia · trip planning</p>
+      <h2 id="route-title">Noosa to Melbourne, with an inland leg</h2>
+      <p class="muted">A journey board for the coastal corridor and the run west toward the South Australian border.</p>
+      <svg class="route-map" viewBox="0 0 360 180" role="img" aria-label="Schematic route from Noosa south along the east coast to Melbourne, then west inland toward the South Australian border">
+        <path d="M92 40 L110 33 124 38 142 32 155 39 170 31 186 35 199 29 214 34 227 30 241 37 252 35 266 45 277 47 285 60 282 73 290 85 281 98 278 112 265 122 260 137 246 146 235 155 218 161 202 161 187 156 170 163 155 158 140 161 126 151 112 147 102 135 95 120 86 109 80 94 83 81 77 68 83 55 Z" fill="#6c8776" stroke="#b1c29e" stroke-opacity=".6" stroke-width="1.3"/>
+        <path d="M248 167 l5 3 -2 6 -6 -1z" fill="#6c8776" stroke="#b1c29e" stroke-opacity=".6"/>
+        <path d="M93 41 C121 60 161 63 191 69 C215 75 235 62 260 48" fill="none" stroke="#a8b59d" stroke-opacity=".25" stroke-width="1" stroke-dasharray="2 4"/>
+        <path d="M100 88 C137 91 166 102 192 127 C207 139 218 148 235 155" fill="none" stroke="#a8b59d" stroke-opacity=".25" stroke-width="1" stroke-dasharray="2 4"/>
+        <text x="118" y="104" fill="#dbe3cf" opacity=".54" font-family="system-ui,sans-serif" font-size="8" letter-spacing="1.2">AUSTRALIA</text>
+        <path d="M260 49 C271 59 263 72 270 84 C278 98 266 108 269 121 C271 134 252 145 244 154 C238 161 229 164 218 162" fill="none" stroke="#9ab094" stroke-width="27" stroke-linecap="round" opacity=".25"/>
+        <path d="M260 49 C271 59 263 72 270 84 C278 98 266 108 269 121 C271 134 252 145 244 154 C238 161 229 164 218 162" fill="none" stroke="#7d9480" stroke-width="1.5" stroke-dasharray="3 5"/>
+        <path d="M260 49 C270 61 264 73 270 84 C277 98 267 109 269 121 C269 135 253 146 244 154 C239 159 232 161 226 161" fill="none" stroke="#f0bd70" stroke-width="3" stroke-linecap="round"/>
+        <path d="M226 161 C211 160 199 155 187 151" fill="none" stroke="#a4d0a4" stroke-width="3" stroke-dasharray="5 5"/>
+        <g fill="#fff3d4" font-family="system-ui,sans-serif" font-size="9">
+          <text x="267" y="49">NOOSA</text><text x="276" y="84">NSW coast</text>
+          <text x="275" y="116">Canberra</text><text x="254" y="145">Gippsland</text>
+          <text x="226" y="174">MELBOURNE</text><text x="101" y="151">inland · SA border</text>
+        </g>
+        <g fill="#f4cd82" stroke="#182d2f" stroke-width="2">
+          <circle cx="260" cy="49" r="5"/><circle cx="270" cy="84" r="4"/><circle cx="269" cy="121" r="4"/>
+          <circle cx="244" cy="154" r="4"/><circle cx="226" cy="161" r="5"/><circle cx="187" cy="151" r="4"/>
+        </g>
+      </svg>
+      <p class="source-note" id="route-feedback" aria-live="polite">Select a leg to preview its planning context.</p>
+      <div class="route-stops">
+        <div class="route-stop"><span class="stop-index">1</span><span><strong>Noosa · Sunshine Coast</strong><small>Coastal departure · Queensland</small></span><button data-route-stop="noosa">Focus</button></div>
+        <div class="route-stop"><span class="stop-index">2</span><span><strong>NSW coast · inland options</strong><small>Plan rest, fuel and weather checks</small></span><button data-route-stop="nsw">Focus</button></div>
+        <div class="route-stop"><span class="stop-index">3</span><span><strong>Melbourne · southern finish</strong><small>Town-scale and community sites stay local</small></span><button data-route-stop="melbourne">Focus</button></div>
+        <div class="route-stop"><span class="stop-index">4</span><span><strong>Inland · toward SA border</strong><small>Road hazards and engine load vary by place</small></span><button data-route-stop="sa-border">Focus</button></div>
+      </div>
+      <p class="source-note"><span class="mode-chip">Planning sketch · public geography adapter ready for sourced routes</span><br>Live road geometry, distances and access conditions appear only when a licensed source pack is loaded. This sketch is not turn-by-turn navigation.</p>
+    </section>
     <div class="panel dispatch"><span class="eyebrow" id="dispatch-step">Field dispatch</span>
       <h2 id="dispatch-title">A town waiting to work</h2><p id="dispatch-copy"></p>
       <div class="campaign-meter" aria-label="Campaign progress"><span id="campaign-fill"></span></div>
@@ -199,6 +554,56 @@
     </details>
   </div>
 </main>
+<script>
+if (navigator.gpu) {
+  if (window.GPUAdapter && GPUAdapter.prototype.requestDevice) {
+    const origRequestDevice = GPUAdapter.prototype.requestDevice;
+    GPUAdapter.prototype.requestDevice = async function(...args) {
+      const dev = await origRequestDevice.apply(this, args);
+      dev.addEventListener('uncapturederror', (e) => {
+        window.__webGpuErrors = window.__webGpuErrors || [];
+        window.__webGpuErrors.push(e.error ? e.error.message : String(e));
+      });
+      return dev;
+    };
+  }
+  if (window.GPUDevice) {
+    const origPipeline = GPUDevice.prototype.createRenderPipeline;
+    GPUDevice.prototype.createRenderPipeline = function(desc) {
+      this.pushErrorScope('validation');
+      const pipe = origPipeline.apply(this, arguments);
+      this.popErrorScope().then(err => {
+        if (err) {
+          window.__pipelineErrors = window.__pipelineErrors || [];
+          window.__pipelineErrors.push({
+            label: desc.label,
+            message: err.message
+          });
+          console.error('*** PIPELINE VALIDATION ERROR ***', desc.label, err.message);
+        }
+      });
+      return pipe;
+    };
+
+    const origShader = GPUDevice.prototype.createShaderModule;
+    GPUDevice.prototype.createShaderModule = function(desc) {
+      this.pushErrorScope('validation');
+      const mod = origShader.apply(this, arguments);
+      this.popErrorScope().then(err => {
+        if (err) {
+          window.__shaderErrors = window.__shaderErrors || [];
+          window.__shaderErrors.push({
+            label: desc.label,
+            message: err.message
+          });
+          console.error('*** SHADER VALIDATION ERROR ***', desc.label, err.message);
+        }
+      });
+      return mod;
+    };
+  }
+}
+</script>
 <script type="module">
 const $ = (id) => document.getElementById(id);
 const jlog = (s) => { const d=document.createElement('div'); d.textContent=s; $('log').prepend(d); };
@@ -212,34 +617,88 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = 'f9060473cf6dab19-characters-5';
+const WASM_BUILD = 'df2357979af893e4-community-overhaul';
+window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
+window.setWorldLoading('Starting the Qualia engine','Initialising the Australian world renderer');
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
+window.setWorldLoading('Restoring your journey','Loading character and world preferences');
 const characters = await import(`./characters.mjs?v=${WASM_BUILD}`);
 const {CHARACTER_NAMES,CHARACTER_ARCS,CHARACTER_TRAITS,CHARACTER_PLACES,characterBio,
   seedCharacters,activeCharacter,selectCharacter,createCharacter,moveCharacter,
   nearbyRadius,walkSpeed,characterChapter,encodeCharacters,decodeCharacters}=characters;
-$('pin').textContent = 'QualiaDB full engine · tested ' + m.pinned_qualiadb_revision();
+ $('pin').textContent = 'QualiaDB · ' + m.pinned_qualiadb_revision().slice(0,8);
 
-const [SEED, ACTIONS, VIBE_SCENE, INVESTMENT_TAXONOMY_TEXT] = await Promise.all(
-  ['fixtures/seed.ttl', 'fixtures/actions.json', 'fixtures/community-beacon.vibe', 'fixtures/investment-taxonomy.json']
+const [SEED, ACTIONS, VIBE_SCENE, INVESTMENT_TAXONOMY_TEXT, ACTIVITY_MODULES_TEXT, PLACE_PACKAGE_TEXT] = await Promise.all(
+  ['fixtures/seed.ttl', 'fixtures/actions.json', 'fixtures/community-beacon.vibe', 'fixtures/investment-taxonomy.json',
+    'fixtures/scenarios/community-grounds-v1.json', 'fixtures/places/fictional-community-v1.json']
     .map(async u => (await fetch(u, {cache:'no-store'})).text()));
 const INVESTMENT_TAXONOMY = JSON.parse(INVESTMENT_TAXONOMY_TEXT);
 $('vibe-scene').value = VIBE_SCENE.trim();
 let session = new m.GameSession(SEED, ACTIONS);
 const catalog = JSON.parse(ACTIONS).actions;
+const ACTIVITY_PACKAGE = JSON.parse(ACTIVITY_MODULES_TEXT);
+const ACTIVITY_MODULES = ACTIVITY_PACKAGE.modules;
+const PLACE_PACKAGE = JSON.parse(PLACE_PACKAGE_TEXT);
+const PLACE_NODES = PLACE_PACKAGE.places;
+const PLACE_INDEX = new Map();
+if(PLACE_PACKAGE.schemaVersion!==1||!PLACE_PACKAGE.packId||
+   !['fictional_fixture','illustrative','reviewed','production'].includes(PLACE_PACKAGE.maturity)||
+   !PLACE_PACKAGE.coverage?.label||!PLACE_PACKAGE.coverage.spatialStatus||
+   !Array.isArray(PLACE_NODES)||!PLACE_NODES.length||
+   !Array.isArray(PLACE_PACKAGE.sourceRecords)||!PLACE_PACKAGE.sourceRecords.length||!Array.isArray(PLACE_PACKAGE.routeGraph?.nodes)||
+   !Array.isArray(PLACE_PACKAGE.routeGraph?.edges))
+  throw new Error('Place pack has an unsupported version or shape');
+const PLACE_SOURCES = new Set(PLACE_PACKAGE.sourceRecords.map(source=>source.id));
+if(PLACE_SOURCES.size!==PLACE_PACKAGE.sourceRecords.length||PLACE_PACKAGE.sourceRecords.some(source=>!source?.id||!source.kind||!source.title))
+  throw new Error('Place pack has invalid or duplicate provenance records');
+for(const place of PLACE_NODES){
+  if(!place.id||PLACE_INDEX.has(place.id)||!place.name||!Array.isArray(place.sourceRefs)||!place.sourceRefs.length||
+     place.sourceRefs.some(id=>!PLACE_SOURCES.has(id)))throw new Error(`Invalid or duplicate place record: ${place.id||'unknown'}`);
+  PLACE_INDEX.set(place.id,place);
+}
+for(const place of PLACE_NODES){
+  if(place.parentId&&!PLACE_INDEX.has(place.parentId))throw new Error(`Place ${place.id} has an unknown parent`);
+  const chain=new Set([place.id]);let parent=place.parentId;
+  while(parent&&PLACE_INDEX.has(parent)){
+    if(chain.has(parent))throw new Error(`Place hierarchy contains a cycle at ${place.id}`);
+    chain.add(parent);parent=PLACE_INDEX.get(parent).parentId;
+  }
+}
+if(!PLACE_PACKAGE.coverage||!Array.isArray(PLACE_PACKAGE.coverage.sourceRefs)||!PLACE_PACKAGE.coverage.sourceRefs.length||
+   PLACE_PACKAGE.coverage.sourceRefs.some(id=>!PLACE_SOURCES.has(id)))
+  throw new Error('Place pack coverage has incomplete provenance');
+const catalogActionIds = new Set(catalog.map(action=>action.id));
+if(ACTIVITY_PACKAGE.schemaVersion!==1||ACTIVITY_PACKAGE.moduleSet!=='community-grounds-situations-v1'||
+   !Array.isArray(ACTIVITY_MODULES)||ACTIVITY_MODULES.length<1)
+  throw new Error('Activity module package has an unsupported version or shape');
+const activityModuleIds=new Set();
+for(const module of ACTIVITY_MODULES){
+  if(!module.id||activityModuleIds.has(module.id)||!Array.isArray(module.nodes)||!module.nodes.length)
+    throw new Error(`Invalid or duplicate activity module: ${module.id||'unknown'}`);
+  activityModuleIds.add(module.id);
+  const nodeIds=new Set(module.nodes.map(node=>node.id));
+  if(!nodeIds.has(module.startNodeId))throw new Error(`Activity module ${module.id} has no start node`);
+  for(const node of module.nodes)for(const choice of node.choices){
+    if(!catalogActionIds.has(choice.actionId))throw new Error(`Activity ${module.id} references unknown game action ${choice.actionId}`);
+    if(choice.nextNodeId!==null&&!nodeIds.has(choice.nextNodeId))
+      throw new Error(`Activity ${module.id} choice ${choice.id} has an unknown next node`);
+  }
+}
 const SELFTEST=new URLSearchParams(location.search).has('selftest');
+const VISUAL_REVIEW_REQUESTED=new URLSearchParams(location.search).has('graphics-view');
+if(VISUAL_REVIEW_REQUESTED){$('save').disabled=true;$('load').disabled=true;$('new-game').disabled=true;$('sky-preset').disabled=true;}
 let roster=seedCharacters(), characterReturnPage='orders', rosterOffset=0;
 let characterDraft={name:CHARACTER_NAMES[3],arc:'grower',trait:'observant',home:'kestrel'};
-let activeWalkSite=null;
+let activeWalkSite=null, activeActivityId=null;
 const playing=()=>activeCharacter(roster);
 const characterPlace=id=>CHARACTER_PLACES.find(p=>p.id===id);
 async function saveCharacters(){
-  if(SELFTEST)return;
+  if(SELFTEST||VISUAL_REVIEW_REQUESTED)return;
   await m.world_save('rc-characters.n3',new TextEncoder().encode(encodeCharacters(roster)));
 }
 async function loadCharacters(){
-  if(SELFTEST)return;
+  if(SELFTEST||VISUAL_REVIEW_REQUESTED)return;
   try {
     const bytes=await m.world_load('rc-characters.n3');
     roster=decodeCharacters(new TextDecoder().decode(bytes));
@@ -256,7 +715,7 @@ async function loadCharacters(){
 }
 let characterSaveTimer=null;
 function queueCharacterSave(){
-  if(SELFTEST)return;
+  if(SELFTEST||VISUAL_REVIEW_REQUESTED)return;
   clearTimeout(characterSaveTimer);
   characterSaveTimer=setTimeout(()=>saveCharacters().catch(e=>note(`Character save: ${e}`)),1600);
 }
@@ -481,6 +940,16 @@ const PLACES = [
   'rc:waterTank', 'rc:garden',
   'rc:bridge', 'rc:windPump', 'rc:orchard', 'rc:communicationsMast',
 ];
+for(const place of PLACE_NODES){
+  if(place.sceneId&&!PLACES.includes(place.sceneId))throw new Error(`Place ${place.id} references unknown scene site ${place.sceneId}`);
+}
+for(const module of ACTIVITY_MODULES){
+  if(module.place.scope==='site'){
+    const site=PLACE_INDEX.get(module.place.siteId),locality=PLACE_INDEX.get(module.place.localityId);
+    if(!site||site.level!=='site'||site.parentId!==locality?.id)
+      throw new Error(`Activity ${module.id} references a site outside its place graph`);
+  }
+}
 const PLACE_MARKERS = [
   ['Shelter','home','#de815b'],['Salvage','salvage','#ca9070'],
   ['Market','trade','#e4ad54'],['Workshop','industry','#8198ce'],
@@ -566,6 +1035,7 @@ const rendererProbe={
 };
 let webgpuAvailable=false;
 let probedGpuAdapter=null;
+const forceCanvas2d=new URLSearchParams(location.search).get('renderer')==='canvas2d';
 const boundedWebgpuProbe=async (operation,label,timeoutMs=4000)=>{
   let timer;
   try {
@@ -580,7 +1050,10 @@ try {
   // path must not be called when the browser reports no adapter. Some
   // headless/WebView implementations expose navigator.gpu while returning
   // null from requestAdapter.
-  if(!rendererProbe.navigatorGpu) {
+  if(forceCanvas2d) {
+    rendererProbe.adapter='bypassed';
+    rendererProbe.device='bypassed';
+  } else if(!rendererProbe.navigatorGpu) {
     rendererProbe.adapter='refused';
     rendererProbe.device='refused';
   } else {
@@ -607,7 +1080,7 @@ try {
       rendererProbe.device='refused';
     }
   }
-  webgpuAvailable=rendererProbe.adapter==='confirmed';
+  webgpuAvailable=!forceCanvas2d&&rendererProbe.adapter==='confirmed';
 } catch(e) {
   rendererProbe.adapter='error';
   rendererProbe.device='error';
@@ -682,12 +1155,42 @@ function rendererCapabilityText(){
     (rendererProbe.error?`; detail=${rendererProbe.error}`:'');
 }
 const ART_STYLES=['Storybook','Earthlight','Community Grounds'];
-let artStyle=0;
-try { const savedStyle=Number(localStorage.getItem('maslows-art-style'));
-  artStyle=ART_STYLES[savedStyle]===undefined?0:savedStyle; } catch {}
+const VEHICLE_RIGS=['Campervan','4WD + caravan','Car + camper trailer','4WD + roof-top tent'];
+const RIG_DRIVING=[
+  {topSpeed:4.0,acceleration:2.0,braking:3.7,steering:0.72,shoulder:1.8,load:0.28,queue:2},
+  {topSpeed:3.0,acceleration:1.25,braking:2.25,steering:0.48,shoulder:1.25,load:0.76,queue:5},
+  {topSpeed:3.4,acceleration:1.55,braking:2.7,steering:0.58,shoulder:1.35,load:0.56,queue:4},
+  {topSpeed:4.2,acceleration:2.1,braking:3.9,steering:0.82,shoulder:2.0,load:0.38,queue:1}
+];
+let ECOLOGY_PROFILE={id:'se-corridor-reference',label:'South-east travel corridor · illustrative',
+  scope:'Noosa coast to Melbourne coast; inland toward the South Australian border',
+  status:'authored encounter showcase; local species presence varies',
+  fauna:['goat','horse','rabbit','kangaroo','wallaby','wombat','deer','roadkill-crows','kookaburra','snake','goanna'],
+  flora:['coastal-bottlebrush','banksia','grass-tree','saltbush','kangaroo-paw']};
+const ROAD_HAZARDS=[
+  {id:'rabbit-01',profileKey:'rabbit',label:'rabbit',taxon:'Oryctolagus cuniculus',x:-4.0,z:0.50,radius:0.58},
+  {id:'goat-01',profileKey:'goat',label:'goat',taxon:'Capra hircus',x:-1.65,z:0.48,radius:1.2},
+  {id:'kangaroo-01',profileKey:'kangaroo',label:'kangaroo',taxon:'Macropodidae · species selected by place profile',x:2.3,z:0.50,radius:1.5},
+  {id:'roadkill-crows-01',profileKey:'roadkill-crows',label:'roadkill and crows',taxon:'roadside carcass scene',x:7.35,z:0.50,radius:0.75},
+  {id:'snake-01',profileKey:'snake',label:'snake',taxon:'Serpentes · species selected by place profile',x:8.8,z:1.00,radius:0.62},
+  {id:'wallaby-01',profileKey:'wallaby',label:'wallaby',taxon:'Macropodidae · species selected by place profile',x:10.2,z:0.50,radius:1.15},
+  {id:'wombat-01',profileKey:'wombat',label:'wombat',taxon:'Vombatidae · species selected by place profile',x:13.0,z:0.50,radius:1.05},
+  {id:'goanna-01',profileKey:'goanna',label:'goanna',taxon:'Varanidae · species selected by place profile',x:15.0,z:1.00,radius:0.78},
+  {id:'horse-01',profileKey:'horse',label:'horse',taxon:'Equus caballus',x:17.0,z:0.49,radius:1.45},
+  {id:'deer-01',profileKey:'deer',label:'deer',taxon:'Cervidae · species selected by place profile',x:20.2,z:0.50,radius:1.4}
+];
+let artStyle=2;
+try { const savedStyle=localStorage.getItem('maslows-community-art-style');
+  if(savedStyle!==null&&Number.isInteger(Number(savedStyle))&&ART_STYLES[Number(savedStyle)]!==undefined)
+    artStyle=Number(savedStyle); } catch {}
 if(new URLSearchParams(location.search).has('selftest'))artStyle=0;
 m.set_art_style(artStyle);
-let hudPage='orders', hudOrderOffset=0, hudScriptResult='', resultMessage='';
+let vehicleRig=0;
+try { const savedRig=Number(localStorage.getItem('maslows-vehicle-rig'));
+  vehicleRig=Number.isInteger(savedRig)&&savedRig>=0&&savedRig<VEHICLE_RIGS.length?savedRig:0; } catch {}
+m.set_vehicle_rig?.(vehicleRig);
+let hudPage='orders', hudOrderOffset=0, hudPlaceOffset=0, hudScriptResult='', resultMessage='';
+let showcaseTour=null;
 let hudSiteLines=[], hudSiteActions=[];
 window.addEventListener('resize',()=>{
   const w=Math.max(600,window.innerWidth), h=Math.max(540,window.innerHeight);
@@ -710,8 +1213,94 @@ $('tier').textContent = rendererCapability().label;
 let camYaw=0.6, camPitch=0.42, camZoom=canvas.width<900?1.9:1.45;
 let camTarget=null, camGoal=null, zoomGoal=null, focusedPlace=null;
 let territory='kestrel', tileCenters={}, placePositions=[];
-let cameraMode='map', walk={x:0,z:0}, worldCenter={x:0,y:0,z:0}, worldScale=1;
+let cameraMode='map', driveView='first-person', walk={x:0,z:0}, worldCenter={x:0,y:0,z:0}, worldScale=1;
+let qualityPreference=2;
+try{const storedQuality=Number(localStorage.getItem('maslows-graphics-quality'));if([0,1,2].includes(storedQuality))qualityPreference=storedQuality;}catch{}
+const DRIVE_PERIODS=['dawn','day','dusk','night'];
+const DRIVE_LIGHTING={
+  dawn:[1.00,0.63,0.40,0.88,0.34],day:[0.88,0.91,0.78,1.18,0.68],
+  dusk:[1.00,0.48,0.28,0.78,0.28],night:[0.48,0.58,0.90,0.38,0.19]
+};
+let drive={heading:-Math.PI/2,speed:0,distance:0,warning:'',hazardStops:0,emergencyStops:0,lastWarning:'',period:'dusk'};
+// Versioned review fixtures keep camera and presentation setup out of campaign state.
+let graphicsReviewFixture=null;
+try {
+  const response=await fetch('./fixtures/graphics/review-cameras.json',{cache:'no-store'});
+  if(!response.ok)throw new Error(`HTTP ${response.status}`);
+  const fixture=await response.json();
+  const requiredViews=['reference-overview','workshop-human-scale','garden-resident',
+    'camp-vehicle','saltwind-water-bridge','highlands-panorama','local-aerial-drive',
+    'fictional-place-navigation','interpersonal-choice-mode','workshop-repair-mode'];
+  const route=fixture.showcaseRoute;
+  const defaults=fixture.defaults;
+  if(fixture.schemaVersion!==1||!defaults||fixture.fixtureSet!=='community-grounds-review-v1'||
+     !fixture.views||requiredViews.some(id=>!fixture.views[id])||
+     !route||route.readOnly!==true||!Number.isInteger(route.durationSeconds)||
+     route.durationSeconds<20||route.durationSeconds>90||!Array.isArray(route.views)||
+     route.views.length<3||route.views.some(id=>!requiredViews.includes(id))||requiredViews.some(id=>!route.views.includes(id))||
+     !Number.isInteger(defaults.artStyleIndex)||defaults.artStyleIndex<0||defaults.artStyleIndex>2||
+     !Number.isInteger(defaults.vehicleRigIndex)||defaults.vehicleRigIndex<0||defaults.vehicleRigIndex>3||
+     !Number.isInteger(defaults.skyPreset)||defaults.skyPreset<1||defaults.skyPreset>3||
+     !Array.isArray(defaults.lighting)||defaults.lighting.length!==5||
+     defaults.lighting.some(value=>!Number.isFinite(value)))
+    throw new Error('invalid graphics review fixture metadata');
+  for(const id of requiredViews){
+    const view=fixture.views[id];
+    if(!Array.isArray(view.target)||view.target.length!==3||view.target.some(value=>!Number.isFinite(value))||
+       ![view.yaw,view.pitch,view.zoom].every(Number.isFinite)||view.zoom<=0)
+      throw new Error(`invalid camera definition: ${id}`);
+    if(view.cameraMode!==undefined&&(view.cameraMode!=='drive'||view.driveView!=='aerial'))
+      throw new Error(`invalid camera mode definition: ${id}`);
+    if(view.territoryId!==undefined&&typeof view.territoryId!=='string')throw new Error(`invalid territory binding: ${id}`);
+    if(view.hudPage!==undefined&&!['places','activities'].includes(view.hudPage))throw new Error(`invalid HUD page binding: ${id}`);
+    if(view.activityId!==undefined&&!ACTIVITY_MODULES.some(module=>module.id===view.activityId))
+      throw new Error(`unknown activity binding: ${id}`);
+  }
+  graphicsReviewFixture=fixture;
+} catch(e) {
+  note(`Graphics review fixture unavailable · ${String(e).slice(0,90)}`);
+}
+const GRAPHICS_VIEWS=graphicsReviewFixture?.views||{};
+const graphicsViewName=new URLSearchParams(location.search).get('graphics-view');
+const graphicsView=GRAPHICS_VIEWS[graphicsViewName]||null;
+let graphicsViewApplied=false;
+if(graphicsViewName)document.documentElement.dataset.graphicsFixture=graphicsView?graphicsViewName:'unknown';
+if(graphicsView){
+  const defaults=graphicsReviewFixture.defaults;
+  artStyle=defaults.artStyleIndex;vehicleRig=defaults.vehicleRigIndex;skyPreset=defaults.skyPreset;
+  m.set_art_style(artStyle);m.set_vehicle_rig?.(vehicleRig);portal.set_sky_preset(skyPreset);
+  portal.set_lighting(...defaults.lighting);
+  note(`Read-only visual fixture · ${graphicsView.title} · seed world · save/load disabled`);
+}else if(graphicsViewName){
+  note(`Unknown graphics camera fixture: ${graphicsViewName}`);
+}
 const walkKeys=new Set();
+m.set_fauna_selection?.(JSON.stringify(ECOLOGY_PROFILE.fauna));
+function activityCurrentNode(module){
+  let nodeId=module.startNodeId;
+  const events=toObj(session.events());
+  for(const actionId of events){
+    if(nodeId===null)return null;
+    const node=module.nodes.find(item=>item.id===nodeId);
+    const choice=node?.choices.find(item=>item.actionId===actionId);
+    if(choice)nodeId=choice.nextNodeId;
+  }
+  return nodeId;
+}
+function activityAvailableActions(st){
+  const available=new Set([...$('actions').querySelectorAll('button[data-action]')].map(button=>button.dataset.action));
+  const events=new Set(toObj(session.events()));
+  if(st.orchardActive&&!st.finale){
+    if(st.harvestChoice==='"reserve"')available.add('openCommonsReserved');
+    if(st.harvestChoice==='"sell"')available.add('openCommons');
+    if(st.harvestChoice)available.add('launchTradeRoute');
+  }
+  const priorities=['activity.housekeeping.linen-first','activity.housekeeping.hygiene-first',
+    'activity.housekeeping.checklist-first'];
+  if(!priorities.some(id=>events.has(id)))priorities.forEach(id=>available.add(id));
+  else if(!events.has('activity.housekeeping.complete'))available.add('activity.housekeeping.complete');
+  return available;
+}
 function applyCam(){
   try {
     if (camTarget) {
@@ -720,6 +1309,92 @@ function applyCam(){
     }
     else portal.set_camera(camYaw, camPitch, camZoom);
   } catch(e) { note(`camera: ${String(e).slice(0,80)}`); }
+}
+function applyGraphicsViewContext(view){
+  const module=view.activityId?ACTIVITY_MODULES.find(item=>item.id===view.activityId):null;
+  activeActivityId=module?.id||null;
+  hudPage=module?'activities':view.hudPage||'orders';
+  const target=module?PLACE_INDEX.get(module.place.siteId):view.placeId?PLACE_INDEX.get(view.placeId):null;
+  let area=target;
+  while(area&&!area.territoryId&&area.parentId)area=PLACE_INDEX.get(area.parentId);
+  const nextTerritory=area?.territoryId||view.territoryId;
+  if(nextTerritory)territory=nextTerritory;
+  focusedPlace=target?.sceneId?PLACES.indexOf(target.sceneId):null;
+  hudPlaceOffset=0;
+  renderHud();
+}
+function applyGraphicsReviewCamera(){
+  if(!graphicsView||graphicsViewApplied)return;
+  if(graphicsView.cameraMode==='drive'){
+    applyGraphicsViewContext(graphicsView);
+    setCameraMode('drive');
+    driveView=graphicsView.driveView;
+    camPitch=1.12;camYaw=drive.heading;
+    placeDriveCamera();graphicsViewApplied=true;return;
+  }
+  const [x,y,z]=graphicsView.target;
+  camYaw=graphicsView.yaw;camPitch=graphicsView.pitch;camZoom=graphicsView.zoom;
+  camTarget={x:(x-worldCenter.x)*worldScale,
+    y:(y-worldCenter.y)*worldScale,z:(z-worldCenter.z)*worldScale};
+  camGoal=null;zoomGoal=null;applyGraphicsViewContext(graphicsView);
+  applyCam();graphicsViewApplied=true;
+}
+const SHOWCASE_ROUTE=graphicsReviewFixture?.showcaseRoute||{durationSeconds:30,views:[]};
+const SHOWCASE_VIEWS=SHOWCASE_ROUTE.views;
+const SHOWCASE_DURATION_MS=SHOWCASE_ROUTE.durationSeconds*1000;
+function showcaseViewPose(name){
+  const view=GRAPHICS_VIEWS[name];
+  if(!view)return null;
+  const [x,y,z]=view.target;
+  return {target:{x:(x-worldCenter.x)*worldScale,y:(y-worldCenter.y)*worldScale,
+    z:(z-worldCenter.z)*worldScale},yaw:view.yaw,pitch:view.pitch,zoom:view.zoom};
+}
+function showcaseSavedPose(){
+  return {target:{...(camTarget||{x:0,y:0,z:0})},yaw:camYaw,pitch:camPitch,zoom:camZoom};
+}
+function toggleShowcaseTour(){
+  if(showcaseTour){stopShowcaseTour();return;}
+  if(!graphicsReviewFixture||SHOWCASE_VIEWS.some(name=>!GRAPHICS_VIEWS[name])){
+    note('Showcase route unavailable · graphics camera fixture could not be loaded');return;
+  }
+  if(cameraMode!=='map'&&cameraMode!=='survey')return;
+  showcaseTour={startedAt:performance.now(),lastHudAt:0,
+    displayedViewIndex:-1,
+    saved:{pose:showcaseSavedPose(),cameraMode,hudPage,territory,activeActivityId,hudPlaceOffset,focusedPlace}};
+  hudPage='orders';camGoal=null;zoomGoal=null;walkKeys.clear();
+  note(`${Math.round(SHOWCASE_DURATION_MS/1000)}-second graphics showcase started · campaign actions are paused until the tour ends`);
+  renderHud();
+}
+function stopShowcaseTour(){
+  if(!showcaseTour)return;
+  const saved=showcaseTour.saved;showcaseTour=null;
+  cameraMode=saved.cameraMode;hudPage=saved.hudPage;territory=saved.territory;
+  activeActivityId=saved.activeActivityId;hudPlaceOffset=saved.hudPlaceOffset;focusedPlace=saved.focusedPlace;
+  camTarget={...saved.pose.target};camYaw=saved.pose.yaw;camPitch=saved.pose.pitch;camZoom=saved.pose.zoom;
+  camGoal=null;zoomGoal=null;applyCam();renderHud();
+}
+function interpolateAngle(from,to,t){
+  const delta=Math.atan2(Math.sin(to-from),Math.cos(to-from));
+  return from+delta*t;
+}
+function updateShowcaseTour(now){
+  if(!showcaseTour)return;
+  const duration=SHOWCASE_DURATION_MS,elapsed=Math.max(0,now-showcaseTour.startedAt);
+  if(elapsed>=duration){stopShowcaseTour();return;}
+  const segment=duration/(SHOWCASE_VIEWS.length+1),index=Math.min(SHOWCASE_VIEWS.length,
+    Math.floor(elapsed/segment));
+  if(index<SHOWCASE_VIEWS.length&&showcaseTour.displayedViewIndex!==index){
+    showcaseTour.displayedViewIndex=index;applyGraphicsViewContext(GRAPHICS_VIEWS[SHOWCASE_VIEWS[index]]);
+  }
+  const from=index===0?showcaseTour.saved.pose:showcaseViewPose(SHOWCASE_VIEWS[index-1]);
+  const to=index<SHOWCASE_VIEWS.length?showcaseViewPose(SHOWCASE_VIEWS[index]):showcaseTour.saved.pose;
+  const linear=Math.min(1,(elapsed-index*segment)/segment),t=linear*linear*(3-2*linear);
+  camTarget={x:from.target.x+(to.target.x-from.target.x)*t,
+    y:from.target.y+(to.target.y-from.target.y)*t,
+    z:from.target.z+(to.target.z-from.target.z)*t};
+  camYaw=interpolateAngle(from.yaw,to.yaw,t);camPitch=from.pitch+(to.pitch-from.pitch)*t;
+  camZoom=from.zoom+(to.zoom-from.zoom)*t;applyCam();
+  if(now-showcaseTour.lastHudAt>120){showcaseTour.lastHudAt=now;renderHud();}
 }
 function framedTarget(p,zoom){
   const panelWidth=canvas.width<900?290:358;
@@ -737,19 +1412,147 @@ function placeWalkCamera(){
     z:eye.z-distance*flat*Math.cos(camYaw)};
   applyCam();
 }
+function placeDriveCamera(){
+  if(driveView==='aerial'){
+    camZoom=3.8;
+    camTarget={x:(walk.x-worldCenter.x)*worldScale,
+      y:(m.terrain_height_world(walk.x,walk.z)+0.35-worldCenter.y)*worldScale,
+      z:(walk.z-worldCenter.z)*worldScale};
+    applyCam();return;
+  }
+  const eye={x:(walk.x-worldCenter.x)*worldScale,
+    y:(m.terrain_height_world(walk.x,walk.z)+1.35-worldCenter.y)*worldScale,
+    z:(walk.z-worldCenter.z)*worldScale};
+  const distance=0.30, flat=Math.cos(camPitch);
+  camZoom=distance;
+  camTarget={x:eye.x-distance*flat*Math.sin(camYaw),
+    y:eye.y-distance*Math.sin(camPitch),
+    z:eye.z-distance*flat*Math.cos(camYaw)};
+  applyCam();
+}
 function setCameraMode(mode){
+  if(mode!==cameraMode)portal.invalidate_temporal_history?.();
   cameraMode=mode;camGoal=null;zoomGoal=null;
   if(mode==='walk'){
     const c=playing(), place=characterPlace(c.place);
     territory=c.place;
     walk={x:c.x,z:c.z};camPitch=place.pitch;camYaw=place.yaw;
     placeWalkCamera();
+  }else if(mode==='drive'){
+    // The first driving slice is a short, authored inland road through the
+    // connected Kestrel/Saltwind demo ground. Geographic packs can replace it.
+    const priorPeriod=drive.period||'dusk', rig=RIG_DRIVING[vehicleRig];
+    driveView='first-person';
+    walk={x:-5.45,z:0.48};drive={heading:-Math.PI/2,speed:0,distance:0,
+      warning:'',hazardStops:0,emergencyStops:0,lastWarning:'',period:priorPeriod,
+      oilTempC:94,coolantTempC:89,ambientC:26,gradePercent:0,thermalLoad:0.32,roadSurface:'sealed',
+      engineHealth:100,overheatSeconds:0,engineWarning:'',oilTrend:'steady',coolantTrend:'steady',
+      trafficQueue:rig.queue};
+    hudPage='orders';walkKeys.clear();
+    camPitch=0.045;camYaw=drive.heading;placeDriveCamera();
   }else{
     camPitch=mode==='survey'?0.16:0.42;
     camYaw=0.6;
     focusTerritory(territory,true);
   }
+  if(mode==='drive')applyDriveLighting();
+  else if(lastSceneBridge)applySceneQuality(lastSceneBridge,lastSceneBridge);
   renderHud();
+}
+function toggleDriveView(){
+  if(cameraMode!=='drive')return;
+  driveView=driveView==='first-person'?'aerial':'first-person';
+  camPitch=driveView==='aerial'?1.12:0.045;
+  camYaw=drive.heading;
+  placeDriveCamera();renderHud();
+  note(`Driving view · ${driveView==='aerial'?'aerial route':'first person'}`);
+}
+function applyDriveLighting(){
+  const light=DRIVE_LIGHTING[drive.period]||DRIVE_LIGHTING.dusk;
+  portal.set_lighting(light[0],light[1],light[2],light[3],light[4]);
+}
+function driveAmbientC(){return {dawn:20,day:38,dusk:32,night:25}[drive.period]??28;}
+function roadSurfaceAt(x){
+  if(x<0)return {name:'sealed',roughness:0.04};
+  if(x<5.8)return {name:'worn bitumen',roughness:0.10};
+  if(x<9.1)return {name:'bridge deck',roughness:0.07};
+  if(x<15.5)return {name:'graded gravel',roughness:0.20};
+  return {name:'corrugated gravel',roughness:0.34};
+}
+function updateVehicleThermals(dt,throttle,reverse){
+  if(dt<=0)return;
+  const rig=RIG_DRIVING[vehicleRig],ambient=driveAmbientC(),surface=roadSurfaceAt(walk.x);
+  const heading=reverse?-1:1;
+  const heightHere=m.terrain_height_world(walk.x,walk.z);
+  const heightAhead=m.terrain_height_world(walk.x+heading*0.55,walk.z);
+  const grade=Math.max(-0.18,Math.min(0.18,(heightAhead-heightHere)/0.55));
+  drive.ambientC=ambient;drive.gradePercent=grade*100;drive.roadSurface=surface.name;
+  const load=Math.max(0.12,Math.min(1.85,0.22+(throttle?0.55:0.08)+
+    Math.abs(drive.speed)/rig.topSpeed*0.16+Math.max(0,grade)*10+surface.roughness*0.60+rig.load));
+  drive.thermalLoad=load;
+  const airflow=Math.min(12,Math.abs(drive.speed)*1.35);
+  const targetOil=ambient+62+load*30-airflow;
+  const targetCoolant=ambient+42+load*23-airflow*0.62;
+  drive.oilTrend=targetOil-drive.oilTempC>1.0?'rising':targetOil-drive.oilTempC< -1.0?'cooling':'steady';
+  drive.coolantTrend=targetCoolant-drive.coolantTempC>1.0?'rising':
+    targetCoolant-drive.coolantTempC< -1.0?'cooling':'steady';
+  drive.oilTempC+=(targetOil-drive.oilTempC)*(1-Math.exp(-dt*0.028));
+  drive.coolantTempC+=(targetCoolant-drive.coolantTempC)*(1-Math.exp(-dt*0.040));
+  const critical=drive.oilTempC>=142||drive.coolantTempC>=114;
+  const elevated=drive.oilTempC>=128||drive.coolantTempC>=104;
+  drive.engineWarning=critical?'CRITICAL ENGINE TEMP · ease off, stop safely and let it cool':
+    elevated?'Engine temperature rising · reduce load and watch the next climb':'';
+  drive.overheatSeconds=critical?drive.overheatSeconds+dt:Math.max(0,drive.overheatSeconds-dt*2);
+  if(drive.overheatSeconds>10){
+    drive.engineHealth=Math.max(0,drive.engineHealth-dt*1.2);
+    if(drive.engineHealth===0){drive.speed=0;drive.engineWarning='ENGINE FAILURE · temperature damage ended the drive';}
+  }
+  const trailer=vehicleRig===1||vehicleRig===2;
+  const trafficTarget=trailer?4.2:3.4;
+  if(Math.abs(drive.speed)<trafficTarget-0.35)
+    drive.trafficQueue=Math.min(7,drive.trafficQueue+dt*(trailer?0.035:0.018));
+  else drive.trafficQueue=Math.max(0,drive.trafficQueue-dt*0.045);
+}
+function rearMirrorReadout(){
+  const mirror=rearMirrorState();
+  if(vehicleRig===1||vehicleRig===2)
+    return mirror.bendReveal?`Bend reveal · ${mirror.queued} vehicles in the mirror line`:
+      `Trailer blocks centre view · ${mirror.queued} vehicles following`;
+  return mirror.bendReveal?`Bend reveal · ${mirror.queued} vehicles behind`:
+    `${mirror.queued} vehicles in the rear view`;
+}
+function rearMirrorState(){
+  const delta=0.35;
+  const slope=(driveRoadCenterZ(walk.x+delta)-driveRoadCenterZ(walk.x-delta))/(2*delta);
+  const roadHeading=-Math.PI/2-Math.atan(slope);
+  const headingError=Math.atan2(Math.sin(drive.heading-roadHeading),Math.cos(drive.heading-roadHeading));
+  const bendReveal=Math.abs(headingError)>0.11||Math.abs((walkKeys.has('d')?1:0)-(walkKeys.has('a')?1:0))>0;
+  const queued=Math.round(drive.trafficQueue||0);
+  return {bendReveal,queued,blocked:(vehicleRig===1||vehicleRig===2)&&!bendReveal};
+}
+function engineTempColor(temp,elevated,critical){
+  return temp>=critical?'#e35b4e':temp>=elevated?'#e8b24f':'#69c294';
+}
+function engineTempFraction(temp,min,max){
+  return Math.max(0,Math.min(1,(temp-min)/(max-min)));
+}
+function engineThermalReadout(){
+  if(drive.engineHealth<=0)return {text:'ENGINE FAILED · Temperature damage ended the drive',color:'#e35b4e'};
+  if(drive.oilTempC>=142||drive.coolantTempC>=114)
+    return {text:'CRITICAL HEAT · Ease off; stop safely and let the engine cool',color:'#e35b4e'};
+  if(drive.oilTempC>=128||drive.coolantTempC>=104)
+    return {text:'HIGH TEMPERATURE · Reduce load before the next climb',color:'#e8b24f'};
+  if(drive.oilTrend==='rising'||drive.coolantTrend==='rising')
+    return {text:'TEMPERATURES RISING · Ease off on long climbs or rough roads',color:'#e8b24f'};
+  if(drive.oilTrend==='cooling'||drive.coolantTrend==='cooling')
+    return {text:'COOLING · Lighter throttle and moving airflow are helping',color:'#69c294'};
+  return {text:'ENGINE TEMPERATURES NORMAL · Watch load on warm climbs',color:'#69c294'};
+}
+function cycleDrivePeriod(){
+  const index=DRIVE_PERIODS.indexOf(drive.period);
+  drive.period=DRIVE_PERIODS[(index+1)%DRIVE_PERIODS.length];
+  drive.warning='';applyDriveLighting();renderHud();
+  note(`Driving time set to ${drive.period} · adjust speed for wildlife and visibility`);
 }
 function focusTerritory(id, immediate=false){
   const p=tileCenters[id]; if(!p)return;
@@ -781,6 +1584,17 @@ let hmcPack = null, hmcManifest = null, hmcResidentScene = '';
 let lastSceneBridge = null;
 let lastTemporalContract = null;
 const hmcSceneApi = typeof portal.load_hmc_scene === 'function';
+if (new URLSearchParams(location.search).has('renderer-debug')) {
+  window.__communityGroundDebug = () => ({
+    sceneMeshes,
+    hmcSceneApi,
+    hmcResidentScene,
+    renderer: rendererProducerReport(),
+    camera: {mode:cameraMode,yaw:camYaw,pitch:camPitch,zoom:camZoom,target:camTarget},
+    canvas: {width:canvas.width,height:canvas.height},
+    scene: lastSceneBridge,
+  });
+}
 
 // This mirrors the WASM bridge for old checked-in packages. It is intentionally
 // a pure projection of the story facts, so a package rebuild cannot change
@@ -813,8 +1627,11 @@ function sceneQualityState(st) {
   const args=[st.upgrades,st.parts.length,st.online,st.approved,st.waterOnline,st.gardenActive,
     st.signalOnline,st.bridgeOpen,st.bridgeBraced,st.day>4,st.pumpOnline,st.orchardActive,
     st.orchardHarvested,st.day,portal.tier(),hmcSceneApi&&!!hmcResidentScene];
-  return typeof m.scene_quality_state==='function' ? toObj(m.scene_quality_state(...args)) :
+  const bridge=typeof m.scene_quality_state==='function' ? toObj(m.scene_quality_state(...args)) :
     fallbackSceneQuality(st,portal.tier(),hmcSceneApi&&!!hmcResidentScene);
+  const qualityTier=Math.min(bridge.quality_tier,qualityPreference);
+  return {...bridge,quality_tier:qualityTier,ambient_enabled:qualityTier>=2,
+    fallback:qualityTier===2?'webgpu':qualityTier===1?'canvas2d':'unavailable'};
 }
 function temporalScheduleContract(bridge,previous,report){
   const sceneChanged=!!previous&&previous.scene_key!==bridge.scene_key;
@@ -843,10 +1660,16 @@ function applySceneQuality(bridge, previous) {
   // effects remain visible on every tier; only enable the field on the
   // explicit GPU-quality path and assert the choice again in the frame loop.
   portal.set_ambient_enabled(bridge.ambient_enabled===true);
+  const highQuality=bridge.quality_tier>=2;
+  portal.set_shadows_enabled?.(highQuality);
+  portal.set_screen_space_ao_enabled?.(highQuality);
+  portal.set_screen_space_ao?.(0.72,0.42,0.025);
+  portal.set_screen_space_ao_sample_count?.(highQuality?12:4);
+  portal.set_auto_temporal_enabled?.(highQuality);
   if(typeof portal.set_temporal_slice==='function')
     portal.set_temporal_slice(bridge.temporal_slice,bridge.temporal_window);
   lastTemporalContract=temporalScheduleContract(bridge,previous,rendererProducerReport());
-  if(previous&&previous.scene_key!==bridge.scene_key&&cameraMode!=='walk'){
+  if(previous&&previous.scene_key!==bridge.scene_key&&cameraMode!=='walk'&&cameraMode!=='drive'){
     if(bridge.camera_focus>=0)focusSite(bridge.camera_focus);
     else focusTerritory(territory);
   }
@@ -854,11 +1677,12 @@ function applySceneQuality(bridge, previous) {
 }
 function tryLoadHmcScene(bridge) {
   if(!hmcPack||!hmcManifest||!hmcSceneApi)return false;
-  if(hmcResidentScene===bridge.scene_key)return true;
+  const residentKey=`${bridge.scene_key}-rig-${vehicleRig}-ecology-${ECOLOGY_PROFILE.id}`;
+  if(hmcResidentScene===residentKey)return true;
   try {
-    const receipt=toObj(portal.load_hmc_scene(hmcPack,JSON.stringify(hmcManifest),bridge.scene_key));
+    const receipt=toObj(portal.load_hmc_scene(hmcPack,JSON.stringify(hmcManifest),residentKey));
     sceneMeshes=receipt.organs_loaded||sceneMeshes;
-    hmcResidentScene=bridge.scene_key;
+    hmcResidentScene=residentKey;
     return sceneMeshes>0;
   } catch(e) {
     note(`HMC scene fallback (${bridge.scene_key}): ${String(e).slice(0,100)}`);
@@ -869,6 +1693,8 @@ function tryLoadHmcScene(bridge) {
 function rebuild() {
   const st = state();
   const bridge=sceneQualityState(st);
+  m.set_vehicle_rig?.(vehicleRig);
+  m.set_fauna_selection?.(JSON.stringify(ECOLOGY_PROFILE.fauna));
   const scene = m.scene_build(st.upgrades, st.parts.length, st.online, st.approved,
     st.waterOnline, st.gardenActive, st.signalOnline, st.bridgeOpen, st.bridgeBraced, st.day>4,
     st.pumpOnline, st.orchardActive, st.orchardHarvested, sceneSource);
@@ -890,27 +1716,151 @@ function rebuild() {
   else if(!camTarget)focusTerritory(territory,true);
   else if(focusedPlace!==null)focusSite(focusedPlace);
   applySceneQuality(bridge,lastSceneBridge);
+  if(cameraMode==='drive')applyDriveLighting();
+  applyGraphicsReviewCamera();
   applyCam();
   return st;
 }
 
 function selectArtStyle(next){
+  if(VISUAL_REVIEW_REQUESTED){$('art-style').value=String(artStyle);return;}
   artStyle=next%ART_STYLES.length;
+  $('art-style').value=String(artStyle);
+  window.showWorldLoading('Changing the visual style',`Loading the ${ART_STYLES[artStyle]} Australian scene`);
   m.set_art_style(artStyle);
-  try { localStorage.setItem('maslows-art-style',String(artStyle)); } catch {}
+  if(!VISUAL_REVIEW_REQUESTED)try { localStorage.setItem('maslows-community-art-style',String(artStyle)); } catch {}
   skyPreset=artStyle===1?2:1;
   portal.set_sky_preset(skyPreset);
   if(artStyle===2)portal.set_lighting(0.58,0.76,0.55,1.32,0.74);
   hmcPack=null;hmcManifest=null;hmcResidentScene='';
-  rebuild();renderHud();hydrateHmcScenePack();
+  rebuild();renderHud();
+  hydrateHmcScenePack().then(result=>finishSceneLoading(result.verified&&result.resident
+    ?`${ART_STYLES[artStyle]} scene is ready.`
+    :`${ART_STYLES[artStyle]} selected; the local compiled scene is ready.`));
+}
+
+function selectVehicleRig(next){
+  vehicleRig=((next%VEHICLE_RIGS.length)+VEHICLE_RIGS.length)%VEHICLE_RIGS.length;
+  m.set_vehicle_rig?.(vehicleRig);
+  if(!VISUAL_REVIEW_REQUESTED)try { localStorage.setItem('maslows-vehicle-rig',String(vehicleRig)); } catch {}
+  hmcResidentScene='';
+  rebuild();renderHud();
+  note(`Touring rig · ${VEHICLE_RIGS[vehicleRig]} · handling profile updated`);
+}
+
+async function loadEcologyProfile(){
+  const requested=VISUAL_REVIEW_REQUESTED&&graphicsView
+    ?graphicsReviewFixture.defaults.ecologyProfileId
+    :(new URLSearchParams(location.search).get('ecology')||'se-corridor-reference');
+  if(!/^[a-z0-9][a-z0-9-]{0,79}$/.test(requested)){
+    note('Ecology profile ID rejected; using the checked-in corridor profile.');return;
+  }
+  try{
+    const response=await fetch(`./assets/ecology/profiles/${requested}.json`,{cache:'no-store'});
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+    const profile=await response.json();
+    const floraSelection=profile.render?.floraSelection||[];
+    if(!/^[a-z0-9][a-z0-9-]{0,63}$/.test(requested)||profile.schemaVersion!==1||profile.id!==requested||
+       !Array.isArray(profile.render?.faunaSelection)||
+       profile.render.faunaSelection.some(key=>typeof key!=='string'||key.length>128)||
+       !Array.isArray(floraSelection)||floraSelection.some(key=>typeof key!=='string'||key.length>128))
+      throw new Error('unsupported regional ecology profile');
+    ECOLOGY_PROFILE={id:profile.id,label:profile.name||profile.id,
+      scope:profile.scope?.description||profile.coverage?.extent||'regional place profile',
+      status:profile.scope?.boundaryStatus||profile.coverage?.rule||'local occurrence varies',
+      fauna:profile.render.faunaSelection,flora:floraSelection};
+    m.set_fauna_selection?.(JSON.stringify(ECOLOGY_PROFILE.fauna));
+    m.set_flora_selection?.(JSON.stringify(ECOLOGY_PROFILE.flora));
+    if(requested!=='se-corridor-reference')note(`Ecology profile loaded · ${ECOLOGY_PROFILE.label}`);
+  }catch(e){
+    ECOLOGY_PROFILE.id='se-corridor-reference';
+    m.set_fauna_selection?.(JSON.stringify(ECOLOGY_PROFILE.fauna));
+    m.set_flora_selection?.(JSON.stringify(ECOLOGY_PROFILE.flora));
+    note(`Ecology profile fallback · ${String(e).slice(0,90)}`);
+  }
+}
+
+function driveRoadCenterZ(x){
+  // These smooth centre lines follow the visible Kestrel and Saltwind road
+  // ribbons. Their heading change drives the mirror's bend-reveal behaviour.
+  if(x<6)return 0.48-0.25*Math.sin(((x+6.1)/12.1)*Math.PI*2);
+  if(x<9)return 0.48;
+  if(x<9.6)return 0.48+(x-9.0)*0.12;
+  const progress=Math.max(0,Math.min(1,(x-9.6)/12.7));
+  return 0.54-0.29*Math.sin(progress*Math.PI*2);
+}
+function stepDrive(dt){
+  const rig=RIG_DRIVING[vehicleRig], engineReady=drive.engineHealth>0;
+  const throttle=engineReady&&(walkKeys.has('w')||walkKeys.has('arrowup'));
+  const reverse=engineReady&&(walkKeys.has('s')||walkKeys.has('arrowdown'));
+  const steer=(walkKeys.has('d')?1:0)-(walkKeys.has('a')?1:0);
+  const brake=walkKeys.has(' ');
+  if(throttle)drive.speed=Math.min(rig.topSpeed,drive.speed+rig.acceleration*dt);
+  if(reverse||brake)drive.speed=Math.max(reverse?-1.0:0,drive.speed-rig.braking*dt);
+  if(!throttle&&!reverse&&!brake)drive.speed=Math.abs(drive.speed)<0.025?0:
+    drive.speed-Math.sign(drive.speed)*Math.min(Math.abs(drive.speed),0.26*dt);
+  if(steer)drive.heading+=steer*rig.steering*dt*(0.22+Math.min(1,Math.abs(drive.speed)/rig.topSpeed));
+  const previous={...walk}, direction=drive.speed<0?-1:1;
+  const distance=Math.abs(drive.speed)*dt;
+  walk.x+=-Math.sin(drive.heading)*distance*direction;
+  walk.z+=-Math.cos(drive.heading)*distance*direction;
+  const offRoad=Math.abs(walk.z-driveRoadCenterZ(walk.x));
+  if(offRoad>rig.shoulder){
+    walk=previous;drive.speed*=0.68;
+    drive.warning='Loose shoulder · steer back toward the road';
+  }else{
+    drive.warning='';
+    if(offRoad>0.72&&Math.abs(drive.speed)>2.2)drive.speed*=0.985;
+  }
+  const detectionRange=drive.period==='dawn'||drive.period==='dusk'?8.0:
+    drive.period==='night'?9.5:4.5;
+  const nearby=ROAD_HAZARDS.map(h=>({hazard:h,distance:Math.hypot(walk.x-h.x,walk.z-h.z)}))
+    .filter(item=>ECOLOGY_PROFILE.fauna.includes(item.hazard.profileKey)&&
+      item.distance<item.hazard.radius+detectionRange)
+    .sort((a,b)=>a.distance-b.distance)[0]?.hazard;
+  if(nearby){
+    const twilight=drive.period==='dawn'||drive.period==='dusk';
+    const riskContext=twilight?'Dawn/dusk wildlife · longer scan':
+      drive.period==='night'?'Night visibility · longer scan':'Road hazard';
+    drive.warning=`${riskContext} · ${nearby.label} · ${nearby.taxon} · slow and give space`;
+    if(Math.hypot(walk.x-nearby.x,walk.z-nearby.z)<nearby.radius+0.38){
+      walk=previous;
+      const emergencySpeed=twilight?1.6:drive.period==='night'?1.4:2.1;
+      if(Math.abs(drive.speed)>emergencySpeed){
+        drive.warning=`Emergency stop · ${nearby.label} · collision risk avoided`;
+        if(drive.lastWarning!==nearby.id){drive.emergencyStops++;drive.lastWarning=nearby.id;
+          note(`Driving event · ${drive.warning}`);}
+      }else{
+        drive.warning=`Safe stop · ${nearby.label} on the road`;
+        if(drive.lastWarning!==nearby.id){drive.hazardStops++;drive.lastWarning=nearby.id;
+          note(`Driving event · ${drive.warning}`);}
+      }
+      drive.speed=0;
+    }
+  }
+  const crossingClosed=!state().bridgeOpen&&walk.x>=5.85;
+  if(crossingClosed){
+    walk=previous;drive.speed=0;drive.warning='Canal crossing closed · secure the bridge before driving through';
+  }else if(walk.x<=-5.65||walk.x>=22.15){
+    walk.x=Math.max(-5.65,Math.min(22.15,walk.x));drive.speed=0;
+    drive.warning='End of the local demo road · regional destinations need a loaded place pack';
+  }
+  drive.distance+=Math.hypot(walk.x-previous.x,walk.z-previous.z);
+  updateVehicleThermals(dt,throttle,reverse);
+  drive.heading=((drive.heading+Math.PI*3)%(Math.PI*2))-Math.PI;
+  camYaw=drive.heading;placeDriveCamera();
 }
 
 // rAF render loop — tick drives GPU pick readback too. The scripted browser
 // self-test renders one frame and then stops so headless runners can collect
 // its DOM report; normal gameplay remains continuously animated.
-let last=performance.now(), tickErrorShown=false;
+let last=performance.now(), tickErrorShown=false, lastDriveHud=0;
 (function loop(t){
-  if(cameraMode==='walk'&&walkKeys.size&&hudPage!=='walk-site'&&hudPage!=='characters'&&hudPage!=='character-create'){
+  if(showcaseTour)updateShowcaseTour(t);
+  if(cameraMode==='drive'&&hudPage==='orders'){
+    stepDrive(Math.min(0.05,Math.max(0,(t-last)/1000)));
+    if(t-lastDriveHud>100){renderHud();lastDriveHud=t;}
+  }else if(cameraMode==='walk'&&walkKeys.size&&hudPage!=='walk-site'&&hudPage!=='characters'&&hudPage!=='character-create'){
     const dt=Math.min(0.05,Math.max(0,(t-last)/1000));
     const forward=(walkKeys.has('w')||walkKeys.has('arrowup')?1:0)
       -(walkKeys.has('s')||walkKeys.has('arrowdown')?1:0);
@@ -943,7 +1893,7 @@ let last=performance.now(), tickErrorShown=false;
   try { portal.tick(canvas, Math.min(50, t-last)); }
   catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
   last=t;
-  if(!SELFTEST)requestAnimationFrame(loop);
+  requestAnimationFrame(loop);
 })(last);
 
 // orbit + pick
@@ -961,23 +1911,26 @@ canvas.addEventListener('pointerdown', e=>{
   canvas.setPointerCapture(e.pointerId);
 });
 canvas.addEventListener('pointermove', e=>{ if(!drag) return;
+  if(showcaseTour)return;
   if(drag.hudAction||drag.blockWorld)return;
   if (Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>4) drag.moved=true;
   if (drag.moved){
     camGoal=null;zoomGoal=null;
-    if(drag.pan&&cameraMode!=='walk'){
+    if(drag.pan&&cameraMode!=='walk'&&cameraMode!=='drive'){
       camTarget.x-=(e.movementX||0)*0.0015;camTarget.z+=(e.movementY||0)*0.0015;
     }
     else{camYaw+=(e.movementX||0)*0.008;
       camPitch=Math.max(cameraMode==='walk'?-0.9:-1.2,
         Math.min(cameraMode==='walk'?0.9:1.4,camPitch+(e.movementY||0)*0.006));}
-    if(cameraMode==='walk')placeWalkCamera();else applyCam(); }});
+    if(cameraMode==='walk')placeWalkCamera();
+    else if(cameraMode==='drive')placeDriveCamera();else applyCam(); }});
 canvas.addEventListener('pointerup', e=>{
   if(drag?.hudAction){
     if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)<18)
       handleHudAction(drag.hudAction);
     drag=null;return;
   }
+  if(showcaseTour){drag=null;return;}
   if(drag?.blockWorld){drag=null;return;}
   if (drag && !drag.moved){
     const r=canvas.getBoundingClientRect();
@@ -1037,14 +1990,35 @@ function inspect(s){
 // ---------- HUD ----------
 function renderHud() {
   const st=state(), W=hudCanvas.width, H=hudCanvas.height;
+  const drivePanel=$('drive-dashboard');
+  drivePanel.hidden=cameraMode!=='drive';
+  if(cameraMode==='drive'){
+    const oil=Math.round(drive.oilTempC),coolant=Math.round(drive.coolantTempC);
+    const oilPct=Math.max(0,Math.min(100,(oil-60)/90*100));
+    const coolantPct=Math.max(0,Math.min(100,(coolant-60)/60*100));
+    $('oil-fill').style.width=`${oilPct}%`;$('coolant-fill').style.width=`${coolantPct}%`;
+    $('oil-readout').textContent=`${oil} °C`;$('coolant-readout').textContent=`${coolant} °C`;
+    $('oil-meter').setAttribute('aria-valuenow',String(oil));$('coolant-meter').setAttribute('aria-valuenow',String(coolant));
+    $('oil-fill').style.background=oil>=142?'#e46b59':oil>=128?'#edaa5d':'';
+    $('coolant-fill').style.background=coolant>=114?'#e46b59':coolant>=104?'#edaa5d':'';
+    const warning=$('engine-warning');
+    const warningText=drive.engineWarning||'Temperatures stable · ease off on steep grades to help the engine cool';
+    if(warning.textContent!==warningText)warning.textContent=warningText;
+    warning.classList.toggle('is-warn',drive.oilTempC>=128||drive.coolantTempC>=104);
+    warning.classList.toggle('is-critical',drive.oilTempC>=142||drive.coolantTempC>=114||drive.engineHealth<=0);
+    $('drive-context').textContent=`Ambient ${Math.round(drive.ambientC)} °C · grade ${drive.gradePercent.toFixed(1)}% · ${drive.roadSurface} surface · load ${Math.round(drive.thermalLoad*100)}%`;
+    $('mirror-status').textContent=rearMirrorReadout();
+    $('rear-mirror').setAttribute('aria-label',rearMirrorReadout());
+    $('rig-choice').value=String(vehicleRig);
+  }
   const compact=W<900;
   const right=compact?W-290:W-358, panelW=W-right-12;
   const items=[];
-  const put=(kind,id,text,x,y,w,h,value=0,disabled=false)=>
-    items.push({kind,id,text:String(text),x,y,w,h,value,disabled});
+  const put=(kind,id,text,x,y,w,h,value=0,disabled=false,color='')=>
+    items.push({kind,id,text:String(text),x,y,w,h,value,disabled,color});
   const panel=(x,y,w,h)=>put('panel','','',x,y,w,h);
-  const label=(text,x,y,w=300,h=23)=>put('label','',String(text).slice(0,150),x,y,w,h);
-  const button=(id,text,x,y,w,h=34)=>put('button',id,String(text).slice(0,44),x,y,w,h);
+  const label=(text,x,y,w=300,h=23,color='')=>put('label','',String(text).slice(0,150),x,y,w,h,0,false,color);
+  const button=(id,text,x,y,w,h=34,disabled=false)=>put('button',id,String(text).slice(0,44),x,y,w,h,0,disabled);
   if(hudPage==='characters'){
     panel(14,12,W-28,H-24);
     label('YOUR CHARACTERS',32,28,W-64,28);
@@ -1101,13 +2075,66 @@ function renderHud() {
       compact?W-333+i*108:right-389+i*130,12,compact?103:124,34));
   button('camera:in','+',18,75,36,34);
   button('camera:out','−',58,75,36,34);
-  button('camera:fit','⌂',98,75,36,34);
+    button('camera:fit','⌂',98,75,36,34);
   button('camera:map','Map',compact?18:146,compact?116:75,compact?84:72,34);
   button('camera:survey','Survey',compact?110:224,compact?116:75,compact?84:82,34);
   button('camera:walk','Walk',compact?202:312,compact?116:75,compact?84:72,34);
-  label(cameraMode==='walk'?'FIRST PERSON · WASD MOVE · DRAG LOOK':
+  button('camera:drive','Drive',compact?294:394,compact?116:75,compact?84:76,34);
+  if(W>=1040&&(showcaseTour||cameraMode==='map'||cameraMode==='survey'))
+    button('showcase:toggle',showcaseTour?'End showcase':`${Math.round(SHOWCASE_DURATION_MS/1000)} sec showcase`,484,75,126,34);
+  if(showcaseTour){
+    const elapsed=Math.max(0,performance.now()-showcaseTour.startedAt);
+    const segment=SHOWCASE_DURATION_MS/(SHOWCASE_VIEWS.length+1);
+    const viewIndex=Math.min(SHOWCASE_VIEWS.length-1,Math.floor(elapsed/segment));
+    const tourWidth=Math.min(360,Math.max(220,right-36));
+    const tourX=Math.min((W-tourWidth)*0.5,right-tourWidth-12);
+    panel(tourX,59,tourWidth,38);
+    label(`SHOWCASE ${viewIndex+1}/${SHOWCASE_VIEWS.length} · ${GRAPHICS_VIEWS[SHOWCASE_VIEWS[viewIndex]].title} · ESC ends`,
+      tourX+10,65,tourWidth-20,24);
+  }
+  label(cameraMode==='drive'?`DRIVING · ${VEHICLE_RIGS[vehicleRig].toUpperCase()} · ${driveView==='aerial'?'AERIAL ROUTE':'FIRST PERSON'}`:
+    cameraMode==='walk'?'FIRST PERSON · WASD MOVE · DRAG LOOK':
     focusedPlace===null?`${cameraMode.toUpperCase()} VIEW`:
       PLACE_MARKERS[focusedPlace][0].toUpperCase(),18,compact?157:114,compact?280:395,23);
+  if(cameraMode==='drive'){
+    const rig=RIG_DRIVING[vehicleRig],compactDriveWidth=compact?Math.max(170,W-286):W-64;
+    const thermal=engineThermalReadout(),oilColor=engineTempColor(drive.oilTempC,128,142),
+      coolantColor=engineTempColor(drive.coolantTempC,104,114);
+    panel(16,H-256,W-32,248);
+    label(compact?'LOCAL DRIVE · FICTIONAL ROAD':'LOCAL DRIVE · KESTREL FLATS TO SALTWIND REACH',
+      32,H-248,compactDriveWidth,21);
+    label(`${drive.speed<0?'R ':''}${Math.abs(drive.speed*3.6).toFixed(0)} km/h  ·  ${drive.distance.toFixed(0)} m  ·  ${VEHICLE_RIGS[vehicleRig]}`,
+      32,H-226,compactDriveWidth,21);
+    label(drive.warning||'Road clear · scan ahead for wildlife and traffic',
+      32,H-204,W-64,18,drive.warning?'#e8b24f':'#69c294');
+    label(thermal.text,32,H-183,W-64,18,thermal.color);
+    label(`SIM OIL  ${drive.oilTempC.toFixed(0)}°C  ·  ${drive.oilTrend}`,
+      32,H-158,W-64,17,oilColor);
+    put('meter','drive:oil','',32,H-138,W-64,8,
+      engineTempFraction(drive.oilTempC,70,155),false,oilColor);
+    label(`SIM WATER / COOLANT  ${drive.coolantTempC.toFixed(0)}°C  ·  ${drive.coolantTrend}`,
+      32,H-117,W-64,17,coolantColor);
+    put('meter','drive:coolant','',32,H-97,W-64,8,
+      engineTempFraction(drive.coolantTempC,65,125),false,coolantColor);
+    label(`${drive.ambientC.toFixed(0)}°C ambient · ${drive.gradePercent>=0?'+':''}${drive.gradePercent.toFixed(1)}% grade · ${drive.roadSurface}`,
+      32,H-76,W-64,17);
+    label(`ENGINE LOAD ${(drive.thermalLoad*100).toFixed(0)}% · HEALTH ${drive.engineHealth.toFixed(0)}% · ${rig.shoulder.toFixed(1)} m shoulder allowance`,
+      32,H-56,W-64,17);
+    const timeWidth=compact?132:184,viewX=compact?178:232,
+      viewWidth=compact?140:172,exitWidth=compact?96:112;
+    button('drive:time',`Time: ${drive.period}  ↻`,32,H-42,timeWidth,34);
+    button('drive:view',driveView==='aerial'?'First-person view':'Aerial route view',
+      viewX,H-42,viewWidth,34);
+    button('drive:exit','Exit drive',W-exitWidth-16,H-42,exitWidth,34);
+    const mirrorY=compact?184:148,mirror=rearMirrorState();
+    panel(W-238,mirrorY,222,146);
+    label('REAR-VIEW MIRRORS',W-226,mirrorY+6,198,18);
+    put('mirror','drive:mirror','',W-226,mirrorY+27,198,74,mirror.queued,
+      mirror.blocked,mirror.blocked?'#e8b24f':'#69c294');
+    label(rearMirrorReadout(),W-226,mirrorY+104,198,20);
+    label(`AUSTRALIA · ${ECOLOGY_PROFILE.label} · illustrative`,W-226,mirrorY+124,198,16);
+    hud.set_document_json(JSON.stringify({items}));return;
+  }
   if(cameraMode==='walk'){
     const c=playing(),trait=CHARACTER_TRAITS.find(t=>t.id===c.trait);
     const arc=CHARACTER_ARCS.find(a=>a.id===c.arc), chapter=characterChapter(c,st);
@@ -1138,7 +2165,7 @@ function renderHud() {
     panel(0,H-112,W,112);
     label(chapter.title,18,H-101,W-36,22);
     label(chapter.goal,18,H-77,W-36,22);
-    label('WASD move · Drag look · Shift run · E explore nearby · 1 Map · 2 Survey',
+    label('WASD move · Drag look · Shift run · E explore nearby · 1 Map · 2 Survey · 4 Drive',
       18,H-39,W-230,24);
     const nearby=nearbyWorldSite(c);
     if(nearby)button('walk:site',`E · ${nearby.label}`,W-204,H-43,186,32);
@@ -1149,10 +2176,12 @@ function renderHud() {
   panel(right,66,panelW,H-128);
   label(territory==='saltwind'?'SALTWIND REACH':
     territory==='highlands'?'NORTHERN HIGHLANDS':'KESTREL FLATS',right+12,75,panelW-24,26);
-  const tabs=st.finale?['result','goals','journal','site','system']:
-    ['orders','goals','journal','site','system'];
+  const tabs=st.finale?['result','places','activities','goals','journal','site','system']:
+    ['orders','places','activities','goals','journal','site','system'];
   const tabW=(panelW-24)/tabs.length;
-  tabs.forEach((tab,i)=>button(`page:${tab}`,tab.toUpperCase(),right+12+i*tabW,108,tabW-3,29));
+  const compactTab={orders:'ORD',places:'MAP',activities:'ACT',goals:'GOAL',journal:'LOG',site:'SITE',system:'MORE',result:'END'};
+  const wideTab={orders:'TASKS',places:'PLACES',activities:'PLAY',goals:'GOALS',journal:'LOG',site:'SITE',system:'MORE',result:'END'};
+  tabs.forEach((tab,i)=>button(`page:${tab}`,compact?compactTab[tab]:wideTab[tab],right+12+i*tabW,108,tabW-3,29));
   let y=148;
   if(hudPage==='orders') {
     const lead=territory==='highlands'?
@@ -1167,8 +2196,12 @@ function renderHud() {
     }
     if(line){label(line,right+14,y,panelW-28,19);y+=19;}
     y+=9;
+    if(compact&&!showcaseTour&&(cameraMode==='map'||cameraMode==='survey')){
+      button('showcase:toggle',`▶ ${Math.round(SHOWCASE_DURATION_MS/1000)}-second graphics showcase`,right+13,y,panelW-26,32);y+=39;
+    }
     if(territory==='highlands'){
       button('camera:walk','▶ Walk the valley',right+13,y,panelW-26,36);y+=43;
+      button('camera:drive','▶ Take a local drive',right+13,y,panelW-26,34);y+=41;
     }else if(lead.action){
       button(`action:${lead.action}`,`▶ ${lead.label}`,right+13,y,panelW-26,36);y+=43;
       const site=siteForAction(lead.action);
@@ -1191,6 +2224,86 @@ function renderHud() {
     if(actions.length>available){
       button('orders:prev','▲ Earlier orders',right+13,H-158,(panelW-30)/2,30);
       button('orders:next','▼ More orders',right+18+(panelW-30)/2,H-158,(panelW-30)/2,30);
+    }
+  } else if(hudPage==='places') {
+    label('PLACE & SITE NAVIGATION',right+14,y,panelW-28,22);y+=27;
+    const roots=PLACE_NODES.filter(place=>place.parentId===null&&place.territoryId);
+    for(const place of roots){
+      const selected=place.territoryId===territory;
+      button(`map-place:${place.id}`,`${selected?'●':'○'} ${place.name}`,right+13,y,panelW-26,28);y+=31;
+    }
+    const locality=roots.find(place=>place.territoryId===territory);
+    if(locality){
+      label(`SITES · ${locality.name.toUpperCase()}`,right+14,y,panelW-28,20);y+=24;
+      const sites=PLACE_NODES.filter(place=>place.parentId===locality.id&&place.level==='site');
+      const room=Math.max(3,Math.floor((H-160-y-58)/31));
+      hudPlaceOffset=Math.min(hudPlaceOffset,Math.max(0,sites.length-room));
+      sites.slice(hudPlaceOffset,hudPlaceOffset+room).forEach(place=>{
+        const selected=focusedPlace!==null&&PLACES[focusedPlace]===place.sceneId;
+        button(`map-place:${place.id}`,`${selected?'◎ ':'⌖ '}${place.name}`,right+13,y,panelW-26,28);y+=30;
+      });
+      if(sites.length>room){
+        button('places:previous','‹ Earlier sites',right+13,y,(panelW-30)/2,27);
+        button('places:next','Later sites ›',right+18+(panelW-30)/2,y,(panelW-30)/2,27);y+=32;
+      }
+    }
+    y+=3;
+    label(`${PLACE_PACKAGE.maturity.replaceAll('_',' ').toUpperCase()} · ${PLACE_PACKAGE.coverage.spatialStatus.replaceAll('_',' ')}`,
+      right+14,y,panelW-28,18,'#e3c988');y+=20;
+    if(PLACE_PACKAGE.routeGraph.edges.length){
+      label(`${PLACE_PACKAGE.routeGraph.edges.length} route segments · see pack provenance`,right+14,y,panelW-28,19);y+=20;
+    }else{
+      const noteText='Road routing is not loaded. Direct Drive is a fictional local simulation.';
+      const words=noteText.split(' ');let line='';
+      for(const word of words){if((line+' '+word).length>Math.max(26,Math.floor((panelW-30)/7))){label(line,right+14,y,panelW-28,18);y+=19;line='';}line+=(line?' ':'')+word;}
+      if(line)label(line,right+14,y,panelW-28,18);
+    }
+  } else if(hudPage==='activities') {
+    label('SITUATIONS & WORK',right+14,y,panelW-28,24);y+=30;
+    const wrap=(text,maxChars=Math.max(25,Math.floor((panelW-30)/(compact?7:8))))=>{
+      const lines=[];let line='';
+      for(const word of String(text).split(/\s+/)){
+        if(line&&(line+' '+word).length>maxChars){lines.push(line);line='';}
+        line+=(line?' ':'')+word;
+      }
+      if(line)lines.push(line);
+      for(const line of lines){label(line,right+14,y,panelW-28,19);y+=20;}
+    };
+    if(!activeActivityId){
+      wrap('Stories and short tasks use the same validated campaign actions and replay tape.');y+=4;
+      for(const module of ACTIVITY_MODULES){
+        button(`activity:open:${module.id}`,module.title,right+13,y,panelW-26,30);y+=31;
+        label(`${module.mode.toUpperCase()} · ${module.place.siteId}`,right+16,y,panelW-32,16);y+=18;
+      }
+      wrap('Choose a module. Campaign rules control which choices are ready.');
+    }else{
+      const module=ACTIVITY_MODULES.find(item=>item.id===activeActivityId);
+      if(!module){activeActivityId=null;label('This activity module is unavailable.',right+14,y,panelW-28,32);}
+      else{
+        button('activity:list','‹ All activities',right+13,y,panelW-26,30);y+=36;
+        label(module.title,right+14,y,panelW-28,25);y+=28;
+        label(`${module.mode.toUpperCase()} · ${module.place.siteId}`,right+14,y,panelW-28,18);y+=22;
+        wrap(module.objective);y+=2;
+        label(`ROLES · ${module.roles.map(role=>role.label).join(', ')}`.slice(0,95),right+14,y,panelW-28,18);y+=20;
+        label(`TOOLS · ${module.toolsMaterials.join(', ')}`.slice(0,95),right+14,y,panelW-28,18);y+=20;
+        label(`TIME · ${module.duration}`.slice(0,95),right+14,y,panelW-28,18);y+=20;
+        const nodeId=activityCurrentNode(module),node=module.nodes.find(item=>item.id===nodeId);
+        if(!node){
+          label('Activity complete · its accepted actions are recorded in the shared campaign.',right+14,y,panelW-28,38,'#69c294');y+=42;
+          wrap(module.nodes[module.nodes.length-1]?.completionText||'Continue exploring the campaign or choose another activity.');
+        }else{
+          y+=3;wrap(node.prompt);y+=4;
+          const availableActions=activityAvailableActions(st),eventIds=new Set(toObj(session.events()));
+          for(const choice of node.choices){
+            const completed=eventIds.has(choice.actionId);
+            const enabled=availableActions.has(choice.actionId)&&!completed&&!VISUAL_REVIEW_REQUESTED;
+            button(`activity:act:${module.id}:${choice.id}`,`${completed?'✓ ':''}${choice.label}`,
+              right+13,y,panelW-26,34,!enabled);y+=37;
+          }
+          if(y<H-90)wrap('Accepted choices enter the shared action ledger and replay with campaign state.');
+        }
+        if(module.provenance?.note){y+=4;wrap(`Content: ${module.provenance.note}`);}
+      }
     }
   } else if(hudPage==='goals'||hudPage==='result') {
     label(hudPage==='result'?'CAMPAIGN RECORD':territory==='saltwind'?'CROSS THE CANAL':'RESTORE THE COMMONS',right+14,y);y+=34;
@@ -1265,6 +2378,7 @@ function renderHud() {
       ['replay','Replay decisions'],['new-game','New campaign'],['sky-preset','Change sky']]){
       button(`utility:${id}`,title,right+14,y,panelW-28,rowH);y+=rowStep;}
     button('style:next',`Visual style: ${ART_STYLES[artStyle]}`,right+14,y,panelW-28,rowH);y+=rowStep;
+    button('rig:next',`Touring rig: ${VEHICLE_RIGS[vehicleRig]}`,right+14,y,panelW-28,rowH);y+=rowStep;
     button('page:characters','Choose or create character',right+14,y,panelW-28,rowH);y+=rowStep;
     button('page:script','VibeScript console',right+14,y,panelW-28,rowH);y+=rowStep;
     label(`QUALIA PORTAL  ·  TIER ${portal.tier()}`,right+14,y+15);
@@ -1325,6 +2439,8 @@ function openWalkSite(site){
 }
 
 function handleHudAction(id){
+  if(showcaseTour){if(id==='showcase:toggle')stopShowcaseTour();return;}
+  if(id==='showcase:toggle'){toggleShowcaseTour();return;}
   if(id==='page:characters'){
     characterReturnPage=hudPage;rosterOffset=0;hudPage='characters';renderHud();return;
   }
@@ -1372,19 +2488,66 @@ function handleHudAction(id){
   if(id==='result:replay'){resultMessage=verifyReplay()?'Replay matches every event.':'Replay diverged.';renderHud();return;}
   if(id==='result:new'){$('new-game').click();return;}
   if(id==='camera:in'||id==='camera:out'){
-    if(cameraMode==='walk')return;
+    if(cameraMode==='walk'||cameraMode==='drive')return;
     camGoal=null;zoomGoal=null;
     camZoom=Math.max(0.55,Math.min(20,camZoom*(id==='camera:in'?0.75:1.33)));
     applyCam();return;
   }
-  if(id==='camera:fit'){focusTerritory(territory);renderHud();return;}
-  if(id.startsWith('camera:')&&['map','survey','walk'].includes(id.slice(7))){
+  if(id==='camera:fit'){if(cameraMode==='drive')return;focusTerritory(territory);renderHud();return;}
+  if(id.startsWith('camera:')&&['map','survey','walk','drive'].includes(id.slice(7))){
     setCameraMode(id.slice(7));return;
   }
+  if(id==='drive:exit'){setCameraMode('map');return;}
+  if(id==='drive:time'){cycleDrivePeriod();return;}
+  if(id==='drive:view'){toggleDriveView();return;}
   if(id.startsWith('territory:')){
+    if(cameraMode==='drive')setCameraMode('map');
     territory=id.slice(10);focusTerritory(territory);refresh();return;}
+  if(id.startsWith('map-place:')){
+    const place=PLACE_INDEX.get(id.slice('map-place:'.length));
+    if(!place){note('That place is not available in the loaded place pack.');return;}
+    let parent=place;
+    while(parent&&!parent.territoryId&&parent.parentId)parent=PLACE_INDEX.get(parent.parentId);
+    if(!parent?.territoryId||!tileCenters[parent.territoryId]){note('This place has no playable scene binding yet.');return;}
+    if(cameraMode==='drive')setCameraMode('map');
+    territory=parent.territoryId;hudPage='places';hudPlaceOffset=0;focusedPlace=null;
+    focusTerritory(territory);refresh();
+    if(place.level==='site'&&place.sceneId){const siteIndex=PLACES.indexOf(place.sceneId);if(siteIndex>=0)focusSite(siteIndex);}
+    renderHud();return;
+  }
+  if(id==='places:previous'||id==='places:next'){
+    const locality=PLACE_NODES.find(place=>place.parentId===null&&place.territoryId===territory);
+    const sites=PLACE_NODES.filter(place=>place.parentId===locality?.id&&place.level==='site');
+    hudPlaceOffset=Math.max(0,Math.min(Math.max(0,sites.length-1),hudPlaceOffset+(id==='places:next'?1:-1)));
+    renderHud();return;
+  }
+  if(id.startsWith('activity:open:')){
+    const module=ACTIVITY_MODULES.find(item=>item.id===id.slice('activity:open:'.length));
+    if(!module||module.availability==='design_only'){note('This activity is not available in the current fixture.');return;}
+    activeActivityId=module.id;hudPage='activities';focusedPlace=null;activeWalkSite=null;
+    const destination=PLACE_INDEX.get(module.place.localityId)?.territoryId||null;
+    if(destination){
+      territory=destination;focusTerritory(territory);refresh();
+      const siteIndex=PLACES.indexOf(module.place.siteId);
+      if(siteIndex>=0){focusSite(siteIndex);renderHud();}
+    }else renderHud();
+    return;
+  }
+  if(id==='activity:list'){activeActivityId=null;renderHud();return;}
+  if(id.startsWith('activity:act:')){
+    const [, ,moduleId,choiceId]=id.split(':');
+    const module=ACTIVITY_MODULES.find(item=>item.id===moduleId);
+    const node=module&&module.nodes.find(item=>item.id===activityCurrentNode(module));
+    const choice=node?.choices.find(item=>item.id===choiceId);
+    if(!choice){note('That activity choice is no longer available.');renderHud();return;}
+    if(!activityAvailableActions(state()).has(choice.actionId)){
+      note('The campaign rules have not enabled that activity choice yet.');renderHud();return;
+    }
+    tryAction(choice.actionId);return;
+  }
   if(id.startsWith('page:')){hudPage=id.slice(5);renderHud();return;}
-  if(id==='style:next'){selectArtStyle(artStyle+1);return;}
+  if(id==='style:next'){if(VISUAL_REVIEW_REQUESTED)return;selectArtStyle(artStyle+1);return;}
+  if(id==='rig:next'){if(VISUAL_REVIEW_REQUESTED)return;selectVehicleRig(vehicleRig+1);return;}
   if(id.startsWith('action:')){tryAction(id.slice(7));return;}
   if(id.startsWith('script:')){
     const command=id.slice(7);
@@ -1392,6 +2555,8 @@ function handleHudAction(id){
       const result=toObj(session.vibe_query('= world.coins'));
       hudScriptResult=result.ok?`World coins: ${result.value}`:String(result.error);
     }else if(command==='recommend'){
+      if(showcaseTour){hudScriptResult='End the graphics showcase before changing campaign state.';renderHud();return;}
+      if(VISUAL_REVIEW_REQUESTED){hudScriptResult='Graphics review fixtures are read-only.';renderHud();return;}
       const action=campaignLead(state()).action;
       if(action){
         const result=toObj(session.vibe_propose(`= "${action}"`));
@@ -1413,6 +2578,7 @@ function handleHudAction(id){
 }
 document.addEventListener('keydown',e=>{
   if(e.target?.matches?.('input,textarea'))return;
+  if(showcaseTour){if(e.key==='Escape')stopShowcaseTour();return;}
   if(e.key==='Escape'&&hudPage==='character-create'){
     handleHudAction('characters:cancel');return;
   }
@@ -1425,8 +2591,14 @@ document.addEventListener('keydown',e=>{
   if(cameraMode==='walk'&&e.key==='Escape'&&hudPage==='walk-site'){
     hudPage='orders';renderHud();return;
   }
-  if(['1','2','3'].includes(e.key)&&!e.repeat){
-    setCameraMode({1:'map',2:'survey',3:'walk'}[e.key]);return;
+  if(e.key==='Escape'&&cameraMode==='drive'){setCameraMode('map');return;}
+  if(cameraMode==='drive'&&e.key.toLowerCase()==='t'){cycleDrivePeriod();return;}
+  if(cameraMode==='drive'&&e.key.toLowerCase()==='v'){toggleDriveView();return;}
+  if(['1','2','3','4'].includes(e.key)&&!e.repeat){
+    setCameraMode({1:'map',2:'survey',3:'walk',4:'drive'}[e.key]);return;
+  }
+  if(cameraMode==='drive'&&['w','a','s','d',' ','arrowup','arrowdown'].includes(e.key.toLowerCase())){
+    e.preventDefault();walkKeys.add(e.key.toLowerCase());return;
   }
   if(cameraMode==='walk'&&['w','a','s','d','shift','arrowup','arrowdown'].includes(e.key.toLowerCase())){
     e.preventDefault();walkKeys.add(e.key.toLowerCase());return;
@@ -1613,6 +2785,8 @@ function refresh() {
 }
 
 function tryAction(id) {
+  if(showcaseTour){note('End the graphics showcase before changing campaign state');return;}
+  if(VISUAL_REVIEW_REQUESTED){note('Graphics review fixtures are read-only');return;}
   const r = toObj(session.propose(id));
   if (r.ok) {
     $('why').style.display='none';
@@ -1654,7 +2828,11 @@ function tryAction(id) {
       sellHarvest:'The harvest is sold. Three coins earned.',
       openCommons:'The commons opens with a harvest gathering.',
       openCommonsReserved:'The stored harvest makes the commons gathering possible.',
-      launchTradeRoute:'The first trade boat sets out.',endTurn:'The crew rests. A new day begins.'
+      launchTradeRoute:'The first trade boat sets out.',endTurn:'The crew rests. A new day begins.',
+      'activity.housekeeping.linen-first':'You prioritised the guest linen request in the practice shift.',
+      'activity.housekeeping.hygiene-first':'You prioritised the room hygiene check in the practice shift.',
+      'activity.housekeeping.checklist-first':'You sequenced the room tasks from the checklist in the practice shift.',
+      'activity.housekeeping.complete':'You completed the fictional housekeeping practice shift.'
     };
     note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
     const actionSite=siteForAction(id);
@@ -1709,6 +2887,7 @@ function tryAction(id) {
 }
 
 $('save').onclick = async () => {
+  if(VISUAL_REVIEW_REQUESTED)return;
   await m.world_save('rc-save.n3', new TextEncoder().encode(session.world()));
   await saveCharacters();
   $('persist').textContent = 'saved';
@@ -1723,6 +2902,7 @@ function migrateSavedWorld(saved) {
     '\nrc:communicationsMast rc:status "offline" .\n';
 }
 $('load').onclick = async () => {
+  if(showcaseTour){note('End the graphics showcase before changing campaign state');return;}
   const b = await m.world_load('rc-save.n3');
   const saved = migrateSavedWorld(new TextDecoder().decode(b));
   if (!saved) {
@@ -1749,6 +2929,7 @@ function verifyReplay() {
 }
 $('replay').onclick = () => {verifyReplay();renderHud();};
 $('new-game').onclick = () => {
+  if(showcaseTour){note('End the graphics showcase before changing campaign state');return;}
   session = new m.GameSession(SEED, ACTIONS);
   territory=playing().place;hudPage='orders';resultMessage='';
   focusedPlace=null;
@@ -1765,6 +2946,7 @@ $('vibe-run').onclick = () => {
   $('vibe-result').textContent = result.ok ? JSON.stringify(result.value, null, 2) : String(result.error||'Evaluation failed');
 };
 $('vibe-propose').onclick = () => {
+  if(showcaseTour){note('End the graphics showcase before changing campaign state');return;}
   const result = toObj(session.vibe_propose($('vibe-command').value));
   $('vibe-command-result').textContent = JSON.stringify(result, null, 2);
   if (result.ok) { note(`VibeScript event ${result.seq}: ${result.action}`); refresh(); }
@@ -1782,14 +2964,81 @@ $('vibe-preview').onclick = () => {
   }
 };
 
+async function finishSceneLoading(detail) {
+  window.setWorldLoading('Drawing the community ground','Waiting for the first rendered scene frame');
+  for(let attempt=0;attempt<120;attempt++){
+    if(rendererProducerReport().frame_presented)return window.finishWorldLoading(detail);
+    try { portal.tick(canvas, 16); } catch {}
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  throw new Error('The scene loaded, but the renderer did not present a frame. Please retry.');
+}
+
+const gameViewButtons=[...document.querySelectorAll('[data-game-view]')];
+function selectGameView(view){
+  document.body.classList.toggle('trip-planning',view==='trip');
+  for(const button of gameViewButtons){
+    if(button.dataset.gameView===view)button.setAttribute('aria-current','page');
+    else button.removeAttribute('aria-current');
+  }
+  if(view==='drive'){
+    setCameraMode('drive');hudPage='orders';
+  }else if(view==='walk'){
+    setCameraMode('walk');hudPage='orders';
+  }else if(view==='activities'){
+    setCameraMode('map');hudPage='activities';
+  }else if(view==='trip'){
+    setCameraMode('map');hudPage='places';
+  }else{
+    setCameraMode('map');hudPage='orders';
+  }
+  renderHud();
+}
+for(const button of gameViewButtons)
+  button.addEventListener('click',()=>selectGameView(button.dataset.gameView));
+$('art-style').value=String(artStyle);
+$('art-style').addEventListener('change',event=>selectArtStyle(Number(event.currentTarget.value)));
+$('quality-profile').value=String(qualityPreference);
+$('quality-profile').addEventListener('change',event=>{
+  qualityPreference=Math.max(0,Math.min(2,Number(event.currentTarget.value)||0));
+  if(!VISUAL_REVIEW_REQUESTED)try{localStorage.setItem('maslows-graphics-quality',String(qualityPreference));}catch{}
+  portal.invalidate_temporal_history?.();
+  const bridge=sceneQualityState(state());applySceneQuality(bridge,lastSceneBridge);renderHud();
+  note(`Graphics quality · ${{0:'Economy',1:'Balanced',2:'High detail'}[qualityPreference]}`);
+});
+$('rig-choice').addEventListener('change',event=>selectVehicleRig(Number(event.currentTarget.value)));
+const routeLegs={
+  noosa:'Noosa departure selected. Check local weather, fuel range and dawn or dusk wildlife risk before leaving.',
+  nsw:'NSW coast and inland options selected. Add sourced towns and route distances when a public route pack is available.',
+  melbourne:'Melbourne selected as the southern trip end. Town and community-ground views remain separate from the Australia-scale map.',
+  'sa-border':'Inland leg selected toward the South Australian border. Plan slower travel and engine temperatures for grades, heat and surface.'
+};
+for(const button of document.querySelectorAll('[data-route-stop]')){
+  const selectStop=()=>{
+    for(const item of document.querySelectorAll('[data-route-stop]'))item.removeAttribute('aria-pressed');
+    document.querySelectorAll(`[data-route-stop="${button.dataset.routeStop}"]`).forEach(item=>item.setAttribute('aria-pressed','true'));
+    const message=routeLegs[button.dataset.routeStop]||'Route leg selected.';
+    $('route-feedback').textContent=message;$('atlas-feedback').textContent=message;
+  };
+  button.addEventListener('click',selectStop);
+  button.addEventListener('keydown',event=>{
+    if((event.key==='Enter'||event.key===' ')&&button.namespaceURI==='http://www.w3.org/2000/svg'){
+      event.preventDefault();selectStop();
+    }
+  });
+}
+
 async function hydrateHmcScenePack() {
   const slug=artStyle===1?'earthlight':artStyle===2?'community':'scenes';
   const pack=`./assets/maslows-challenge-${slug}.hmc`;
   const manifest=`./assets/${slug==='scenes'?'manifest':slug+'-manifest'}.json`;
   try {
-    const [packResponse,manifestResponse]=await Promise.all([fetch(pack,{cache:'no-store'}),fetch(manifest,{cache:'no-store'})]);
+    window.setWorldLoading('Loading the illustrated ground',`Fetching the ${ART_STYLES[artStyle]} environment pack`);
+    const [packResponse,manifestResponse]=await Promise.all([fetch(pack,{cache:'default'}),fetch(manifest,{cache:'default'})]);
     if(!packResponse.ok||!manifestResponse.ok)throw new Error(`HTTP ${packResponse.status}/${manifestResponse.status}`);
-    const bytes=new Uint8Array(await packResponse.arrayBuffer()), parsed=await manifestResponse.json();
+    const parsed=await manifestResponse.json();
+    const bytes=await readPackResponse(packResponse,ART_STYLES[artStyle]);
+    window.setWorldLoading('Checking the scene pack','Verifying its assets before showing the world');
     const verified=m.verify_game_hmc(bytes);
     if(verified!==parsed.assets.length+1)throw new Error(`verified ${verified}, expected ${parsed.assets.length+1}`);
     hmcPack=bytes;hmcManifest=parsed;
@@ -1803,6 +3052,32 @@ async function hydrateHmcScenePack() {
     note(`HMC optional path unavailable: ${String(e).slice(0,120)}`);
     return {verified:false,manifest:false,loader:hmcSceneApi,resident:false,error:String(e)};
   }
+}
+
+async function readPackResponse(response,styleName){
+  const total=Number(response.headers.get('content-length'))||0;
+  if(!response.body?.getReader){
+    const bytes=new Uint8Array(await response.arrayBuffer());
+    window.setWorldLoading('Checking the scene pack',`${styleName} pack received · ${(bytes.byteLength/1048576).toFixed(1)} MB`,99);
+    return bytes;
+  }
+  const reader=response.body.getReader(),chunks=[];let received=0,lastProgressAt=0,lastProgressPercent=-1;
+  while(true){
+    const {done,value}=await reader.read();if(done)break;
+    if(value){chunks.push(value);received+=value.byteLength;
+      const percent=total?Math.min(99,received/total*100):null;
+      const detail=total?`${(received/1048576).toFixed(1)} of ${(total/1048576).toFixed(1)} MB`:`${(received/1048576).toFixed(1)} MB received`;
+      const now=performance.now(),wholePercent=Number.isFinite(percent)?Math.floor(percent):-1;
+      if(wholePercent-lastProgressPercent>=3||now-lastProgressAt>=400){
+        window.setWorldLoading('Downloading the illustrated ground',detail,percent);
+        lastProgressAt=now;lastProgressPercent=wholePercent;
+      }}
+  }
+  const bytes=new Uint8Array(received);let offset=0;
+  for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+  const detail=`${styleName} scene pack received · ${(received/1048576).toFixed(1)} MB`;
+  window.setWorldLoading('Checking the scene pack',detail,total?100:null);
+  return bytes;
 }
 
 async function verifyWasmPackageHash() {
@@ -1825,11 +3100,20 @@ async function verifyWasmPackageHash() {
   }
 }
 
+window.setWorldLoading('Restoring your journey','Loading character and campaign preferences');
 await loadCharacters();
+window.setWorldLoading('Preparing Australian nature','Selecting the current ecology profile');
+await loadEcologyProfile();
 territory=playing().place;walk={x:playing().x,z:playing().z};
+window.setWorldLoading('Building the community ground','Composing the local scene and checking its assets');
 refresh();
 const hmcHydration=hydrateHmcScenePack();
+const hmcStartupResult=await hmcHydration;
 note('slice ready — '+rendererCapabilityText());
+await finishSceneLoading(hmcStartupResult.verified&&hmcStartupResult.resident
+  ?'The community ground and its shared model pack are ready.'
+  :hmcStartupResult.verified?'The local ground is ready; this renderer is using its compiled scene path.'
+    :'The local ground is ready. The shared model pack is unavailable, so the built-in scene is active.');
 
 // Scripted acceptance playthrough for headless verification (?selftest).
 if (new URLSearchParams(location.search).has('selftest')) {
@@ -1857,11 +3141,14 @@ if (new URLSearchParams(location.search).has('selftest')) {
   note(`TEST WebGPU runtime execution: ${report.webgpu_runtime_observed?'PASS':'INFO (not observed; no GPU frame claim)'} · backend=${report.backend}; frames=${report.frame_presented===true?'presented':'not-observed'}`);
   note(`TEST Canvas2D fallback: ${rendererProbe.canvas2d==='confirmed'?'PASS':'INFO (not available)'} · api=${rendererProbe.canvas2d}; portal=${report.backend}; portalFrame=${report.canvas2d_fallback_observed?'observed':'not-observed'}`);
   const temporal=lastTemporalContract||temporalScheduleContract(bridgeA,null,report);
-  note(`TEST temporal producer contract: ${temporal.producer_ready===false&&temporal.executed===false&&
-    temporal.fallback==='ordinary-tick'?'PASS':'FAIL'} · policy=${temporal.policy_admitted?'admitted':'closed'}; execution=${temporal.executed?'observed':'not-admitted'}; real motion/reactive views=${temporal.producer_views?.motion_vectors===true&&temporal.producer_views?.reactive_mask===true?'yes':'no'}`);
-  const hmcPath=hmcSceneApi&&hmcResult.resident&&hmcResidentScene===bridgeA.scene_key?'resident HMC':'compiled .10d fallback';
+  const temporalEvidence=temporal.producer_ready===report.temporal_producer_ready&&
+    temporal.executed===report.temporal_execution_observed&&
+    (!temporal.executed||(temporal.producer_ready&&temporal.fallback==='temporal-resolve'));
+  note(`TEST temporal producer contract: ${temporalEvidence?'PASS':'FAIL'} · policy=${temporal.policy_admitted?'admitted':'closed'}; execution=${temporal.executed?'observed':'not-observed'}; real motion/reactive views=${temporal.producer_views?.motion_vectors===true&&temporal.producer_views?.reactive_mask===true?'yes':'no'}`);
+  const expectedHmcScene=`${bridgeA.scene_key}-rig-${vehicleRig}-ecology-${ECOLOGY_PROFILE.id}`;
+  const hmcPath=hmcSceneApi&&hmcResult.resident&&hmcResidentScene===expectedHmcScene?'resident HMC':'compiled .10d fallback';
   note(`TEST HMC bundle verification: ${hmcResult.verified?'PASS':'FAIL'} · entries=${hmcResult.assetCount||0}`);
-  note(`TEST HMC hydration: ${hmcResult.loader?(hmcResult.resident&&hmcResidentScene===bridgeA.scene_key?'PASS':'FAIL'):'INFO (loader unavailable; compiled .10d fallback)'} · ${hmcResult.loader?`resident=${hmcResult.resident?'yes':'no'}`:'refused by checked-in package'}; path=${hmcPath}`);
+  note(`TEST HMC hydration: ${hmcResult.loader?(hmcResult.resident&&hmcResidentScene===expectedHmcScene?'PASS':'FAIL'):'INFO (loader unavailable; compiled .10d fallback)'} · ${hmcResult.loader?`resident=${hmcResult.resident?'yes':'no'}`:'refused by checked-in package'}; path=${hmcPath}`);
   note(`TEST WASM package hash: ${packageHash.ok?'PASS':'FAIL'} · ${packageHash.ok?`${packageHash.actual} (${packageHash.bytes} bytes)`:(packageHash.error||`${packageHash.actual||'missing'} != ${packageHash.expected||'missing'}`)}`);
   const vibe = toObj(m.vibe_eval_cell('= 1 + 2'));
   note(`TEST VibeScript: ${vibe.ok && String(vibe.value)==='3' ? 'PASS' : 'FAIL'}`);

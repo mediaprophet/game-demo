@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://civics.au/schemas/game/community-place-pack-1.json",
+  "title": "Community Grounds game-side place and route pack",
+  "description": "Normalized game interface produced only after source review and source-owned parsing. It does not define Observatory, Q42, RDF, Qualia Logic, or VibeScript syntax.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "packId", "title", "maturity", "coverage", "sourceRecords", "places", "routeGraph", "renderArtifacts", "renderTiles"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "packId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "maturity": { "enum": ["fictional_fixture", "illustrative", "reviewed", "production"] },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "label", "spatialStatus", "sourceRefs"],
+      "properties": {
+        "kind": { "enum": ["australia", "state_or_territory", "region", "corridor", "locality", "site", "fictional_fixture"] },
+        "label": { "type": "string", "minLength": 1 },
+        "countryCode": { "const": "AU" },
+        "spatialStatus": { "enum": ["source_geometry", "schematic", "not_available"] },
+        "geometryRef": { "$ref": "#/$defs/geometryRef" },
+        "sourceRefs": { "$ref": "#/$defs/sourceRefs" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "enum": ["australia", "state_or_territory", "region", "corridor", "locality", "site"] } }, "required": ["kind"] },
+          "then": { "required": ["countryCode"] }
+        },
+        {
+          "if": { "properties": { "spatialStatus": { "const": "source_geometry" } } },
+          "then": { "required": ["geometryRef"] }
+        }
+      ]
+    },
+    "sourceRecords": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceRecord" }
+    },
+    "places": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/place" }
+    },
+    "routeGraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["crs", "nodes", "edges"],
+      "properties": {
+        "crs": { "type": ["string", "null"] },
+        "nodes": { "type": "array", "items": { "$ref": "#/$defs/routeNode" } },
+        "edges": { "type": "array", "items": { "$ref": "#/$defs/routeEdge" } }
+      }
+    },
+    "renderArtifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/renderArtifact" }
+    },
+    "renderTiles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/renderTile" }
+    },
+    "dataLayers": {
+      "type": "array",
+      "description": "Provenance-bound terrain, ecology, climate, settlement, infrastructure and other layers. Layer/domain names remain extensible.",
+      "items": { "$ref": "#/$defs/dataLayer" }
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Versioned game-side additions. Producer-owned source payloads remain opaque and are referenced through sourceRecords.",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{1,255}$" },
+    "sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "sourceRefs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+    "geometryRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "artifactId", "featureId", "format", "crs"],
+      "properties": {
+        "sourceId": { "$ref": "#/$defs/id" },
+        "artifactId": { "$ref": "#/$defs/id" },
+        "featureId": { "$ref": "#/$defs/id" },
+        "format": { "type": "string", "minLength": 1 },
+        "crs": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sourceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "title", "version", "snapshotAt", "licenceStatus", "gameUseStatus", "notes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["observatory_artifact", "public_dataset", "game_authored"] },
+        "title": { "type": "string", "minLength": 1 },
+        "uri": { "type": ["string", "null"], "format": "uri" },
+        "version": { "type": ["string", "null"] },
+        "snapshotAt": { "type": ["string", "null"], "format": "date-time" },
+        "sourcePackageId": { "type": ["string", "null"] },
+        "sourceManifestSha256": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "artifactId": { "type": ["string", "null"] },
+        "artifactSha256": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "licenceStatus": { "enum": ["permitted", "conditional", "prohibited", "unknown", "not_applicable"] },
+        "gameUseStatus": { "enum": ["approved", "review_required", "reference_only", "not_approved"] },
+        "transformationIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "notes": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "observatory_artifact" } }, "required": ["kind"] },
+          "then": {
+            "required": ["sourcePackageId", "sourceManifestSha256", "artifactId", "artifactSha256", "uri", "version", "snapshotAt"],
+            "properties": {
+              "sourcePackageId": { "type": "string", "minLength": 1 },
+              "sourceManifestSha256": { "$ref": "#/$defs/sha256" },
+              "artifactId": { "type": "string", "minLength": 1 },
+              "artifactSha256": { "$ref": "#/$defs/sha256" },
+              "uri": { "type": "string", "format": "uri" },
+              "version": { "type": "string", "minLength": 1 },
+              "snapshotAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "public_dataset" } }, "required": ["kind"] },
+          "then": {
+            "required": ["artifactId", "artifactSha256", "uri", "version", "snapshotAt"],
+            "properties": {
+              "artifactId": { "type": "string", "minLength": 1 },
+              "artifactSha256": { "$ref": "#/$defs/sha256" },
+              "uri": { "type": "string", "format": "uri" },
+              "version": { "type": "string", "minLength": 1 },
+              "snapshotAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      ]
+    },
+    "place": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "level", "name", "parentId", "spatialStatus", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "level": { "enum": ["country", "state_or_territory", "region", "locality", "town_or_area", "site"] },
+        "name": { "type": "string", "minLength": 1 },
+        "parentId": { "anyOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+        "spatialStatus": { "enum": ["source_geometry", "schematic", "not_available"] },
+        "geometryRef": { "$ref": "#/$defs/geometryRef" },
+        "territoryId": { "type": ["string", "null"] },
+        "sceneId": { "type": ["string", "null"] },
+        "sourceRefs": { "$ref": "#/$defs/sourceRefs" },
+        "tags": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "spatialStatus": { "const": "source_geometry" } } },
+          "then": { "required": ["geometryRef"] }
+        }
+      ]
+    },
+    "routeNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "placeId", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "placeId": { "anyOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+        "coordinate": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "type": "number" } },
+        "elevationMetres": { "type": "number" },
+        "sourceRefs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "routeEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "fromNodeId", "toNodeId", "mode", "distanceMetres", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "fromNodeId": { "$ref": "#/$defs/id" },
+        "toNodeId": { "$ref": "#/$defs/id" },
+        "mode": { "type": "string", "minLength": 1 },
+        "distanceMetres": { "type": "number", "exclusiveMinimum": 0 },
+        "roadClass": { "type": "string", "minLength": 1 },
+        "surface": { "type": "string", "minLength": 1 },
+        "gradePercent": { "type": "number", "minimum": -100, "maximum": 100 },
+        "elevationChangeMetres": { "type": "number" },
+        "geometryRef": { "$ref": "#/$defs/geometryRef" },
+        "sourceRefs": { "$ref": "#/$defs/sourceRefs" },
+        "vehicleConstraints": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "hazardProfileRefs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "renderArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "path", "format", "sha256", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "role": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?![A-Za-z]:)[^\\\\]+$", "not": { "pattern": "(^|/)\\.\\.?(/|$)" } },
+        "format": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "sourceRefs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "renderTile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "lod", "bounds", "crs", "artifactId", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "lod": { "type": "integer", "minimum": 0 },
+        "bounds": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } },
+        "crs": { "type": "string", "minLength": 1 },
+        "artifactId": { "$ref": "#/$defs/id" },
+        "sourceRefs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "dataLayer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "domain", "placeId", "sourceArtifactIds", "renderArtifactIds", "sourceRefs", "spatialStatus", "timePeriod", "gameUse", "notes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "domain": { "type": "string", "minLength": 1 },
+        "placeId": { "anyOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+        "sourceArtifactIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "renderArtifactIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "sourceRefs": { "$ref": "#/$defs/sourceRefs" },
+        "spatialStatus": { "enum": ["source_geometry", "aggregated", "schematic", "not_available"] },
+        "timePeriod": { "type": ["string", "null"] },
+        "gameUse": { "enum": ["display_context", "terrain_input", "route_input", "scenario_context", "fictional_gameplay", "not_approved"] },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

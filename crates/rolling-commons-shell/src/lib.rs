@@ -10,12 +10,16 @@
 
 #![cfg(target_arch = "wasm32")]
 
-mod asset_catalog;
 mod ants;
+mod asset_catalog;
+mod fauna;
+mod flora;
+mod pack_validation;
 mod terrain;
+mod vehicles;
 
+use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
-use std::cell::Cell;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlCanvasElement;
@@ -25,11 +29,73 @@ use web_sys::HtmlCanvasElement;
 pub const QUALIADB_PINNED_REVISION: &str = include_str!("../../../qualia.ref");
 
 thread_local! { static ART_STYLE: Cell<u8> = const { Cell::new(0) }; }
+thread_local! { static VEHICLE_RIG: Cell<u8> = const { Cell::new(0) }; }
+// Place profiles carry stable render keys, so the ecology pipeline can add
+// taxa without squeezing Australia's species catalogue into a numeric mask.
+thread_local! { static FAUNA_SELECTION: RefCell<Vec<String>> = RefCell::new(vec![
+    "goat".into(), "horse".into(), "rabbit".into(), "kangaroo".into(),
+    "wallaby".into(), "wombat".into(), "deer".into(), "roadkill-crows".into(),
+    "kookaburra".into(), "snake".into(), "goanna".into(),
+]); }
+thread_local! { static FLORA_SELECTION: RefCell<Vec<String>> = const { RefCell::new(Vec::new()) }; }
 
 /// Presentation preference only; world state and game rules are unchanged.
 #[wasm_bindgen]
 pub fn set_art_style(style: u8) {
     ART_STYLE.with(|active| active.set(style.min(2)));
+}
+
+/// Select a presentation-only touring combination: campervan, 4WD/caravan,
+/// car/camper-trailer, or 4WD/roof-top tent.
+#[wasm_bindgen]
+pub fn set_vehicle_rig(rig: u8) {
+    VEHICLE_RIG.with(|active| active.set(rig.min(3)));
+}
+
+/// Select fauna render keys from a reviewed locality profile. Unknown keys
+/// stay in the source profile as data and do not become guessed 3D species.
+#[wasm_bindgen]
+pub fn set_fauna_selection(selection_json: &str) -> Result<(), JsValue> {
+    if selection_json.len() > 256_000 {
+        return Err(JsValue::from_str("ecology selection exceeds bound"));
+    }
+    let selection: Vec<String> = serde_json::from_str(selection_json)
+        .map_err(|error| JsValue::from_str(&format!("ecology selection: {error}")))?;
+    if selection.len() > 4096
+        || selection
+            .iter()
+            .any(|key| key.trim().is_empty() || key.len() > 128)
+    {
+        return Err(JsValue::from_str(
+            "ecology selection entry is outside bounds",
+        ));
+    }
+    FAUNA_SELECTION.with(|active| *active.borrow_mut() = selection);
+    Ok(())
+}
+
+/// Select original Australian plant groups from a reviewed locality profile.
+/// Unknown keys remain source-profile data and do not receive guessed models.
+#[wasm_bindgen]
+pub fn set_flora_selection(selection_json: &str) -> Result<(), JsValue> {
+    if selection_json.len() > 256_000 {
+        return Err(JsValue::from_str("flora selection exceeds bound"));
+    }
+    let selection: Vec<String> = serde_json::from_str(selection_json)
+        .map_err(|error| JsValue::from_str(&format!("flora selection: {error}")))?;
+    if selection.len() > 4096
+        || selection.iter().any(|key| {
+            key.trim().is_empty()
+                || key.len() > 128
+                || !key
+                    .bytes()
+                    .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
+        })
+    {
+        return Err(JsValue::from_str("flora selection entry is outside bounds"));
+    }
+    FLORA_SELECTION.with(|active| *active.borrow_mut() = selection);
+    Ok(())
 }
 
 /// Community Grounds: the muted sage, olive, warm tan, terracotta and cream
@@ -40,38 +106,72 @@ fn community_grounds_color(id: &str, color: [f32; 4]) -> [f32; 4] {
     let has = |words: &[&str]| words.iter().any(|word| id.contains(word));
     // State-bearing and character surfaces keep their authored reading.
     let keep = has(&[
-        "window", "glow", "signal", "indicator", "node", "sign", "eyes",
-        "face", "hair", "boot", "door",
+        "window",
+        "glow",
+        "signal",
+        "indicator",
+        "node",
+        "sign",
+        "eyes",
+        "face",
+        "hair",
+        "boot",
+        "door",
     ]);
     let (target, mix) = if keep {
         ([0.58, 0.53, 0.47], 0.10)
     } else if has(&["solar", "panel"]) {
         ([0.15, 0.24, 0.34], 0.42)
+    } else if has(&["trunk", "stem", "branch", "bark"]) {
+        ([0.64, 0.52, 0.38], 0.30)
     } else if has(&["awning", "roof", "chimney", "band", "banner", "fascia"])
         || id.contains("market-canopy")
     {
         ([0.75, 0.44, 0.25], 0.42)
     } else if has(&[
-        "canopy", "crown", "foliage", "leaf", "shoot", "shrub", "herb",
-        "grass", "wattle", "lavender", "orchard", "gum", "flower", "reeds",
-        "windbreak", "veggie", "spray", "bloom", "crop",
+        "canopy",
+        "crown",
+        "foliage",
+        "leaf",
+        "shoot",
+        "shrub",
+        "herb",
+        "grass",
+        "wattle",
+        "lavender",
+        "orchard",
+        "gum",
+        "flower",
+        "banksia",
+        "bottlebrush",
+        "grass-tree",
+        "saltbush",
+        "kangaroo-paw",
+        "reeds",
+        "windbreak",
+        "veggie",
+        "spray",
+        "bloom",
+        "crop",
     ]) {
         ([0.50, 0.56, 0.42], 0.46)
     } else if has(&["water", "canal", "ripple", "channel", "creek", "trough"]) {
         ([0.45, 0.57, 0.62], 0.26)
-    } else if has(&["mast", "cable", "rack", "drum", "wheel", "chassis", "light", "pole", "pipe"]) {
+    } else if has(&[
+        "mast", "cable", "rack", "drum", "wheel", "chassis", "light", "pole", "pipe",
+    ]) {
         ([0.55, 0.54, 0.52], 0.22)
     } else if has(&[
-        "trunk", "stem", "fork", "branch", "bark", "deck", "boards", "fence",
-        "basket", "crate", "stand", "rail", "plank",
+        "deck", "boards", "fence", "basket", "crate", "stand", "rail", "plank",
     ]) {
         ([0.64, 0.52, 0.38], 0.30)
-    } else if has(&["workshop", "hall", "barn", "market", "stall", "shelter", "facade"]) {
+    } else if has(&[
+        "workshop", "hall", "barn", "market", "stall", "shelter", "facade",
+    ]) {
         ([0.92, 0.89, 0.83], 0.22)
     } else if has(&[
-        "ground", "terrain", "earth", "road", "bank", "meadow", "hill",
-        "skirt", "soil", "furrow", "mound", "boulder", "stone", "path", "bed",
-        "quay",
+        "ground", "terrain", "earth", "road", "bank", "meadow", "hill", "skirt", "soil", "furrow",
+        "mound", "boulder", "stone", "path", "bed", "quay",
     ]) {
         ([0.62, 0.54, 0.36], 0.40)
     } else {
@@ -87,19 +187,58 @@ fn community_grounds_color(id: &str, color: [f32; 4]) -> [f32; 4] {
 }
 
 fn style_color(id: &str, color: [f32; 4], style: u8) -> [f32; 4] {
-    if style == 0 { return color; }
-    if style == 2 { return community_grounds_color(id, color); }
+    // Preserve natural hide/coat palettes across the stylised built-world packs.
+    if id.contains("/fauna/") {
+        return color;
+    }
+    if style == 0 {
+        return color;
+    }
+    if style == 2 {
+        return community_grounds_color(id, color);
+    }
     // Earthlight: a restrained earth/foliage colour script. The same Qualia
     // geometry and `.10d` surface-reading path carries both styles.
-    let foliage = ["crown", "canopy", "foliage", "leaf", "shoot", "shrub", "herb",
-                   "grass", "wattle", "lavender", "orchard", "gum"].iter()
+    let woody = ["trunk", "stem", "branch", "bark"]
+        .iter()
         .any(|word| id.contains(word));
-    let earth = ["ground", "terrain", "earth", "road", "bank", "meadow", "hill"]
-        .iter().any(|word| id.contains(word));
-    let target = if foliage { [0.36, 0.52, 0.33] }
-        else if earth { [0.55, 0.43, 0.31] }
-        else { [0.65, 0.52, 0.40] };
-    let mix = if foliage || earth { 0.38 } else { 0.18 };
+    let foliage = [
+        "crown",
+        "canopy",
+        "foliage",
+        "leaf",
+        "shoot",
+        "shrub",
+        "herb",
+        "grass",
+        "wattle",
+        "lavender",
+        "orchard",
+        "gum",
+        "cone",
+        "bottlebrush",
+        "saltbush",
+        "kangaroo-paw",
+    ]
+    .iter()
+    .any(|word| id.contains(word));
+    let earth = [
+        "ground", "terrain", "earth", "road", "bank", "meadow", "hill",
+    ]
+    .iter()
+    .any(|word| id.contains(word));
+    let target = if foliage && !woody {
+        [0.36, 0.52, 0.33]
+    } else if earth {
+        [0.55, 0.43, 0.31]
+    } else {
+        [0.65, 0.52, 0.40]
+    };
+    let mix = if (foliage && !woody) || earth {
+        0.38
+    } else {
+        0.18
+    };
     let luminance = color[0] * 0.25 + color[1] * 0.58 + color[2] * 0.17;
     let mut result = color;
     for axis in 0..3 {
@@ -121,7 +260,7 @@ pub fn pinned_qualiadb_revision() -> String {
 pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec<u8>, JsValue> {
     use qualia_core_db::bundle::{BundleReader, BundleWriter};
 
-    if entries.length() > 512 || manifest_json.len() > 512_000 {
+    if entries.length() > 4096 || manifest_json.len() > 2_097_152 {
         return Err(JsValue::from_str(
             "game pack exceeds bounded entry or manifest limit",
         ));
@@ -134,7 +273,7 @@ pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec
             manifest_json.as_bytes().to_vec(),
             None,
         )
-        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+        .map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
     for item in entries.iter() {
         let key = js_sys::Reflect::get(&item, &"key".into())?
             .as_string()
@@ -169,15 +308,25 @@ pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec
 #[wasm_bindgen]
 pub fn verify_game_hmc(bytes: &[u8]) -> Result<u32, JsValue> {
     use qualia_core_db::bundle::BundleReader;
-    let reader = BundleReader::parse(bytes).map_err(|e| JsValue::from_str(&e.to_string()))?;
-    if reader
-        .entries()
-        .iter()
-        .any(|entry| !reader.verify_entry(&entry.key))
+    let reader =
+        BundleReader::parse(bytes).map_err(|error| JsValue::from_str(&error.to_string()))?;
+    if reader.entries().len() > 4097
+        || reader
+            .entries()
+            .iter()
+            .any(|entry| !reader.verify_entry(&entry.key))
     {
-        return Err(JsValue::from_str("HMC entry digest verification failed"));
+        return Err(JsValue::from_str(
+            "HMC entry count or digest verification failed",
+        ));
     }
     Ok(reader.entries().len() as u32)
+}
+
+/// Cold-path release gate: verify every embedded .10d mesh and material graph.
+#[wasm_bindgen]
+pub fn validate_game_hmc(bytes: &[u8]) -> Result<u32, JsValue> {
+    pack_validation::verify_game_pack(bytes).map_err(|error| JsValue::from_str(&error))
 }
 
 #[wasm_bindgen]
@@ -296,6 +445,145 @@ pub fn asset_compile_10d(
     compile_mesh_to_10d_with_nodes(&mesh, &nodes).map_err(|e| JsValue::from_str(&format!("{e:?}")))
 }
 
+/// Compile one feature from a caller-supplied OSM Overpass JSON snapshot into
+/// a provenance-bearing `.10d` mesh. This function performs no network access;
+/// acquisition and consent belong to the caller, and the snapshot can be
+/// authored offline. `style` is `marker`, `line`, or `area`; `size_m` is the
+/// marker radius or line width and is ignored for area fills.
+#[wasm_bindgen]
+pub fn compile_osm_feature_10d(
+    overpass_json: &str,
+    feature_type: &str,
+    feature_id: u64,
+    origin_lat: f64,
+    origin_lon: f64,
+    origin_alt_m: f64,
+    style: &str,
+    size_m: f32,
+    vertical_offset_m: f32,
+) -> Result<Vec<u8>, JsValue> {
+    let frame = qualia_core_db::domains::geospatial::vector_scene::VectorSceneFrame::new(
+        origin_lat,
+        origin_lon,
+        origin_alt_m,
+    );
+    compile_osm_feature_10d_with_frame(
+        overpass_json,
+        feature_type,
+        feature_id,
+        style,
+        size_m,
+        vertical_offset_m,
+        frame,
+    )
+}
+
+/// Compile one OSM feature and clip every emitted triangle to an exact local
+/// tile rectangle. Bounds are `[min_east, min_north, max_east, max_north]` in
+/// metres relative to the supplied WGS84 origin. No network access occurs.
+#[wasm_bindgen]
+pub fn compile_osm_feature_10d_in_tile(
+    overpass_json: &str,
+    feature_type: &str,
+    feature_id: u64,
+    origin_lat: f64,
+    origin_lon: f64,
+    origin_alt_m: f64,
+    style: &str,
+    size_m: f32,
+    vertical_offset_m: f32,
+    min_east: f64,
+    min_north: f64,
+    max_east: f64,
+    max_north: f64,
+) -> Result<Vec<u8>, JsValue> {
+    let frame = qualia_core_db::domains::geospatial::vector_scene::VectorSceneFrame::new(
+        origin_lat,
+        origin_lon,
+        origin_alt_m,
+    )
+    .with_tile_bounds([min_east, min_north, max_east, max_north]);
+    compile_osm_feature_10d_with_frame(
+        overpass_json,
+        feature_type,
+        feature_id,
+        style,
+        size_m,
+        vertical_offset_m,
+        frame,
+    )
+}
+
+fn compile_osm_feature_10d_with_frame(
+    overpass_json: &str,
+    feature_type: &str,
+    feature_id: u64,
+    style: &str,
+    size_m: f32,
+    vertical_offset_m: f32,
+    frame: qualia_core_db::domains::geospatial::vector_scene::VectorSceneFrame,
+) -> Result<Vec<u8>, JsValue> {
+    use qualia_core_db::container_10d::provenance_section::ProvenanceSidecar;
+    use qualia_core_db::domains::geospatial::adapters::OsmAdapter;
+    use qualia_core_db::domains::geospatial::vector_scene::{
+        compile_osm_feature_mesh, OsmVectorStyle,
+    };
+    use qualia_core_db::render::compile_10d::compile_mesh_to_10d_with_surface_reading;
+
+    const MAX_SNAPSHOT_BYTES: usize = 16 * 1024 * 1024;
+    if overpass_json.len() > MAX_SNAPSHOT_BYTES {
+        return Err(JsValue::from_str(
+            "OSM snapshot exceeds the 16 MiB feature compile bound",
+        ));
+    }
+    let vector_style = match style {
+        "marker" => OsmVectorStyle::Marker {
+            radius_m: size_m,
+            vertical_offset_m,
+        },
+        "line" => OsmVectorStyle::Line {
+            width_m: size_m,
+            vertical_offset_m,
+        },
+        "area" => OsmVectorStyle::Area { vertical_offset_m },
+        _ => return Err(JsValue::from_str("OSM style must be marker, line, or area")),
+    };
+    let adapter = OsmAdapter::new("offline_osm_snapshot", "", "");
+    let features = adapter
+        .parse_vector_features(overpass_json)
+        .map_err(|error| JsValue::from_str(&format!("OSM snapshot: {error}")))?;
+    let feature = features
+        .iter()
+        .find(|feature| feature.element_type == feature_type && feature.id == feature_id)
+        .ok_or_else(|| JsValue::from_str("OSM feature identity was not present in the snapshot"))?;
+    let rendered = compile_osm_feature_mesh(feature, frame, vector_style)
+        .map_err(|error| JsValue::from_str(&format!("OSM feature mesh: {error}")))?;
+    let source_record = serde_json::json!({
+        "source": rendered.source_iri,
+        "elementType": feature_type,
+        "elementId": feature_id,
+        "version": rendered.source_version,
+        "timestamp": rendered.source_timestamp,
+        "tags": rendered.tags,
+        "attribution": "© OpenStreetMap contributors",
+        "license": "ODbL-1.0"
+    });
+    let source_bytes = serde_json::to_vec(&source_record)
+        .map_err(|error| JsValue::from_str(&format!("OSM provenance: {error}")))?;
+    let provenance = ProvenanceSidecar::new(
+        source_bytes,
+        "application/vnd.openstreetmap.feature+json",
+        "ODbL-1.0 (OpenStreetMap contributors)",
+    );
+    let surface_reading = vec![[1.0; 4]; rendered.mesh.positions.len()];
+    compile_mesh_to_10d_with_surface_reading(
+        &rendered.mesh,
+        Some(&provenance),
+        &surface_reading,
+    )
+    .map_err(|error| JsValue::from_str(&format!("OSM .10d compile: {error}")))
+}
+
 /// Build a pickable tensor buffer (32B header + N×40 `Tensor10D`) from the
 /// same authored nodes — the surface `QualiaPortal::upload_tensor_buffer`
 /// ingests for semantic picking. Groups of 10 floats as in
@@ -366,8 +654,12 @@ fn bridge_seed(scene: &str, day: u32, water_online: bool, high_tide: bool) -> u3
         seed = (seed ^ u32::from(byte)).wrapping_mul(0xc2b2_ae35);
         seed = seed.rotate_left(13);
     }
-    if water_online { seed ^= 0x51ed_0a7e; }
-    if high_tide { seed ^= 0xa771_de5e; }
+    if water_online {
+        seed ^= 0x51ed_0a7e;
+    }
+    if high_tide {
+        seed ^= 0xa771_de5e;
+    }
     seed ^ (seed >> 16)
 }
 
@@ -462,7 +754,15 @@ pub fn scene_quality_state(
     let seed = bridge_seed(scene_key, day, water_online, high_tide);
     serde_wasm_bindgen::to_value(&SceneQualityBridge {
         scene_key,
-        terrain_phase: if bridge_open { "connected" } else if high_tide { "flooded" } else if garden_active { "cultivated" } else { "settled" },
+        terrain_phase: if bridge_open {
+            "connected"
+        } else if high_tide {
+            "flooded"
+        } else if garden_active {
+            "cultivated"
+        } else {
+            "settled"
+        },
         water_state,
         water_level,
         water_phase: day % 8,
@@ -618,9 +918,18 @@ pub fn scene_build(
                 } else {
                     0.91 + elevation * 0.14 + ripple
                 };
-                let green = if terrain_surface { 1.07 - elevation * 0.24 }
-                    else if foliage || landscape { 1.04 } else { 1.0 };
-                let red = if terrain_surface { 1.0 + elevation * 0.18 } else { 1.0 };
+                let green = if terrain_surface {
+                    1.07 - elevation * 0.24
+                } else if foliage || landscape {
+                    1.04
+                } else {
+                    1.0
+                };
+                let red = if terrain_surface {
+                    1.0 + elevation * 0.18
+                } else {
+                    1.0
+                };
                 [
                     (recipe.color[0] * gain * red).clamp(0.0, 1.0),
                     (recipe.color[1] * gain * green).clamp(0.0, 1.0),
@@ -631,8 +940,95 @@ pub fn scene_build(
             .collect();
         let bytes = compile_mesh_to_10d_with_surface_reading(&mesh, Some(&provenance), &reading)
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
+        // Keep the authored SRD1 vertex colour while giving Qualia's PBR
+        // material system a stable material family for this asset.
+        let family = if recipe.id.contains("solar") || recipe.id.contains("panel") {
+            ("solar-glass", 0.46, 0.23)
+        } else if recipe.id.contains("wheel")
+            || recipe.id.contains("tyre")
+            || recipe.id.contains("boot")
+        {
+            ("rubber", 0.0, 0.84)
+        } else if recipe.id.contains("window") || recipe.id.contains("glass") {
+            ("framed-glass", 0.08, 0.24)
+        } else if [
+            "metal", "mast", "steel", "pipe", "tank", "battery", "gutter", "rail", "frame",
+        ]
+        .iter()
+        .any(|word| recipe.id.contains(word))
+        {
+            ("galvanised-metal", 0.62, 0.34)
+        } else if [
+            "wood", "trunk", "stem", "branch", "bark", "bed", "bench", "crate", "fence", "deck",
+            "board", "plank", "shelf", "tool",
+        ]
+        .iter()
+        .any(|word| recipe.id.contains(word))
+        {
+            ("weathered-timber", 0.02, 0.78)
+        } else if [
+            "foliage",
+            "canopy",
+            "crown",
+            "leaf",
+            "shoot",
+            "flower",
+            "gum",
+            "wattle",
+            "grass",
+            "crop",
+            "cone",
+            "bottlebrush",
+            "saltbush",
+            "kangaroo-paw",
+        ]
+        .iter()
+        .any(|word| recipe.id.contains(word))
+        {
+            ("living-foliage", 0.0, 0.88)
+        } else if [
+            "ground", "terrain", "soil", "path", "road", "hill", "earth", "mound",
+        ]
+        .iter()
+        .any(|word| recipe.id.contains(word))
+        {
+            ("soil-and-gravel", 0.0, 0.96)
+        } else if recipe.id.contains("/fauna/") {
+            ("fur-and-hide", 0.0, 0.91)
+        } else if ["resident", "hand", "head", "face", "hair", "pants", "coat"]
+            .iter()
+            .any(|word| recipe.id.contains(word))
+        {
+            ("cloth-and-skin", 0.0, 0.82)
+        } else {
+            ("painted-metal", 0.12, 0.52)
+        };
+        let mut material = qualia_core_db::container_10d::MaterialRecord::legacy_default();
+        material.id = qualia_core_db::q_hash(&format!("urn:rolling-commons:material:{}", family.0));
+        material.base_color = [1.0; 4];
+        material.metallic = family.1;
+        material.roughness = family.2;
+        let ranges = [qualia_core_db::container_10d::SubmeshRange {
+            first_index: 0,
+            index_count: (mesh.triangles.len() * 3) as u32,
+            material_id: material.id,
+            semantic_id: qualia_core_db::q_hash(&recipe.id),
+        }];
+        let bytes = qualia_core_db::container_10d::attach_material_section(
+            &bytes,
+            &[material],
+            &ranges,
+            ranges[0].index_count,
+        )
+        .map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
         let obj = js_sys::Object::new();
-        js_sys::Reflect::set(&obj, &"id".into(), &JsValue::from_str(recipe.id))?;
+        js_sys::Reflect::set(&obj, &"id".into(), &JsValue::from_str(&recipe.id))?;
+        js_sys::Reflect::set(
+            &obj,
+            &"renderRole".into(),
+            &JsValue::from_str(&recipe.render_role),
+        )?;
+        js_sys::Reflect::set(&obj, &"materialFamily".into(), &JsValue::from_str(family.0))?;
         js_sys::Reflect::set(
             &obj,
             &"bytes".into(),
@@ -665,12 +1061,17 @@ pub fn scene_build(
         orchard_harvested,
     ));
     recipes.extend(asset_catalog::northern_highlands());
+    recipes.extend(vehicles::rig_assets(VEHICLE_RIG.with(Cell::get)));
+    let fauna_selection = FAUNA_SELECTION.with(|active| active.borrow().clone());
+    recipes.extend(fauna::road_hazards(&fauna_selection));
+    let flora_selection = FLORA_SELECTION.with(|active| active.borrow().clone());
+    recipes.extend(flora::profile_assets(&flora_selection));
     if !vibe_scene.trim().is_empty() {
         recipes.push(vibe_scene_recipe(vibe_scene).map_err(|e| JsValue::from_str(&e))?);
     }
     let art_style = ART_STYLE.with(|active| active.get());
     for recipe in &mut recipes {
-        recipe.color = style_color(recipe.id, recipe.color, art_style);
+        recipe.color = style_color(&recipe.id, recipe.color, art_style);
     }
     for recipe in recipes {
         let (mesh, obj) = compile_asset(&recipe)?;
@@ -696,7 +1097,7 @@ pub fn scene_build(
     let mut nodes = Vec::with_capacity(places.len() * 10);
     let site_positions = js_sys::Array::new();
     for point in places {
-        let p = portal_point(min, max, point);
+        let p = portal_point(min, max, point).map(|v| v * (1.7 / 1.6));
         nodes.extend_from_slice(&[0.0, 0.0, 4.0, p[0], p[1], p[2], 0.0, 1.0, 0.7, 0.5]);
         let site = js_sys::Object::new();
         for (key, value) in ["x", "y", "z"].iter().zip(p) {
@@ -718,7 +1119,7 @@ pub fn scene_build(
         ("saltwind", [16.0, 0.0, 0.0]),
         ("highlands", [8.0, 0.0, -14.0]),
     ] {
-        let p = portal_point(min, max, center);
+        let p = portal_point(min, max, center).map(|v| v * (1.7 / 1.6));
         let tile = js_sys::Object::new();
         js_sys::Reflect::set(&tile, &"id".into(), &JsValue::from_str(id))?;
         for (key, value) in ["x", "y", "z"].iter().zip(p) {
@@ -736,9 +1137,15 @@ pub fn scene_build(
     for (key, value) in ["x", "y", "z"].iter().zip(center_world) {
         js_sys::Reflect::set(&center, &(*key).into(), &JsValue::from_f64(value as f64))?;
     }
-    let span = (0..3).map(|axis| max[axis] - min[axis]).fold(1e-6_f32, f32::max);
+    let span = (0..3)
+        .map(|axis| max[axis] - min[axis])
+        .fold(1e-6_f32, f32::max);
     js_sys::Reflect::set(&result, &"worldCenter".into(), &center)?;
-    js_sys::Reflect::set(&result, &"worldScale".into(), &JsValue::from_f64((1.6 / span) as f64))?;
+    js_sys::Reflect::set(
+        &result,
+        &"worldScale".into(),
+        &JsValue::from_f64((1.7 / span) as f64),
+    )?;
     js_sys::Reflect::set(&result, &"places".into(), &site_positions)?;
     Ok(result.into())
 }
@@ -804,6 +1211,153 @@ pub struct GamePortal {
     inner: qualia_core_db::QualiaPortal,
 }
 
+fn is_water_surface_role(id: &str, render_role: &str) -> bool {
+    render_role == "water" || matches!(id, "rc:asset/channel" | "rc:asset/highland-creek")
+}
+
+fn append_water_mesh(
+    mesh: &qualia_core_db::render::assets::Mesh,
+    positions: &mut Vec<[f32; 3]>,
+    indices: &mut Vec<u32>,
+) -> Result<(), JsValue> {
+    let base = u32::try_from(positions.len())
+        .map_err(|_| JsValue::from_str("water vertex count exceeds the scene index range"))?;
+    for triangle in &mesh.triangles {
+        for &index in triangle {
+            indices.push(
+                base.checked_add(index).ok_or_else(|| {
+                    JsValue::from_str("water index overflows the scene index range")
+                })?,
+            );
+        }
+    }
+    positions.extend_from_slice(&mesh.positions);
+    Ok(())
+}
+
+fn load_scene_assets(
+    inner: &mut qualia_core_db::QualiaPortal,
+    assets: &js_sys::Array,
+    mut water_positions: Vec<[f32; 3]>,
+    water_indices: Vec<u32>,
+    water_surface_count: usize,
+    water_colour: [f32; 4],
+) -> Result<JsValue, JsValue> {
+    // The browser camera uses the portal's shared orbit frame. Normalise the
+    // complete scene together; retaining metre coordinates puts the camera
+    // inside the terrain and also suppresses the portal's CPU fallback.
+    inner.set_preserve_authored_frame(false);
+    // Water is uploaded separately and does not pass through the body's orbit
+    // normalisation. Use the same opaque bounds and 1.7-span transform here.
+    let mut min = [f32::INFINITY; 3];
+    let mut max = [f32::NEG_INFINITY; 3];
+    for asset in assets.iter() {
+        let bytes = js_get(&asset, "bytes")
+            .ok_or_else(|| JsValue::from_str("scene asset missing bytes"))?;
+        let bytes = js_sys::Uint8Array::new(&bytes).to_vec();
+        let mesh = qualia_core_db::render::compile_10d::decode_10d_mesh(&bytes)
+            .map_err(|e| JsValue::from_str(&format!("scene bounds: {e}")))?;
+        for position in &mesh.positions {
+            for axis in 0..3 {
+                min[axis] = min[axis].min(position[axis]);
+                max[axis] = max[axis].max(position[axis]);
+            }
+        }
+    }
+    let span = (0..3).map(|i| max[i] - min[i]).fold(1e-6_f32, f32::max);
+    for position in &mut water_positions {
+        for axis in 0..3 {
+            position[axis] = (position[axis] - (min[axis] + max[axis]) * 0.5) * 1.7 / span;
+        }
+    }
+    let receipt = inner.load_assets_colored(assets)?;
+    let flat_positions: Vec<f32> = water_positions.iter().flat_map(|p| *p).collect();
+    inner.set_water_geometry(&flat_positions, &water_indices)?;
+    if water_surface_count > 0 {
+        inner.set_water_surface(
+            water_colour[0],
+            water_colour[1],
+            water_colour[2],
+            water_colour[3].clamp(0.0, 1.0),
+            0.025,
+            1.0,
+            1,
+        );
+    }
+    let organs = js_get(&receipt, "assets_loaded")
+        .or_else(|| js_get(&receipt, "organs_loaded"))
+        .and_then(|value| value.as_f64())
+        .unwrap_or(0.0);
+    let object = js_sys::Object::new();
+    for (key, value) in [
+        (
+            "assets_loaded",
+            JsValue::from_f64(organs + water_surface_count as f64),
+        ),
+        (
+            "organs_loaded",
+            JsValue::from_f64(organs + water_surface_count as f64),
+        ),
+        ("opaque_meshes_loaded", JsValue::from_f64(organs)),
+        (
+            "water_surfaces",
+            JsValue::from_f64(water_surface_count as f64),
+        ),
+        (
+            "water_triangles",
+            JsValue::from_f64((water_indices.len() / 3) as f64),
+        ),
+    ] {
+        js_sys::Reflect::set(&object, &key.into(), &value)?;
+    }
+    Ok(object.into())
+}
+
+fn split_scene_assets(
+    source: &js_sys::Array,
+) -> Result<(js_sys::Array, Vec<[f32; 3]>, Vec<u32>, usize, [f32; 4]), JsValue> {
+    let mut opaque = js_sys::Array::new();
+    let mut water_positions = Vec::new();
+    let mut water_indices = Vec::new();
+    let mut water_surfaces = 0usize;
+    let mut water_colour_sum = [0.0; 4];
+    for value in source.iter() {
+        let id = js_sys::Reflect::get(&value, &"id".into())?
+            .as_string()
+            .unwrap_or_default();
+        let render_role = js_sys::Reflect::get(&value, &"renderRole".into())?
+            .as_string()
+            .unwrap_or_default();
+        if is_water_surface_role(&id, &render_role) {
+            let source_bytes = js_sys::Reflect::get(&value, &"bytes".into())?;
+            let bytes = js_sys::Uint8Array::new(&source_bytes).to_vec();
+            let mesh = qualia_core_db::render::compile_10d::decode_10d_mesh(&bytes)
+                .map_err(|error| JsValue::from_str(&format!("water .10d decode: {error}")))?;
+            append_water_mesh(&mesh, &mut water_positions, &mut water_indices)?;
+            for (axis, key) in ["r", "g", "b", "a"].iter().enumerate() {
+                water_colour_sum[axis] += js_sys::Reflect::get(&value, &(*key).into())?
+                    .as_f64()
+                    .unwrap_or(1.0) as f32;
+            }
+            water_surfaces += 1;
+        } else {
+            opaque.push(&value);
+        }
+    }
+    let water_colour = if water_surfaces == 0 {
+        [0.16, 0.38, 0.42, 0.78]
+    } else {
+        water_colour_sum.map(|channel| channel / water_surfaces as f32)
+    };
+    Ok((
+        opaque,
+        water_positions,
+        water_indices,
+        water_surfaces,
+        water_colour,
+    ))
+}
+
 /// Arm the WebGPU path. Await once before constructing the portal; on
 /// `false`/throw the portal keeps its CPU/canvas fallback.
 #[wasm_bindgen]
@@ -828,14 +1382,22 @@ impl GamePortal {
 
     /// Load a multi-asset scene: `Array<{bytes: .10d, r,g,b,a}>` where each
     /// mesh keeps its authored position in the shared coordinate space — one
-    /// global normalisation across all objects. This is how a town of
+    /// authored scale across all objects. This is how a town of
     /// distinct props composes into one viewport mesh. The engine binding
     /// still carries its legacy anatomy-era name (`load_body_organs_colored`);
     /// the upstream rename is tracked as QG-20 in
     /// `docs/planning/19-qualiadb-upstream-gate-work-orders.md`.
     pub fn load_scene(&mut self, assets: &js_sys::Array) -> Result<JsValue, JsValue> {
-        self.inner.set_preserve_authored_frame(false);
-        self.inner.load_body_organs_colored(assets)
+        let (opaque, water_positions, water_indices, water_surfaces, water_colour) =
+            split_scene_assets(assets)?;
+        load_scene_assets(
+            &mut self.inner,
+            &opaque,
+            water_positions,
+            water_indices,
+            water_surfaces,
+            water_colour,
+        )
     }
 
     /// Load one game-authored scene snapshot from its verified HMC pack. The
@@ -848,20 +1410,31 @@ impl GamePortal {
         manifest_json: &str,
         scene_key: &str,
     ) -> Result<JsValue, JsValue> {
+        fn default_asset_rgba() -> [f32; 4] {
+            [1.0; 4]
+        }
         #[derive(serde::Deserialize)]
         struct Manifest {
             scenes: Vec<Scene>,
+            #[serde(default)]
+            assets: Vec<SceneAsset>,
         }
         #[derive(serde::Deserialize)]
         struct Scene {
             name: String,
+            #[serde(default)]
             assets: Vec<SceneAsset>,
+            #[serde(rename = "assetIndices", default)]
+            asset_indices: Vec<usize>,
         }
-        #[derive(serde::Deserialize)]
+        #[derive(Clone, serde::Deserialize)]
         struct SceneAsset {
             id: String,
             file: String,
+            #[serde(default = "default_asset_rgba")]
             rgba: [f32; 4],
+            #[serde(rename = "renderRole", default)]
+            render_role: String,
         }
 
         if manifest_json.len() > 2_000_000 {
@@ -874,7 +1447,27 @@ impl GamePortal {
             .into_iter()
             .find(|scene| scene.name == scene_key)
             .ok_or_else(|| JsValue::from_str("HMC scene key not found"))?;
-        if scene.assets.is_empty() || scene.assets.len() > 512 {
+        if manifest.assets.len() > 65_536 {
+            return Err(JsValue::from_str("HMC manifest asset table exceeds bound"));
+        }
+        let scene_assets =
+            if scene.assets.is_empty() {
+                if scene.asset_indices.len() > 512 {
+                    return Err(JsValue::from_str("HMC scene asset count is outside bounds"));
+                }
+                scene
+                    .asset_indices
+                    .into_iter()
+                    .map(|index| {
+                        manifest.assets.get(index).cloned().ok_or_else(|| {
+                            JsValue::from_str("HMC scene asset index is outside table")
+                        })
+                    })
+                    .collect::<Result<Vec<_>, _>>()?
+            } else {
+                scene.assets
+            };
+        if scene_assets.is_empty() || scene_assets.len() > 512 {
             return Err(JsValue::from_str("HMC scene asset count is outside bounds"));
         }
 
@@ -882,7 +1475,11 @@ impl GamePortal {
         let reader = BundleReader::parse(hmc_bytes)
             .map_err(|e| JsValue::from_str(&format!("HMC scene bundle: {e}")))?;
         let assets = js_sys::Array::new();
-        for asset in scene.assets {
+        let mut water_positions = Vec::new();
+        let mut water_indices = Vec::new();
+        let mut water_surfaces = 0usize;
+        let mut water_colour_sum = [0.0; 4];
+        for asset in scene_assets {
             if !asset.file.starts_with("10d/")
                 || !asset.file.ends_with(".10d")
                 || asset.file.contains("..")
@@ -901,20 +1498,37 @@ impl GamePortal {
             let bytes = reader
                 .get(&entry.key)
                 .ok_or_else(|| JsValue::from_str("HMC scene asset bytes not found"))?;
+            if is_water_surface_role(&asset.id, &asset.render_role) {
+                let mesh = qualia_core_db::render::compile_10d::decode_10d_mesh(bytes)
+                    .map_err(|error| JsValue::from_str(&format!("water .10d decode: {error}")))?;
+                append_water_mesh(&mesh, &mut water_positions, &mut water_indices)?;
+                for (axis, value) in asset.rgba.iter().enumerate() {
+                    water_colour_sum[axis] += *value;
+                }
+                water_surfaces += 1;
+                continue;
+            }
             let object = js_sys::Object::new();
             js_sys::Reflect::set(&object, &"id".into(), &JsValue::from_str(&asset.id))?;
-            js_sys::Reflect::set(
-                &object,
-                &"bytes".into(),
-                &js_sys::Uint8Array::from(bytes),
-            )?;
+            js_sys::Reflect::set(&object, &"bytes".into(), &js_sys::Uint8Array::from(bytes))?;
             for (key, value) in ["r", "g", "b", "a"].iter().zip(asset.rgba) {
                 js_sys::Reflect::set(&object, &(*key).into(), &JsValue::from_f64(value as f64))?;
             }
             assets.push(&object);
         }
-        self.inner.set_preserve_authored_frame(false);
-        self.inner.load_body_organs_colored(&assets)
+        let water_colour = if water_surfaces == 0 {
+            [0.16, 0.38, 0.42, 0.78]
+        } else {
+            water_colour_sum.map(|channel| channel / water_surfaces as f32)
+        };
+        load_scene_assets(
+            &mut self.inner,
+            &assets,
+            water_positions,
+            water_indices,
+            water_surfaces,
+            water_colour,
+        )
     }
 
     /// Render tier: 0 = CPU fallback, 1 = WebGL2 fallback, 2 = WebGPU path.
@@ -922,12 +1536,38 @@ impl GamePortal {
         self.inner.tier()
     }
 
-    /// Report renderer admission and observed execution separately from the
-    /// temporal producer handoff. The game owns no GPU texture views, so every
-    /// producer view remains explicitly unavailable until a real host surface
-    /// is supplied upstream.
+    pub fn set_auto_temporal_enabled(&mut self, enabled: bool) {
+        self.inner.set_auto_temporal_enabled(enabled);
+    }
+
+    pub fn set_shadows_enabled(&mut self, enabled: bool) {
+        self.inner.set_shadows_enabled(enabled);
+    }
+
+    pub fn set_screen_space_ao_enabled(&mut self, enabled: bool) {
+        self.inner.set_screen_space_ao_enabled(enabled);
+    }
+
+    pub fn set_screen_space_ao(&mut self, radius: f32, strength: f32, bias: f32) {
+        self.inner.set_screen_space_ao(radius, strength, bias);
+    }
+
+    pub fn set_screen_space_ao_sample_count(&mut self, samples: u32) {
+        self.inner.set_screen_space_ao_sample_count(samples);
+    }
+
+    pub fn set_environment_probe_data(
+        &mut self,
+        packed_probes: &[f32],
+        fallback_radiance: &[f32],
+    ) -> Result<bool, JsValue> {
+        self.inner
+            .set_environment_probe_data(packed_probes, fallback_radiance)
+    }
+
+    /// Report active renderer resources and actual temporal execution receipts.
     pub fn renderer_producer_report(&self) -> Result<JsValue, JsValue> {
-        let receipt = self.inner.body_render_receipt()?;
+        let receipt = self.inner.scene_render_receipt()?;
         let renderer = js_get(&receipt, "renderer")
             .and_then(|value| value.as_string())
             .unwrap_or_else(|| "none".to_string());
@@ -949,21 +1589,24 @@ impl GamePortal {
         let gpu_policy_admitted = renderer == "webgpu" || self.inner.tier() >= 2;
         let gpu_execution_observed = renderer == "webgpu" && frame_presented;
 
-        let mut producers = js_sys::Object::new();
-        for key in [
-            "scene_color",
-            "linear_depth",
-            "motion_vectors",
-            "reactive_mask",
-        ] {
-            set(&mut producers, key, JsValue::FALSE);
-        }
-        let fallback = if renderer == "webgpu" {
+        let temporal = self.inner.temporal_graphics_receipt();
+        let producers = js_get(&temporal, "producer_views")
+            .unwrap_or_else(|| JsValue::from(js_sys::Object::new()));
+        let temporal_producer_ready = js_get(&temporal, "producer_ready")
+            .and_then(|value| value.as_bool())
+            .unwrap_or(false);
+        let temporal_execution_observed = js_get(&temporal, "execution_observed")
+            .and_then(|value| value.as_bool())
+            .unwrap_or(false);
+        let fallback = if temporal_execution_observed {
+            "temporal-resolve"
+        } else if renderer == "webgpu" {
             "ordinary-tick"
         } else {
             renderer.as_str()
         };
         let mut report = js_sys::Object::new();
+        set(&mut report, "mesh_receipt", receipt);
         set(&mut report, "backend", JsValue::from_str(&renderer));
         set(
             &mut report,
@@ -990,23 +1633,39 @@ impl GamePortal {
             "gpu_execution_observed",
             JsValue::from_bool(gpu_execution_observed),
         );
-        set(&mut report, "producer_views", producers.into());
-        set(&mut report, "temporal_producer_ready", JsValue::FALSE);
-        set(&mut report, "temporal_execution_observed", JsValue::FALSE);
+        set(&mut report, "producer_views", producers);
         set(
             &mut report,
-            "fallback",
-            JsValue::from_str(fallback),
+            "temporal_producer_ready",
+            JsValue::from_bool(temporal_producer_ready),
         );
+        set(
+            &mut report,
+            "temporal_execution_observed",
+            JsValue::from_bool(temporal_execution_observed),
+        );
+        set(
+            &mut report,
+            "temporal_execution_count",
+            js_get(&temporal, "execution_count").unwrap_or(JsValue::from_f64(0.0)),
+        );
+        set(
+            &mut report,
+            "screen_space_ao_available",
+            JsValue::from_bool(self.inner.screen_space_ao_available()),
+        );
+        set(
+            &mut report,
+            "shadows_available",
+            JsValue::from_bool(self.inner.shadows_available()),
+        );
+        set(&mut report, "fallback", JsValue::from_str(fallback));
         Ok(report.into())
     }
 
-    /// Return the bounded temporal handoff contract for the current scene.
-    /// This is policy and scheduling metadata only: without real motion-vector
-    /// and reactive-mask views, execution is never admitted and the ordinary
-    /// renderer tick remains the fallback.
+    /// Return a bounded temporal schedule with current renderer-owned producer evidence.
     pub fn temporal_schedule_contract(
-        &self,
+        &mut self,
         quality_tier: u8,
         scene_changed: bool,
         camera_changed: bool,
@@ -1015,18 +1674,31 @@ impl GamePortal {
         let gpu_policy_admitted = js_get(&renderer, "gpu_policy_admitted")
             .and_then(|value| value.as_bool())
             .unwrap_or(false);
-        let policy_admitted = quality_tier >= 2 && gpu_policy_admitted;
+        let temporal_receipt = self.inner.temporal_graphics_receipt();
+        let producer_ready = js_get(&temporal_receipt, "producer_ready")
+            .and_then(|value| value.as_bool())
+            .unwrap_or(false);
+        let temporal_enabled = js_get(&temporal_receipt, "enabled")
+            .and_then(|value| value.as_bool())
+            .unwrap_or(false);
+        let policy_admitted =
+            quality_tier >= 2 && gpu_policy_admitted && producer_ready && temporal_enabled;
         let reset_history = scene_changed || camera_changed;
+        if reset_history {
+            self.inner.invalidate_temporal_history();
+        }
         let reads_history = policy_admitted && !reset_history;
         let publish_history = policy_admitted;
         let final_output = policy_admitted;
-        let schedule_valid = policy_admitted
-            && publish_history
-            && final_output
-            && !(reset_history && reads_history);
+        let schedule_valid =
+            policy_admitted && publish_history && final_output && !(reset_history && reads_history);
 
         let mut schedule = js_sys::Object::new();
-        set(&mut schedule, "enabled", JsValue::from_bool(policy_admitted));
+        set(
+            &mut schedule,
+            "enabled",
+            JsValue::from_bool(policy_admitted),
+        );
         set(
             &mut schedule,
             "reset_history",
@@ -1061,25 +1733,35 @@ impl GamePortal {
             JsValue::from_bool(schedule_valid),
         );
         set(&mut contract, "schedule", schedule.into());
-        set(&mut contract, "producer_views", {
-            let mut producers = js_sys::Object::new();
-            for key in [
-                "scene_color",
-                "linear_depth",
-                "motion_vectors",
-                "reactive_mask",
-            ] {
-                set(&mut producers, key, JsValue::FALSE);
-            }
-            producers.into()
-        });
-        set(&mut contract, "producer_ready", JsValue::FALSE);
-        set(&mut contract, "execution_admitted", JsValue::FALSE);
-        set(&mut contract, "executed", JsValue::FALSE);
+        set(
+            &mut contract,
+            "producer_views",
+            js_get(&temporal_receipt, "producer_views")
+                .unwrap_or_else(|| JsValue::from(js_sys::Object::new())),
+        );
+        set(
+            &mut contract,
+            "producer_ready",
+            JsValue::from_bool(producer_ready),
+        );
+        set(
+            &mut contract,
+            "execution_admitted",
+            JsValue::from_bool(policy_admitted),
+        );
+        set(
+            &mut contract,
+            "executed",
+            js_get(&temporal_receipt, "execution_observed").unwrap_or(JsValue::FALSE),
+        );
         set(
             &mut contract,
             "fallback",
-            JsValue::from_str("ordinary-tick"),
+            JsValue::from_str(if policy_admitted {
+                "temporal-resolve"
+            } else {
+                "ordinary-tick"
+            }),
         );
         Ok(contract.into())
     }
@@ -1170,7 +1852,8 @@ impl GamePortal {
         intensity: f32,
         ambient: f32,
     ) {
-        self.inner.set_lighting(sun_r, sun_g, sun_b, intensity, ambient);
+        self.inner
+            .set_lighting(sun_r, sun_g, sun_b, intensity, ambient);
     }
 }
 
@@ -1357,7 +2040,8 @@ impl GameSession {
         for transition in &action.after_turn {
             let gate_json = serde_json::to_string(&transition.gate).unwrap_or_else(|_| "[]".into());
             let report = match qualia_core_db::wasm_bridge::validate_shacl_json_wasm(
-                &self.world(), &gate_json,
+                &self.world(),
+                &gate_json,
             ) {
                 Ok(r) => r,
                 Err(_) => continue,
@@ -1365,10 +2049,18 @@ impl GameSession {
             let ready = js_get(&report, "conforms")
                 .and_then(|v| v.as_bool())
                 .unwrap_or(false);
-            if !ready { continue; }
-            for spec in &transition.remove_all { self.remove_matching(spec, usize::MAX); }
-            for spec in &transition.remove_n { self.remove_matching(spec, spec.n.max(1)); }
-            for add in &transition.add { self.lines.push(add.replace("{seq}", &seq.to_string())); }
+            if !ready {
+                continue;
+            }
+            for spec in &transition.remove_all {
+                self.remove_matching(spec, usize::MAX);
+            }
+            for spec in &transition.remove_n {
+                self.remove_matching(spec, spec.n.max(1));
+            }
+            for add in &transition.add {
+                self.lines.push(add.replace("{seq}", &seq.to_string()));
+            }
         }
         self.lines.push(format!("ev:e{seq} a ev:Event ."));
         self.lines
@@ -1602,14 +2294,19 @@ fn vibe_scene_recipe(src: &str) -> Result<asset_catalog::AssetRecipe, String> {
                 longitude: 16,
             }
         }
-        _ => return Err("scene kind must be sphere, cylinder, water, vegetation, box, or probe".into()),
+        _ => {
+            return Err(
+                "scene kind must be sphere, cylinder, water, vegetation, box, or probe".into(),
+            )
+        }
     };
     Ok(AssetRecipe {
-        id: "rc:asset/vibe-preview",
+        id: "rc:asset/vibe-preview".to_string(),
         parts: Vec::new(),
         parametric: Some(shape),
         color,
         vibe_source: Some(src.to_string()),
+        render_role: "opaque".to_string(),
     })
 }
 
@@ -1749,7 +2446,11 @@ mod vibe_scene_expansion_tests {
         }"#;
         let recipe = vibe_scene_recipe(water_vibe).expect("water vibe recipe should parse");
         assert!(recipe.parametric.is_some());
-        let mesh = recipe.parametric.unwrap().compile().expect("water plane compiles");
+        let mesh = recipe
+            .parametric
+            .unwrap()
+            .compile()
+            .expect("water plane compiles");
         assert!(!mesh.positions.is_empty());
         assert!(!mesh.triangles.is_empty());
 
@@ -1761,7 +2462,11 @@ mod vibe_scene_expansion_tests {
         }"#;
         let recipe = vibe_scene_recipe(veg_vibe).expect("veg vibe recipe should parse");
         assert!(recipe.parametric.is_some());
-        let mesh = recipe.parametric.unwrap().compile().expect("veg patch compiles");
+        let mesh = recipe
+            .parametric
+            .unwrap()
+            .compile()
+            .expect("veg patch compiles");
         assert_eq!(mesh.positions.len(), 16 * 3);
         assert_eq!(mesh.triangles.len(), 16);
 

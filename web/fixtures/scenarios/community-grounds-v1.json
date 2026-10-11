@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "moduleSet": "community-grounds-situations-v1",
+  "modules": [
+    {
+      "id": "community-conversation",
+      "version": "1.0.0",
+      "title": "Hear the people affected",
+      "mode": "interpersonal",
+      "availability": "playable",
+      "place": { "localityId": "fixture:kestrel-flats", "siteId": "rc:committee", "scope": "site", "status": "fictional_fixture" },
+      "roles": [
+        { "id": "player", "label": "Community organiser", "actor": "player" },
+        { "id": "mara", "label": "Mara, resident", "actor": "fictional_character" },
+        { "id": "eli", "label": "Eli, resident", "actor": "fictional_character" }
+      ],
+      "objective": "Listen to access and maintenance concerns before asking the group to make a shared decision.",
+      "entry": "Begin when the community is considering work on its shared facilities. Existing action rules determine whether each conversation is available.",
+      "toolsMaterials": ["Conversation choices", "One workday per recorded conversation"],
+      "duration": "One to three workdays",
+      "accessibility": { "interaction": "Select a clearly labelled choice", "keyboard": true, "reducedMotion": true },
+      "provenance": { "kind": "game_authored", "sourceIds": [], "note": "Fictional Kestrel Flats campaign characters and dialogue; not a real community record." },
+      "startNodeId": "first-listen",
+      "nodes": [
+        {
+          "id": "first-listen",
+          "prompt": "Whose concerns will you hear first?",
+          "choices": [
+            { "id": "hear-mara", "label": "Hear Mara on access", "actionId": "canvassMara", "outcome": "Mara's access concern enters the shared project record.", "nextNodeId": "second-listen" },
+            { "id": "hear-eli", "label": "Hear Eli on maintenance", "actionId": "canvassEli", "outcome": "Eli's maintenance concern enters the shared project record.", "nextNodeId": "second-listen" }
+          ]
+        },
+        {
+          "id": "second-listen",
+          "prompt": "One resident has spoken. Hear from the other before convening a committee.",
+          "choices": [
+            { "id": "hear-mara-next", "label": "Hear Mara on access", "actionId": "canvassMara", "outcome": "Mara's access concern enters the shared project record.", "nextNodeId": "committee" },
+            { "id": "hear-eli-next", "label": "Hear Eli on maintenance", "actionId": "canvassEli", "outcome": "Eli's maintenance concern enters the shared project record.", "nextNodeId": "committee" }
+          ]
+        },
+        {
+          "id": "committee",
+          "prompt": "Both concerns are recorded. You can invite the residents to make a decision together.",
+          "choices": [
+            { "id": "form-committee", "label": "Convene the project committee", "actionId": "formCommittee", "outcome": "The residents convene a committee with a community mandate.", "nextNodeId": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fruit-harvest",
+      "version": "1.0.0",
+      "title": "Pick and decide on the fruit",
+      "mode": "agriculture",
+      "availability": "playable",
+      "place": { "localityId": "fixture:saltwind-reach", "siteId": "rc:orchard", "scope": "site", "status": "fictional_fixture" },
+      "roles": [
+        { "id": "player", "label": "Orchard worker", "actor": "player" },
+        { "id": "neighbours", "label": "Local neighbours", "actor": "group" }
+      ],
+      "objective": "Choose whether the harvest first supports neighbours or earns funds for shared work.",
+      "entry": "The campaign rule set requires a planted orchard, available labour and an undecided harvest.",
+      "toolsMaterials": ["Orchard rows", "Harvest crates", "One workday"],
+      "duration": "One workday plus an optional follow-up",
+      "accessibility": { "interaction": "Select a clearly labelled choice", "keyboard": true, "reducedMotion": true },
+      "provenance": { "kind": "game_authored", "sourceIds": [], "note": "Fictional campaign activity; no claim about a real orchard, crop or seasonal job." },
+      "startNodeId": "harvest-choice",
+      "nodes": [
+        {
+          "id": "harvest-choice",
+          "prompt": "The fruit is ready. How will the first harvest be used?",
+          "choices": [
+            { "id": "reserve-harvest", "label": "Reserve fruit for the commons", "actionId": "reserveHarvest", "outcome": "The harvest is stored for a shared gathering.", "nextNodeId": "share-reserve" },
+            { "id": "sell-harvest", "label": "Sell fruit at the market", "actionId": "sellHarvest", "outcome": "The harvest earns three coins for later community choices.", "nextNodeId": "share-market" }
+          ]
+        },
+        {
+          "id": "share-reserve",
+          "prompt": "The fruit is reserved. You can host the gathering or use other campaign options.",
+          "choices": [
+            { "id": "host-reserved", "label": "Host a gathering with the reserve", "actionId": "openCommonsReserved", "outcome": "The commons opens with stored food.", "nextNodeId": null }
+          ]
+        },
+        {
+          "id": "share-market",
+          "prompt": "The fruit was sold. The shared food and trade decisions remain in the campaign ledger.",
+          "choices": [
+            { "id": "launch-trade", "label": "Launch the trade route", "actionId": "launchTradeRoute", "outcome": "The first trade boat sets out.", "nextNodeId": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "workshop-repair",
+      "version": "1.0.0",
+      "title": "Repair and return a vehicle to service",
+      "mode": "repair",
+      "availability": "playable",
+      "place": { "localityId": "fixture:kestrel-flats", "siteId": "rc:workshop", "scope": "site", "status": "fictional_fixture" },
+      "roles": [
+        { "id": "player", "label": "Workshop mechanic", "actor": "player" },
+        { "id": "crew", "label": "Community crew", "actor": "group" }
+      ],
+      "objective": "Use available parts, labour and workshop capacity to complete a repair order.",
+      "entry": "The shared campaign gates determine whether the workshop or vehicle repair action can proceed.",
+      "toolsMaterials": ["Workshop tools", "Repair fittings or available parts", "Crew labour"],
+      "duration": "One workday per accepted repair",
+      "accessibility": { "interaction": "Select a clearly labelled choice", "keyboard": true, "reducedMotion": true },
+      "provenance": { "kind": "game_authored", "sourceIds": [], "note": "Fictional repair choices use the existing shared campaign actions and inventory." },
+      "startNodeId": "repair-choice",
+      "nodes": [
+        {
+          "id": "repair-choice",
+          "prompt": "Choose the repair the crew can support with current resources.",
+          "choices": [
+            { "id": "repair-tank-labour", "label": "Repair the water tank with salvaged fittings", "actionId": "repairTankLabour", "outcome": "The tank returns to service without buying a replacement fitting.", "nextNodeId": null },
+            { "id": "repair-tank-parts", "label": "Repair the water tank with purchased parts", "actionId": "repairTankCoins", "outcome": "The purchased fitting returns the tank to service.", "nextNodeId": null },
+            { "id": "repair-order", "label": "Complete the workshop repair order", "actionId": "fulfilWorkshopOrder", "outcome": "The repair order is delivered and campaign funds change through the existing rule.", "nextNodeId": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shared-meal",
+      "version": "1.0.0",
+      "title": "Prepare a shared meal",
+      "mode": "food",
+      "availability": "playable",
+      "place": { "localityId": "fixture:saltwind-reach", "siteId": "rc:orchard", "scope": "site", "status": "fictional_fixture" },
+      "roles": [
+        { "id": "player", "label": "Meal organiser", "actor": "player" },
+        { "id": "neighbours", "label": "Gathering participants", "actor": "group" }
+      ],
+      "objective": "Choose how the community gathers around available food and shared funds.",
+      "entry": "A planted orchard and the harvest decision are checked by campaign actions; this fixture contains no nutritional guidance.",
+      "toolsMaterials": ["Available harvest or reserve", "Shared preparation space", "Crew labour"],
+      "duration": "One workday",
+      "accessibility": { "interaction": "Select a clearly labelled choice", "keyboard": true, "reducedMotion": true },
+      "provenance": { "kind": "synthetic_demo", "sourceIds": [], "note": "Fictional campaign event. It is not recipe, allergy, health or nutrition advice; a reviewed food dataset adapter is a future source." },
+      "startNodeId": "meal-plan",
+      "nodes": [
+        {
+          "id": "meal-plan",
+          "prompt": "Choose how to prepare the gathering around the harvest.",
+          "choices": [
+            { "id": "meal-reserve", "label": "Use food reserved for the commons", "actionId": "openCommonsReserved", "outcome": "The shared reserve supports the gathering.", "nextNodeId": null },
+            { "id": "meal-harvest", "label": "Host a gathering with the harvest", "actionId": "openCommons", "outcome": "The harvest gathering changes shared campaign state through the action receipt.", "nextNodeId": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "housekeeping-practice",
+      "version": "1.0.0",
+      "title": "Housekeeping practice shift",
+      "mode": "hospitality",
+      "availability": "playable",
+      "place": { "localityId": "fixture:training", "siteId": "fixture:fictional-motel-room", "scope": "scenario", "status": "fictional_fixture" },
+      "roles": [
+        { "id": "player", "label": "Housekeeping worker", "actor": "player" },
+        { "id": "guest", "label": "Guest with a timely request", "actor": "fictional_character" }
+      ],
+      "objective": "Prioritise a room task while balancing the guest's request, hygiene and the next arrival.",
+      "entry": "A self-contained fictional training vignette, separate from the mapped Kestrel and Saltwind community sites.",
+      "toolsMaterials": ["Fresh linen", "Cleaning kit", "Room checklist"],
+      "duration": "A short interactive practice shift",
+      "accessibility": { "interaction": "Two-stage labelled choices; no timed input", "keyboard": true, "reducedMotion": true },
+      "provenance": { "kind": "synthetic_demo", "sourceIds": [], "note": "Fictional motel-room scenario. It does not represent a real employer, property, vacancy or service." },
+      "startNodeId": "priority",
+      "nodes": [
+        {
+          "id": "priority",
+          "prompt": "A guest needs fresh towels while the room is due for its next arrival. What do you prioritise first?",
+          "choices": [
+            { "id": "linen-first", "label": "Respond to the guest, then finish the linen reset", "actionId": "activity.housekeeping.linen-first", "outcome": "The guest request is recorded as the first priority.", "nextNodeId": "finish" },
+            { "id": "hygiene-first", "label": "Finish the hygiene check before restocking", "actionId": "activity.housekeeping.hygiene-first", "outcome": "The hygiene check is recorded as the first priority.", "nextNodeId": "finish" },
+            { "id": "checklist-first", "label": "Use the checklist to sequence the room", "actionId": "activity.housekeeping.checklist-first", "outcome": "The checklist sequence is recorded as the first priority.", "nextNodeId": "finish" }
+          ]
+        },
+        {
+          "id": "finish",
+          "prompt": "Complete the room check and record the practice shift.",
+          "choices": [
+            { "id": "complete-shift", "label": "Finish the practice shift", "actionId": "activity.housekeeping.complete", "outcome": "The practice task is complete; no currency or real employment claim is created.", "nextNodeId": null }
+          ]
+        }
+      ]
+    }
+  ]
+}

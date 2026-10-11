@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "packId": "fictional-kestrel-saltwind-v1",
+  "title": "Fictional campaign place graph",
+  "maturity": "fictional_fixture",
+  "coverage": {
+    "kind": "fictional_fixture",
+    "label": "Kestrel Flats, Saltwind Reach and the Northern Highlands",
+    "spatialStatus": "not_available",
+    "sourceRefs": ["source:game-demo"]
+  },
+  "sourceRecords": [
+    {
+      "id": "source:game-demo",
+      "kind": "game_authored",
+      "title": "Maslows Challenge fictional campaign",
+      "uri": null,
+      "version": "1.0.0",
+      "snapshotAt": null,
+      "licenceStatus": "not_applicable",
+      "gameUseStatus": "approved",
+      "notes": "Synthetic presentation fixture only. It contains no Australian boundaries, road alignments, service claims or species occurrences."
+    }
+  ],
+  "places": [
+    { "id": "fixture:kestrel-flats", "level": "locality", "name": "Kestrel Flats", "parentId": null, "spatialStatus": "schematic", "territoryId": "kestrel", "sourceRefs": ["source:game-demo"], "tags": ["fictional"] },
+    { "id": "rc:camp", "level": "site", "name": "Mobile camp", "parentId": "fixture:kestrel-flats", "spatialStatus": "schematic", "sceneId": "rc:camp", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "camp"] },
+    { "id": "rc:scrapyard", "level": "site", "name": "Salvage yard", "parentId": "fixture:kestrel-flats", "spatialStatus": "schematic", "sceneId": "rc:scrapyard", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "salvage"] },
+    { "id": "rc:market", "level": "site", "name": "Market", "parentId": "fixture:kestrel-flats", "spatialStatus": "schematic", "sceneId": "rc:market", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "market"] },
+    { "id": "rc:workshop", "level": "site", "name": "Solar workshop", "parentId": "fixture:kestrel-flats", "spatialStatus": "schematic", "sceneId": "rc:workshop", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "workshop"] },
+    { "id": "rc:committee", "level": "site", "name": "Community committee", "parentId": "fixture:kestrel-flats", "spatialStatus": "schematic", "sceneId": "rc:committee", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "community"] },
+    { "id": "rc:waterTank", "level": "site", "name": "Shared water tank", "parentId": "fixture:kestrel-flats", "spatialStatus": "schematic", "sceneId": "rc:waterTank", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "water"] },
+    { "id": "rc:garden", "level": "site", "name": "Productive garden", "parentId": "fixture:kestrel-flats", "spatialStatus": "schematic", "sceneId": "rc:garden", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "garden"] },
+    { "id": "rc:communicationsMast", "level": "site", "name": "Communications mast", "parentId": "fixture:kestrel-flats", "spatialStatus": "schematic", "sceneId": "rc:communicationsMast", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "communications"] },
+    { "id": "fixture:saltwind-reach", "level": "locality", "name": "Saltwind Reach", "parentId": null, "spatialStatus": "schematic", "territoryId": "saltwind", "sourceRefs": ["source:game-demo"], "tags": ["fictional"] },
+    { "id": "rc:bridge", "level": "site", "name": "Canal crossing", "parentId": "fixture:saltwind-reach", "spatialStatus": "schematic", "sceneId": "rc:bridge", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "crossing"] },
+    { "id": "rc:windPump", "level": "site", "name": "Wind pump", "parentId": "fixture:saltwind-reach", "spatialStatus": "schematic", "sceneId": "rc:windPump", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "water"] },
+    { "id": "rc:orchard", "level": "site", "name": "Canal orchard", "parentId": "fixture:saltwind-reach", "spatialStatus": "schematic", "sceneId": "rc:orchard", "sourceRefs": ["source:game-demo"], "tags": ["fictional", "orchard"] },
+    { "id": "fixture:northern-highlands", "level": "region", "name": "Northern Highlands", "parentId": null, "spatialStatus": "schematic", "territoryId": "highlands", "sourceRefs": ["source:game-demo"], "tags": ["fictional"] }
+  ],
+  "routeGraph": { "crs": null, "nodes": [], "edges": [] },
+  "renderArtifacts": [],
+  "renderTiles": []
+}

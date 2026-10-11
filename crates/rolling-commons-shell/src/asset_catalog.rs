@@ -54,6 +54,21 @@ pub enum ParametricRecipe {
         latitude: u32,
         longitude: u32,
     },
+    /// A deterministic cluster of narrow leaf forms compiled into one mesh.
+    /// This gives gum and wattle silhouettes readable foliage detail without
+    /// uploading one draw/scene object for every leaf.
+    EllipsoidCluster {
+        instances: Vec<EllipsoidInstance>,
+        latitude: u32,
+        longitude: u32,
+    },
+    /// A merged set of tapered, articulated limbs authored from Qualia's
+    /// parametric revolve primitive. Endpoints are local to `center`.
+    LimbCluster {
+        center: [f32; 3],
+        limbs: Vec<LimbSegment>,
+        radial_segments: usize,
+    },
     Torus {
         center: [f32; 3],
         major: f32,
@@ -76,6 +91,14 @@ pub enum ParametricRecipe {
     },
     /// A wheel: a Qualia cylinder turned onto its axle and placed.
     Wheel {
+        center: [f32; 3],
+        radius: f32,
+        width: f32,
+        segments: u32,
+    },
+    /// A wheel mounted on an X axle. The van faces along the scene's Z axis,
+    /// so this keeps its paired wheels on the two visible sides of the body.
+    WheelX {
         center: [f32; 3],
         radius: f32,
         width: f32,
@@ -119,6 +142,58 @@ pub enum ParametricRecipe {
     },
 }
 
+/// One deterministic, oriented leaf or petal in a merged foliage mesh.
+#[derive(Debug, Clone, Copy)]
+pub struct EllipsoidInstance {
+    pub center: [f32; 3],
+    pub radii: [f32; 3],
+    pub pitch_deg: f32,
+    pub yaw_deg: f32,
+    pub roll_deg: f32,
+}
+
+/// One tapered limb segment. Radius is measured at `start` and `end`.
+#[derive(Debug, Clone, Copy)]
+pub struct LimbSegment {
+    pub start: [f32; 3],
+    pub end: [f32; 3],
+    pub start_radius: f32,
+    pub end_radius: f32,
+}
+
+fn limb_segment(
+    start: [f32; 3],
+    end: [f32; 3],
+    start_radius: f32,
+    end_radius: f32,
+) -> LimbSegment {
+    LimbSegment {
+        start,
+        end,
+        start_radius,
+        end_radius,
+    }
+}
+
+/// Elbow/hand offsets for six readable, static work poses around the grounds.
+/// Character movement clips can later animate the same stable limb assets.
+fn community_work_pose(index: usize) -> ([f32; 3], [f32; 3], [f32; 3], [f32; 3]) {
+    match index {
+        // Planting: one hand stays close while the other reaches to a bed.
+        0 => ([-0.36, 0.70, 0.02], [-0.39, 0.49, 0.12], [0.36, 0.71, 0.08], [0.27, 0.48, 0.34]),
+        // Repairing: a low tool grip and a hand braced near the waist.
+        1 => ([-0.40, 0.72, 0.01], [-0.22, 0.56, 0.08], [0.40, 0.76, 0.10], [0.17, 0.72, 0.29]),
+        // Harvesting: both hands work in front of the body at different heights.
+        2 => ([-0.39, 0.76, 0.07], [-0.28, 0.63, 0.29], [0.39, 0.72, 0.07], [0.31, 0.54, 0.30]),
+        // Welcoming/teaching: arms open so the silhouette reads at overview scale.
+        3 => ([-0.45, 0.80, 0.02], [-0.60, 0.84, 0.04], [0.44, 0.81, 0.02], [0.61, 0.91, 0.04]),
+        // Watering: both hands angle down toward the shared growing area.
+        4 => ([-0.37, 0.72, 0.08], [-0.43, 0.53, 0.25], [0.37, 0.71, 0.08], [0.30, 0.49, 0.32]),
+        // Carrying produce: hands meet around a crate-height load.
+        _ => ([-0.40, 0.76, 0.07], [-0.23, 0.68, 0.21], [0.40, 0.76, 0.07], [0.23, 0.68, 0.21]),
+    }
+}
+
 /// One rotated box inside a `PanelGroup`, offset from the group center.
 #[derive(Debug, Clone, Copy)]
 pub struct PanelPart {
@@ -127,6 +202,96 @@ pub struct PanelPart {
     pub pitch_deg: f32,
     pub roll_deg: f32,
     pub yaw_deg: f32,
+}
+
+fn mesh_bounds(positions: &[[f32; 3]]) -> ([f32; 3], [f32; 3]) {
+    let mut min = [f32::INFINITY; 3];
+    let mut max = [f32::NEG_INFINITY; 3];
+    for position in positions {
+        for axis in 0..3 {
+            min[axis] = min[axis].min(position[axis]);
+            max[axis] = max[axis].max(position[axis]);
+        }
+    }
+    (min, max)
+}
+
+fn tapered_limb_mesh(limb: LimbSegment, radial_segments: usize) -> Result<Mesh, String> {
+    let delta = [
+        limb.end[0] - limb.start[0],
+        limb.end[1] - limb.start[1],
+        limb.end[2] - limb.start[2],
+    ];
+    let length = (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]).sqrt();
+    if !length.is_finite()
+        || length < 0.025
+        || !limb.start_radius.is_finite()
+        || !limb.end_radius.is_finite()
+        || limb.start_radius <= 0.0
+        || limb.end_radius <= 0.0
+        || limb.start_radius > 0.25
+        || limb.end_radius > 0.25
+    {
+        return Err("invalid tapered limb dimensions".into());
+    }
+
+    let half = length * 0.5;
+    let profile = [
+        Point3::new(0.0, -half as f64, 0.0),
+        Point3::new(limb.start_radius as f64, -half as f64, 0.0),
+        Point3::new(limb.end_radius as f64, half as f64, 0.0),
+        Point3::new(0.0, half as f64, 0.0),
+    ];
+    let sides = radial_segments.clamp(8, 24);
+    let mut vertices = vec![Point3::new(0.0, 0.0, 0.0); profile.len() * sides];
+    let mut triangles = vec![[0u32; 3]; (profile.len() - 1) * sides * 2];
+    let (vertex_count, triangle_count) = parametric_cad::revolve_profile(
+        &profile,
+        sides,
+        &mut vertices,
+        &mut triangles,
+    )
+    .map_err(|error| format!("limb revolve: {error:?}"))?;
+    let positions: Vec<[f32; 3]> = vertices[..vertex_count]
+        .iter()
+        .map(|point| [point.x as f32, point.y as f32, point.z as f32])
+        .collect();
+    let (min, max) = mesh_bounds(&positions);
+    let local = Mesh {
+        positions,
+        triangles: triangles[..triangle_count].to_vec(),
+        min,
+        max,
+    };
+
+    let y = [delta[0] / length, delta[1] / length, delta[2] / length];
+    let horizontal = (y[0] * y[0] + y[1] * y[1]).sqrt();
+    let x = if horizontal < 0.001 {
+        [1.0, 0.0, 0.0]
+    } else {
+        [y[1] / horizontal, -y[0] / horizontal, 0.0]
+    };
+    let z = [
+        x[1] * y[2] - x[2] * y[1],
+        x[2] * y[0] - x[0] * y[2],
+        x[0] * y[1] - x[1] * y[0],
+    ];
+    let rotation = [
+        [x[0] as f64, x[1] as f64, x[2] as f64, 0.0],
+        [y[0] as f64, y[1] as f64, y[2] as f64, 0.0],
+        [z[0] as f64, z[1] as f64, z[2] as f64, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ];
+    let rotated = authoring::transform_mesh(&local, &rotation);
+    let midpoint = [
+        (limb.start[0] + limb.end[0]) * 0.5,
+        (limb.start[1] + limb.end[1]) * 0.5,
+        (limb.start[2] + limb.end[2]) * 0.5,
+    ];
+    Ok(authoring::transform_mesh(
+        &rotated,
+        &authoring::translation(midpoint[0] as f64, midpoint[1] as f64, midpoint[2] as f64),
+    ))
 }
 
 impl ParametricRecipe {
@@ -267,6 +432,107 @@ impl ParametricRecipe {
                     ),
                 )
             }
+            Self::EllipsoidCluster {
+                instances,
+                latitude,
+                longitude,
+            } => {
+                let unit =
+                    authoring::uv_sphere(1.0, *latitude, *longitude).map_err(|e| e.to_string())?;
+                let mut positions = Vec::with_capacity(instances.len() * unit.positions.len());
+                let mut triangles = Vec::with_capacity(instances.len() * unit.triangles.len());
+                for instance in instances {
+                    let scale = authoring::scale(
+                        instance.radii[0] as f64,
+                        instance.radii[1] as f64,
+                        instance.radii[2] as f64,
+                    );
+                    let mut rotation = authoring::identity();
+                    if instance.yaw_deg != 0.0 {
+                        rotation = authoring::mat_mul(
+                            &authoring::rotation_y(instance.yaw_deg.to_radians() as f64),
+                            &rotation,
+                        );
+                    }
+                    if instance.roll_deg != 0.0 {
+                        rotation = authoring::mat_mul(
+                            &authoring::rotation_z(instance.roll_deg.to_radians() as f64),
+                            &rotation,
+                        );
+                    }
+                    if instance.pitch_deg != 0.0 {
+                        rotation = authoring::mat_mul(
+                            &authoring::rotation_x(instance.pitch_deg.to_radians() as f64),
+                            &rotation,
+                        );
+                    }
+                    let translate = authoring::translation(
+                        instance.center[0] as f64,
+                        instance.center[1] as f64,
+                        instance.center[2] as f64,
+                    );
+                    let transform =
+                        authoring::mat_mul(&translate, &authoring::mat_mul(&rotation, &scale));
+                    let leaf = authoring::transform_mesh(&unit, &transform);
+                    let base = positions.len() as u32;
+                    positions.extend_from_slice(&leaf.positions);
+                    triangles.extend(
+                        leaf.triangles
+                            .iter()
+                            .map(|tri| [base + tri[0], base + tri[1], base + tri[2]]),
+                    );
+                }
+                let mut min = [f32::INFINITY; 3];
+                let mut max = [f32::NEG_INFINITY; 3];
+                for point in &positions {
+                    for axis in 0..3 {
+                        min[axis] = min[axis].min(point[axis]);
+                        max[axis] = max[axis].max(point[axis]);
+                    }
+                }
+                (
+                    [0.0; 3],
+                    Mesh {
+                        positions,
+                        triangles,
+                        min,
+                        max,
+                    },
+                )
+            }
+            Self::LimbCluster {
+                center,
+                limbs,
+                radial_segments,
+            } => {
+                if limbs.is_empty() || limbs.len() > 24 {
+                    return Err("limb cluster must contain 1–24 segments".into());
+                }
+                let sides = (*radial_segments).clamp(8, 24);
+                let mut positions = Vec::with_capacity(limbs.len() * sides * 4);
+                let mut triangles = Vec::with_capacity(limbs.len() * sides * 6);
+                for limb in limbs {
+                    let segment = tapered_limb_mesh(*limb, *radial_segments)?;
+                    let base = positions.len() as u32;
+                    positions.extend_from_slice(&segment.positions);
+                    triangles.extend(
+                        segment
+                            .triangles
+                            .iter()
+                            .map(|tri| [base + tri[0], base + tri[1], base + tri[2]]),
+                    );
+                }
+                let (min, max) = mesh_bounds(&positions);
+                (
+                    *center,
+                    Mesh {
+                        positions,
+                        triangles,
+                        min,
+                        max,
+                    },
+                )
+            }
             Self::Torus {
                 center,
                 major,
@@ -356,11 +622,7 @@ impl ParametricRecipe {
                         min,
                         max,
                     },
-                    &authoring::scale(
-                        stretch[0] as f64,
-                        stretch[1] as f64,
-                        stretch[2] as f64,
-                    ),
+                    &authoring::scale(stretch[0] as f64, stretch[1] as f64, stretch[2] as f64),
                 );
                 (*center, mesh)
             }
@@ -373,6 +635,17 @@ impl ParametricRecipe {
                 let wheel =
                     authoring::cylinder(*radius, *width, *segments).map_err(|e| e.to_string())?;
                 let axle = authoring::rotation_x(std::f64::consts::FRAC_PI_2);
+                (*center, authoring::transform_mesh(&wheel, &axle))
+            }
+            Self::WheelX {
+                center,
+                radius,
+                width,
+                segments,
+            } => {
+                let wheel =
+                    authoring::cylinder(*radius, *width, *segments).map_err(|e| e.to_string())?;
+                let axle = authoring::rotation_z(std::f64::consts::FRAC_PI_2);
                 (*center, authoring::transform_mesh(&wheel, &axle))
             }
             Self::Barrel {
@@ -420,12 +693,8 @@ impl ParametricRecipe {
                 let mut positions: Vec<[f32; 3]> = Vec::new();
                 let mut triangles: Vec<[u32; 3]> = Vec::new();
                 for part in parts {
-                    let panel = authoring::box_mesh(
-                        part.size[0],
-                        part.size[1],
-                        part.size[2],
-                    )
-                    .map_err(|e| e.to_string())?;
+                    let panel = authoring::box_mesh(part.size[0], part.size[1], part.size[2])
+                        .map_err(|e| e.to_string())?;
                     let mut rotation = authoring::identity();
                     if part.yaw_deg != 0.0 {
                         rotation = authoring::mat_mul(
@@ -498,11 +767,7 @@ impl ParametricRecipe {
                 let half_l = l * 0.5;
                 for i in 0..=subs {
                     for j in 0..=subs {
-                        positions.push([
-                            -half_w + i as f32 * dx,
-                            0.0,
-                            -half_l + j as f32 * dz,
-                        ]);
+                        positions.push([-half_w + i as f32 * dx, 0.0, -half_l + j as f32 * dz]);
                     }
                 }
                 for i in 0..subs {
@@ -584,11 +849,13 @@ impl ParametricRecipe {
 }
 
 pub struct AssetRecipe {
-    pub id: &'static str,
+    pub id: String,
     pub parts: Vec<Primitive>,
     pub parametric: Option<ParametricRecipe>,
     pub color: [f32; 4],
     pub vibe_source: Option<String>,
+    /// Renderer-owned pass role carried beside the `.10d` payload in HMC.
+    pub render_role: String,
 }
 
 fn block(center: [f32; 3], size: [f32; 3]) -> Primitive {
@@ -599,24 +866,32 @@ fn roof(center: [f32; 3], size: [f32; 3]) -> Primitive {
     Primitive::Roof { center, size }
 }
 
-fn asset(id: &'static str, color: [f32; 4], parts: Vec<Primitive>) -> AssetRecipe {
+fn asset(id: &str, color: [f32; 4], parts: Vec<Primitive>) -> AssetRecipe {
     AssetRecipe {
-        id,
+        id: id.to_string(),
         parts,
         parametric: None,
         color,
         vibe_source: None,
+        render_role: "opaque".to_string(),
     }
 }
 
-fn parametric(id: &'static str, color: [f32; 4], recipe: ParametricRecipe) -> AssetRecipe {
+fn parametric(id: &str, color: [f32; 4], recipe: ParametricRecipe) -> AssetRecipe {
     AssetRecipe {
-        id,
+        id: id.to_string(),
         parts: Vec::new(),
         parametric: Some(recipe),
         color,
         vibe_source: None,
+        render_role: "opaque".to_string(),
     }
+}
+
+fn water_surface(id: &str, color: [f32; 4], recipe: ParametricRecipe) -> AssetRecipe {
+    let mut result = parametric(id, color, recipe);
+    result.render_role = "water".to_string();
+    result
 }
 
 /// First-pass blockout kit. Keep IDs stable when replacing geometry with
@@ -637,6 +912,17 @@ pub fn kestrel_flats(
         [0.62, 0.42],
         [0.51, 0.61],
         [0.0, 0.61],
+    ];
+    const SERVICE_VAN_PROFILE: &[[f32; 2]] = &[
+        [0.0, 0.0],
+        [0.42, 0.0],
+        [0.58, 0.045],
+        [0.72, 0.18],
+        [0.78, 0.34],
+        [0.78, 0.94],
+        [0.71, 1.15],
+        [0.58, 1.32],
+        [0.0, 1.36],
     ];
     let mut scene = Vec::with_capacity(160);
     scene.push(asset(
@@ -680,12 +966,8 @@ pub fn kestrel_flats(
         [0.52, 1.06],
         [0.0, 1.13],
     ];
-    const HOME_BAND_PROFILE: &[[f32; 2]] = &[
-        [0.845, 0.20],
-        [0.912, 0.26],
-        [0.912, 0.32],
-        [0.845, 0.36],
-    ];
+    const HOME_BAND_PROFILE: &[[f32; 2]] =
+        &[[0.845, 0.20], [0.912, 0.26], [0.912, 0.32], [0.845, 0.36]];
     const ANNEX_PROFILE: &[[f32; 2]] = &[
         [0.0, 0.0],
         [0.42, 0.0],
@@ -724,7 +1006,10 @@ pub fn kestrel_flats(
                 [-3.05, 0.40, 2.7],
                 [home_half_length * 2.0 + 0.14, 0.14, 1.06],
             ),
-            block([-3.05, 0.52, 2.7], [home_half_length * 2.0 + 0.04, 0.06, 0.9]),
+            block(
+                [-3.05, 0.52, 2.7],
+                [home_half_length * 2.0 + 0.04, 0.06, 0.9],
+            ),
         ],
     ));
     for (id, z) in [
@@ -947,12 +1232,98 @@ pub fn kestrel_flats(
             block([3.85, 0.8, -1.25], [0.07, 1.6, 0.07]),
         ],
     ));
+    // An open, two-bay repair canopy gives the hub the working depth seen in
+    // the Community Grounds reference. These are compiled as ordinary
+    // game-owned recipes through the existing Qualia mesh path.
+    scene.push(asset(
+        "rc:asset/workshop-bay-frame",
+        [0.34, 0.39, 0.36, 1.0],
+        vec![
+            block([2.03, 0.88, -0.38], [0.12, 1.72, 0.13]),
+            block([4.37, 0.88, -0.38], [0.12, 1.72, 0.13]),
+            block([2.03, 0.88, -1.28], [0.12, 1.72, 0.13]),
+            block([4.37, 0.88, -1.28], [0.12, 1.72, 0.13]),
+            block([3.20, 1.70, -0.38], [2.42, 0.13, 0.14]),
+            block([3.20, 1.84, -1.28], [2.42, 0.13, 0.14]),
+            block([3.20, 1.54, 0.04], [2.42, 0.11, 0.13]),
+            block([3.20, 1.76, -0.79], [2.42, 0.08, 0.09]),
+        ],
+    ));
+    scene.push(parametric(
+        "rc:asset/workshop-bay-canopy",
+        [0.84, 0.79, 0.67, 1.0],
+        ParametricRecipe::PanelGroup {
+            center: [3.20, 1.78, -0.78],
+            parts: vec![
+                PanelPart {
+                    offset: [-0.88, 0.035, 0.0],
+                    size: [0.79, 0.09, 1.62],
+                    pitch_deg: -7.0,
+                    roll_deg: 0.0,
+                    yaw_deg: 0.0,
+                },
+                PanelPart {
+                    offset: [0.0, 0.035, 0.0],
+                    size: [0.79, 0.09, 1.62],
+                    pitch_deg: -7.0,
+                    roll_deg: 0.0,
+                    yaw_deg: 0.0,
+                },
+                PanelPart {
+                    offset: [0.88, 0.035, 0.0],
+                    size: [0.79, 0.09, 1.62],
+                    pitch_deg: -7.0,
+                    roll_deg: 0.0,
+                    yaw_deg: 0.0,
+                },
+            ],
+        },
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-benches",
+        [0.56, 0.38, 0.24, 1.0],
+        vec![
+            block([2.63, 0.73, -0.91], [0.92, 0.12, 0.38]),
+            block([2.27, 0.39, -0.91], [0.08, 0.64, 0.08]),
+            block([2.99, 0.39, -0.91], [0.08, 0.64, 0.08]),
+            block([3.78, 0.73, -0.91], [0.92, 0.12, 0.38]),
+            block([3.42, 0.39, -0.91], [0.08, 0.64, 0.08]),
+            block([4.14, 0.39, -0.91], [0.08, 0.64, 0.08]),
+            block([2.63, 0.91, -1.19], [0.64, 0.18, 0.12]),
+            block([3.78, 0.91, -1.19], [0.64, 0.18, 0.12]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-tool-wall",
+        [0.44, 0.48, 0.44, 1.0],
+        vec![
+            block([3.21, 1.12, -1.19], [0.95, 0.45, 0.06]),
+            block([2.88, 1.18, -1.105], [0.055, 0.26, 0.04]),
+            block([3.08, 1.21, -1.105], [0.055, 0.31, 0.04]),
+            block([3.30, 1.17, -1.105], [0.055, 0.23, 0.04]),
+            block([3.51, 1.22, -1.105], [0.055, 0.30, 0.04]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/workshop-service-shelf",
+        [0.39, 0.43, 0.42, 1.0],
+        vec![
+            block([4.14, 0.68, -2.65], [0.82, 0.09, 0.45]),
+            block([4.14, 1.15, -2.65], [0.82, 0.09, 0.45]),
+            block([3.76, 0.91, -2.65], [0.07, 0.58, 0.08]),
+            block([4.52, 0.91, -2.65], [0.07, 0.58, 0.08]),
+            block([3.90, 0.84, -2.55], [0.18, 0.20, 0.17]),
+            block([4.18, 0.84, -2.56], [0.18, 0.20, 0.18]),
+            block([4.38, 1.31, -2.55], [0.22, 0.20, 0.17]),
+        ],
+    ));
     if panels > 0 {
         // Mounted on the workshop's gable slopes: each installed part adds a
         // framed panel to the south row, then the north row, with rails and
         // cell faces pitched to the roof plane.
         let mut array_parts = Vec::new();
         let mut cell_parts = Vec::new();
+        let mut grid_parts = Vec::new();
         for i in 0..panels.min(8) {
             let south = i < 4;
             let (pitch, z_panel, z_cell) = if south {
@@ -975,13 +1346,39 @@ pub fn kestrel_flats(
                 roll_deg: 0.0,
                 yaw_deg: 0.0,
             });
-            cell_parts.push(PanelPart {
-                offset: [x, 0.052, z_cell],
-                size: [0.46, 0.02, 0.92],
-                pitch_deg: pitch,
-                roll_deg: 0.0,
-                yaw_deg: 0.0,
-            });
+            for row in 0..4 {
+                for column in 0..3 {
+                    cell_parts.push(PanelPart {
+                        offset: [
+                            x + (column as f32 - 1.0) * 0.145,
+                            0.052,
+                            z_cell + (row as f32 - 1.5) * 0.225,
+                        ],
+                        size: [0.134, 0.02, 0.211],
+                        pitch_deg: pitch,
+                        roll_deg: 0.0,
+                        yaw_deg: 0.0,
+                    });
+                }
+            }
+            for seam in 0..4 {
+                grid_parts.push(PanelPart {
+                    offset: [x + (seam as f32 - 1.5) * 0.145, 0.071, z_cell],
+                    size: [0.018, 0.015, 0.94],
+                    pitch_deg: pitch,
+                    roll_deg: 0.0,
+                    yaw_deg: 0.0,
+                });
+            }
+            for seam in 0..5 {
+                grid_parts.push(PanelPart {
+                    offset: [x, 0.071, z_cell + (seam as f32 - 2.0) * 0.188],
+                    size: [0.47, 0.015, 0.018],
+                    pitch_deg: pitch,
+                    roll_deg: 0.0,
+                    yaw_deg: 0.0,
+                });
+            }
         }
         scene.push(parametric(
             "rc:asset/solar-array",
@@ -997,6 +1394,14 @@ pub fn kestrel_flats(
             ParametricRecipe::PanelGroup {
                 center: [3.2, 1.94, -2.2],
                 parts: cell_parts,
+            },
+        ));
+        scene.push(parametric(
+            "rc:asset/solar-grid",
+            [0.57, 0.64, 0.66, 1.0],
+            ParametricRecipe::PanelGroup {
+                center: [3.2, 1.94, -2.2],
+                parts: grid_parts,
             },
         ));
     }
@@ -1064,7 +1469,7 @@ pub fn kestrel_flats(
     scene.push(asset(
         "rc:asset/garden-beds",
         if garden_active {
-            [0.29, 0.54, 0.19, 1.0]
+            [0.48, 0.35, 0.22, 1.0]
         } else {
             [0.36, 0.27, 0.18, 1.0]
         },
@@ -1072,9 +1477,55 @@ pub fn kestrel_flats(
             block([-4.8, 0.09, -4.2], [1.4, 0.18, 0.55]),
             block([-4.8, 0.09, -3.3], [1.4, 0.18, 0.55]),
             block([-3.0, 0.09, -4.2], [1.4, 0.18, 0.55]),
-            block([-3.0, 0.09, -3.3], [1.4, 0.18, 0.55]),
         ],
     ));
+    // One raised plot is a small water-connected growing channel. Keep its
+    // frame in the ordinary scene so offline states still show the hardware.
+    scene.push(asset(
+        "rc:asset/hydroponic-channel-frame",
+        [0.43, 0.39, 0.29, 1.0],
+        vec![
+            block([-3.62, 0.20, -3.51], [0.08, 0.34, 0.08]),
+            block([-2.38, 0.20, -3.51], [0.08, 0.34, 0.08]),
+            block([-3.62, 0.20, -3.09], [0.08, 0.34, 0.08]),
+            block([-2.38, 0.20, -3.09], [0.08, 0.34, 0.08]),
+            block([-3.0, 0.36, -3.54], [1.38, 0.10, 0.07]),
+            block([-3.0, 0.36, -3.06], [1.38, 0.10, 0.07]),
+            block([-3.67, 0.36, -3.30], [0.07, 0.10, 0.48]),
+            block([-2.33, 0.36, -3.30], [0.07, 0.10, 0.48]),
+            block([-3.0, 0.30, -3.30], [1.26, 0.035, 0.42]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/hydroponic-channel-dividers",
+        [0.78, 0.79, 0.70, 1.0],
+        vec![
+            block([-3.0, 0.405, -3.375], [1.20, 0.05, 0.025]),
+            block([-3.0, 0.405, -3.225], [1.20, 0.05, 0.025]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/hydroponic-channel-liner",
+        if water_online {
+            [0.18, 0.37, 0.34, 1.0]
+        } else {
+            [0.34, 0.32, 0.27, 1.0]
+        },
+        vec![block([-3.0, 0.33, -3.30], [1.21, 0.025, 0.40])],
+    ));
+    if water_online {
+        for (suffix, z) in [("west", -3.45), ("centre", -3.30), ("east", -3.15)] {
+            scene.push(water_surface(
+                &format!("rc:asset/hydroponic-water-{suffix}"),
+                [0.20, 0.64, 0.76, 1.0],
+                ParametricRecipe::WaterPlane {
+                    center: [-3.0, 0.408, z],
+                    size: [1.16, 0.105],
+                    subdivisions: 3,
+                },
+            ));
+        }
+    }
     scene.push(asset(
         "rc:asset/garden-fence",
         [0.55, 0.39, 0.23, 1.0],
@@ -1100,22 +1551,45 @@ pub fn kestrel_flats(
             block([4.0, 0.06, -2.65], [0.07, 0.07, 0.95]),
         ],
     ));
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/repair-van",
-        [0.57, 0.63, 0.55, 1.0],
-        vec![
-            block([0.0, 0.56, 4.55], [1.8, 0.85, 0.85]),
-            block([0.6, 0.87, 4.55], [0.55, 0.45, 0.85]),
-            block([-0.55, 0.16, 4.12], [0.28, 0.3, 0.12]),
-            block([0.55, 0.16, 4.12], [0.28, 0.3, 0.12]),
-        ],
+        [0.84, 0.81, 0.70, 1.0],
+        ParametricRecipe::Pod {
+            center: [0.0, 0.16, 4.55],
+            profile: SERVICE_VAN_PROFILE,
+            segments: 28,
+            stretch: [1.08, 1.0, 0.74],
+        },
     ));
     scene.push(asset(
         "rc:asset/van-windows",
         [0.12, 0.27, 0.34, 1.0],
         vec![
-            block([0.68, 0.9, 4.08], [0.36, 0.27, 0.04]),
-            block([-0.23, 0.8, 4.08], [0.44, 0.25, 0.04]),
+            block([0.73, 1.10, 4.20], [0.04, 0.35, 0.40]),
+            block([-0.73, 1.10, 4.20], [0.04, 0.35, 0.40]),
+            block([0.73, 0.91, 4.78], [0.04, 0.40, 0.42]),
+            block([-0.73, 0.91, 4.78], [0.04, 0.40, 0.42]),
+            block([0.0, 1.20, 4.02], [0.72, 0.30, 0.04]),
+            block([0.0, 0.83, 5.06], [0.65, 0.27, 0.04]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/van-bumpers",
+        [0.45, 0.47, 0.44, 1.0],
+        vec![
+            block([0.0, 0.34, 3.89], [1.52, 0.13, 0.12]),
+            block([0.0, 0.34, 5.20], [1.42, 0.13, 0.12]),
+            block([0.0, 0.16, 4.06], [0.94, 0.08, 0.08]),
+        ],
+    ));
+    scene.push(asset(
+        "rc:asset/van-door-trim",
+        [0.56, 0.52, 0.43, 1.0],
+        vec![
+            block([0.75, 0.78, 4.68], [0.04, 0.08, 0.11]),
+            block([-0.75, 0.78, 4.68], [0.04, 0.08, 0.11]),
+            block([0.75, 0.63, 4.48], [0.04, 0.05, 0.38]),
+            block([-0.75, 0.63, 4.48], [0.04, 0.05, 0.38]),
         ],
     ));
     scene.push(asset(
@@ -1410,25 +1884,53 @@ pub fn kestrel_flats(
         [0.19, 0.15, 0.11, 1.0],
         [-4.2, -3.3]
             .into_iter()
-            .flat_map(|z| {
-                [-4.8, -3.0]
-                    .into_iter()
-                    .map(move |x| block([x, 0.195, z], [1.24, 0.035, 0.43]))
-            })
+            .flat_map(|z| [-4.8, -3.0].into_iter().filter_map(move |x| {
+                (x == -4.8 || z == -4.2).then(|| block([x, 0.195, z], [1.24, 0.035, 0.43]))
+            }))
             .collect(),
     ));
     if garden_active {
         scene.push(asset(
             "rc:asset/garden-shoots",
             [0.27, 0.78, 0.26, 1.0],
-            [-4.2, -3.3]
+            [
+                (-4.2, &[-5.2_f32, -4.7, -4.2, -3.4, -2.9, -2.4][..]),
+                (-3.3, &[-5.2_f32, -4.7, -4.2][..]),
+            ]
                 .into_iter()
-                .flat_map(|z| {
-                    [-5.2, -4.7, -4.2, -3.4, -2.9, -2.4]
-                        .into_iter()
-                        .map(move |x| block([x, 0.36, z], [0.12, 0.31, 0.15]))
-                })
+                .flat_map(|(z, xs)| xs.iter().copied().map(move |x| block([x, 0.36, z], [0.12, 0.31, 0.15])))
                 .collect(),
+        ));
+        // Three compact cultivated heads bring a softer silhouette to the
+        // trough. They are garden crops, not a claim about native wetland flora.
+        let hydroponic_leaves = [-3.43_f32, -3.0, -2.57]
+            .into_iter()
+            .flat_map(|x| {
+                [
+                    (0.0_f32, 0.54_f32, [0.16, 0.055, 0.10], 0.0_f32),
+                    (-0.11, 0.57, [0.15, 0.05, 0.085], -27.0),
+                    (0.11, 0.57, [0.15, 0.05, 0.085], 27.0),
+                    (-0.05, 0.64, [0.13, 0.05, 0.08], 58.0),
+                    (0.05, 0.64, [0.13, 0.05, 0.08], -58.0),
+                ]
+                .into_iter()
+                .map(move |(dx, y, radii, yaw_deg)| EllipsoidInstance {
+                    center: [x + dx, y, -3.30],
+                    radii,
+                    pitch_deg: 8.0,
+                    yaw_deg,
+                    roll_deg: 0.0,
+                })
+            })
+            .collect();
+        scene.push(parametric(
+            "rc:asset/hydroponic-greens",
+            [0.29, 0.68, 0.28, 1.0],
+            ParametricRecipe::EllipsoidCluster {
+                instances: hydroponic_leaves,
+                latitude: 7,
+                longitude: 10,
+            },
         ));
         for (id, x, z, hue) in [
             (
@@ -1456,6 +1958,9 @@ pub fn kestrel_flats(
                 [0.28, 0.55, 0.31, 1.0],
             ),
         ] {
+            if id.ends_with("chard-b") {
+                continue;
+            }
             scene.push(parametric(
                 id,
                 hue,
@@ -1792,19 +2297,19 @@ pub fn kestrel_flats(
         ));
     }
     for (id, center) in [
-        ("rc:asset/van-wheel-fl", [-0.58, 0.2, 4.1]),
-        ("rc:asset/van-wheel-fr", [0.58, 0.2, 4.1]),
-        ("rc:asset/van-wheel-rl", [-0.58, 0.2, 5.0]),
-        ("rc:asset/van-wheel-rr", [0.58, 0.2, 5.0]),
+        ("rc:asset/van-wheel-fl", [-0.77, 0.26, 4.08]),
+        ("rc:asset/van-wheel-fr", [0.77, 0.26, 4.08]),
+        ("rc:asset/van-wheel-rl", [-0.77, 0.26, 5.00]),
+        ("rc:asset/van-wheel-rr", [0.77, 0.26, 5.00]),
     ] {
         scene.push(parametric(
             id,
             [0.08, 0.10, 0.10, 1.0],
-            ParametricRecipe::Sphere {
+            ParametricRecipe::WheelX {
                 center,
-                radius: 0.23,
-                latitude: 5,
-                longitude: 8,
+                radius: 0.27,
+                width: 0.16,
+                segments: 24,
             },
         ));
     }
@@ -1927,6 +2432,63 @@ pub fn kestrel_flats(
             },
         ));
     }
+    // Individually oriented leaf forms break up the distant gum blobs. Each
+    // tree is a merged Qualia mesh, with seeded geometry authored in metres.
+    for (id, center, color, phase) in [
+        (
+            "rc:asset/gum-foliage-nw",
+            [-6.15, 2.52, -5.48],
+            [0.34, 0.49, 0.36, 1.0],
+            0.12,
+        ),
+        (
+            "rc:asset/gum-foliage-ne",
+            [6.12, 2.54, -5.22],
+            [0.36, 0.51, 0.37, 1.0],
+            0.63,
+        ),
+        (
+            "rc:asset/gum-foliage-sw",
+            [-6.14, 2.51, 5.16],
+            [0.33, 0.48, 0.35, 1.0],
+            0.37,
+        ),
+        (
+            "rc:asset/gum-foliage-se",
+            [6.12, 2.50, 4.81],
+            [0.35, 0.50, 0.36, 1.0],
+            0.88,
+        ),
+    ] {
+        let mut leaves = Vec::with_capacity(24);
+        for branch in 0..8 {
+            let angle = phase + branch as f32 * std::f32::consts::TAU / 8.0;
+            for tier in 0..3 {
+                let reach = 0.20 + tier as f32 * 0.16;
+                let droop = tier as f32 * 0.035;
+                leaves.push(EllipsoidInstance {
+                    center: [
+                        center[0] + angle.cos() * reach,
+                        center[1] + 0.16 - droop,
+                        center[2] + angle.sin() * reach,
+                    ],
+                    radii: [0.047, 0.15 - tier as f32 * 0.012, 0.038],
+                    pitch_deg: -angle.sin() * 28.0,
+                    yaw_deg: angle.to_degrees(),
+                    roll_deg: angle.cos() * 31.0,
+                });
+            }
+        }
+        scene.push(parametric(
+            id,
+            color,
+            ParametricRecipe::EllipsoidCluster {
+                instances: leaves,
+                latitude: 7,
+                longitude: 10,
+            },
+        ));
+    }
     for (id, center, color) in [
         (
             "rc:asset/wattle-bloom-nw",
@@ -1960,130 +2522,325 @@ pub fn kestrel_flats(
     const COAT_PROFILE: &[[f32; 2]] = &[
         [0.0, -0.34],
         [0.23, -0.34],
-        [0.34, -0.20],
-        [0.30, 0.15],
-        [0.19, 0.35],
+        [0.31, -0.22],
+        [0.29, 0.15],
+        [0.18, 0.35],
         [0.0, 0.35],
     ];
-    for (body_id, head_id, feet_id, arm_id, face_id, hair_id, x, z, coat) in [
+    let residents = [
         (
             "rc:asset/resident-ada-coat",
             "rc:asset/resident-ada-head",
             "rc:asset/resident-ada-boots",
+            "rc:asset/resident-ada-pants",
             "rc:asset/resident-ada-arms",
+            "rc:asset/resident-ada-hands",
             "rc:asset/resident-ada-face",
             "rc:asset/resident-ada-hair",
             -2.2,
             1.8,
             [0.95, 0.35, 0.38, 1.0],
+            [0.23, 0.27, 0.32, 1.0],
         ),
         (
             "rc:asset/resident-bo-coat",
             "rc:asset/resident-bo-head",
             "rc:asset/resident-bo-boots",
+            "rc:asset/resident-bo-pants",
             "rc:asset/resident-bo-arms",
+            "rc:asset/resident-bo-hands",
             "rc:asset/resident-bo-face",
             "rc:asset/resident-bo-hair",
             1.0,
             0.4,
             [0.35, 0.66, 0.85, 1.0],
+            [0.27, 0.34, 0.39, 1.0],
         ),
         (
             "rc:asset/resident-cam-coat",
             "rc:asset/resident-cam-head",
             "rc:asset/resident-cam-boots",
+            "rc:asset/resident-cam-pants",
             "rc:asset/resident-cam-arms",
+            "rc:asset/resident-cam-hands",
             "rc:asset/resident-cam-face",
             "rc:asset/resident-cam-hair",
             -2.0,
             -2.0,
             [0.91, 0.67, 0.29, 1.0],
+            [0.38, 0.31, 0.20, 1.0],
         ),
         (
             "rc:asset/resident-dev-coat",
             "rc:asset/resident-dev-head",
             "rc:asset/resident-dev-boots",
+            "rc:asset/resident-dev-pants",
             "rc:asset/resident-dev-arms",
+            "rc:asset/resident-dev-hands",
             "rc:asset/resident-dev-face",
             "rc:asset/resident-dev-hair",
             3.5,
             -0.6,
             [0.62, 0.46, 0.83, 1.0],
+            [0.29, 0.28, 0.36, 1.0],
         ),
         (
             "rc:asset/resident-eve-coat",
             "rc:asset/resident-eve-head",
             "rc:asset/resident-eve-boots",
+            "rc:asset/resident-eve-pants",
             "rc:asset/resident-eve-arms",
+            "rc:asset/resident-eve-hands",
             "rc:asset/resident-eve-face",
             "rc:asset/resident-eve-hair",
             -2.35,
             4.1,
             [0.83, 0.41, 0.34, 1.0],
+            [0.34, 0.25, 0.20, 1.0],
         ),
         (
             "rc:asset/resident-finn-coat",
             "rc:asset/resident-finn-head",
             "rc:asset/resident-finn-boots",
+            "rc:asset/resident-finn-pants",
             "rc:asset/resident-finn-arms",
+            "rc:asset/resident-finn-hands",
             "rc:asset/resident-finn-face",
             "rc:asset/resident-finn-hair",
             -1.6,
             4.4,
             [0.44, 0.56, 0.40, 1.0],
+            [0.25, 0.32, 0.23, 1.0],
         ),
-    ] {
+    ];
+    const SKIN_TONES: [[f32; 4]; 6] = [
+        [0.78, 0.52, 0.34, 1.0],
+        [0.44, 0.29, 0.20, 1.0],
+        [0.64, 0.40, 0.27, 1.0],
+        [0.84, 0.67, 0.49, 1.0],
+        [0.91, 0.72, 0.53, 1.0],
+        [0.55, 0.35, 0.23, 1.0],
+    ];
+    const HAIR_TONES: [[f32; 4]; 6] = [
+        [0.24, 0.10, 0.08, 1.0],
+        [0.14, 0.13, 0.12, 1.0],
+        [0.31, 0.20, 0.13, 1.0],
+        [0.53, 0.48, 0.39, 1.0],
+        [0.19, 0.12, 0.09, 1.0],
+        [0.59, 0.40, 0.20, 1.0],
+    ];
+    for (resident_index, resident) in residents.into_iter().enumerate() {
+        let (
+            body_id,
+            head_id,
+            feet_id,
+            pants_id,
+            arm_id,
+            hand_id,
+            face_id,
+            hair_id,
+            x,
+            z,
+            coat,
+            pants,
+        ) = resident;
+        let skin = SKIN_TONES[resident_index];
+        let hair_color = HAIR_TONES[resident_index];
         scene.push(parametric(
             body_id,
             coat,
             ParametricRecipe::Revolve {
-                center: [x, 0.58, z],
+                center: [x, 0.72, z],
                 profile: COAT_PROFILE,
-                segments: 16,
+                segments: 24,
             },
         ));
         scene.push(parametric(
             head_id,
-            [0.94, 0.68, 0.47, 1.0],
-            ParametricRecipe::Sphere {
-                center: [x, 1.04, z],
-                radius: 0.23,
-                latitude: 8,
+            skin,
+            ParametricRecipe::Ellipsoid {
+                center: [x, 1.23, z],
+                radii: [0.17, 0.22, 0.17],
+                latitude: 12,
+                longitude: 18,
+            },
+        ));
+        let resident_key = body_id
+            .strip_prefix("rc:asset/resident-")
+            .and_then(|name| name.strip_suffix("-coat"))
+            .unwrap_or("community-member");
+        scene.push(parametric(
+            &format!("rc:asset/resident-{resident_key}-neck"),
+            skin,
+            ParametricRecipe::Ellipsoid {
+                center: [x, 1.035, z - 0.005],
+                radii: [0.078, 0.115, 0.078],
+                latitude: 10,
+                longitude: 14,
+            },
+        ));
+        scene.push(parametric(
+            feet_id,
+            [0.31, 0.35, 0.47, 1.0],
+            ParametricRecipe::EllipsoidCluster {
+                instances: vec![
+                    EllipsoidInstance {
+                        center: [x - 0.12, 0.095, z + 0.075],
+                        radii: [0.12, 0.085, 0.18],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                    EllipsoidInstance {
+                        center: [x + 0.12, 0.095, z + 0.075],
+                        radii: [0.12, 0.085, 0.18],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                ],
+                latitude: 9,
                 longitude: 12,
             },
         ));
-        scene.push(asset(
-            feet_id,
-            [0.31, 0.35, 0.47, 1.0],
-            vec![
-                block([x - 0.12, 0.16, z], [0.14, 0.32, 0.17]),
-                block([x + 0.12, 0.16, z], [0.14, 0.32, 0.17]),
-            ],
+        scene.push(parametric(
+            pants_id,
+            pants,
+            ParametricRecipe::LimbCluster {
+                center: [x, 0.0, z],
+                limbs: vec![
+                    limb_segment([-0.12, 0.48, 0.0], [-0.13, 0.10, 0.04], 0.092, 0.057),
+                    limb_segment([0.12, 0.48, 0.0], [0.13, 0.10, 0.04], 0.092, 0.057),
+                ],
+                radial_segments: 12,
+            },
         ));
-        scene.push(asset(
+        let (left_elbow, left_hand, right_elbow, right_hand) =
+            community_work_pose(resident_index);
+        let left_shoulder = [-0.29, 0.93, 0.0];
+        let right_shoulder = [0.29, 0.93, 0.0];
+        scene.push(parametric(
             arm_id,
             coat,
-            vec![
-                block([x - 0.35, 0.65, z], [0.16, 0.48, 0.19]),
-                block([x + 0.35, 0.65, z], [0.16, 0.48, 0.19]),
-            ],
+            ParametricRecipe::LimbCluster {
+                center: [x, 0.0, z],
+                limbs: vec![
+                    limb_segment(left_shoulder, left_elbow, 0.078, 0.063),
+                    limb_segment(left_elbow, left_hand, 0.063, 0.048),
+                    limb_segment(right_shoulder, right_elbow, 0.078, 0.063),
+                    limb_segment(right_elbow, right_hand, 0.063, 0.048),
+                ],
+                radial_segments: 12,
+            },
         ));
-        scene.push(asset(
+        scene.push(parametric(
+            hand_id,
+            skin,
+            ParametricRecipe::EllipsoidCluster {
+                instances: vec![
+                    EllipsoidInstance {
+                        center: [x + left_hand[0], left_hand[1], z + left_hand[2]],
+                        radii: [0.066, 0.073, 0.061],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                    EllipsoidInstance {
+                        center: [x + right_hand[0], right_hand[1], z + right_hand[2]],
+                        radii: [0.066, 0.073, 0.061],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                ],
+                latitude: 9,
+                longitude: 12,
+            },
+        ));
+        scene.push(parametric(
             face_id,
             [0.12, 0.21, 0.26, 1.0],
-            vec![
-                block([x - 0.085, 1.07, z + 0.215], [0.035, 0.045, 0.025]),
-                block([x + 0.085, 1.07, z + 0.215], [0.035, 0.045, 0.025]),
-            ],
+            ParametricRecipe::EllipsoidCluster {
+                instances: vec![
+                    EllipsoidInstance {
+                        center: [x - 0.055, 1.26, z + 0.154],
+                        radii: [0.016, 0.020, 0.012],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                    EllipsoidInstance {
+                        center: [x + 0.055, 1.26, z + 0.154],
+                        radii: [0.016, 0.020, 0.012],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                    EllipsoidInstance {
+                        center: [x - 0.055, 1.30, z + 0.151],
+                        radii: [0.033, 0.009, 0.010],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                    EllipsoidInstance {
+                        center: [x + 0.055, 1.30, z + 0.151],
+                        radii: [0.033, 0.009, 0.010],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                    EllipsoidInstance {
+                        center: [x, 1.155, z + 0.170],
+                        radii: [0.034, 0.008, 0.009],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                ],
+                latitude: 7,
+                longitude: 10,
+            },
+        ));
+        scene.push(parametric(
+            &format!("rc:asset/resident-{resident_key}-nose"),
+            skin,
+            ParametricRecipe::Ellipsoid {
+                center: [x, 1.205, z + 0.176],
+                radii: [0.024, 0.038, 0.028],
+                latitude: 8,
+                longitude: 10,
+            },
         ));
         scene.push(parametric(
             hair_id,
-            [0.20, 0.22, 0.24, 1.0],
-            ParametricRecipe::Sphere {
-                center: [x, 1.23, z - 0.035],
-                radius: 0.22,
-                latitude: 8,
-                longitude: 12,
+            hair_color,
+            ParametricRecipe::EllipsoidCluster {
+                instances: vec![
+                    EllipsoidInstance {
+                        center: [x, 1.405, z - 0.045],
+                        radii: [0.176, 0.087, 0.155],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 0.0,
+                    },
+                    EllipsoidInstance {
+                        center: [x - 0.135, 1.315, z - 0.035],
+                        radii: [0.061, 0.118, 0.135],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: -8.0,
+                    },
+                    EllipsoidInstance {
+                        center: [x + 0.135, 1.315, z - 0.035],
+                        radii: [0.061, 0.118, 0.135],
+                        pitch_deg: 0.0,
+                        yaw_deg: 0.0,
+                        roll_deg: 8.0,
+                    },
+                ],
+                latitude: 10,
+                longitude: 14,
             },
         ));
     }
@@ -2350,17 +3107,18 @@ pub fn saltwind_reach(
             },
         ));
     }
-    scene.push(asset(
+    scene.push(water_surface(
         "rc:asset/channel",
         if high_tide {
             [0.18, 0.48, 0.66, 1.0]
         } else {
             [0.23, 0.67, 0.75, 1.0]
         },
-        vec![block(
-            [8.0, if high_tide { 0.04 } else { -0.06 }, 0.0],
-            [2.0, if high_tide { 0.20 } else { 0.08 }, 14.0],
-        )],
+        ParametricRecipe::WaterPlane {
+            center: [8.0, if high_tide { 0.08 } else { 0.0 }, 0.0],
+            size: [2.0, 14.0],
+            subdivisions: 8,
+        },
     ));
     scene.push(asset(
         "rc:asset/canal-reeds",
@@ -2935,10 +3693,14 @@ pub fn northern_highlands() -> Vec<AssetRecipe> {
             },
         ));
     }
-    scene.push(asset(
+    scene.push(water_surface(
         "rc:asset/highland-creek",
         [0.28, 0.63, 0.73, 1.0],
-        vec![block([8.0, 0.025, -14.0], [2.0, 0.07, 14.0])],
+        ParametricRecipe::WaterPlane {
+            center: [8.0, 0.02, -14.0],
+            size: [2.0, 14.0],
+            subdivisions: 8,
+        },
     ));
     for (id, x, z, radii) in [
         (

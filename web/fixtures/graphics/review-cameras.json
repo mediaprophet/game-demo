@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "fixtureSet": "community-grounds-review-v1",
+  "defaults": {
+    "worldSeedFile": "seed.ttl",
+    "worldActionsApplied": [],
+    "characterRoster": "authored seed roster; do not load or save OPFS characters",
+    "ecologyProfileId": "se-corridor-reference",
+    "artStyle": "Community Grounds",
+    "artStyleIndex": 2,
+    "skyPreset": 1,
+    "lighting": [0.58, 0.76, 0.55, 1.32, 0.74],
+    "qualityTier": "automatic device admission",
+    "vehicleRigIndex": 0,
+    "animationTimeSeconds": 0,
+    "viewport": "record the actual viewport; 1920x1080 is the reference comparison size"
+  },
+  "views": {
+    "reference-overview": {
+      "title": "Community Grounds overview",
+      "region": "Kestrel Flats",
+      "territoryId": "kestrel",
+      "target": [0, 0, 0],
+      "yaw": 0.64,
+      "pitch": 0.48,
+      "zoom": 1.22
+    },
+    "workshop-human-scale": {
+      "title": "Workshop at human scale",
+      "region": "Kestrel Flats",
+      "territoryId": "kestrel",
+      "target": [3.15, 1.05, -1.65],
+      "yaw": 0.46,
+      "pitch": 0.2,
+      "zoom": 0.64
+    },
+    "garden-resident": {
+      "title": "Garden and resident",
+      "region": "Kestrel Flats",
+      "territoryId": "kestrel",
+      "target": [-3.72, 0.72, -3.48],
+      "yaw": 0.66,
+      "pitch": 0.26,
+      "zoom": 0.68
+    },
+    "camp-vehicle": {
+      "title": "Mobile camp and touring rig",
+      "region": "Kestrel Flats",
+      "territoryId": "kestrel",
+      "target": [2.35, 0.9, 5.25],
+      "yaw": 1.02,
+      "pitch": 0.22,
+      "zoom": 0.69
+    },
+    "saltwind-water-bridge": {
+      "title": "Saltwind water and bridge",
+      "region": "Saltwind Reach",
+      "territoryId": "saltwind",
+      "target": [16, 0.58, -1.25],
+      "yaw": 0.62,
+      "pitch": 0.24,
+      "zoom": 0.72
+    },
+    "highlands-panorama": {
+      "title": "Northern highlands panorama",
+      "region": "Northern Highlands",
+      "territoryId": "highlands",
+      "target": [8, 1.1, -14],
+      "yaw": 0.62,
+      "pitch": 0.48,
+      "zoom": 1.08
+    },
+    "local-aerial-drive": {
+      "title": "Aerial route-follow drive view",
+      "region": "Fictional Kestrel Flats demo road",
+      "territoryId": "kestrel",
+      "target": [-5.45, 0.35, 0.48],
+      "yaw": -1.57079632679,
+      "pitch": 1.12,
+      "zoom": 3.8,
+      "cameraMode": "drive",
+      "driveView": "aerial"
+    },
+    "fictional-place-navigation": {
+      "title": "Fictional locality and linked-site navigation",
+      "region": "Fictional local place graph",
+      "territoryId": "kestrel",
+      "hudPage": "places",
+      "target": [0, 0, 0],
+      "yaw": 0.64,
+      "pitch": 0.48,
+      "zoom": 1.42
+    },
+    "interpersonal-choice-mode": {
+      "title": "Resident conversation choice mode",
+      "region": "Kestrel Flats · fictional scene",
+      "territoryId": "kestrel",
+      "hudPage": "activities",
+      "activityId": "community-conversation",
+      "target": [0, 0.9, -0.6],
+      "yaw": 0.55,
+      "pitch": 0.28,
+      "zoom": 0.88
+    },
+    "workshop-repair-mode": {
+      "title": "Workshop repair situation mode",
+      "region": "Kestrel Flats · fictional scene",
+      "territoryId": "kestrel",
+      "hudPage": "activities",
+      "activityId": "workshop-repair",
+      "target": [3.15, 1.05, -1.65],
+      "yaw": 0.46,
+      "pitch": 0.2,
+      "zoom": 0.74
+    }
+  },
+  "showcaseRoute": {
+    "durationSeconds": 30,
+    "readOnly": true,
+    "views": [
+      "reference-overview",
+      "workshop-human-scale",
+        "fictional-place-navigation",
+        "interpersonal-choice-mode",
+        "workshop-repair-mode",
+      "garden-resident",
+      "camp-vehicle",
+      "saltwind-water-bridge",
+      "highlands-panorama",
+      "local-aerial-drive"
+    ]
+  }
+}

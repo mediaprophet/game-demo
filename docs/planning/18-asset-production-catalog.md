@@ -1,5 +1,11 @@
 # Maslows Challenge: Asset Production Catalog
 
+**Production direction, 2026-10-11:** Use [35 — Community Grounds graphics
+overhaul](35-community-grounds-graphics-overhaul.md) for the current reference,
+model specifications, replacement inventory and acceptance criteria. The
+counts and upstream statuses below are historical; regenerate the inventory
+from current manifests before implementing the overhaul.
+
 Status: production backlog and first source batch, 2026-10-03. Follow the
 [RTS uplift blueprint](17-rts-aaa-uplift-blueprint.md) and the
 [QualiaDB-only contract](13-qualiadb-only-development-contract.md). This

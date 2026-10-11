@@ -1,0 +1,26 @@
+# Game graphics capability matrix
+
+Inventory current symbols on the pinned Qualia revision before adding any call. The entries below record what was visible in source inspection on 2026-10-11; they are deliberately conservative.
+
+| Capability | Existing inspection evidence | Game status | Required next proof |
+|---|---|---|---|
+| Camera, lighting, sky, AO and .10d load | GamePortal wraps Qualia camera/sky/light/AO/shadow controls; game submits camera and style/quality state | Bound; visual result unreviewed | Record the six camera frames on named browser/backend/device configurations |
+| HMC mesh | Game loader verifies the HMC manifest and referenced bundles, decodes scene assets, preserves authored frames and reports loaded meshes/water | Pack validated; browser residency unreviewed | Capture actual HMC scene load, material bindings, stable picks and campaign-state switching |
+| Material/texture package | Recipes export stable material families and roles; Qualia decodes 10D geometry and routes water. HMC texture dependencies/round-trip are still open | Materials partial; textures unverified | Demonstrate real maps, colour space, roughness/normal/alpha and dependency residency after hydration |
+| Shadows | Game quality bridge calls Qualia-owned shadow enablement when admitted on high quality | Bound conditionally; effect unreviewed | Compare admitted and fallback browser frames and record the renderer receipt |
+| Screen-space AO | Game quality bridge controls enablement, radius, strength, bias and sample count through Qualia | Bound conditionally; effect unreviewed | Capture matched on/off frames and record availability for each backend |
+| Temporal AA | Game asks Qualia for a temporal schedule and carries actual producer/execution receipts; the ordinary-tick fallback remains explicit | Scheduling bound; moving geometry acceptance open | Show actual producer history and multi-frame execution on an animated fixture; otherwise preserve ordinary tick |
+| Environment probe | GamePortal exposes Qualia's environment-probe-data setter; no authored probe dataset is currently submitted by the game | API exposed, content not integrated | Supply bounded authored probe data through the same game-owned renderer and compare a scene frame |
+| Water | Game splits `renderRole=water` geometry into Qualia's water pass and sets surface colour/alpha/wave controls while loading scene assets | Static geometry/pass bound; campaign flow and shoreline motion unreviewed | Capture shoreline, state transitions, depth interaction and actual wave presentation in the game path |
+| Vegetation | Qualia has a bounded collider/wind evaluator and instancing/culling APIs; game recipes currently load static merged foliage meshes | Engine capability available; game motion not bound | Route bounded wind/collider state into foliage instances and show movement, capacity and fallback |
+| Character rigs and clips | Current game residents/fauna use separate authored mesh parts; no serialized animated-skin playback is wired through GamePortal/HMC | Static models only | Add the supported rig/clip export/import path and record deformation, contact, attachment and clip transitions |
+| LOD, instancing and terrain streaming | Game authors Qualia-built heightfields and validated fixed scene packs; the route/world is still a bounded illustrative fixture | Static terrain bound; regional streaming/LOD unimplemented | Connect Qualia spatial pack APIs, then record adjacent seam, visibility, LOD and bounded-memory results |
+| VibeScript composition | Game parser builds one shape for sphere/cylinder/water/vegetation/box/probe | Partial | Bind authored data to production scene/material/renderer APIs; probe currently maps to a sphere recipe |
+| Backend recovery and quality | Portal tier/recovery controls and browser capability code exist | Partial | User-facing tier, truthful receipt, resize/loss/recovery playback in game |
+| Direct Drive feedback | Qualia HUD supports colored labels/meters and a rear-view mirror widget; game displays simulated engine temperatures and following traffic | Implemented as an illustrative driving fixture | Review rising/cooling alerts, towing occlusion, and bend reveal in actual rendered captures |
+| Graphics review fixtures | Six camera presets live in a versioned JSON fixture; review mode pins style/rig/lighting/ecology and disables persistence | Deterministic setup implemented | Capture all six views at a recorded viewport/backend and compare them to the reference rubric |
+| Profile-selected Australian flora | `flora.rs` authors five Australian plant groups through Qualia mesh/10D tooling; profile string keys choose the groups before scene compilation | Models exported; corridor mix remains illustrative | Review all five silhouettes and have each geographic pack select only source-supported local taxa |
+
+The Vibe host's Render.* invocation must be traced through the full host, active game instance and WASM renderer. A successful host handler test does not demonstrate that it changes the GamePortal canvas.
+
+When a feature is complete, replace the next-proof text with exact full engine/game SHAs, public symbol, exported WASM API, fixture, browser/backend and observable result.
