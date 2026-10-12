@@ -1,7 +1,21 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "se-corridor-reference",
   "name": "South-east Australian travel corridor",
+  "taxonConvention": {
+    "canonicalId": "gbifKey",
+    "rationale": "QualiaDB engine interop ID is the GBIF backbone taxon key (u64) — see crates/qualia-core-db/src/domains/geospatial/adapters/gbif_adapter.rs and audio/bioacoustics.rs::taxon_id. Scientific-name strings are display/lookup convenience only; they are NOT identity (homonyms, synonyms, rank moves).",
+    "gbifIriPattern": "https://www.gbif.org/species/{gbifKey}",
+    "ontologyBindings": {
+      "darwinCore": "urn:qualia:ontology:dwc",
+      "auNsl": "urn:qualia:ontology:aunsl",
+      "tern": "urn:qualia:ontology:tern",
+      "note": "dwc:Taxon / dwc:scientificName / dwc:taxonID terms apply at pack-compile time; auNSL covers flora nomenclature — fauna binding rides GBIF backbone until an AFD source is registered (G51)."
+    },
+    "rankHonesty": "taxon.rank reports the GBIF backbone rank verbatim, including backbone quirks — see the snake entry. Do not silently 'fix' ranks; record the backbone value and a note.",
+    "resolvedAt": "2026-10-12",
+    "resolvedVia": "https://api.gbif.org/v1/species/match (GBIF backbone v1)"
+  },
   "scope": {
     "kind": "broad-user-described-corridor",
     "anchors": [
@@ -21,6 +35,13 @@
   "roadHazards": [
     {
       "taxonId": "Capra hircus",
+      "taxon": {
+        "gbifKey": 2441056,
+        "gbifScientificName": "Capra hircus Linnaeus, 1758",
+        "rank": "SPECIES",
+        "confidence": 99,
+        "iri": "https://www.gbif.org/species/2441056"
+      },
       "commonName": "goat",
       "context": "user-reported road hazard in some inland parts of the corridor",
       "placement": "illustrative demo road actor; not an exact real-world occurrence",
@@ -29,6 +50,13 @@
     },
     {
       "taxonId": "Equus caballus",
+      "taxon": {
+        "gbifKey": 2440886,
+        "gbifScientificName": "Equus caballus Linnaeus, 1758",
+        "rank": "SPECIES",
+        "confidence": 99,
+        "iri": "https://www.gbif.org/species/2440886"
+      },
       "commonName": "horse",
       "context": "user-reported road hazard in some inland parts of the corridor",
       "placement": "illustrative demo road actor; not an exact real-world occurrence",
@@ -37,6 +65,13 @@
     },
     {
       "taxonId": "Oryctolagus cuniculus",
+      "taxon": {
+        "gbifKey": 2436940,
+        "gbifScientificName": "Oryctolagus cuniculus (Linnaeus, 1758)",
+        "rank": "SPECIES",
+        "confidence": 99,
+        "iri": "https://www.gbif.org/species/2436940"
+      },
       "commonName": "rabbit",
       "context": "user-reported road hazard across parts of the corridor",
       "placement": "illustrative demo road actor; not an exact real-world occurrence",
@@ -45,6 +80,13 @@
     },
     {
       "taxonId": "Macropodidae",
+      "taxon": {
+        "gbifKey": 9372,
+        "gbifScientificName": "Macropodidae",
+        "rank": "FAMILY",
+        "confidence": 94,
+        "iri": "https://www.gbif.org/species/9372"
+      },
       "commonName": "kangaroo",
       "context": "user-reported road hazard; local species varies by place",
       "placement": "illustrative demo road actor; species unresolved pending place profile",
@@ -53,6 +95,13 @@
     },
     {
       "taxonId": "Macropodidae",
+      "taxon": {
+        "gbifKey": 9372,
+        "gbifScientificName": "Macropodidae",
+        "rank": "FAMILY",
+        "confidence": 94,
+        "iri": "https://www.gbif.org/species/9372"
+      },
       "commonName": "wallaby",
       "context": "user-reported road hazard; local species varies by place",
       "placement": "illustrative demo road actor; species unresolved pending place profile",
@@ -61,6 +110,13 @@
     },
     {
       "taxonId": "Vombatidae",
+      "taxon": {
+        "gbifKey": 9376,
+        "gbifScientificName": "Vombatidae",
+        "rank": "FAMILY",
+        "confidence": 94,
+        "iri": "https://www.gbif.org/species/9376"
+      },
       "commonName": "wombat",
       "context": "user-reported road hazard; local species varies by place",
       "placement": "illustrative demo road actor; species unresolved pending place profile",
@@ -69,6 +125,13 @@
     },
     {
       "taxonId": "Cervidae",
+      "taxon": {
+        "gbifKey": 5298,
+        "gbifScientificName": "Cervidae",
+        "rank": "FAMILY",
+        "confidence": 94,
+        "iri": "https://www.gbif.org/species/5298"
+      },
       "commonName": "deer",
       "context": "user-reported road hazard; local species varies by place",
       "placement": "illustrative demo road actor; species unresolved pending place profile",
@@ -77,6 +140,13 @@
     },
     {
       "taxonId": "Corvidae",
+      "taxon": {
+        "gbifKey": 5235,
+        "gbifScientificName": "Corvidae",
+        "rank": "FAMILY",
+        "confidence": 94,
+        "iri": "https://www.gbif.org/species/5235"
+      },
       "commonName": "crows feeding on roadkill",
       "context": "user-reported roadside scene around animals already hit on roads",
       "placement": "illustrative roadside carcass and scavenger scene; non-graphic and not an exact sighting",
@@ -85,6 +155,13 @@
     },
     {
       "taxonId": "Dacelo novaeguineae",
+      "taxon": {
+        "gbifKey": 2475648,
+        "gbifScientificName": "Dacelo novaeguineae (Hermann, 1783)",
+        "rank": "SPECIES",
+        "confidence": 99,
+        "iri": "https://www.gbif.org/species/2475648"
+      },
       "commonName": "laughing kookaburra",
       "context": "user-reported roadside fauna",
       "placement": "illustrative roadside perch; not an exact real-world occurrence",
@@ -93,6 +170,14 @@
     },
     {
       "taxonId": "Serpentes",
+      "taxon": {
+        "gbifKey": 11205692,
+        "gbifScientificName": "Serpentes",
+        "rank": "FAMILY",
+        "rankNote": "GBIF backbone files Serpentes at family rank (key 11205692); standard taxonomy treats it as suborder under Squamata. Recorded verbatim per rankHonesty.",
+        "confidence": 94,
+        "iri": "https://www.gbif.org/species/11205692"
+      },
       "commonName": "snake",
       "context": "user-reported road hazard; local species varies by place",
       "placement": "illustrative road-edge actor; species unresolved pending place profile",
@@ -101,11 +186,120 @@
     },
     {
       "taxonId": "Varanidae",
+      "taxon": {
+        "gbifKey": 5023,
+        "gbifScientificName": "Varanidae",
+        "rank": "FAMILY",
+        "confidence": 94,
+        "iri": "https://www.gbif.org/species/5023"
+      },
       "commonName": "goanna",
       "context": "user-reported road hazard; local species varies by place",
       "placement": "illustrative road-edge actor; species unresolved pending place profile",
       "evidenceStatus": "player-provided regional context",
       "renderKey": "goanna"
+    }
+  ],
+  "floraTaxa": [
+    {
+      "taxon": {
+        "gbifKey": 7493935,
+        "gbifScientificName": "Eucalyptus L'Hér.",
+        "rank": "GENUS",
+        "confidence": 95,
+        "iri": "https://www.gbif.org/species/7493935"
+      },
+      "commonName": "eucalypt gum",
+      "placement": "generic mature gum model family; species unresolved pending place profile",
+      "evidenceStatus": "illustrative flora family",
+      "renderKey": "eucalypt-gum",
+      "assetFamily": "rc:asset/flora/eucalypt-gum",
+      "accrualNote": "candidate consumer of modalities/accrual.rs — mature/centennial gums carry IrreversibilityClass-relevant structure (hollows = horizon-exceeding)"
+    },
+    {
+      "taxon": {
+        "gbifKey": 2978604,
+        "gbifScientificName": "Acacia pycnantha Benth.",
+        "rank": "SPECIES",
+        "confidence": 99,
+        "iri": "https://www.gbif.org/species/2978604"
+      },
+      "commonName": "golden wattle",
+      "placement": "illustrative flora model; not an exact real-world occurrence",
+      "evidenceStatus": "illustrative flora family",
+      "renderKey": "golden-wattle",
+      "assetFamily": "rc:asset/flora/golden-wattle"
+    },
+    {
+      "taxon": {
+        "gbifKey": 3173347,
+        "gbifScientificName": "Callistemon R.Br.",
+        "rank": "GENUS",
+        "confidence": 95,
+        "iri": "https://www.gbif.org/species/3173347"
+      },
+      "commonName": "coastal bottlebrush",
+      "placement": "genus-level model family; species unresolved pending place profile",
+      "evidenceStatus": "illustrative flora family",
+      "renderKey": "coastal-bottlebrush",
+      "assetFamily": "rc:asset/flora/coastal-bottlebrush"
+    },
+    {
+      "taxon": {
+        "gbifKey": 8399031,
+        "gbifScientificName": "Banksia L.f.",
+        "rank": "GENUS",
+        "confidence": 95,
+        "iri": "https://www.gbif.org/species/8399031"
+      },
+      "commonName": "banksia",
+      "placement": "genus-level model family; species unresolved pending place profile",
+      "evidenceStatus": "illustrative flora family",
+      "renderKey": "banksia",
+      "assetFamily": "rc:asset/flora/banksia"
+    },
+    {
+      "taxon": {
+        "gbifKey": 2779409,
+        "gbifScientificName": "Xanthorrhoea Sm.",
+        "rank": "GENUS",
+        "confidence": 95,
+        "iri": "https://www.gbif.org/species/2779409"
+      },
+      "commonName": "grass tree",
+      "placement": "genus-level model family; species unresolved pending place profile",
+      "evidenceStatus": "illustrative flora family",
+      "renderKey": "grass-tree",
+      "assetFamily": "rc:asset/flora/grass-tree",
+      "accrualNote": "exceptionally slow accrual — Xanthorrhoea growth ~1–2cm/yr; mature specimens carry horizon-exceeding time-depth"
+    },
+    {
+      "taxon": {
+        "gbifKey": 10651755,
+        "gbifScientificName": "Atriplex L.",
+        "rank": "GENUS",
+        "confidence": 95,
+        "iri": "https://www.gbif.org/species/10651755"
+      },
+      "commonName": "saltbush",
+      "placement": "genus-level model family; species unresolved pending place profile",
+      "evidenceStatus": "illustrative flora family",
+      "renderKey": "saltbush",
+      "assetFamily": "rc:asset/flora/saltbush"
+    },
+    {
+      "taxon": {
+        "gbifKey": 2765832,
+        "gbifScientificName": "Anigozanthos Labill.",
+        "rank": "GENUS",
+        "confidence": 96,
+        "iri": "https://www.gbif.org/species/2765832"
+      },
+      "commonName": "kangaroo paw",
+      "placement": "genus-level model family; species unresolved pending place profile",
+      "evidenceStatus": "illustrative flora family",
+      "renderKey": "kangaroo-paw",
+      "assetFamily": "rc:asset/flora/kangaroo-paw"
     }
   ],
   "render": {

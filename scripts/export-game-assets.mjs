@@ -22,6 +22,28 @@ await writeFile(join(publicProfiles, 'se-corridor-reference.json'),
 set_fauna_selection(JSON.stringify(ecologyProfile.render.faunaSelection));
 set_flora_selection(JSON.stringify(ecologyProfile.render.floraSelection || []));
 
+// Taxon bindings (schemaVersion 2): canonical identity is the GBIF backbone
+// key — the same u64 the QualiaDB engine uses (gbif_adapter, bioacoustics
+// taxon_id). Scientific names are display labels, not identity. Fauna asset
+// instance ids embed the renderKey token (inland-goat-01, road-kangaroo-01);
+// flora assets prefix-match `rc:asset/flora/<renderKey>` via assetFamily.
+const taxonBindings = {};
+for (const h of ecologyProfile.roadHazards || []) {
+  if (h.renderKey && h.taxon?.gbifKey != null)
+    taxonBindings[h.renderKey] = { assetFamily: 'rc:asset/fauna', ...h.taxon };
+}
+for (const f of ecologyProfile.floraTaxa || []) {
+  if (f.renderKey && f.taxon?.gbifKey != null)
+    taxonBindings[f.renderKey] = { assetFamily: f.assetFamily || `rc:asset/flora/${f.renderKey}`, ...f.taxon };
+}
+function taxonForAsset(assetId) {
+  if (assetId.startsWith('rc:asset/flora/'))
+    return Object.values(taxonBindings).find(b => assetId.startsWith(`${b.assetFamily}/`)) ?? null;
+  if (assetId.startsWith('rc:asset/fauna/'))
+    return taxonBindings[Object.keys(taxonBindings).find(k => assetId.includes(k)) ?? ''] ?? null;
+  return null;
+}
+
 const beacon = (await readFile(join(root, 'web', 'fixtures', 'community-beacon.vibe'), 'utf8')).trim();
 const cases = [
   ['opening', [0, 0, false, false, false, false, false, false, false, false, false, false, false, '']],
@@ -79,9 +101,11 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
     const key = `${asset.id}:${sha256}`;
     if (!assets.has(key)) {
       await writeFile(join(out, file), bytes);
+      const taxon = taxonForAsset(asset.id);
       assets.set(key, { id: asset.id, file: `10d/${file}`, bytes: bytes.length, sha256,
         rgba: [asset.r, asset.g, asset.b, asset.a], renderRole: asset.renderRole || 'opaque',
-        materialFamily: asset.materialFamily });
+        materialFamily: asset.materialFamily,
+        ...(taxon ? { taxon: { gbifKey: taxon.gbifKey, iri: taxon.iri, rank: taxon.rank } } : {}) });
     }
     entries.push(key);
   }
@@ -129,6 +153,8 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
     'crates/rolling-commons-shell/src/mature_gums.rs',
     'assets/ecology/profiles/se-corridor-reference.json'],
   wasm: { file: 'web/pkg/rolling_commons_shell_bg.wasm', sha256: createHash('sha256').update(wasm).digest('hex') },
+  taxonConvention: ecologyProfile.taxonConvention || null,
+  taxonBindings,
   assets: globalAssets.map(([, asset]) => asset),
   textures: [...textures.values()].sort((a,b)=>a.file.localeCompare(b.file)||a.role-b.role),
   scenes: scenes.map(({ assetKeys, ...scene }) => ({

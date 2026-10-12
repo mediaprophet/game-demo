@@ -41,7 +41,7 @@ const csvPath = resolve(csvArg), metadataPath = resolve(metadataArg), profilePat
 const [csvBytes, metadata, profile] = await Promise.all([
   readFile(csvPath), readFile(metadataPath, 'utf8').then(JSON.parse), readFile(profilePath, 'utf8').then(JSON.parse)
 ]);
-if (profile.schemaVersion !== 1 || !profile.id || !profile.scope) throw new Error('Unsupported or incomplete region profile');
+if (![1, 2].includes(profile.schemaVersion) || !profile.id || !profile.scope) throw new Error('Unsupported or incomplete region profile');
 if (metadata.sourceSystem !== 'Atlas of Living Australia' || !metadata.dataset || !metadata.downloadedAt ||
     !metadata.spatialQuery || metadata.regionProfileId !== profile.id || !metadata.attribution || !metadata.downloadDOI) {
   throw new Error('Metadata must include the ALA dataset, retrieval time, region query, matching profile ID, attribution and download DOI');
@@ -83,7 +83,16 @@ for (const [rowIndex, row] of rows.entries()) {
   taxa.set(taxonId, entry);
 }
 
-const profileHazards = new Map((profile.roadHazards || []).map(item => [item.taxonId, item]));
+// schemaVersion 2: hazards carry a structured `taxon` object keyed by GBIF
+// backbone key — index all three identity surfaces (legacy taxonId name
+// string, structured scientific name, numeric GBIF key) so ALA records in
+// any of those forms still join to the authored hazard context.
+const profileHazards = new Map();
+for (const item of profile.roadHazards || []) {
+  if (item.taxonId) profileHazards.set(item.taxonId, item);
+  if (item.taxon?.gbifScientificName) profileHazards.set(item.taxon.gbifScientificName, item);
+  if (item.taxon?.gbifKey != null) profileHazards.set(String(item.taxon.gbifKey), item);
+}
 const species = [...taxa.values()].map(item => {
   const licences = [...item.licences].sort();
   const hazard = profileHazards.get(item.taxonId) || profileHazards.get(item.scientificName);
