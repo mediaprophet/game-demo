@@ -130,52 +130,48 @@ pure fn dwc_rank(gbif_rank: string) -> string {
     return "";
 }
 
-// Statements for one bound render key. Five quins describe the taxon node
-// itself (subject = GBIF species IRI); when asset_iri is non-empty a sixth
-// foaf:depicts edge links the asset subject to the taxon node. Unbound
-// keys return [] — data-only, never a fabricated identity.
+// One semantic statement: the source terms plus the host-sealed quin, so
+// pack compile can emit the 48-byte records AND a hash→IRI lexicon from a
+// single authored source — scripts declare statements, the host seals them.
+pure fn stmt(s: string, p: string, o: string) -> Record {
+    return {s: s, p: p, o: o,
+        quin: quin.statement(subject: s, predicate: p, object: o, context: 0)};
+}
+
+// Statements for one bound render key. Five describe the taxon node itself
+// (subject = GBIF species IRI); when asset_iri is non-empty a foaf:depicts
+// edge links the asset subject to the taxon node, and accrual classes —
+// when the binding carries them — classify the standing stock (the asset),
+// never the taxon: Eucalyptus-as-concept is not centennial; this gum is.
+// Accrual object IRIs are the modality's class names verbatim so the quins
+// join with accrual.rs predicates via the shared 60-bit hash space.
+// Unbound keys return [] — data-only, never a fabricated identity.
 pure fn dwc_statements_for(render_key: string, asset_iri: string) -> List {
     let t = taxon_for(render_key);
     if t.bound == 0.0 {
         return [];
     }
-    let statements = [
-        quin.statement(subject: t.iri,
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://rs.tdwg.org/dwc/terms/Taxon", context: 0),
-        quin.statement(subject: t.iri,
-            predicate: "http://rs.tdwg.org/dwc/terms/taxonID",
-            object: t.iri, context: 0),
-        quin.statement(subject: t.iri,
-            predicate: "http://rs.tdwg.org/dwc/terms/scientificName",
-            object: t.scientificName, context: 0),
-        quin.statement(subject: t.iri,
-            predicate: "http://rs.tdwg.org/dwc/terms/taxonRank",
-            object: dwc_rank(t.rank), context: 0),
-        quin.statement(subject: t.iri,
-            predicate: "http://rs.tdwg.org/dwc/terms/vernacularName",
-            object: t.commonName, context: 0)
+    let taxon = t.iri;
+    let mut statements = [
+        stmt(taxon, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "http://rs.tdwg.org/dwc/terms/Taxon"),
+        stmt(taxon, "http://rs.tdwg.org/dwc/terms/taxonID", taxon),
+        stmt(taxon, "http://rs.tdwg.org/dwc/terms/scientificName", t.scientificName),
+        stmt(taxon, "http://rs.tdwg.org/dwc/terms/taxonRank", dwc_rank(t.rank)),
+        stmt(taxon, "http://rs.tdwg.org/dwc/terms/vernacularName", t.commonName)
     ];
     if asset_iri != "" {
         // list.push is pure — it returns the extended list.
-        let mut out = statements.push(quin.statement(subject: asset_iri,
-            predicate: "http://xmlns.com/foaf/0.1/depicts",
-            object: t.iri, context: 0));
-        // Accrual classifies the standing stock (the asset instance), never
-        // the taxon — Eucalyptus-as-concept is not centennial; this gum is.
-        // Object IRIs are the modality's class names verbatim so the quins
-        // join with accrual.rs predicates via the shared 60-bit hash space.
+        statements = statements.push(stmt(asset_iri,
+            "http://xmlns.com/foaf/0.1/depicts", taxon));
         if t.maturityIri != "" {
-            out = out.push(quin.statement(subject: asset_iri,
-                predicate: "qualia:accrual:maturityClass",
-                object: t.maturityIri, context: 0));
+            statements = statements.push(stmt(asset_iri,
+                "qualia:accrual:maturityClass", t.maturityIri));
         }
         if t.irreversibilityIri != "" {
-            out = out.push(quin.statement(subject: asset_iri,
-                predicate: "qualia:accrual:irreversibilityClass",
-                object: t.irreversibilityIri, context: 0));
+            statements = statements.push(stmt(asset_iri,
+                "qualia:accrual:irreversibilityClass", t.irreversibilityIri));
         }
-        return out;
     }
     return statements;
 }

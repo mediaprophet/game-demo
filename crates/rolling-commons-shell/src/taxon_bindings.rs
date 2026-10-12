@@ -137,15 +137,31 @@ pub fn taxon_binding_json(render_key: &str) -> Result<String, JsValue> {
 /// gbifTaxonKey integer quin.
 pub const MAX_DWC_QUINS: usize = 9;
 
-/// Evaluate `dwc_statements_for` in the VibeScript fixture and copy the
-/// sealed quins into the caller-provided buffer, then append the
-/// `urn:qualia:gbif:taxonKey` quin with `INLINE_TAG_INTEGER` packing — the
-/// tag sits above 2^53 so scripts cannot form it losslessly; this is the
-/// same u64 the engine uses for `taxon_id` in gbif_adapter/bioacoustics.
+/// One emitted semantic statement: the sealed quin plus its source terms,
+/// so pack compile can write a hash→IRI lexicon without re-deriving hashes.
+#[derive(Debug, Clone)]
+pub struct DwcStatement {
+    pub quin: NQuin,
+    pub subject_term: String,
+    pub predicate_term: String,
+    pub object_term: String,
+    /// True when the object is a typed integer, not a hashed IRI/literal.
+    pub object_is_integer: bool,
+}
+
+/// Evaluate `dwc_statements_for` in the VibeScript fixture into
+/// caller-provided buffers, then append the `urn:qualia:gbif:taxonKey` quin
+/// with `INLINE_TAG_INTEGER` packing — the tag sits above 2^53 so scripts
+/// cannot form it losslessly; this is the same u64 the engine uses for
+/// `taxon_id` in gbif_adapter/bioacoustics.
 ///
-/// `asset_iri` is the foaf:depicts subject; pass "" to emit taxon-node
-/// statements only. Returns the quin count written.
-pub fn dwc_quins(render_key: &str, asset_iri: &str, out: &mut [NQuin]) -> Result<usize, JsValue> {
+/// `asset_iri` is the foaf:depicts/accrual subject; pass "" to emit
+/// taxon-node statements only. Returns the statement count written.
+pub fn dwc_statements(
+    render_key: &str,
+    asset_iri: &str,
+    out: &mut [DwcStatement],
+) -> Result<usize, JsValue> {
     check_render_key(render_key)?;
     if asset_iri.len() > 512
         || asset_iri
@@ -184,52 +200,84 @@ pub fn dwc_quins(render_key: &str, asset_iri: &str, out: &mut [NQuin]) -> Result
         }
         let mut n = 0usize;
         for item in &items {
-            let vibe::Value::QuinRef(quin) = item else {
-                return Err(JsValue::from_str("dwc emission returned a non-quin value"));
+            let vibe::Value::Record(record) = item else {
+                return Err(JsValue::from_str("dwc emission returned a non-record value"));
+            };
+            let vibe::Value::QuinRef(quin) = record
+                .get("quin")
+                .ok_or_else(|| JsValue::from_str("dwc statement missing quin"))?
+            else {
+                return Err(JsValue::from_str("dwc statement quin is not sealed"));
             };
             let f = quin.raw_fields();
-            out[n] = NQuin {
-                subject: f[0],
-                predicate: f[1],
-                object: f[2],
-                context: f[3],
-                metadata: f[4],
-                parity: f[5],
+            out[n] = DwcStatement {
+                quin: NQuin {
+                    subject: f[0],
+                    predicate: f[1],
+                    object: f[2],
+                    context: f[3],
+                    metadata: f[4],
+                    parity: f[5],
+                },
+                subject_term: text(record, "s")?.to_owned(),
+                predicate_term: text(record, "p")?.to_owned(),
+                object_term: text(record, "o")?.to_owned(),
+                object_is_integer: false,
             };
             n += 1;
         }
         let subject = generate_60bit_token(binding.iri.as_bytes());
         let predicate = generate_60bit_token(b"urn:qualia:gbif:taxonKey");
         let object = INLINE_TAG_INTEGER | binding.gbif_key;
-        out[n] = NQuin {
-            subject,
-            predicate,
-            object,
-            context: 0,
-            metadata: 0,
-            parity: NQuin::calculate_parity(subject, predicate, object, 0, 0),
+        out[n] = DwcStatement {
+            quin: NQuin {
+                subject,
+                predicate,
+                object,
+                context: 0,
+                metadata: 0,
+                parity: NQuin::calculate_parity(subject, predicate, object, 0, 0),
+            },
+            subject_term: binding.iri.clone(),
+            predicate_term: "urn:qualia:gbif:taxonKey".to_owned(),
+            object_term: binding.gbif_key.to_string(),
+            object_is_integer: true,
         };
         Ok(n + 1)
     })
 }
 
-/// Emit the Darwin Core quins for a render key as JSON — fields are hex
-/// strings so u64 values survive JS's f64 losslessness boundary. Used by
-/// pack/export tooling; the .vibe fixture authors the statements.
+/// Emit the Darwin Core statements for a render key as JSON — quin fields
+/// are hex strings so u64 values survive JS's f64 losslessness boundary,
+/// and each entry carries its source terms so exporters can write the
+/// pack's hash→IRI lexicon from the same authored emission.
 #[wasm_bindgen]
 pub fn taxon_dwc_json(render_key: &str, asset_iri: &str) -> Result<String, JsValue> {
-    let mut buf = [NQuin::default(); MAX_DWC_QUINS];
-    let n = dwc_quins(render_key, asset_iri, &mut buf)?;
+    let blank = DwcStatement {
+        quin: NQuin::default(),
+        subject_term: String::new(),
+        predicate_term: String::new(),
+        object_term: String::new(),
+        object_is_integer: false,
+    };
+    let mut buf: [DwcStatement; MAX_DWC_QUINS] = std::array::from_fn(|_| blank.clone());
+    let n = dwc_statements(render_key, asset_iri, &mut buf)?;
     let quins: Vec<serde_json::Value> = buf[..n]
         .iter()
-        .map(|quin| {
+        .map(|stmt| {
             serde_json::json!({
-                "subject": format!("0x{:016x}", quin.subject),
-                "predicate": format!("0x{:016x}", quin.predicate),
-                "object": format!("0x{:016x}", quin.object),
-                "context": format!("0x{:016x}", quin.context),
-                "metadata": format!("0x{:016x}", quin.metadata),
-                "parity": format!("0x{:016x}", quin.parity),
+                "s": stmt.subject_term,
+                "p": stmt.predicate_term,
+                "o": stmt.object_term,
+                "integer": stmt.object_is_integer,
+                "quin": {
+                    "subject": format!("0x{:016x}", stmt.quin.subject),
+                    "predicate": format!("0x{:016x}", stmt.quin.predicate),
+                    "object": format!("0x{:016x}", stmt.quin.object),
+                    "context": format!("0x{:016x}", stmt.quin.context),
+                    "metadata": format!("0x{:016x}", stmt.quin.metadata),
+                    "parity": format!("0x{:016x}", stmt.quin.parity),
+                },
             })
         })
         .collect();
@@ -263,23 +311,39 @@ mod tests {
 
     #[test]
     fn dwc_emission_seals_taxon_node_and_depicts() {
-        let mut buf = [NQuin::default(); MAX_DWC_QUINS];
-        let n = dwc_quins("kangaroo", "rc:asset/fauna/inland-kangaroo-01", &mut buf).unwrap();
+        let blank = DwcStatement {
+            quin: NQuin::default(),
+            subject_term: String::new(),
+            predicate_term: String::new(),
+            object_term: String::new(),
+            object_is_integer: false,
+        };
+        let mut buf: [DwcStatement; MAX_DWC_QUINS] = std::array::from_fn(|_| blank.clone());
+        let n =
+            dwc_statements("kangaroo", "rc:asset/fauna/inland-kangaroo-01", &mut buf).unwrap();
         assert_eq!(n, 7);
-        assert!(buf[..n].iter().all(|quin| quin.verify_ecc_parity()));
+        assert!(buf[..n].iter().all(|s| s.quin.verify_ecc_parity()));
         // Host-packed integer quin is last: INLINE_TAG_INTEGER | gbifKey.
-        assert_eq!(buf[n - 1].object, INLINE_TAG_INTEGER | 9372);
+        assert_eq!(buf[n - 1].quin.object, INLINE_TAG_INTEGER | 9372);
+        assert!(buf[n - 1].object_is_integer);
         // Without an asset subject the depicts edge is omitted.
-        let n = dwc_quins("kangaroo", "", &mut buf).unwrap();
+        let n = dwc_statements("kangaroo", "", &mut buf).unwrap();
         assert_eq!(n, 6);
         // Accrual-classified stocks emit maturity + irreversibility quins on
         // the asset subject (the stock), not the taxon.
-        let n = dwc_quins("eucalypt-gum", "rc:asset/flora/eucalypt-gum/mature-gums-01", &mut buf)
-            .unwrap();
+        let n = dwc_statements(
+            "eucalypt-gum",
+            "rc:asset/flora/eucalypt-gum/mature-gums-01",
+            &mut buf,
+        )
+        .unwrap();
         assert_eq!(n, MAX_DWC_QUINS);
         let irrev_pred = generate_60bit_token(b"qualia:accrual:irreversibilityClass");
-        assert!(buf[..n].iter().any(|quin| quin.predicate == irrev_pred));
+        assert!(buf[..n].iter().any(|s| s.quin.predicate == irrev_pred));
         // Unbound keys emit nothing.
-        assert_eq!(dwc_quins("not-a-taxon", "rc:asset/fauna/x", &mut buf).unwrap(), 0);
+        assert_eq!(
+            dwc_statements("not-a-taxon", "rc:asset/fauna/x", &mut buf).unwrap(),
+            0
+        );
     }
 }

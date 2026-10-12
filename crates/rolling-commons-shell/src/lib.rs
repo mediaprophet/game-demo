@@ -29,6 +29,7 @@ mod macropod_models;
 mod material_library;
 mod mature_gums;
 mod pack_validation;
+mod semantic_slice;
 mod quadruped_animation;
 mod quadruped_models;
 mod resident_animation;
@@ -324,7 +325,19 @@ pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec
                     .bytes()
                     .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
         });
-        if ((!key.starts_with("10d/") || !key.ends_with(".10d")) && !texture) || key.contains("..")
+        // Semantic entries carry pack-resident ontology quins (.quins = raw
+        // 48-byte NQuins) and their hash→IRI lexicon (.lex). These are how
+        // ontology data reaches the browser — the native ontology loader is
+        // cfg !wasm32, so packs are the delivery path (G50).
+        let semantic = key
+            .strip_prefix("sem/")
+            .map_or(false, |name| {
+                name.bytes().all(|b| {
+                    b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-' || b == b'.'
+                }) && (name.ends_with(".quins") || name.ends_with(".lex"))
+            });
+        if ((!key.starts_with("10d/") || !key.ends_with(".10d")) && !texture && !semantic)
+            || key.contains("..")
         {
             return Err(JsValue::from_str("invalid game HMC entry key"));
         }
@@ -333,7 +346,16 @@ pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec
             .dyn_into::<js_sys::Uint8Array>()
             .map_err(|_| JsValue::from_str("HMC entry bytes must be Uint8Array"))?
             .to_vec();
-        let kind = if texture { "image/png" } else { "10d" };
+        if key.ends_with(".quins") && (bytes.is_empty() || bytes.len() % 48 != 0) {
+            return Err(JsValue::from_str("semantic quin blob is not 48-byte aligned"));
+        }
+        let kind = if texture {
+            "image/png"
+        } else if semantic {
+            "quins"
+        } else {
+            "10d"
+        };
         writer
             .add_file(key, kind, bytes, None)
             .map_err(|e| JsValue::from_str(&e.to_string()))?;

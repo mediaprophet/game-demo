@@ -40,8 +40,9 @@ for (const [manifestPath, packPath] of styles) {
   const packInfo = await stat(resolve(root, packPath));
   if (packInfo.size < 100_000) throw new Error(`${packPath} is missing or unexpectedly small`);
   const pack=await read(packPath),textureCount=new Set(manifest.textures.map(texture=>texture.file)).size;
-  if(validate_game_hmc(pack)!==manifest.assets.length+textureCount+1)
-    throw new Error(`${packPath}: native material/UV/texture dependency verification failed`);
+  const semanticCount=Array.isArray(manifest.semantics)?manifest.semantics.length:0;
+  if(validate_game_hmc(pack)!==manifest.assets.length+textureCount+semanticCount+1)
+    throw new Error(`${packPath}: native material/UV/texture/semantic dependency verification failed`);
 }
 
 await stat(resolve(root, 'web/assets/ecology/profiles/se-corridor-reference.json'));

@@ -3581,10 +3581,11 @@ async function hydrateHmcScenePack() {
     const bytes=await readPackResponse(packResponse,ART_STYLES[artStyle]);
     window.setWorldLoading('Checking the scene pack','Verifying its assets before showing the world');
     const verified=m.verify_game_hmc(bytes);
-    // The pack carries assets + texture files + the manifest entry; the same
-    // texture count is used by scripts/verify-game-release.mjs.
+    // The pack carries assets + texture files + semantic entries + the
+    // manifest entry; the same count is used by verify-game-release.mjs.
     const textureCount=new Set((parsed.textures||[]).map(texture=>texture.file)).size;
-    const expected=parsed.assets.length+textureCount+1;
+    const semanticCount=Array.isArray(parsed.semantics)?parsed.semantics.length:0;
+    const expected=parsed.assets.length+textureCount+semanticCount+1;
     if(verified!==expected)throw new Error(`verified ${verified}, expected ${expected}`);
     hmcPack=bytes;hmcManifest=parsed;
     note(`HMC ${parsed.artStyle||'scene'} verified · ${verified-1} assets`);
@@ -3759,7 +3760,8 @@ if (new URLSearchParams(location.search).has('selftest')) {
     const packBytes=new Uint8Array(await packResponse.arrayBuffer());
     const manifest=await (await fetch('./assets/manifest.json')).json();
     note(`TEST Qualia HMC game assets: ${m.verify_game_hmc(packBytes)===manifest.assets.length+
-      new Set((manifest.textures||[]).map(texture=>texture.file)).size+1?'PASS':'FAIL'}`);
+      new Set((manifest.textures||[]).map(texture=>texture.file)).size+
+      (Array.isArray(manifest.semantics)?manifest.semantics.length:0)+1?'PASS':'FAIL'}`);
     packBytes[64]^=1;
     let tamperRejected=false;
     try { m.verify_game_hmc(packBytes); } catch(_) { tamperRejected=true; }
