@@ -47,17 +47,24 @@ pub enum ParametricRecipe {
     /// Authored three-axis placement through Qualia's public transform surface.
     Oriented {
         source: Box<ParametricRecipe>,
-        pivot: [f32;3],
-        target: [f32;3],
-        degrees: [f32;3],
+        pivot: [f32; 3],
+        target: [f32; 3],
+        degrees: [f32; 3],
     },
     /// Station-authored coachwork compiled by Qualia's closed convex loft.
     LoftedBody {
         sections: Vec<Vec<[f32; 3]>>,
     },
     WheelClearancePanel {
-        center_x:f32,thickness:f32,z:[f32;2],bottom:f32,top:[f32;2],
-        wheel_y:f32,clearance_radius:f32,axles:Vec<f32>,segments:u16,
+        center_x: f32,
+        thickness: f32,
+        z: [f32; 2],
+        bottom: f32,
+        top: [f32; 2],
+        wheel_y: f32,
+        clearance_radius: f32,
+        axles: Vec<f32>,
+        segments: u16,
     },
     Ribbon {
         control: &'static [[f32; 2]],
@@ -214,12 +221,7 @@ pub struct LimbSegment {
     pub end_radius: f32,
 }
 
-fn limb_segment(
-    start: [f32; 3],
-    end: [f32; 3],
-    start_radius: f32,
-    end_radius: f32,
-) -> LimbSegment {
+fn limb_segment(start: [f32; 3], end: [f32; 3], start_radius: f32, end_radius: f32) -> LimbSegment {
     LimbSegment {
         start,
         end,
@@ -232,17 +234,47 @@ fn limb_segment(
 pub(crate) fn community_work_pose(index: usize) -> ([f32; 3], [f32; 3], [f32; 3], [f32; 3]) {
     match index {
         // Planting: one hand stays close while the other reaches to a bed.
-        0 => ([-0.36, 0.70, 0.02], [-0.39, 0.49, 0.12], [0.36, 0.71, 0.08], [0.27, 0.48, 0.34]),
+        0 => (
+            [-0.36, 0.70, 0.02],
+            [-0.39, 0.49, 0.12],
+            [0.36, 0.71, 0.08],
+            [0.27, 0.48, 0.34],
+        ),
         // Repairing: a low tool grip and a hand braced near the waist.
-        1 => ([-0.40, 0.72, 0.01], [-0.22, 0.56, 0.08], [0.40, 0.76, 0.10], [0.17, 0.72, 0.29]),
+        1 => (
+            [-0.40, 0.72, 0.01],
+            [-0.22, 0.56, 0.08],
+            [0.40, 0.76, 0.10],
+            [0.17, 0.72, 0.29],
+        ),
         // Harvesting: both hands work in front of the body at different heights.
-        2 => ([-0.39, 0.76, 0.07], [-0.28, 0.63, 0.29], [0.39, 0.72, 0.07], [0.31, 0.54, 0.30]),
+        2 => (
+            [-0.39, 0.76, 0.07],
+            [-0.28, 0.63, 0.29],
+            [0.39, 0.72, 0.07],
+            [0.31, 0.54, 0.30],
+        ),
         // Welcoming/teaching: arms open so the silhouette reads at overview scale.
-        3 => ([-0.45, 0.80, 0.02], [-0.60, 0.84, 0.04], [0.44, 0.81, 0.02], [0.61, 0.91, 0.04]),
+        3 => (
+            [-0.45, 0.80, 0.02],
+            [-0.60, 0.84, 0.04],
+            [0.44, 0.81, 0.02],
+            [0.61, 0.91, 0.04],
+        ),
         // Watering: both hands angle down toward the shared growing area.
-        4 => ([-0.37, 0.72, 0.08], [-0.43, 0.53, 0.25], [0.37, 0.71, 0.08], [0.30, 0.49, 0.32]),
+        4 => (
+            [-0.37, 0.72, 0.08],
+            [-0.43, 0.53, 0.25],
+            [0.37, 0.71, 0.08],
+            [0.30, 0.49, 0.32],
+        ),
         // Carrying produce: hands meet around a crate-height load.
-        _ => ([-0.40, 0.76, 0.07], [-0.23, 0.68, 0.21], [0.40, 0.76, 0.07], [0.23, 0.68, 0.21]),
+        _ => (
+            [-0.40, 0.76, 0.07],
+            [-0.23, 0.68, 0.21],
+            [0.40, 0.76, 0.07],
+            [0.23, 0.68, 0.21],
+        ),
     }
 }
 
@@ -278,11 +310,7 @@ fn sampled_spline(control: &[[f32; 2]], segments: u32) -> Result<Vec<Point3>, St
         .collect();
     (0..=segments.clamp(8, 256))
         .map(|step| {
-            parametric_cad::bspline_eval(
-                &curve,
-                3,
-                step as f64 / segments.clamp(8, 256) as f64,
-            )
+            parametric_cad::bspline_eval(&curve, 3, step as f64 / segments.clamp(8, 256) as f64)
                 .map_err(|error| format!("waterway curve: {error:?}"))
         })
         .collect()
@@ -290,7 +318,12 @@ fn sampled_spline(control: &[[f32; 2]], segments: u32) -> Result<Vec<Point3>, St
 
 fn mesh_from_positions(positions: Vec<[f32; 3]>, triangles: Vec<[u32; 3]>) -> Mesh {
     let (min, max) = mesh_bounds(&positions);
-    Mesh { positions, triangles, min, max }
+    Mesh {
+        positions,
+        triangles,
+        min,
+        max,
+    }
 }
 
 fn tapered_limb_mesh(limb: LimbSegment, radial_segments: usize) -> Result<Mesh, String> {
@@ -309,7 +342,10 @@ fn tapered_limb_mesh(limb: LimbSegment, radial_segments: usize) -> Result<Mesh, 
         || limb.start_radius > 2.0
         || limb.end_radius > 2.0
     {
-        return Err(format!("invalid tapered limb dimensions: length={length}, start={:?}, end={:?}, r0={}, r1={}", limb.start, limb.end, limb.start_radius, limb.end_radius));
+        return Err(format!(
+            "invalid tapered limb dimensions: length={length}, start={:?}, end={:?}, r0={}, r1={}",
+            limb.start, limb.end, limb.start_radius, limb.end_radius
+        ));
     }
 
     let half = length * 0.5;
@@ -322,13 +358,9 @@ fn tapered_limb_mesh(limb: LimbSegment, radial_segments: usize) -> Result<Mesh, 
     let sides = radial_segments.clamp(8, 24);
     let mut vertices = vec![Point3::new(0.0, 0.0, 0.0); profile.len() * sides];
     let mut triangles = vec![[0u32; 3]; (profile.len() - 1) * sides * 2];
-    let (vertex_count, triangle_count) = parametric_cad::revolve_profile(
-        &profile,
-        sides,
-        &mut vertices,
-        &mut triangles,
-    )
-    .map_err(|error| format!("limb revolve: {error:?}"))?;
+    let (vertex_count, triangle_count) =
+        parametric_cad::revolve_profile(&profile, sides, &mut vertices, &mut triangles)
+            .map_err(|error| format!("limb revolve: {error:?}"))?;
     let positions: Vec<[f32; 3]> = vertices[..vertex_count]
         .iter()
         .map(|point| [point.x as f32, point.y as f32, point.z as f32])
@@ -393,29 +425,76 @@ impl ParametricRecipe {
             Self::TerrainApron { center_x, center_z } => {
                 ([0.0; 3], crate::terrain::apron(*center_x, *center_z))
             }
-            Self::Transform { source, pivot, target, scale } => {
-                if pivot.iter().chain(target.iter()).chain(scale.iter()).any(|v| !v.is_finite())
+            Self::Transform {
+                source,
+                pivot,
+                target,
+                scale,
+            } => {
+                if pivot
+                    .iter()
+                    .chain(target.iter())
+                    .chain(scale.iter())
+                    .any(|v| !v.is_finite())
                     || scale.iter().any(|v| *v <= 0.0 || *v > 64.0)
                 {
                     return Err("invalid authored model transform".into());
                 }
                 let mesh = source.compile()?;
-                let local = authoring::transform_mesh(&mesh, &authoring::translation(
-                    -pivot[0] as f64, -pivot[1] as f64, -pivot[2] as f64));
-                let scaled = authoring::transform_mesh(&local,
-                    &authoring::scale(scale[0] as f64, scale[1] as f64, scale[2] as f64));
-                return Ok(authoring::transform_mesh(&scaled, &authoring::translation(
-                    target[0] as f64, target[1] as f64, target[2] as f64)));
+                let local = authoring::transform_mesh(
+                    &mesh,
+                    &authoring::translation(-pivot[0] as f64, -pivot[1] as f64, -pivot[2] as f64),
+                );
+                let scaled = authoring::transform_mesh(
+                    &local,
+                    &authoring::scale(scale[0] as f64, scale[1] as f64, scale[2] as f64),
+                );
+                return Ok(authoring::transform_mesh(
+                    &scaled,
+                    &authoring::translation(target[0] as f64, target[1] as f64, target[2] as f64),
+                ));
             }
-            Self::WheelClearancePanel{center_x,thickness,z,bottom,top,wheel_y,clearance_radius,axles,segments}=>{
-                use qualia_core_db::specialized_libs::computational_geometry::wheel_panel::{WheelPanel,wheel_clearance_panel_into};
-                let count=(*segments as usize+1).min(193);
-                let mut positions=vec![[0.0;3];count*10];let mut triangles=vec![[0;3];count*8];
-                let receipt=wheel_clearance_panel_into(WheelPanel{center_x:*center_x,thickness:*thickness,z:*z,
-                    bottom:*bottom,top:*top,wheel_y:*wheel_y,clearance_radius:*clearance_radius,axles,segments:*segments},
-                    &mut positions,&mut triangles).map_err(|e|e.to_string())?;
-                positions.truncate(receipt.vertex_count);triangles.truncate(receipt.triangle_count);
-                return Ok(Mesh{positions,triangles,min:receipt.min,max:receipt.max});
+            Self::WheelClearancePanel {
+                center_x,
+                thickness,
+                z,
+                bottom,
+                top,
+                wheel_y,
+                clearance_radius,
+                axles,
+                segments,
+            } => {
+                use qualia_core_db::specialized_libs::computational_geometry::wheel_panel::{
+                    wheel_clearance_panel_into, WheelPanel,
+                };
+                let count = (*segments as usize + 1).min(193);
+                let mut positions = vec![[0.0; 3]; count * 10];
+                let mut triangles = vec![[0; 3]; count * 8];
+                let receipt = wheel_clearance_panel_into(
+                    WheelPanel {
+                        center_x: *center_x,
+                        thickness: *thickness,
+                        z: *z,
+                        bottom: *bottom,
+                        top: *top,
+                        wheel_y: *wheel_y,
+                        clearance_radius: *clearance_radius,
+                        axles,
+                        segments: *segments,
+                    },
+                    &mut positions,
+                    &mut triangles,
+                )
+                .map_err(|e| e.to_string())?;
+                positions.truncate(receipt.vertex_count);
+                triangles.truncate(receipt.triangle_count);
+                return Ok(Mesh {
+                    positions,
+                    triangles,
+                    min: receipt.min,
+                    max: receipt.max,
+                });
             }
             Self::LoftedBody { sections } => {
                 let count = sections.first().map_or(0, Vec::len);
@@ -424,36 +503,77 @@ impl ParametricRecipe {
                 }
                 let mut positions = vec![[0.0; 3]; sections.len() * (count + 1) * 2];
                 let mut triangles = vec![[0; 3]; sections.len() * count * 2];
-                let receipt = authoring::loft_convex_sections_into(sections, &mut positions, &mut triangles)
-                    .map_err(|e| e.to_string())?;
+                let receipt =
+                    authoring::loft_convex_sections_into(sections, &mut positions, &mut triangles)
+                        .map_err(|e| e.to_string())?;
                 positions.truncate(receipt.vertex_count);
                 triangles.truncate(receipt.triangle_count);
-                return Ok(Mesh { positions, triangles, min: receipt.min, max: receipt.max });
+                return Ok(Mesh {
+                    positions,
+                    triangles,
+                    min: receipt.min,
+                    max: receipt.max,
+                });
             }
-            Self::Oriented {source,pivot,target,degrees}=>{
-                if pivot.iter().chain(target.iter()).chain(degrees.iter()).any(|value|!value.is_finite()) {
+            Self::Oriented {
+                source,
+                pivot,
+                target,
+                degrees,
+            } => {
+                if pivot
+                    .iter()
+                    .chain(target.iter())
+                    .chain(degrees.iter())
+                    .any(|value| !value.is_finite())
+                {
                     return Err("invalid authored orientation".into());
                 }
-                let mesh=source.compile()?;
-                let local=authoring::transform_mesh(&mesh,&authoring::translation(
-                    -pivot[0] as f64,-pivot[1] as f64,-pivot[2] as f64));
-                let yaw=authoring::transform_mesh(&local,&authoring::rotation_y(degrees[1].to_radians() as f64));
-                let roll=authoring::transform_mesh(&yaw,&authoring::rotation_z(degrees[2].to_radians() as f64));
-                let pitch=authoring::transform_mesh(&roll,&authoring::rotation_x(degrees[0].to_radians() as f64));
-                return Ok(authoring::transform_mesh(&pitch,&authoring::translation(
-                    target[0] as f64,target[1] as f64,target[2] as f64)));
+                let mesh = source.compile()?;
+                let local = authoring::transform_mesh(
+                    &mesh,
+                    &authoring::translation(-pivot[0] as f64, -pivot[1] as f64, -pivot[2] as f64),
+                );
+                let yaw = authoring::transform_mesh(
+                    &local,
+                    &authoring::rotation_y(degrees[1].to_radians() as f64),
+                );
+                let roll = authoring::transform_mesh(
+                    &yaw,
+                    &authoring::rotation_z(degrees[2].to_radians() as f64),
+                );
+                let pitch = authoring::transform_mesh(
+                    &roll,
+                    &authoring::rotation_x(degrees[0].to_radians() as f64),
+                );
+                return Ok(authoring::transform_mesh(
+                    &pitch,
+                    &authoring::translation(target[0] as f64, target[1] as f64, target[2] as f64),
+                ));
             }
-            Self::Yawed { source, pivot, degrees, target } => {
-                if !degrees.is_finite() || pivot.iter().chain(target.iter()).any(|v| !v.is_finite()) {
+            Self::Yawed {
+                source,
+                pivot,
+                degrees,
+                target,
+            } => {
+                if !degrees.is_finite() || pivot.iter().chain(target.iter()).any(|v| !v.is_finite())
+                {
                     return Err("invalid authored model orientation".into());
                 }
                 let mesh = source.compile()?;
-                let local = authoring::transform_mesh(&mesh, &authoring::translation(
-                    -pivot[0] as f64, -pivot[1] as f64, -pivot[2] as f64));
-                let rotated = authoring::transform_mesh(&local,
-                    &authoring::rotation_y((*degrees as f64).to_radians()));
-                return Ok(authoring::transform_mesh(&rotated, &authoring::translation(
-                    target[0] as f64, target[1] as f64, target[2] as f64)));
+                let local = authoring::transform_mesh(
+                    &mesh,
+                    &authoring::translation(-pivot[0] as f64, -pivot[1] as f64, -pivot[2] as f64),
+                );
+                let rotated = authoring::transform_mesh(
+                    &local,
+                    &authoring::rotation_y((*degrees as f64).to_radians()),
+                );
+                return Ok(authoring::transform_mesh(
+                    &rotated,
+                    &authoring::translation(target[0] as f64, target[1] as f64, target[2] as f64),
+                ));
             }
             Self::Ribbon {
                 control,
@@ -648,7 +768,10 @@ impl ParametricRecipe {
                 radial_segments,
             } => {
                 if limbs.is_empty() || limbs.len() > 64 {
-                    return Err(format!("limb cluster must contain 1–64 segments (had {})", limbs.len()));
+                    return Err(format!(
+                        "limb cluster must contain 1–64 segments (had {})",
+                        limbs.len()
+                    ));
                 }
                 let sides = (*radial_segments).clamp(8, 24);
                 let mut positions = Vec::with_capacity(limbs.len() * sides * 4);
@@ -961,11 +1084,10 @@ impl ParametricRecipe {
                 for index in 0..path.len() {
                     for column in 0..=across {
                         let t = column as f64 / across as f64;
-                        let ripple = ((index as f32 / longitudinal as f32)
-                            * std::f32::consts::TAU
-                            * 2.0)
-                            .sin()
-                            * 0.0025;
+                        let ripple =
+                            ((index as f32 / longitudinal as f32) * std::f32::consts::TAU * 2.0)
+                                .sin()
+                                * 0.0025;
                         positions.push([
                             (left[index].x * (1.0 - t) + right[index].x * t) as f32,
                             *elevation + ripple,
@@ -1104,20 +1226,76 @@ pub struct MaterialFamily {
     pub roughness: f32,
 }
 
-pub const SOLAR_GLASS: MaterialFamily = MaterialFamily { id: "solar-glass", metallic: 0.0, roughness: 0.23 };
-pub const RUBBER: MaterialFamily = MaterialFamily { id: "rubber", metallic: 0.0, roughness: 0.84 };
-pub const FRAMED_GLASS: MaterialFamily = MaterialFamily { id: "framed-glass", metallic: 0.0, roughness: 0.24 };
-pub const GALVANISED_METAL: MaterialFamily = MaterialFamily { id: "galvanised-metal", metallic: 0.62, roughness: 0.34 };
-pub const WEATHERED_TIMBER: MaterialFamily = MaterialFamily { id: "weathered-timber", metallic: 0.0, roughness: 0.78 };
-pub const LIVING_FOLIAGE: MaterialFamily = MaterialFamily { id: "living-foliage", metallic: 0.0, roughness: 0.88 };
-pub const SOIL_AND_GRAVEL: MaterialFamily = MaterialFamily { id: "soil-and-gravel", metallic: 0.0, roughness: 0.96 };
-pub const FUR_AND_HIDE: MaterialFamily = MaterialFamily { id: "fur-and-hide", metallic: 0.0, roughness: 0.91 };
-pub const CLOTH_AND_SKIN: MaterialFamily = MaterialFamily { id: "cloth-and-skin", metallic: 0.0, roughness: 0.82 };
-pub const WEATHERED_CONCRETE: MaterialFamily = MaterialFamily { id: "weathered-concrete", metallic: 0.0, roughness: 0.93 };
-pub const PAINTED_METAL: MaterialFamily = MaterialFamily { id: "painted-metal", metallic: 0.12, roughness: 0.52 };
-pub const LIME_RENDER: MaterialFamily = MaterialFamily { id: "lime-render", metallic: 0.0, roughness: 0.91 };
-pub const TERRACOTTA: MaterialFamily = MaterialFamily { id: "terracotta", metallic: 0.0, roughness: 0.82 };
-pub const SHADE_CANVAS: MaterialFamily = MaterialFamily { id: "shade-canvas", metallic: 0.0, roughness: 0.89 };
+pub const SOLAR_GLASS: MaterialFamily = MaterialFamily {
+    id: "solar-glass",
+    metallic: 0.0,
+    roughness: 0.23,
+};
+pub const RUBBER: MaterialFamily = MaterialFamily {
+    id: "rubber",
+    metallic: 0.0,
+    roughness: 0.84,
+};
+pub const FRAMED_GLASS: MaterialFamily = MaterialFamily {
+    id: "framed-glass",
+    metallic: 0.0,
+    roughness: 0.24,
+};
+pub const GALVANISED_METAL: MaterialFamily = MaterialFamily {
+    id: "galvanised-metal",
+    metallic: 0.62,
+    roughness: 0.34,
+};
+pub const WEATHERED_TIMBER: MaterialFamily = MaterialFamily {
+    id: "weathered-timber",
+    metallic: 0.0,
+    roughness: 0.78,
+};
+pub const LIVING_FOLIAGE: MaterialFamily = MaterialFamily {
+    id: "living-foliage",
+    metallic: 0.0,
+    roughness: 0.88,
+};
+pub const SOIL_AND_GRAVEL: MaterialFamily = MaterialFamily {
+    id: "soil-and-gravel",
+    metallic: 0.0,
+    roughness: 0.96,
+};
+pub const FUR_AND_HIDE: MaterialFamily = MaterialFamily {
+    id: "fur-and-hide",
+    metallic: 0.0,
+    roughness: 0.91,
+};
+pub const CLOTH_AND_SKIN: MaterialFamily = MaterialFamily {
+    id: "cloth-and-skin",
+    metallic: 0.0,
+    roughness: 0.82,
+};
+pub const WEATHERED_CONCRETE: MaterialFamily = MaterialFamily {
+    id: "weathered-concrete",
+    metallic: 0.0,
+    roughness: 0.93,
+};
+pub const PAINTED_METAL: MaterialFamily = MaterialFamily {
+    id: "painted-metal",
+    metallic: 0.12,
+    roughness: 0.52,
+};
+pub const LIME_RENDER: MaterialFamily = MaterialFamily {
+    id: "lime-render",
+    metallic: 0.0,
+    roughness: 0.91,
+};
+pub const TERRACOTTA: MaterialFamily = MaterialFamily {
+    id: "terracotta",
+    metallic: 0.0,
+    roughness: 0.82,
+};
+pub const SHADE_CANVAS: MaterialFamily = MaterialFamily {
+    id: "shade-canvas",
+    metallic: 0.0,
+    roughness: 0.89,
+};
 
 /// Existing recipe IDs get a first shared family; hero recipes can override
 /// it at construction time. Material assignment is stored on the recipe and
@@ -1139,9 +1317,7 @@ pub(crate) fn material_family_for(id: &str) -> MaterialFamily {
         || id.contains("/tyre-")
     {
         RUBBER
-    } else if has(&["glass", "glazing"])
-        || (has(&["window", "windows"]) && !has(&["frame"]))
-    {
+    } else if has(&["glass", "glazing"]) || (has(&["window", "windows"]) && !has(&["frame"])) {
         FRAMED_GLASS
     } else if id.contains("/flora/") && has(&["trunk", "stem", "branch", "bark", "wood"]) {
         WEATHERED_TIMBER
@@ -1149,17 +1325,13 @@ pub(crate) fn material_family_for(id: &str) -> MaterialFamily {
         LIVING_FOLIAGE
     } else if has(&["trunk", "stem", "branch", "bark", "fork"]) {
         WEATHERED_TIMBER
-    } else if has(&["foliage", "crown", "leaf", "spray"])
-        || component.starts_with("canopy-")
-    {
+    } else if has(&["foliage", "crown", "leaf", "spray"]) || component.starts_with("canopy-") {
         LIVING_FOLIAGE
-    } else if has(&["shade", "awning", "canvas", "tent"])
-        && !has(&["frame", "metal"])
-    {
+    } else if has(&["shade", "awning", "canvas", "tent"]) && !has(&["frame", "metal"]) {
         SHADE_CANVAS
     } else if has(&[
-        "metal", "mast", "steel", "pipe", "tank", "battery", "gutter", "rail", "frame",
-        "vice", "press", "fascia", "chassis", "array", "grid",
+        "metal", "mast", "steel", "pipe", "tank", "battery", "gutter", "rail", "frame", "vice",
+        "press", "fascia", "chassis", "array", "grid",
     ]) {
         GALVANISED_METAL
     } else if has(&[
@@ -1168,8 +1340,21 @@ pub(crate) fn material_family_for(id: &str) -> MaterialFamily {
     ]) {
         WEATHERED_TIMBER
     } else if has(&[
-        "foliage", "canopy", "crown", "leaf", "shoot", "flower", "gum", "wattle", "grass",
-        "crop", "cone", "bottlebrush", "saltbush", "kangaroo-paw", "shrub",
+        "foliage",
+        "canopy",
+        "crown",
+        "leaf",
+        "shoot",
+        "flower",
+        "gum",
+        "wattle",
+        "grass",
+        "crop",
+        "cone",
+        "bottlebrush",
+        "saltbush",
+        "kangaroo-paw",
+        "shrub",
     ]) {
         LIVING_FOLIAGE
     } else if component == "workshop-roof-panels" {
@@ -1177,13 +1362,14 @@ pub(crate) fn material_family_for(id: &str) -> MaterialFamily {
     } else if has(&[
         "ground", "terrain", "soil", "path", "road", "hill", "earth", "mound", "rock", "boulder",
         "bank", "canal", "creek", "meadow",
-    ])
-    {
+    ]) {
         SOIL_AND_GRAVEL
     } else if id.contains("/fauna/") {
         FUR_AND_HIDE
     } else if id.contains("resident")
-        || has(&["hand", "head", "face", "hair", "pants", "coat", "shirt", "dress"])
+        || has(&[
+            "hand", "head", "face", "hair", "pants", "coat", "shirt", "dress",
+        ])
     {
         CLOTH_AND_SKIN
     } else if has(&["floor", "concrete", "masonry", "cement", "slab"]) {
@@ -1289,7 +1475,10 @@ pub fn kestrel_flats(
     scene.push(parametric(
         "rc:asset/kestrel-earth-skirt",
         [0.51, 0.52, 0.33, 1.0],
-        ParametricRecipe::TerrainApron { center_x: 0.0, center_z: 0.0 },
+        ParametricRecipe::TerrainApron {
+            center_x: 0.0,
+            center_z: 0.0,
+        },
     ));
     scene.push(parametric(
         "rc:asset/ground",
@@ -1776,7 +1965,12 @@ pub fn kestrel_flats(
         ),
         (
             "rc:asset/path-garden-to-workshop",
-            &[[-3.75_f32, -2.25], [-2.10, -1.53], [0.65, -0.50], [2.82, -0.45]][..],
+            &[
+                [-3.75_f32, -2.25],
+                [-2.10, -1.53],
+                [0.65, -0.50],
+                [2.82, -0.45],
+            ][..],
             0.54,
             0.052,
         ),
@@ -1790,7 +1984,11 @@ pub fn kestrel_flats(
         scene.push(parametric(
             id,
             [0.88, 0.73, 0.53, 1.0],
-            ParametricRecipe::Ribbon { control, width, elevation },
+            ParametricRecipe::Ribbon {
+                control,
+                width,
+                elevation,
+            },
         ));
     }
     scene.push(parametric(
@@ -1851,9 +2049,11 @@ pub fn kestrel_flats(
         [0.19, 0.15, 0.11, 1.0],
         [-4.2, -3.3]
             .into_iter()
-            .flat_map(|z| [-4.8, -3.0].into_iter().filter_map(move |x| {
-                (x == -4.8 || z == -4.2).then(|| block([x, 0.195, z], [1.24, 0.035, 0.43]))
-            }))
+            .flat_map(|z| {
+                [-4.8, -3.0].into_iter().filter_map(move |x| {
+                    (x == -4.8 || z == -4.2).then(|| block([x, 0.195, z], [1.24, 0.035, 0.43]))
+                })
+            })
             .collect(),
     ));
     for (name, x, z, length) in [
@@ -1885,16 +2085,28 @@ pub fn kestrel_flats(
     if garden_active {
         let mut seedlings = Vec::new();
         for (plant, (x, z)) in [
-            (-5.2_f32, -4.2_f32), (-4.7, -4.2), (-4.2, -4.2), (-3.4, -4.2),
-            (-2.9, -4.2), (-2.4, -4.2), (-5.0, -3.3), (-4.55, -3.3), (-4.1, -3.3),
-        ].into_iter().enumerate() {
+            (-5.2_f32, -4.2_f32),
+            (-4.7, -4.2),
+            (-4.2, -4.2),
+            (-3.4, -4.2),
+            (-2.9, -4.2),
+            (-2.4, -4.2),
+            (-5.0, -3.3),
+            (-4.55, -3.3),
+            (-4.1, -3.3),
+        ]
+        .into_iter()
+        .enumerate()
+        {
             for leaf in 0..9 {
-                let angle = leaf as f32 * std::f32::consts::TAU / 9.0
-                    + plant as f32 * 0.61;
+                let angle = leaf as f32 * std::f32::consts::TAU / 9.0 + plant as f32 * 0.61;
                 let reach = 0.12 + ((leaf * 5 + plant * 3) % 7) as f32 * 0.018;
                 seedlings.push(EllipsoidInstance {
-                    center: [x + angle.cos() * reach, 0.34 + (leaf % 3) as f32 * 0.018,
-                        z + angle.sin() * reach * 0.62],
+                    center: [
+                        x + angle.cos() * reach,
+                        0.34 + (leaf % 3) as f32 * 0.018,
+                        z + angle.sin() * reach * 0.62,
+                    ],
                     radii: [0.075, 0.035, 0.18 + (leaf % 4) as f32 * 0.018],
                     pitch_deg: 18.0 + (leaf % 4) as f32 * 7.0,
                     yaw_deg: angle.to_degrees(),
@@ -1973,8 +2185,11 @@ pub fn kestrel_flats(
                 let angle = leaf as f32 * std::f32::consts::TAU / 16.0;
                 let reach = 0.16 + ((leaf * 7 + 3) % 9) as f32 * 0.012;
                 leaves.push(EllipsoidInstance {
-                    center: [x + angle.cos() * reach, 0.40 + (leaf % 4) as f32 * 0.025,
-                        z + angle.sin() * reach * 0.72],
+                    center: [
+                        x + angle.cos() * reach,
+                        0.40 + (leaf % 4) as f32 * 0.025,
+                        z + angle.sin() * reach * 0.72,
+                    ],
                     radii: [0.12, 0.043, 0.24 + (leaf % 5) as f32 * 0.014],
                     pitch_deg: 16.0 + (leaf % 5) as f32 * 8.0,
                     yaw_deg: angle.to_degrees() + (leaf % 3) as f32 * 7.0,
@@ -2475,8 +2690,7 @@ pub fn kestrel_flats(
                 radial_segments: 12,
             },
         ));
-        let (left_elbow, left_hand, right_elbow, right_hand) =
-            community_work_pose(resident_index);
+        let (left_elbow, left_hand, right_elbow, right_hand) = community_work_pose(resident_index);
         let left_shoulder = [-0.29, 0.93, 0.0];
         let right_shoulder = [0.29, 0.93, 0.0];
         scene.push(parametric(
@@ -2606,13 +2820,19 @@ pub fn kestrel_flats(
         // Adult proportions: leg length, torso width and head size are authored
         // independently. Qualia transforms the source meshes; stable IDs and
         // the resident's world X/Z location remain unchanged.
-        scene.extend(crate::resident_props::assets(resident_key,
-            [x+left_hand[0],left_hand[1],z+left_hand[2]],
-            [x+right_hand[0],right_hand[1],z+right_hand[2]]));
+        scene.extend(crate::resident_props::assets(
+            resident_key,
+            [x + left_hand[0], left_hand[1], z + left_hand[2]],
+            [x + right_hand[0], right_hand[1], z + right_hand[2]],
+        ));
         let ground = crate::terrain::settlement_height(0.0, x, z);
         for part in &mut scene[model_start..] {
-            let Some(source) = part.parametric.take() else { continue };
-            let head_part = part.id == head_id || part.id == face_id || part.id == hair_id
+            let Some(source) = part.parametric.take() else {
+                continue;
+            };
+            let head_part = part.id == head_id
+                || part.id == face_id
+                || part.id == hair_id
                 || part.id.ends_with("-nose");
             let (pivot, target, scale) = if head_part {
                 ([x, 1.23, z], [x, ground + 1.64, z], [0.74, 0.64, 0.74])
@@ -2624,7 +2844,10 @@ pub fn kestrel_flats(
                 ([x, 0.48, z], [x, ground + 0.815, z], [0.74, 1.04, 0.74])
             };
             part.parametric = Some(ParametricRecipe::Transform {
-                source: Box::new(source), pivot, target, scale,
+                source: Box::new(source),
+                pivot,
+                target,
+                scale,
             });
         }
     }
@@ -2760,11 +2983,7 @@ mod material_family_tests {
             .positions
             .iter()
             .all(|point| point.iter().all(|v| v.is_finite())));
-        let centerline: Vec<[f32; 3]> = water
-            .positions
-            .chunks_exact(9)
-            .map(|row| row[4])
-            .collect();
+        let centerline: Vec<[f32; 3]> = water.positions.chunks_exact(9).map(|row| row[4]).collect();
         let z_span = centerline
             .iter()
             .map(|point| point[2])
@@ -2797,7 +3016,10 @@ mod material_family_tests {
 
     #[test]
     fn botanical_anatomy_keeps_bark_and_foliage_distinct() {
-        assert_eq!(material_family_for("rc:asset/flora/eucalypt-gum/trunk").id, "weathered-timber");
+        assert_eq!(
+            material_family_for("rc:asset/flora/eucalypt-gum/trunk").id,
+            "weathered-timber"
+        );
         assert_eq!(
             material_family_for("rc:asset/flora/eucalypt-gum/blue-grey-leaves-0").id,
             "living-foliage"
@@ -2806,12 +3028,30 @@ mod material_family_tests {
 
     #[test]
     fn settlement_parts_use_their_authored_surface_family() {
-        assert_eq!(material_family_for("rc:asset/solar-cells").id, "solar-glass");
-        assert_eq!(material_family_for("rc:asset/solar-array").id, "galvanised-metal");
-        assert_eq!(material_family_for("rc:asset/workshop-window-glazing").id, "framed-glass");
-        assert_eq!(material_family_for("rc:asset/workshop-window-frame").id, "galvanised-metal");
-        assert_eq!(material_family_for("rc:asset/workshop-roof").id, "terracotta");
-        assert_eq!(material_family_for("rc:asset/camp-shade-panels").id, "shade-canvas");
+        assert_eq!(
+            material_family_for("rc:asset/solar-cells").id,
+            "solar-glass"
+        );
+        assert_eq!(
+            material_family_for("rc:asset/solar-array").id,
+            "galvanised-metal"
+        );
+        assert_eq!(
+            material_family_for("rc:asset/workshop-window-glazing").id,
+            "framed-glass"
+        );
+        assert_eq!(
+            material_family_for("rc:asset/workshop-window-frame").id,
+            "galvanised-metal"
+        );
+        assert_eq!(
+            material_family_for("rc:asset/workshop-roof").id,
+            "terracotta"
+        );
+        assert_eq!(
+            material_family_for("rc:asset/camp-shade-panels").id,
+            "shade-canvas"
+        );
     }
 }
 
@@ -2830,7 +3070,10 @@ pub fn saltwind_reach(
     scene.push(parametric(
         "rc:asset/saltwind-earth-skirt",
         [0.55, 0.55, 0.35, 1.0],
-        ParametricRecipe::TerrainApron { center_x: 16.0, center_z: 0.0 },
+        ParametricRecipe::TerrainApron {
+            center_x: 16.0,
+            center_z: 0.0,
+        },
     ));
     scene.push(parametric(
         "rc:asset/saltwind-ground",
@@ -2968,9 +3211,7 @@ pub fn saltwind_reach(
             },
         ));
     }
-    const CANAL_CONTROL: &[[f32; 2]] = &[
-        [8.05, -7.0], [8.72, -2.15], [7.28, 2.20], [8.02, 7.0],
-    ];
+    const CANAL_CONTROL: &[[f32; 2]] = &[[8.05, -7.0], [8.72, -2.15], [7.28, 2.20], [8.02, 7.0]];
     scene.push(parametric(
         "rc:asset/channel-banks",
         [0.62, 0.64, 0.43, 1.0],
@@ -3155,7 +3396,11 @@ pub fn saltwind_reach(
         scene.push(parametric(
             id,
             [0.91, 0.79, 0.59, 1.0],
-            ParametricRecipe::Ribbon { control, width, elevation: 0.052 },
+            ParametricRecipe::Ribbon {
+                control,
+                width,
+                elevation: 0.052,
+            },
         ));
     }
     scene.push(asset(
@@ -3573,7 +3818,10 @@ pub fn northern_highlands() -> Vec<AssetRecipe> {
         scene.push(parametric(
             base_id,
             [0.51, 0.53, 0.36, 1.0],
-            ParametricRecipe::TerrainApron { center_x: x, center_z: -14.0 },
+            ParametricRecipe::TerrainApron {
+                center_x: x,
+                center_z: -14.0,
+            },
         ));
         scene.push(parametric(
             id,
@@ -3584,9 +3832,7 @@ pub fn northern_highlands() -> Vec<AssetRecipe> {
             },
         ));
     }
-    const CREEK_CONTROL: &[[f32; 2]] = &[
-        [8.02, -21.0], [8.48, -16.4], [7.55, -11.3], [8.08, -7.0],
-    ];
+    const CREEK_CONTROL: &[[f32; 2]] = &[[8.02, -21.0], [8.48, -16.4], [7.55, -11.3], [8.08, -7.0]];
     scene.push(parametric(
         "rc:asset/highland-creek-banks",
         [0.57, 0.67, 0.46, 1.0],

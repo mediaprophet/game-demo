@@ -740,7 +740,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = 'c9f41788cc40b056-community-overhaul';
+const WASM_BUILD = '910dca7af46a7787-community-overhaul';
 window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 window.setWorldLoading('Starting the Qualia engine','Initialising the Australian world renderer');
@@ -752,9 +752,10 @@ const {CHARACTER_NAMES,CHARACTER_ARCS,CHARACTER_TRAITS,CHARACTER_PLACES,characte
   nearbyRadius,walkSpeed,characterChapter,encodeCharacters,decodeCharacters}=characters;
  $('pin').textContent = 'QualiaDB · ' + m.pinned_qualiadb_revision().slice(0,8);
 
-const [SEED, ACTIONS, VIBE_SCENE, VIBE_DRIVE_TEXT, INVESTMENT_TAXONOMY_TEXT, ACTIVITY_MODULES_TEXT, PLACE_PACKAGE_TEXT] = await Promise.all(
+const [SEED, ACTIONS, VIBE_SCENE, VIBE_DRIVE_TEXT, INVESTMENT_TAXONOMY_TEXT, ACTIVITY_MODULES_TEXT, PLACE_PACKAGE_TEXT, VIBE_CHARACTERS_TEXT, VIBE_CAMPAIGN_TEXT] = await Promise.all(
   ['fixtures/seed.ttl', 'fixtures/actions.json', 'fixtures/community-beacon.vibe', 'fixtures/drive-simulation.vibe',
-    'fixtures/investment-taxonomy.json', 'fixtures/scenarios/community-grounds-v1.json', 'fixtures/places/fictional-community-v1.json']
+    'fixtures/investment-taxonomy.json', 'fixtures/scenarios/community-grounds-v1.json', 'fixtures/places/fictional-community-v1.json',
+    'fixtures/character-arcs.vibe', 'fixtures/campaign-rules.vibe']
     .map(async u => (await fetch(u, {cache:'no-store'})).text()));
 const INVESTMENT_TAXONOMY = JSON.parse(INVESTMENT_TAXONOMY_TEXT);
 $('vibe-scene').value = VIBE_SCENE.trim();
@@ -770,6 +771,13 @@ if (!driveModeAvailable && driveModeButton) {
   driveModeButton.disabled = true;
   driveModeButton.title = 'This WASM package predates the VibeScript drive module. Update the compiled package to enable driving.';
 }
+const characterSimulation = typeof m.CharacterSimulation === 'function'
+  ? new m.CharacterSimulation(VIBE_CHARACTERS_TEXT) : null;
+if (characterSimulation && typeof characters.bindCharacterSimulation === 'function') {
+  characters.bindCharacterSimulation(characterSimulation);
+}
+const campaignSimulation = typeof m.CampaignSimulation === 'function'
+  ? new m.CampaignSimulation(VIBE_CAMPAIGN_TEXT) : null;
 const catalog = JSON.parse(ACTIONS).actions;
 const ACTIVITY_PACKAGE = JSON.parse(ACTIVITY_MODULES_TEXT);
 const ACTIVITY_MODULES = ACTIVITY_PACKAGE.modules;
@@ -1003,6 +1011,20 @@ const STORY = {
   endTurn: 'Your crew has spent its work for today. Rest and begin again tomorrow.',
 };
 function campaignLead(st) {
+  if (campaignSimulation && typeof campaignSimulation.lead === 'function') {
+    try {
+      const res = campaignSimulation.lead(JSON.stringify(st));
+      if (res && res.title) {
+        return {
+          title: res.title,
+          copy: res.copy,
+          label: res.label,
+          action: res.action || null,
+          territory: res.territory || 'kestrel',
+        };
+      }
+    } catch (_) {}
+  }
   if (st.finale) return {title:st.finale==='"commons"'?'The commons are open':'The canal is connected',
     copy:st.finale==='"commons"'?'You chose a local gathering and opened a shared place to celebrate the harvest.':'You chose a working trade link, carrying Saltwind’s produce to neighbouring communities.',
     label:'Campaign complete · explore the map', action:null, territory:'saltwind'};

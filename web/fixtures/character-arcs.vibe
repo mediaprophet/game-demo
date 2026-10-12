@@ -1,0 +1,153 @@
+module <https://civics.au/game/modules/character_arcs>;
+
+// Character trait movement and sensory field mechanics.
+pure fn nearby_radius(trait_id: string) -> f64 {
+    if trait_id == "observant" { return 7.0; }
+    if trait_id == "connector" { return 5.0; }
+    return 3.6;
+}
+
+pure fn walk_speed(trait_id: string, running: bool) -> f64 {
+    let base = if running { 5.0 } else { 2.6 };
+    if trait_id == "trailwise" && !running { return base * 1.25; }
+    if trait_id == "steadfast" && running { return base * 1.15; }
+    return base;
+}
+
+pure fn arc_opening(arc: string) -> string {
+    if arc == "maker" { return "A silent workshop can still become the town’s heart."; }
+    if arc == "grower" { return "The first harvest begins with water and a place to plant."; }
+    if arc == "crossing" { return "Two settlements need a safe way to meet again."; }
+    if arc == "steward" { return "The valley has stories worth carrying into the commons."; }
+    return "A new neighbour, ready to leave a mark on the valley.";
+}
+
+pure fn character_bio(name: string) -> string {
+    if name == "Ada" { return "Keeps the tools her mother left behind, and fixes what the town has given up on."; }
+    if name == "Mira" { return "Carries seeds gathered from every garden she has helped bring back to life."; }
+    if name == "Orin" { return "A ridge guide who remembers the old footpaths and the people who used them."; }
+    if name == "Tavi" { return "A curious apprentice, always asking who gets left out of a good plan."; }
+    if name == "Leni" { return "A patient cook who knows that a shared meal can start a difficult conversation."; }
+    if name == "Rowan" { return "A creek watcher learning how small changes upstream reshape the whole valley."; }
+    if name == "Sol" { return "A tinkerer who would rather teach a repair than keep a clever trick secret."; }
+    if name == "Nia" { return "A market runner with a talent for finding the neighbour who has what is needed."; }
+    if name == "Kit" { return "A young mapmaker trying to connect places that stopped speaking to one another."; }
+    if name == "Ari" { return "A careful listener collecting the stories behind the town’s hardest choices."; }
+    if name == "Eden" { return "A seed keeper determined to make the next harvest belong to everyone."; }
+    if name == "Jules" { return "A builder who believes a safe crossing should bring communities closer."; }
+    return "A new neighbour, ready to leave a mark on the valley.";
+}
+
+pure fn character_chapter(arc: string, world: Record) -> Record {
+    let opening = arc_opening(arc);
+    if arc == "maker" {
+        if world.online {
+            if world.signalOnline {
+                return {
+                    title: "A workshop that reaches farther",
+                    goal: "The signal is live. Take a paid repair order and pass those skills on.",
+                    opening: opening
+                };
+            }
+            return {
+                title: "Power with a purpose",
+                goal: "The workshop runs. Reconnect the mast so distant neighbours can call for repairs.",
+                opening: opening
+            };
+        }
+        if world.approved {
+            return {
+                title: "The final connection",
+                goal: "The town endorsed the solar project. Bring the workshop online.",
+                opening: opening
+            };
+        }
+        return {
+            title: "A workshop waiting",
+            goal: "Find the missing parts and earn the council’s endorsement.",
+            opening: opening
+        };
+    }
+
+    if arc == "grower" {
+        if world.orchardActive {
+            return {
+                title: "A harvest to share",
+                goal: "Choose how Saltwind’s harvest should support the commons.",
+                opening: opening
+            };
+        }
+        if world.gardenActive {
+            return {
+                title: "From one garden to two",
+                goal: "Help Saltwind reopen water and plant its orchard.",
+                opening: opening
+            };
+        }
+        if world.waterOnline {
+            return {
+                title: "The first beds",
+                goal: "Shared water flows. Plant Kestrel’s garden.",
+                opening: opening
+            };
+        }
+        return {
+            title: "Water before seeds",
+            goal: "Repair the shared cistern so anyone can grow food.",
+            opening: opening
+        };
+    }
+
+    if arc == "crossing" {
+        if world.pumpOnline {
+            return {
+                title: "Beyond the bridge",
+                goal: "The wind pump works. Help the orchard and the first trade route.",
+                opening: opening
+            };
+        }
+        if world.bridgeOpen {
+            return {
+                title: "Water on the far bank",
+                goal: "The crossing is open. Bring Saltwind’s wind pump online.",
+                opening: opening
+            };
+        }
+        return {
+            title: "The divided canal",
+            goal: "Restore or brace the bridge before high water makes the work harder.",
+            opening: opening
+        };
+    }
+
+    if arc == "steward" {
+        if world.finale != "" {
+            return {
+                title: "A living record",
+                goal: "The commons carries the choices you helped make.",
+                opening: opening
+            };
+        }
+        if world.signalOnline {
+            return {
+                title: "The wider circle",
+                goal: "Share the town’s progress with neighbours through the mast.",
+                opening: opening
+            };
+        }
+        if world.gardenActive {
+            return {
+                title: "What grows here",
+                goal: "Walk the creek valley and help the town keep its new garden alive.",
+                opening: opening
+            };
+        }
+        return {
+            title: "Listen to the valley",
+            goal: "Explore the ridge, then help restore shelter, water and food.",
+            opening: opening
+        };
+    }
+
+    return { title: "", goal: "", opening: opening };
+}

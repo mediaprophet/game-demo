@@ -18,7 +18,20 @@ export const CHARACTER_BIOS = {
   Eden:'A seed keeper determined to make the next harvest belong to everyone.',
   Jules:'A builder who believes a safe crossing should bring communities closer.',
 };
-export const characterBio = c => CHARACTER_BIOS[c.name] || 'A new neighbour, ready to leave a mark on the valley.';
+let characterSimulation = null;
+export function bindCharacterSimulation(sim) {
+  characterSimulation = sim;
+}
+
+export const characterBio = c => {
+  if (characterSimulation && typeof characterSimulation.bio === 'function') {
+    try {
+      const bio = characterSimulation.bio(c.name);
+      if (bio) return bio;
+    } catch (_) {}
+  }
+  return CHARACTER_BIOS[c.name] || 'A new neighbour, ready to leave a mark on the valley.';
+};
 export const CHARACTER_ARCS = [
   {id:'maker', label:'The Maker', opening:'A silent workshop can still become the town’s heart.'},
   {id:'grower', label:'The Grower', opening:'The first harvest begins with water and a place to plant.'},
@@ -69,13 +82,37 @@ export function moveCharacter(c,x,z,place=c.place){
   c.z=round(Math.max(-20.6,Math.min(6.6,z)));
   c.place=place;
 }
-export function nearbyRadius(c){return c.trait==='observant'?7:c.trait==='connector'?5:3.6;}
+export function nearbyRadius(c){
+  if (characterSimulation && typeof characterSimulation.nearby_radius === 'function') {
+    try {
+      return characterSimulation.nearby_radius(c.trait);
+    } catch (_) {}
+  }
+  return c.trait==='observant'?7:c.trait==='connector'?5:3.6;
+}
 export function walkSpeed(c,running){
+  if (characterSimulation && typeof characterSimulation.walk_speed === 'function') {
+    try {
+      return characterSimulation.walk_speed(c.trait, !!running);
+    } catch (_) {}
+  }
   const base=running?5:2.6;
   return base*(c.trait==='trailwise'&&!running?1.25:
     c.trait==='steadfast'&&running?1.15:1);
 }
 export function characterChapter(c,world){
+  if (characterSimulation && typeof characterSimulation.chapter === 'function') {
+    try {
+      const stage = characterSimulation.chapter(c.arc, JSON.stringify(world));
+      if (stage && stage.title) {
+        return {
+          title: stage.title,
+          goal: stage.goal,
+          opening: stage.opening || CHARACTER_ARCS.find(a=>a.id===c.arc)?.opening || ''
+        };
+      }
+    } catch (_) {}
+  }
   const stage={
     maker: world.online ?
       world.signalOnline?['A workshop that reaches farther','The signal is live. Take a paid repair order and pass those skills on.']:

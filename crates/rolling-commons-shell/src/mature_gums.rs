@@ -3,8 +3,7 @@
 //! assemblies. These are genus-level fictional plantings, not occurrence data.
 
 use crate::asset_catalog::{
-    AssetRecipe, EllipsoidInstance, LimbSegment, ParametricRecipe, LIVING_FOLIAGE,
-    WEATHERED_TIMBER,
+    AssetRecipe, EllipsoidInstance, LimbSegment, ParametricRecipe, LIVING_FOLIAGE, WEATHERED_TIMBER,
 };
 
 fn wood(id: &str, center: [f32; 3], limbs: Vec<LimbSegment>, color: [f32; 4]) -> AssetRecipe {
@@ -12,15 +11,24 @@ fn wood(id: &str, center: [f32; 3], limbs: Vec<LimbSegment>, color: [f32; 4]) ->
         id: format!("rc:asset/{id}"),
         parts: Vec::new(),
         parametric: Some(ParametricRecipe::LimbCluster {
-            center, limbs, radial_segments: 14,
+            center,
+            limbs,
+            radial_segments: 14,
         }),
-        color, material_family: WEATHERED_TIMBER, vibe_source: None,
+        color,
+        material_family: WEATHERED_TIMBER,
+        vibe_source: None,
         render_role: "opaque".into(),
     }
 }
 
 fn limb(start: [f32; 3], end: [f32; 3], a: f32, b: f32) -> LimbSegment {
-    LimbSegment { start, end, start_radius: a, end_radius: b }
+    LimbSegment {
+        start,
+        end,
+        start_radius: a,
+        end_radius: b,
+    }
 }
 
 /// Narrow, pendulous leaflets grouped into branch-end sprays, with open sky
@@ -46,16 +54,23 @@ fn leaves(id: &str, tips: &[[f32; 3]], phase: f32, tone: usize) -> AssetRecipe {
         }
     }
     let palette = [
-        [0.34, 0.42, 0.24, 1.0], [0.42, 0.49, 0.29, 1.0],
-        [0.30, 0.39, 0.28, 1.0], [0.49, 0.53, 0.33, 1.0],
+        [0.34, 0.42, 0.24, 1.0],
+        [0.42, 0.49, 0.29, 1.0],
+        [0.30, 0.39, 0.28, 1.0],
+        [0.49, 0.53, 0.33, 1.0],
     ];
     AssetRecipe {
-        id: format!("rc:asset/{id}"), parts: Vec::new(),
+        id: format!("rc:asset/{id}"),
+        parts: Vec::new(),
         parametric: Some(ParametricRecipe::EllipsoidCluster {
-            instances, latitude: 4, longitude: 6,
+            instances,
+            latitude: 4,
+            longitude: 6,
         }),
-        color: palette[tone % palette.len()], material_family: LIVING_FOLIAGE,
-        vibe_source: None, render_role: "opaque".into(),
+        color: palette[tone % palette.len()],
+        material_family: LIVING_FOLIAGE,
+        vibe_source: None,
+        render_role: "opaque".into(),
     }
 }
 
@@ -68,36 +83,69 @@ pub fn assets() -> Vec<AssetRecipe> {
         ("ne", 6.1, -5.2, 5.8, 0.37, 0.83),
         ("sw", -6.1, 5.2, 5.4, -0.50, 1.41),
         ("se", 6.1, 4.8, 5.9, 0.32, 2.06),
-    ].into_iter().enumerate() {
+    ]
+    .into_iter()
+    .enumerate()
+    {
         let root = [x, crate::terrain::settlement_height(0.0, x, z) - 0.01, z];
         let h = height;
         let joint = [lean * 0.65, h * 0.45, -0.10];
         let top = [lean, h * 0.73, 0.08];
-        result.push(wood(&format!("tree-trunk-{key}"), root, vec![
-            limb([0.0, 0.0, 0.0], [lean * 0.28, h * 0.23, 0.04], 0.31, 0.24),
-            limb([lean * 0.28, h * 0.23, 0.04], joint, 0.24, 0.17),
-            limb(joint, top, 0.17, 0.07),
-        ], [0.76, 0.74, 0.63, 1.0]));
+        result.push(wood(
+            &format!("tree-trunk-{key}"),
+            root,
+            vec![
+                limb([0.0, 0.0, 0.0], [lean * 0.28, h * 0.23, 0.04], 0.31, 0.24),
+                limb([lean * 0.28, h * 0.23, 0.04], joint, 0.24, 0.17),
+                limb(joint, top, 0.17, 0.07),
+            ],
+            [0.76, 0.74, 0.63, 1.0],
+        ));
         let mut branches = Vec::with_capacity(18);
         let mut tips = Vec::with_capacity(9);
         for branch in 0..9 {
             let angle = phase + branch as f32 * 2.399_963;
             let spread = 1.05 + (branch % 3) as f32 * 0.38;
             let start = [lean * 0.72, h * (0.42 + branch as f32 * 0.023), -0.06];
-            let elbow = [lean + angle.cos() * spread * 0.55,
-                h * (0.68 + (branch % 3) as f32 * 0.04), angle.sin() * spread * 0.49];
-            let tip = [lean + angle.cos() * spread,
-                h * (0.79 + (branch % 4) as f32 * 0.047), angle.sin() * spread * 0.83];
+            let elbow = [
+                lean + angle.cos() * spread * 0.55,
+                h * (0.68 + (branch % 3) as f32 * 0.04),
+                angle.sin() * spread * 0.49,
+            ];
+            let tip = [
+                lean + angle.cos() * spread,
+                h * (0.79 + (branch % 4) as f32 * 0.047),
+                angle.sin() * spread * 0.83,
+            ];
             branches.push(limb(start, elbow, 0.11 - branch as f32 * 0.004, 0.046));
             branches.push(limb(elbow, tip, 0.046, 0.012));
             tips.push([root[0] + tip[0], root[1] + tip[1], root[2] + tip[2]]);
         }
-        result.push(wood(&format!("gum-fork-{key}"), root, branches, [0.64, 0.62, 0.51, 1.0]));
-        result.push(wood(&format!("gum-bark-{key}"), root, vec![
-            limb([-0.035, 0.04, 0.03], [lean * 0.10 - 0.04, h * 0.12, 0.05], 0.318, 0.27),
-            limb([lean * 0.28 + 0.012, h * 0.23, 0.046],
-                 [lean * 0.44 + 0.015, h * 0.33, 0.04], 0.242, 0.207),
-        ], [0.45, 0.41, 0.32, 1.0]));
+        result.push(wood(
+            &format!("gum-fork-{key}"),
+            root,
+            branches,
+            [0.64, 0.62, 0.51, 1.0],
+        ));
+        result.push(wood(
+            &format!("gum-bark-{key}"),
+            root,
+            vec![
+                limb(
+                    [-0.035, 0.04, 0.03],
+                    [lean * 0.10 - 0.04, h * 0.12, 0.05],
+                    0.318,
+                    0.27,
+                ),
+                limb(
+                    [lean * 0.28 + 0.012, h * 0.23, 0.046],
+                    [lean * 0.44 + 0.015, h * 0.33, 0.04],
+                    0.242,
+                    0.207,
+                ),
+            ],
+            [0.45, 0.41, 0.32, 1.0],
+        ));
         // Stable groups occupy different branch ends instead of layering solid
         // ellipsoids and fine leaves at the same position.
         for (id, range, tone) in [

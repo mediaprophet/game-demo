@@ -155,21 +155,9 @@ fn eucalypt_gum() -> Vec<AssetRecipe> {
         ));
     }
     for (index, (center, spread, color)) in [
-        (
-            [x - 0.66, 5.18, z - 0.12],
-            1.10,
-            [0.34, 0.48, 0.37, 1.0],
-        ),
-        (
-            [x + 0.58, 5.28, z + 0.12],
-            1.08,
-            [0.29, 0.43, 0.34, 1.0],
-        ),
-        (
-            [x - 0.04, 5.75, z + 0.06],
-            0.94,
-            [0.38, 0.51, 0.39, 1.0],
-        ),
+        ([x - 0.66, 5.18, z - 0.12], 1.10, [0.34, 0.48, 0.37, 1.0]),
+        ([x + 0.58, 5.28, z + 0.12], 1.08, [0.29, 0.43, 0.34, 1.0]),
+        ([x - 0.04, 5.75, z + 0.06], 0.94, [0.38, 0.51, 0.39, 1.0]),
     ]
     .into_iter()
     .enumerate()
@@ -221,7 +209,14 @@ fn golden_wattle() -> Vec<AssetRecipe> {
         ));
         assets.push(cluster(
             format!("rc:asset/flora/golden-wattle/gold-blossoms-{index}"),
-            radial_leaves([center[0], center[1] + 0.18, center[2]], 9, spread * 0.42, 0.13, 0.105, 0.0),
+            radial_leaves(
+                [center[0], center[1] + 0.18, center[2]],
+                9,
+                spread * 0.42,
+                0.13,
+                0.105,
+                0.0,
+            ),
             [0.94, 0.66, 0.16, 1.0],
         ));
     }

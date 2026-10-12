@@ -1,6 +1,6 @@
 //! Physical-unit lens adapter. Projection and admitted bounds remain native.
-use wasm_bindgen::prelude::*;
 use super::{GameHud, GamePortal};
+use wasm_bindgen::prelude::*;
 
 fn near_plane(metres: f32, scale: f32) -> Result<f32, JsValue> {
     if !metres.is_finite() || !scale.is_finite() || metres <= 0.0 || scale <= 0.0 {

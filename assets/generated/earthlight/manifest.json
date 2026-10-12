@@ -1,6 +1,7 @@
 {
   "format": "maslows-challenge-asset-export-v1",
   "artStyle": "earthlight",
+  "epistemicMode": "simulation",
   "generator": "scripts/export-game-assets.mjs",
   "sourceRecipes": [
     "crates/rolling-commons-shell/src/asset_catalog.rs",
@@ -38,7 +39,7 @@
   ],
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "c9f41788cc40b056d307bbdc71dfc40532717d5ef2df86a3526c20b6e7cc09c6"
+    "sha256": "910dca7af46a778723f72296dc46b33d948d02fabe79aaf8a47140f05e148af7"
   },
   "assets": [
     {

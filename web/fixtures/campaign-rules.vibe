@@ -1,0 +1,198 @@
+module <https://civics.au/game/modules/campaign_rules>;
+
+// Campaign advisor and stage decision machine.
+pure fn campaign_lead(st: Record) -> Record {
+    if st.finale != "" {
+        let is_commons = st.finale == "\"commons\"" || st.finale == "commons";
+        return {
+            title: if is_commons { "The commons are open" } else { "The canal is connected" },
+            copy: if is_commons {
+                "You chose a local gathering and opened a shared place to celebrate the harvest."
+            } else {
+                "You chose a working trade link, carrying Saltwind’s produce to neighbouring communities."
+            },
+            label: "Campaign complete · explore the map",
+            action: "",
+            territory: "saltwind"
+        };
+    }
+
+    if !st.historyRecorded {
+        return {
+            title: "A project before the committee",
+            copy: "Document the site's history and acknowledge past harm before seeking new endorsement.",
+            label: if st.labour { "Document the reuse and prior harm" } else { "Rest for tomorrow" },
+            action: if st.labour { "recordAppropriation" } else { "endTurn" },
+            territory: "kestrel"
+        };
+    }
+
+    if !st.waterOnline {
+        return {
+            title: "First, restore shared water",
+            copy: "The cistern has been dry for weeks. Salvage a fitting and get water moving before the next project.",
+            label: if st.labour { "Repair the tank" } else { "Rest for tomorrow" },
+            action: if st.labour { "repairTankLabour" } else { "endTurn" },
+            territory: "kestrel"
+        };
+    }
+
+    let held_panel = st.held.contains("rc:partPanel");
+    let held_inverter = st.held.contains("rc:partInverter");
+    let fitted_panel = st.parts.contains("rc:partPanel");
+    let fitted_inverter = st.parts.contains("rc:partInverter");
+
+    if !st.online {
+        let mut action = "";
+        if !st.historyRecorded {
+            action = "recordAppropriation";
+        } else if !st.committeeFormed {
+            action = if st.supporters > 0.0 { "formCommittee" } else { "canvassMara" };
+        } else if !st.scoped {
+            action = "scopeSolarProject";
+        } else if st.fundingFailed {
+            action = if st.supporters < 2.0 {
+                "canvassSecondResident"
+            } else if st.coins >= 3.0 {
+                "selfFundProject"
+            } else {
+                "raiseCommunityFunds"
+            };
+        } else if st.fundingAvailable && st.fundingDisposition == "" {
+            action = "";
+        } else if st.grantStatus == "" {
+            action = "submitGrant";
+        } else if st.grantStatus == "\"pending\"" || st.grantStatus == "pending" {
+            action = "endTurn";
+        } else if st.grantStatus == "\"declined\"" || st.grantStatus == "declined" {
+            action = if st.supporters < 2.0 { "canvassSecondResident" } else { "reviseGrant" };
+        } else if (st.grantStatus == "\"awarded\"" || st.grantStatus == "awarded") && st.fundingDisposition == "" {
+            action = "";
+        } else if !st.procurementReady {
+            action = if st.fundingFailed { "raiseCommunityFunds" } else { "" };
+        } else if held_panel {
+            action = "contributePanel";
+        } else if held_inverter {
+            action = "contributeInverter";
+        } else if !fitted_panel {
+            action = if st.labour { "salvagePanel" } else if st.coins >= 4.0 { "buyPanel" } else { "endTurn" };
+        } else if !fitted_inverter {
+            action = if st.coins >= 7.0 { "buyInverter" } else if st.labour { "salvageInverter" } else { "endTurn" };
+        } else if !st.approved {
+            action = "requestApproval";
+        } else {
+            action = "switchPowerOn";
+        }
+
+        let mut title = "Power the workshop";
+        if !st.historyRecorded { title = "Document what happened before the next meeting"; }
+        else if !st.committeeFormed { title = "Build a mandate before the project"; }
+        else if !st.scoped { title = "Prepare the project"; }
+        else if st.fundingDisposition == "\"government-claimed\"" || st.fundingDisposition == "government-claimed" { title = "The department controls the project"; }
+        else if st.fundingFailed { title = "Recover from a failed funding path"; }
+        else if st.grantStatus == "" { title = "Seek funding"; }
+        else if st.grantStatus == "\"pending\"" || st.grantStatus == "pending" { title = "Wait for the grant decision"; }
+        else if st.grantStatus == "\"declined\"" || st.grantStatus == "declined" { title = "Respond to the declined application"; }
+        else if st.fundingDisposition == "" { title = "Choose who gets paid and who controls the work"; }
+
+        let mut copy = "Choose whether to pursue supplier registration, let the committee hire someone else, accept government control, or take another route. Each choice changes money, credit, service, and future relationships.";
+        if st.fundingDisposition == "\"government-claimed\"" || st.fundingDisposition == "government-claimed" {
+            copy = "The department controls the funds and project. Delegate the contract to its political backer, or pay again to challenge the takeover; the review may still fail.";
+        }
+
+        let label = if action != "" { "Continue" } else { "Choose a funding, procurement, or challenge path" };
+        return { title: title, copy: copy, label: label, action: action, territory: "kestrel" };
+    }
+
+    if !st.gardenActive {
+        return {
+            title: "Grow local food",
+            copy: "Plant root crops, greens and herbs now that shared water is available.",
+            label: if st.labour { "Plant the garden" } else { "Rest for tomorrow" },
+            action: if st.labour { "startGarden" } else { "endTurn" },
+            territory: "kestrel"
+        };
+    }
+
+    if !st.bridgeOpen {
+        let action = if !st.labour {
+            "endTurn"
+        } else if st.day <= 4.0 {
+            "restoreBridge"
+        } else if st.bridgeBraced {
+            "restoreBridgeLateLabour"
+        } else if st.coins >= 2.0 {
+            "restoreBridgeLateCoins"
+        } else {
+            "braceBridge"
+        };
+
+        return {
+            title: if st.day <= 4.0 { "Reach the far bank" } else { "Cross the high canal" },
+            copy: "Restore or brace the crossing before high water complicates the repairs.",
+            label: if action == "endTurn" { "Rest for tomorrow" } else { "Continue" },
+            action: action,
+            territory: "saltwind"
+        };
+    }
+
+    if !st.pumpOnline {
+        return {
+            title: "Bring water to Saltwind",
+            copy: "Raise the wind pump so orchards and far-bank communities can grow food.",
+            label: if st.labour { "Commission the wind pump" } else { "Rest for tomorrow" },
+            action: if st.labour { "raiseWindPump" } else { "endTurn" },
+            territory: "saltwind"
+        };
+    }
+
+    if !st.orchardActive {
+        return {
+            title: "Plant for the future",
+            copy: "Plant fruit trees on the sheltered terrace above the canal.",
+            label: if st.labour { "Plant the orchard" } else { "Rest for tomorrow" },
+            action: if st.labour { "plantOrchard" } else { "endTurn" },
+            territory: "saltwind"
+        };
+    }
+
+    if !st.orchardHarvested && st.coins < 4.0 {
+        return {
+            title: "Decide what to do with the harvest",
+            copy: "Reserve food for a lower-cost commons gathering, or sell it for three coins. You can also choose an ending with the resources you already have.",
+            label: "Explore the orchard choices",
+            action: "",
+            territory: "saltwind"
+        };
+    }
+
+    if st.coins < 4.0 && st.orderDelivered && !st.signalOnline {
+        let action = if st.labour { "connectMastLabour" } else if st.coins >= 3.0 { "connectMastCoins" } else { "endTurn" };
+        return {
+            title: "Find another source of supplies",
+            copy: "The communications mast connects distant repair contracts.",
+            label: if action == "endTurn" { "Rest for tomorrow" } else { "Connect the mast" },
+            action: action,
+            territory: "kestrel"
+        };
+    }
+
+    if st.coins < 4.0 && st.signalOnline && !st.remoteOrderDelivered {
+        let action = if st.labour { "fulfilRemoteOrder" } else { "endTurn" };
+        return {
+            title: "Use the new connection",
+            copy: "The connected mast brings a distant repair contract. Complete it for four coins.",
+            label: if action == "endTurn" { "Rest for tomorrow" } else { "Deliver contract" },
+            action: action,
+            territory: "kestrel"
+        };
+    }
+
+    return {
+        title: "Choose what the town becomes",
+        copy: "The essentials now work. Host a local harvest gathering or launch a canal trade route. Each ending asks for a different commitment.",
+        label: "Choose an ending below",
+        action: "",
+        territory: "saltwind"
+    };
+}

@@ -14,23 +14,26 @@ const VEHICLE_Z: f32 = 4.65;
 /// corner radius. This authors coachwork rather than stretching a revolved
 /// capsule: bonnet, cab, shoulder and rear overhang have distinct profiles.
 pub(crate) fn coachwork(x: f32, z: f32, stations: &[[f32; 5]]) -> ParametricRecipe {
-    let sections = stations.iter().map(|s| {
-        let [station, width, sill, height, radius] = *s;
-        let r = radius.min(width * 0.45).min(height * 0.45);
-        let mut ring = Vec::with_capacity(20);
-        for (cx, cy, start) in [
-            (width - r, sill + r, -90.0_f32),
-            (width - r, sill + height - r, 0.0),
-            (-width + r, sill + height - r, 90.0),
-            (-width + r, sill + r, 180.0),
-        ] {
-            for step in 0..5 {
-                let angle = (start + step as f32 * 22.5).to_radians();
-                ring.push([x + cx + r * angle.cos(), cy + r * angle.sin(), z + station]);
+    let sections = stations
+        .iter()
+        .map(|s| {
+            let [station, width, sill, height, radius] = *s;
+            let r = radius.min(width * 0.45).min(height * 0.45);
+            let mut ring = Vec::with_capacity(20);
+            for (cx, cy, start) in [
+                (width - r, sill + r, -90.0_f32),
+                (width - r, sill + height - r, 0.0),
+                (-width + r, sill + height - r, 90.0),
+                (-width + r, sill + r, 180.0),
+            ] {
+                for step in 0..5 {
+                    let angle = (start + step as f32 * 22.5).to_radians();
+                    ring.push([x + cx + r * angle.cos(), cy + r * angle.sin(), z + station]);
+                }
             }
-        }
-        ring
-    }).collect();
+            ring
+        })
+        .collect();
     ParametricRecipe::LoftedBody { sections }
 }
 
@@ -83,7 +86,9 @@ fn wheels(prefix: &str, x: f32, axle_z: &[f32], radius: f32) -> Vec<AssetRecipe>
                 [0.70, 0.72, 0.68, 1.0],
                 ParametricRecipe::WheelX {
                     center: [VEHICLE_X + offset + offset.signum() * 0.102, 0.29, *z],
-                    radius: radius * 0.51, width: 0.025, segments: 24,
+                    radius: radius * 0.51,
+                    width: 0.025,
+                    segments: 24,
                 },
             );
             rim.material_family = GALVANISED_METAL;
@@ -99,23 +104,31 @@ fn four_wheel_drive(prefix: &str, color: [f32; 4], cab_color: [f32; 4]) -> Vec<A
     let body = mesh_part(
         format!("rc:asset/rig/{prefix}/body"),
         color,
-        coachwork(x, z, &[
-            [-1.28, 0.74, 0.46, 0.36, 0.08],
-            [-1.08, 0.83, 0.42, 0.45, 0.10],
-            [-0.52, 0.84, 0.42, 0.52, 0.10],
-            [0.66, 0.84, 0.42, 0.55, 0.10],
-            [1.23, 0.79, 0.46, 0.50, 0.08],
-        ]),
+        coachwork(
+            x,
+            z,
+            &[
+                [-1.28, 0.74, 0.46, 0.36, 0.08],
+                [-1.08, 0.83, 0.42, 0.45, 0.10],
+                [-0.52, 0.84, 0.42, 0.52, 0.10],
+                [0.66, 0.84, 0.42, 0.55, 0.10],
+                [1.23, 0.79, 0.46, 0.50, 0.08],
+            ],
+        ),
     );
     let cabin = mesh_part(
         format!("rc:asset/rig/{prefix}/cabin"),
         cab_color,
-        coachwork(x, z, &[
-            [-0.49, 0.68, 0.91, 0.65, 0.065],
-            [-0.34, 0.71, 0.91, 0.76, 0.075],
-            [0.60, 0.71, 0.91, 0.76, 0.075],
-            [0.73, 0.67, 0.91, 0.65, 0.065],
-        ]),
+        coachwork(
+            x,
+            z,
+            &[
+                [-0.49, 0.68, 0.91, 0.65, 0.065],
+                [-0.34, 0.71, 0.91, 0.76, 0.075],
+                [0.60, 0.71, 0.91, 0.76, 0.075],
+                [0.73, 0.67, 0.91, 0.65, 0.065],
+            ],
+        ),
     );
     let chassis = asset(
         format!("rc:asset/rig/{prefix}/chassis"),
@@ -162,12 +175,16 @@ fn caravan(prefix: &str) -> Vec<AssetRecipe> {
     let body = mesh_part(
         format!("rc:asset/rig/{prefix}/caravan-body"),
         [0.88, 0.85, 0.74, 1.0],
-        coachwork(x, z, &[
-            [-1.58, 0.77, 0.42, 1.10, 0.12],
-            [-1.32, 0.90, 0.36, 1.32, 0.13],
-            [1.28, 0.90, 0.36, 1.32, 0.13],
-            [1.58, 0.80, 0.42, 1.16, 0.12],
-        ]),
+        coachwork(
+            x,
+            z,
+            &[
+                [-1.58, 0.77, 0.42, 1.10, 0.12],
+                [-1.32, 0.90, 0.36, 1.32, 0.13],
+                [1.28, 0.90, 0.36, 1.32, 0.13],
+                [1.58, 0.80, 0.42, 1.16, 0.12],
+            ],
+        ),
     );
     let running_gear = asset(
         format!("rc:asset/rig/{prefix}/caravan-running-gear"),
@@ -206,7 +223,12 @@ fn caravan(prefix: &str) -> Vec<AssetRecipe> {
         ],
     );
     let mut out = vec![body, running_gear, glazing, details, drawbar];
-    out.extend(wheels(&format!("{prefix}/caravan"), 0.93, &[z - 0.13, z + 0.42], 0.31));
+    out.extend(wheels(
+        &format!("{prefix}/caravan"),
+        0.93,
+        &[z - 0.13, z + 0.42],
+        0.31,
+    ));
     out
 }
 
@@ -254,23 +276,31 @@ fn sedan(prefix: &str) -> Vec<AssetRecipe> {
         mesh_part(
             format!("rc:asset/rig/{prefix}/body"),
             [0.56, 0.65, 0.65, 1.0],
-            coachwork(x, z, &[
-                [-1.43, 0.72, 0.44, 0.31, 0.09],
-                [-1.04, 0.83, 0.40, 0.38, 0.10],
-                [-0.56, 0.84, 0.40, 0.43, 0.10],
-                [0.70, 0.84, 0.40, 0.43, 0.10],
-                [1.40, 0.73, 0.44, 0.30, 0.09],
-            ]),
+            coachwork(
+                x,
+                z,
+                &[
+                    [-1.43, 0.72, 0.44, 0.31, 0.09],
+                    [-1.04, 0.83, 0.40, 0.38, 0.10],
+                    [-0.56, 0.84, 0.40, 0.43, 0.10],
+                    [0.70, 0.84, 0.40, 0.43, 0.10],
+                    [1.40, 0.73, 0.44, 0.30, 0.09],
+                ],
+            ),
         ),
         mesh_part(
             format!("rc:asset/rig/{prefix}/cabin"),
             [0.67, 0.73, 0.70, 1.0],
-            coachwork(x, z, &[
-                [-0.63, 0.65, 0.80, 0.23, 0.06],
-                [-0.33, 0.67, 0.80, 0.53, 0.07],
-                [0.39, 0.67, 0.80, 0.53, 0.07],
-                [0.75, 0.63, 0.80, 0.21, 0.06],
-            ]),
+            coachwork(
+                x,
+                z,
+                &[
+                    [-0.63, 0.65, 0.80, 0.23, 0.06],
+                    [-0.33, 0.67, 0.80, 0.53, 0.07],
+                    [0.39, 0.67, 0.80, 0.53, 0.07],
+                    [0.75, 0.63, 0.80, 0.21, 0.06],
+                ],
+            ),
         ),
         asset(
             format!("rc:asset/rig/{prefix}/chassis"),
@@ -348,13 +378,17 @@ fn campervan(prefix: &str) -> Vec<AssetRecipe> {
         mesh_part(
             format!("rc:asset/rig/{prefix}/body"),
             [0.88, 0.84, 0.73, 1.0],
-            coachwork(x, z, &[
-                [-1.78, 0.78, 0.35, 1.12, 0.12],
-                [-1.50, 0.91, 0.30, 1.34, 0.14],
-                [-0.90, 0.92, 0.30, 1.40, 0.14],
-                [1.49, 0.92, 0.30, 1.40, 0.14],
-                [1.78, 0.81, 0.35, 1.26, 0.12],
-            ]),
+            coachwork(
+                x,
+                z,
+                &[
+                    [-1.78, 0.78, 0.35, 1.12, 0.12],
+                    [-1.50, 0.91, 0.30, 1.34, 0.14],
+                    [-0.90, 0.92, 0.30, 1.40, 0.14],
+                    [1.49, 0.92, 0.30, 1.40, 0.14],
+                    [1.78, 0.81, 0.35, 1.26, 0.12],
+                ],
+            ),
         ),
         asset(
             format!("rc:asset/rig/{prefix}/glazing"),
@@ -406,7 +440,12 @@ pub fn rig_assets(rig: u8) -> Vec<AssetRecipe> {
         2 => {
             let mut out = sedan("car-trailer");
             out.extend(camper_trailer("car-trailer"));
-            out.extend(wheels("car-trailer/camper-trailer",0.78,&[VEHICLE_Z+2.65],0.31));
+            out.extend(wheels(
+                "car-trailer/camper-trailer",
+                0.78,
+                &[VEHICLE_Z + 2.65],
+                0.31,
+            ));
             out
         }
         _ => {
@@ -419,13 +458,15 @@ pub fn rig_assets(rig: u8) -> Vec<AssetRecipe> {
             out
         }
     };
-    crate::vehicle_cabins::refine(rig,&mut assets);
-    crate::vehicle_exterior::refine(rig,&mut assets);
+    crate::vehicle_cabins::refine(rig, &mut assets);
+    crate::vehicle_exterior::refine(rig, &mut assets);
     let mut frames = Vec::new();
     for glazing in assets.iter().filter(|asset| asset.id.ends_with("glazing")) {
         let mut parts = Vec::new();
         for pane in &glazing.parts {
-            let Primitive::Box { center, size } = pane else { continue };
+            let Primitive::Box { center, size } = pane else {
+                continue;
+            };
             let axis = if size[0] < size[2] { 0 } else { 2 };
             let horizontal = if axis == 0 { 2 } else { 0 };
             let thickness = 0.036;
@@ -446,8 +487,11 @@ pub fn rig_assets(rig: u8) -> Vec<AssetRecipe> {
             }
         }
         if !parts.is_empty() {
-            frames.push(asset(glazing.id.replace("glazing", "window-frame"),
-                [0.26, 0.29, 0.27, 1.0], parts));
+            frames.push(asset(
+                glazing.id.replace("glazing", "window-frame"),
+                [0.26, 0.29, 0.27, 1.0],
+                parts,
+            ));
         }
     }
     assets.extend(frames);

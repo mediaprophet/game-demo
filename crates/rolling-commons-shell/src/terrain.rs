@@ -53,8 +53,7 @@ pub fn apron(center_x: f32, center_z: f32) -> Mesh {
         } else {
             settlement_height(center_x, x, z) - 0.12
         };
-        let erosion = 0.035 * (x * 1.8 + z * 0.7).sin()
-            + 0.02 * (z * 2.1 - x * 0.5).cos();
+        let erosion = 0.035 * (x * 1.8 + z * 0.7).sin() + 0.02 * (z * 2.1 - x * 0.5).cos();
         underlying * (1.0 - eased) + (-0.64 + erosion) * eased
     })
 }
