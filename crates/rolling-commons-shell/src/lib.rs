@@ -2187,8 +2187,41 @@ impl GameSession {
     }
 }
 
+fn line_to_quin(line: &str) -> Option<qualia_core_db::NQuin> {
+    use qualia_core_db::lexicon::generate_60bit_token;
+    let mut parts = line.split_whitespace();
+    let s = parts.next()?;
+    let p = parts.next()?;
+    let o = parts.next()?;
+    if s == "." || p == "." || o == "." {
+        return None;
+    }
+    let s_clean = s.trim_matches(|c| c == '<' || c == '>');
+    let p_clean = p.trim_matches(|c| c == '<' || c == '>');
+    let o_clean = o.trim_matches(|c| c == '<' || c == '>' || c == '"');
+    let subj = generate_60bit_token(s_clean.as_bytes());
+    let pred = generate_60bit_token(p_clean.as_bytes());
+    let obj = generate_60bit_token(o_clean.as_bytes());
+    Some(qualia_core_db::NQuin {
+        subject: subj,
+        predicate: pred,
+        object: obj,
+        context: 0,
+        metadata: 0,
+        parity: subj ^ pred ^ obj,
+    })
+}
+
 fn eval_vibe(src: &str, session: Option<&GameSession>) -> Result<vibe::Value, String> {
-    let mut host = qualia_core_db::poet_host::PoetSnapshot::default();
+    let mut quins = Vec::new();
+    if let Some(session) = session {
+        for line in &session.lines {
+            if let Some(q) = line_to_quin(line) {
+                quins.push(q);
+            }
+        }
+    }
+    let mut host = qualia_core_db::poet_host::PoetSnapshot::with_seed(quins);
     let mut env = vibe::Env::default();
     if let Some(session) = session {
         let mut world = BTreeMap::new();
@@ -2579,4 +2612,30 @@ mod vibe_scene_expansion_tests {
         let mesh = recipe.parametric.unwrap().compile().expect("box compiles");
         assert!(!mesh.positions.is_empty());
     }
+
+    #[test]
+    fn test_vibe_eval_session_with_modalities() {
+        let session = GameSession {
+            lines: vec![
+                "rc:player rc:coin 10 .".into(),
+                "rc:workshop rc:status \"online\" .".into(),
+                "ev:e1 a ev:Event .".into(),
+            ],
+            actions: Vec::new(),
+            events: vec!["init".into()],
+            seq: 1,
+            drive_verified: [false; 4],
+        };
+        // Verify line_to_quin converts Turtle triples
+        assert!(line_to_quin("rc:player rc:coin 10 .").is_some());
+        assert!(line_to_quin(".").is_none());
+
+        // Verify VibeScript evaluation with session world record
+        let val = eval_vibe("= world.coins", Some(&session)).expect("world.coins evaluates");
+        assert_eq!(val, vibe::Value::I64(1));
+
+        let online = eval_vibe("= world.workshop_online", Some(&session)).expect("workshop_online evaluates");
+        assert_eq!(online, vibe::Value::Bool(true));
+    }
 }
+
