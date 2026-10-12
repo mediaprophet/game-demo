@@ -2188,7 +2188,7 @@ impl GameSession {
 }
 
 fn eval_vibe(src: &str, session: Option<&GameSession>) -> Result<vibe::Value, String> {
-    let mut host = vibe::LocalHost::default();
+    let mut host = qualia_core_db::poet_host::PoetSnapshot::default();
     let mut env = vibe::Env::default();
     if let Some(session) = session {
         let mut world = BTreeMap::new();

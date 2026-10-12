@@ -11,9 +11,10 @@ fn route(action:&str)->Result<Option<(String,String,f64)>,JsValue> {
             *cached=Some(vibe::load_program(include_str!("../../../web/fixtures/resident-activities.vibe"))
                 .map_err(|_|JsValue::from_str("resident VibeScript policy could not load"))?);
         }
-        let mut host=vibe::LocalHost::default();let mut env=vibe::Env::default();
-        let value=vibe::eval_function(cached.as_ref().unwrap(),"activity_for",vec![vibe::Value::String(action.to_owned())],&mut host,&mut env)
-            .map_err(|_|JsValue::from_str("resident VibeScript policy failed"))?;
+        let mut host = qualia_core_db::poet_host::PoetSnapshot::default();
+        let mut env = vibe::Env::default();
+        let value = vibe::eval_function(cached.as_ref().unwrap(), "activity_for", vec![vibe::Value::String(action.to_owned())], &mut host, &mut env)
+            .map_err(|_| JsValue::from_str("resident VibeScript policy failed"))?;
         let vibe::Value::Record(record)=value else {return Err(JsValue::from_str("activity policy did not return a record"));};
         let Some(vibe::Value::String(actor))=record.get("actor") else {return Err(JsValue::from_str("activity actor missing"));};
         if actor.is_empty() {return Ok(None);}

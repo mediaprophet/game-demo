@@ -57,8 +57,9 @@ fn evaluate(function:&str,args:Vec<vibe::Value>)->Result<serde_json::Value,JsVal
         let mut slot=slot.borrow_mut();
         if slot.is_none() {*slot=Some(vibe::load_program(POLICY)
             .map_err(|_|fail("workshop VibeScript failed to load"))?);}
+        let mut host = qualia_core_db::poet_host::PoetSnapshot::default();
         let value=vibe::eval_function(slot.as_ref().unwrap(),function,args,
-            &mut vibe::LocalHost::default(),&mut vibe::Env::default())
+            &mut host,&mut vibe::Env::default())
             .map_err(|_|fail("workshop VibeScript evaluation failed"))?;
         value_json(&value,0)
     })
