@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/rolling-commons-shell"]
+members = ["crates/rolling-commons-shell", "crates/pack-export"]
 
 [workspace.dependencies]
 # Full local QualiaDB engine. The verified checkout revision is recorded in

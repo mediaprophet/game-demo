@@ -1,0 +1,12 @@
+[package]
+name = "pack-export"
+version = "0.0.1"
+edition = "2021"
+description = "Native pack exporter — repacks generated .10d assets, textures, and the vibe-authored semantic section into verified HMC bundles. Replaces the Node exporter for the pack/manifest path; scene_build (.10d regeneration) remains a WASM step."
+
+[dependencies]
+qualia-core-db = { workspace = true }
+vibe = { path = "../../../qualiaDB/crates/vibe" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = "0.11"
