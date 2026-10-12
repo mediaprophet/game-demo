@@ -5,7 +5,7 @@ import { readFile, writeFile, mkdir, readdir, unlink } from 'node:fs/promises';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import init, { pack_game_hmc, scene_build, set_art_style, set_vehicle_rig, set_fauna_selection, set_flora_selection,
-  validate_game_hmc } from '../web/pkg/rolling_commons_shell.js';
+  taxon_binding_json, validate_game_hmc } from '../web/pkg/rolling_commons_shell.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const wasmPath = join(root, 'web', 'pkg', 'rolling_commons_shell_bg.wasm');
@@ -22,19 +22,16 @@ await writeFile(join(publicProfiles, 'se-corridor-reference.json'),
 set_fauna_selection(JSON.stringify(ecologyProfile.render.faunaSelection));
 set_flora_selection(JSON.stringify(ecologyProfile.render.floraSelection || []));
 
-// Taxon bindings (schemaVersion 2): canonical identity is the GBIF backbone
-// key — the same u64 the QualiaDB engine uses (gbif_adapter, bioacoustics
-// taxon_id). Scientific names are display labels, not identity. Fauna asset
-// instance ids embed the renderKey token (inland-goat-01, road-kangaroo-01);
-// flora assets prefix-match `rc:asset/flora/<renderKey>` via assetFamily.
+// Taxon bindings come from the VibeScript fixture (web/fixtures/
+// taxon-bindings.vibe) through the WASM host — the single authored source.
+// GBIF backbone keys are the engine-interop identity; name strings are
+// display labels. Fauna asset instance ids embed the renderKey token
+// (inland-goat-01, road-kangaroo-01); flora assets prefix-match
+// `rc:asset/flora/<renderKey>` via assetFamily.
 const taxonBindings = {};
-for (const h of ecologyProfile.roadHazards || []) {
-  if (h.renderKey && h.taxon?.gbifKey != null)
-    taxonBindings[h.renderKey] = { assetFamily: 'rc:asset/fauna', ...h.taxon };
-}
-for (const f of ecologyProfile.floraTaxa || []) {
-  if (f.renderKey && f.taxon?.gbifKey != null)
-    taxonBindings[f.renderKey] = { assetFamily: f.assetFamily || `rc:asset/flora/${f.renderKey}`, ...f.taxon };
+for (const key of [...ecologyProfile.render.faunaSelection, ...(ecologyProfile.render.floraSelection || [])]) {
+  const binding = JSON.parse(taxon_binding_json(key));
+  if (binding) taxonBindings[key] = binding;
 }
 function taxonForAsset(assetId) {
   if (assetId.startsWith('rc:asset/flora/'))

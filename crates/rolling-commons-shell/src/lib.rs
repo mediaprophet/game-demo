@@ -34,6 +34,7 @@ mod quadruped_models;
 mod resident_animation;
 mod resident_props;
 mod rig_workshop;
+mod taxon_bindings;
 mod terrain;
 mod vehicle_animation;
 mod vehicle_cabins;
