@@ -43,6 +43,7 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
   const out = join(styleRoot, '10d');
   await mkdir(out, { recursive: true });
   const assets = new Map();
+  const textures = new Map();
   const scenes = [];
   for (const [name, args] of cases) {
     for (const rig of [0, 1, 2, 3]) {
@@ -50,6 +51,17 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
       set_fauna_selection(JSON.stringify(ecologyProfile.render.faunaSelection));
       set_flora_selection(JSON.stringify(ecologyProfile.render.floraSelection || []));
   const scene = scene_build(...args);
+  for(const image of scene.textures||[]){
+    const bytes=Buffer.from(image.bytes),sha256=createHash('sha256').update(bytes).digest('hex');
+    if(image.key!==`textures/sha256/${sha256}`||image.mime!=='image/png'||![0,1,2,3].includes(image.role))
+      throw new Error('Invalid native texture dependency receipt');
+    const key=`${image.key}:${image.role}`;
+    if(!textures.has(key)){
+      await mkdir(join(styleRoot,'textures','sha256'),{recursive:true});
+      await writeFile(join(styleRoot,image.key),bytes);
+      textures.set(key,{file:image.key,sha256,mime:image.mime,role:image.role,bytes:bytes.length});
+    }
+  }
       const sceneName = `${name}-rig-${rig}-ecology-${ecologyProfile.id}`;
   if (!Array.isArray(scene.assets) || scene.assets.length < 135) {
     throw new Error(`${sceneName}: unexpected Qualia scene receipt`);
@@ -87,9 +99,37 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
     'crates/rolling-commons-shell/src/vehicles.rs',
     'crates/rolling-commons-shell/src/fauna.rs',
     'crates/rolling-commons-shell/src/flora.rs',
+    'crates/rolling-commons-shell/src/material_library.rs',
+    'crates/rolling-commons-shell/src/resident_animation.rs',
+    'crates/rolling-commons-shell/src/resident_props.rs',
+    'crates/rolling-commons-shell/src/animation_bridge.rs',
+    'crates/rolling-commons-shell/src/activity_presentation.rs',
+    'web/fixtures/resident-activities.vibe',
+    'crates/rolling-commons-shell/src/rig_workshop.rs',
+    'crates/rolling-commons-shell/src/drive_session.rs',
+    'crates/rolling-commons-shell/src/drive_contacts.rs',
+    'crates/rolling-commons-shell/src/drive_contact_integration.rs',
+    'crates/rolling-commons-shell/src/vehicle_camera.rs',
+    'crates/rolling-commons-shell/src/macropod_models.rs',
+    'crates/rolling-commons-shell/src/fauna_animation.rs',
+    'crates/rolling-commons-shell/src/quadruped_models.rs',
+    'crates/rolling-commons-shell/src/quadruped_animation.rs',
+    'crates/rolling-commons-shell/src/camera_presentation.rs',
+    'crates/rolling-commons-shell/src/workshop_assembly.rs',
+    'crates/rolling-commons-shell/src/asset_compile.rs',
+    'crates/rolling-commons-shell/src/vehicle_cabins.rs',
+    'crates/rolling-commons-shell/src/vehicle_exterior.rs',
+    'crates/rolling-commons-shell/src/vehicle_animation.rs',
+    'crates/rolling-commons-shell/src/water_presentation.rs',
+    'web/fixtures/rig-workshop.vibe',
+    'crates/rolling-commons-shell/src/workshop_structure.rs',
+    'crates/rolling-commons-shell/src/workshop.rs',
+    'crates/rolling-commons-shell/src/camp_home.rs',
+    'crates/rolling-commons-shell/src/mature_gums.rs',
     'assets/ecology/profiles/se-corridor-reference.json'],
   wasm: { file: 'web/pkg/rolling_commons_shell_bg.wasm', sha256: createHash('sha256').update(wasm).digest('hex') },
   assets: globalAssets.map(([, asset]) => asset),
+  textures: [...textures.values()].sort((a,b)=>a.file.localeCompare(b.file)||a.role-b.role),
   scenes: scenes.map(({ assetKeys, ...scene }) => ({
     ...scene,
     assetIndices: assetKeys.map(key => assetIndex.get(key)),
@@ -102,10 +142,13 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
     key: asset.file,
     bytes: new Uint8Array(await readFile(join(styleRoot, asset.file))),
   })));
+  const textureFiles=[...new Set(manifest.textures.map(texture=>texture.file))];
+  for(const file of textureFiles)entries.push({key:file,
+    bytes:new Uint8Array(await readFile(join(styleRoot,file)))});
 // Keep the checked-in manifest readable; pack the same data compactly so
 // growing scene catalogs stay within the game shell's bounded HMC input.
   const pack = pack_game_hmc(entries, JSON.stringify(manifest));
-  if (validate_game_hmc(pack) !== manifest.assets.length + 1) {
+  if (validate_game_hmc(pack) !== manifest.assets.length + textureFiles.length + 1) {
     throw new Error('Qualia HMC reader rejected an entry');
   }
   const packDir = join(root, 'web', 'assets');

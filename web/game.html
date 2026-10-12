@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Maslows Challenge, an SDGs game</title>
 <style>
   :root { color-scheme:dark; --bg:#0b1718; --surface:#152527; --surface2:#1b3030;
@@ -225,7 +225,7 @@
   #game-hud { position:absolute; inset:0; z-index:2; width:100%; height:100%; pointer-events:none; }
   .world-column > .panel { display:block !important; }
   #resource-bar { display:grid !important; }
-  #inspector { display:block !important; }
+  #inspector { display:none !important; }
   .panel { color:var(--text); background:linear-gradient(145deg,#1b2d2feF,#142427f5);
     border:1px solid #82998a35; border-radius:15px; padding:15px;
     box-shadow:0 10px 28px #06101235,inset 0 1px #ffffff08; }
@@ -323,6 +323,111 @@
     .scene-shell { height:55vh; min-height:340px; border-radius:14px; }
     .territory-nav { overflow:auto; } .territory-nav button { flex:none; min-width:110px; }
     .scene-help { max-width:calc(100% - 26px); font-size:10px; } }
+  /* World-first layout: the scene owns the viewport; tools are overlay docks. */
+  html,body { width:100%; height:100%; overflow:hidden; }
+  main,.world-column { display:block !important; position:static; width:100%; height:100%;
+    max-width:none; margin:0; padding:0; }
+  .scene-shell { position:fixed; inset:0; width:100%; height:100dvh; min-height:0;
+    border:0; border-radius:0; box-shadow:none; }
+  #scene,#game-hud { width:100%; height:100%; max-height:none; }
+  .panel-tabs { display:flex; gap:4px; position:sticky; top:0; z-index:1;
+    padding:6px; background:#102327; border:1px solid #ffffff33; border-radius:10px; }
+  .panel-tabs button { flex:1; min-height:44px; padding:6px; font-size:12px; text-align:center; }
+  .panel-tabs button[aria-pressed="true"] { background:#dfb770; color:#142427; }
+  #game-panels > [data-panel-tab]:not([data-panel-active]) { display:none !important; }
+  .side-column { overscroll-behavior:contain; scrollbar-width:thin; }
+  header { position:fixed; top:max(8px,env(safe-area-inset-top)); left:12px; right:12px;
+    min-height:48px; padding:7px 12px; border:1px solid #ffffff26; border-radius:12px;
+    gap:12px; flex-wrap:nowrap; background:#102327cc; }
+  .brand strong { font-size:16px; } .brand .eyebrow { display:none; }
+  .header-meta .badge { display:none; }
+  .header-meta select { max-width:110px; }
+  .header-mode-nav { order:0; width:auto; overflow:auto; }
+  .header-mode-nav button { padding:7px 9px; }
+  .territory-nav { position:fixed; top:72px; left:12px; z-index:6; max-width:min(520px,calc(100vw - 24px));
+    overflow:auto; }
+  .territory-nav button { flex:none; font-size:11px; padding:6px 9px; }
+  .side-column { display:none !important; position:fixed; z-index:12; right:12px; top:114px;
+    bottom:max(16px,env(safe-area-inset-bottom)); width:min(330px,calc(100vw - 24px));
+    max-height:none; overflow:auto; gap:10px; padding:0 3px 4px; }
+  body.panels-open .side-column { display:grid !important; }
+  #game-panels { align-content:start; }
+  #game-panels .header-meta { margin:0; }
+  #game-panels .header-meta select { display:block; max-width:none; flex:1; min-height:44px; }
+  .world-column > .panel,#resource-bar,.scene-label,.scene-help { display:none !important; }
+  #game-panels #inspector[data-panel-active] { display:block !important; }
+  #game-panels #log { max-height:none; }
+  .panel { padding:13px; border-radius:12px; background:#142427ed; }
+  .panel h2 { font-size:17px; }
+  #toggle-game-panels { white-space:nowrap; min-height:36px; box-shadow:none; }
+  #fullscreen-game { min-width:40px; min-height:40px; padding:6px; box-shadow:none; }
+  .panel-toolbar { display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:6px 10px; background:#102327ed; border-radius:10px; }
+  .panel-toolbar strong { font-size:13px; }
+  #close-game-panels { min-height:44px; padding:6px 12px; }
+  #scene { touch-action:none; }
+  header { right:auto; max-width:calc(100vw - 24px); }
+  .side-column { background:#102327ba; border:1px solid #ffffff33; border-radius:16px;
+    padding:8px; box-shadow:0 12px 36px #0005; }
+  @media(min-width:901px) { .territory-nav { max-width:calc(100vw - 380px); }
+    header .brand { margin-right:8px; } }
+  .touch-controls { display:none; position:fixed; z-index:8; left:12px;
+    bottom:calc(70px + env(safe-area-inset-bottom)); gap:6px; grid-template-columns:repeat(4,44px); }
+  .touch-controls button { min-width:44px; min-height:44px; text-align:center; touch-action:none;
+    background:#12292bc9; border-color:#ffffff55; }
+  body.panels-open .touch-controls { display:none; }
+  body:not([data-hud-page="orders"]) .touch-controls { display:none; }
+  @media(max-width:900px) {
+    header { left:8px; right:8px; padding:6px 8px; gap:8px; }
+    .brand strong { font-size:14px; }
+    #toggle-game-panels { font-size:12px; padding:6px 10px; }
+    .brand { margin-right:auto; } .header-meta { margin-left:0; }
+    .header-meta select { display:none; }
+    body.panels-open .header-meta select { display:block; max-width:95px; }
+    .header-mode-nav { position:fixed; left:8px; right:8px; bottom:max(8px,env(safe-area-inset-bottom));
+      width:auto; padding:5px; justify-content:space-around; background:#102327ed;
+      border:1px solid #ffffff33; border-radius:12px; }
+    .header-mode-nav button { flex:1; min-width:0; min-height:44px; font-size:12px; padding:6px 3px; }
+    .territory-nav { top:68px; left:8px; max-width:calc(100vw - 16px); }
+    .side-column { top:auto; left:8px; right:8px; bottom:calc(68px + env(safe-area-inset-bottom));
+      width:auto; max-height:48dvh; padding:8px; border:1px solid #ffffff44;
+      border-radius:16px; background:#102327ed; overscroll-behavior:contain; }
+    .atlas-overlay { padding-top:112px; padding-bottom:74px; }
+  }
+  @media(max-width:420px) { .territory-nav button { font-size:10px; padding:6px; }
+    .territory-nav { max-width:calc(100vw - 16px); white-space:nowrap; }
+    .header-mode-nav button { font-size:11px; }
+    .brand strong { max-width:145px; display:block; overflow:hidden; text-overflow:ellipsis;
+      white-space:nowrap; } }
+  @media(max-width:600px) {
+    header { gap:5px; }
+    #fullscreen-game { min-width:44px; min-height:44px; }
+    #toggle-game-panels { min-height:44px; }
+    .territory-nav { flex-wrap:nowrap; scrollbar-width:none; }
+    .territory-nav button { min-height:44px; }
+    .panel-tabs button { min-width:0; }
+  }
+  @media(pointer:coarse) { body[data-camera-mode="walk"] .touch-controls,
+    body[data-camera-mode="drive"] .touch-controls { display:grid; }
+    body.panels-open .touch-controls { display:none; } }
+  @media(pointer:coarse) { body:not([data-hud-page="orders"]) .touch-controls { display:none; } }
+  @media(max-height:500px) and (max-width:900px) {
+    .brand strong { font-size:13px; } header { min-height:40px; }
+    .territory-nav { top:56px; }
+    .header-mode-nav { left:auto; width:100px; top:106px; bottom:auto; right:8px;
+      flex-direction:column; }
+    .header-mode-nav button { min-height:36px; }
+    .side-column { right:116px; bottom:8px; max-height:calc(100dvh - 100px); }
+    .touch-controls { bottom:calc(12px + env(safe-area-inset-bottom)); }
+  }
+  /* These elements never participate in a document-column game layout. */
+  main { overflow:visible; }
+  .world-column { overflow:visible; }
+  #game-panels { max-height:calc(100dvh - 130px); }
+  @media(max-width:900px) { #game-panels { max-height:48dvh; } }
+  @media(max-height:500px) and (max-width:900px) {
+    #game-panels { max-height:calc(100dvh - 100px); }
+  }
 </style>
 </head>
 <body>
@@ -425,9 +530,12 @@
     <button data-game-view="world" aria-current="page">Community</button>
     <button data-game-view="trip">Trip map</button>
     <button data-game-view="drive">Drive</button>
+    <button data-game-view="workshop">Workshop</button>
     <button data-game-view="walk">Explore</button>
     <button data-game-view="activities">Activities</button>
   </nav>
+  <button id="toggle-game-panels" aria-expanded="false" aria-controls="game-panels">Panels</button>
+  <button id="fullscreen-game" aria-label="Enter fullscreen" title="Fullscreen" hidden>⛶</button>
   <div class="header-meta"><select id="art-style" class="art-style-choice" aria-label="Environment art style"><option value="2">Community Grounds</option><option value="1">Earthlight</option><option value="0">Storybook</option></select><select id="quality-profile" class="quality-choice" aria-label="Graphics quality"><option value="0">Economy</option><option value="1">Balanced</option><option value="2">High detail</option></select><span class="badge" id="day">Day 1</span><span class="badge" id="tide">Low tide</span><span class="badge" id="pin"></span><span class="badge" id="tier"></span></div>
 </header>
 <main inert>
@@ -465,9 +573,18 @@
     </div>
     <div id="resource-bar" class="resource-bar" aria-label="World resources"></div>
     <div id="inspector" class="panel" aria-live="polite"></div>
-    <div class="panel"><h2>Event journal</h2><div id="log" role="log" aria-live="polite"></div></div>
+    <div class="panel" id="journal-panel"><h2>Event journal</h2><div id="log" role="log" aria-live="polite"></div></div>
   </div>
-  <div class="side-column">
+  <div class="side-column" id="game-panels" inert>
+    <div class="panel-toolbar"><strong>Game tools</strong><button id="close-game-panels" aria-label="Close game tools">Close</button></div>
+    <nav class="panel-tabs" aria-label="Information panel">
+      <button data-panel-choice="tasks" aria-pressed="true">Tasks</button>
+      <button data-panel-choice="trip" aria-pressed="false">Journey</button>
+      <button data-panel-choice="rig" aria-pressed="false">Rig</button>
+      <button data-panel-choice="journal" aria-pressed="false">Journal</button>
+      <button data-panel-choice="tools" aria-pressed="false">Tools</button>
+    </nav>
+    <p class="panel" id="rig-idle-note">Choose Drive to use the touring rig controls and live engine instruments.</p>
     <section class="panel drive-panel" id="drive-dashboard" hidden aria-labelledby="drive-title">
       <span class="eyebrow">Direct Drive · vehicle systems</span>
       <h2 id="drive-title">Touring rig &amp; engine</h2>
@@ -554,6 +671,12 @@
     </details>
   </div>
 </main>
+<nav class="touch-controls" aria-label="Movement controls">
+  <button data-touch-key="a" aria-label="Steer or move left">◀</button>
+  <button data-touch-key="w" aria-label="Accelerate or move forward">▲</button>
+  <button data-touch-key="s" aria-label="Brake or move backward">▼</button>
+  <button data-touch-key="d" aria-label="Steer or move right">▶</button>
+</nav>
 <script>
 if (navigator.gpu) {
   if (window.GPUAdapter && GPUAdapter.prototype.requestDevice) {
@@ -617,7 +740,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '3ca0c643bb536dac-community-overhaul';
+const WASM_BUILD = 'c9f41788cc40b056-community-overhaul';
 window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
 window.setWorldLoading('Starting the Qualia engine','Initialising the Australian world renderer');
@@ -1030,8 +1153,8 @@ function siteBrief(index,st){
 }
 // ---------- portal ----------
 const canvas = $('scene');
-canvas.width = Math.max(600, window.innerWidth);
-canvas.height = Math.max(540, window.innerHeight);
+canvas.width = Math.max(1, window.innerWidth);
+canvas.height = Math.max(1, window.innerHeight);
 const hudCanvas = $('game-hud');
 hudCanvas.width = canvas.width;
 hudCanvas.height = canvas.height;
@@ -1129,6 +1252,9 @@ if(webgpuAvailable) {
   note('webgpu unavailable — using QualiaPortal canvas fallback');
 }
 const portal = new m.GamePortal(canvas);
+const animationMotionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
+portal.set_animation_reduced_motion?.(animationMotionPreference.matches);
+animationMotionPreference.addEventListener('change',event=>portal.set_animation_reduced_motion?.(event.matches));
 const hud = new m.GameHud(hudCanvas);
 function rendererProducerReport(){
   if(typeof portal.renderer_producer_report==='function'){
@@ -1188,21 +1314,45 @@ let artStyle=2;
 try { const savedStyle=localStorage.getItem('maslows-community-art-style');
   if(savedStyle!==null&&Number.isInteger(Number(savedStyle))&&ART_STYLES[Number(savedStyle)]!==undefined)
     artStyle=Number(savedStyle); } catch {}
-if(new URLSearchParams(location.search).has('selftest'))artStyle=0;
+if(SELFTEST){
+  const requestedStyle=new URLSearchParams(location.search).get('style');
+  artStyle=({storybook:0,earthlight:1,community:2})[requestedStyle]??2;
+}
 m.set_art_style(artStyle);
 let vehicleRig=0;
 try { const savedRig=Number(localStorage.getItem('maslows-vehicle-rig'));
   vehicleRig=Number.isInteger(savedRig)&&savedRig>=0&&savedRig<VEHICLE_RIGS.length?savedRig:0; } catch {}
 m.set_vehicle_rig?.(vehicleRig);
 let hudPage='orders', hudOrderOffset=0, hudPlaceOffset=0, hudScriptResult='', resultMessage='';
+let hudDockPage='',hudDockScroll=0,hudDockBounds=null;
+let workshopViewCache=null,workshopDriveCache=null,workshopFeedback='',workshopSelectedPart='';
+function workshopView(){
+  if(typeof session.workshop_view!=='function')return null;
+  if(workshopViewCache?.session!==session||workshopViewCache.rig!==vehicleRig)
+    workshopViewCache={session,rig:vehicleRig,view:JSON.parse(session.workshop_view(vehicleRig))};
+  return workshopViewCache.view;
+}
+function workshopConditions(){
+  if(typeof session.workshop_drive_conditions!=='function')return {};
+  if(workshopDriveCache?.session!==session||workshopDriveCache.rig!==vehicleRig)
+    workshopDriveCache={session,rig:vehicleRig,conditions:JSON.parse(session.workshop_drive_conditions(vehicleRig))};
+  return workshopDriveCache.conditions;
+}
 let showcaseTour=null;
 let hudSiteLines=[], hudSiteActions=[];
-window.addEventListener('resize',()=>{
-  const w=Math.max(600,window.innerWidth), h=Math.max(540,window.innerHeight);
+function resizeGameViewport(){
+  const bounds=canvas.getBoundingClientRect();
+  const w=Math.max(1,Math.round(bounds.width)), h=Math.max(1,Math.round(bounds.height));
   if(w===canvas.width&&h===canvas.height)return;
   canvas.width=w;canvas.height=h;hudCanvas.width=w;hudCanvas.height=h;
   applyCam();renderHud();
-});
+}
+window.addEventListener('resize',resizeGameViewport);
+window.visualViewport?.addEventListener('resize',resizeGameViewport);
+// Mobile browser chrome, rotation and fullscreen can resize the scene without
+// changing window.innerHeight. Both native layers use the actual scene surface.
+const gameViewportObserver=new ResizeObserver(resizeGameViewport);
+gameViewportObserver.observe(canvas);
 let skyPreset=artStyle===1?2:1;
 portal.set_sky_preset(skyPreset);
 // Community Grounds presents a soft warm daylight under the Qualia sky.
@@ -1219,6 +1369,7 @@ let camYaw=0.6, camPitch=0.42, camZoom=canvas.width<900?1.9:1.45;
 let camTarget=null, camGoal=null, zoomGoal=null, focusedPlace=null;
 let territory='kestrel', tileCenters={}, placePositions=[], scenePickTargets=[];
 let cameraMode='map', driveView='first-person', walk={x:0,z:0}, worldCenter={x:0,y:0,z:0}, worldScale=1;
+let driveLook={yaw:0,pitch:0.045};
 let qualityPreference=2;
 try{const storedQuality=Number(localStorage.getItem('maslows-graphics-quality'));if([0,1,2].includes(storedQuality))qualityPreference=storedQuality;}catch{}
 function driveStateFromVibe(rigId){
@@ -1228,7 +1379,8 @@ function driveStateFromVibe(rigId){
     engineHealth:100,overheatSeconds:0,engineWarning:'',oilTrend:'steady',coolantTrend:'steady',
     trafficQueue:0,mirrorReveal:false,mirrorQueue:0,mirrorBlocked:false,topSpeed:0,
     acceleration:0,braking:0,steering:0,shoulder:0,rigLoad:0,trailer:false};
-  const setup=toObj(driveSimulation.setup(rigId));
+  const setup=typeof session.drive_resume==='function'
+    ?JSON.parse(session.drive_resume(driveSimulation,rigId)):toObj(driveSimulation.setup(rigId));
   if(!setup||setup.ok===false||setup.error)throw new Error(setup?.error||'VibeScript returned no drive setup');
   return {x:setup.x,z:setup.z,heading:setup.heading,speed:setup.speed,distance:setup.distance,
     warning:setup.warning,hazardStops:setup.hazard_stops,emergencyStops:setup.emergency_stops,
@@ -1239,7 +1391,8 @@ function driveStateFromVibe(rigId){
     oilTrend:setup.oil_trend,coolantTrend:setup.coolant_trend,trafficQueue:setup.traffic_queue,
     mirrorReveal:setup.mirror_reveal,mirrorQueue:setup.mirror_queue,mirrorBlocked:setup.mirror_blocked,
     topSpeed:setup.top_speed,acceleration:setup.acceleration,braking:setup.braking,
-    steering:setup.steering,shoulder:setup.shoulder,rigLoad:setup.rig_load,trailer:setup.trailer};
+    steering:setup.steering,shoulder:setup.shoulder,rigLoad:setup.rig_load,trailer:setup.trailer,
+    trailerHeading:setup.trailer_heading,trailerAngle:setup.trailer_articulation,trailerWarning:setup.trailer_warning||''};
 }
 const DRIVE_PERIODS=['dawn','day','dusk','night'];
 const DRIVE_LIGHTING={
@@ -1328,6 +1481,11 @@ function activityAvailableActions(st){
 }
 function applyCam(){
   try {
+    if(typeof portal.set_camera_near_metres==='function'){
+      const closeView=cameraMode==='walk'||(cameraMode==='drive'&&driveView==='first-person');
+      portal.set_camera_near_metres(closeView?0.035:0.05,closeView?worldScale:1);
+      hud.set_camera_near_metres?.(closeView?0.035:0.05,closeView?worldScale:1);
+    }
     if (camTarget) {
       portal.set_camera_target(camYaw, camPitch, camZoom,camTarget.x,camTarget.y,camTarget.z);
       hud.set_camera_target(camYaw, camPitch, camZoom,camTarget.x,camTarget.y,camTarget.z);
@@ -1426,7 +1584,8 @@ function updateShowcaseTour(now){
   if(now-showcaseTour.lastHudAt>120){showcaseTour.lastHudAt=now;renderHud();}
 }
 function framedTarget(p,zoom){
-  const panelWidth=canvas.width<900?290:358;
+  if(canvas.width<900||!document.body.classList.contains('panels-open'))return {...p};
+  const panelWidth=$('game-panels').getBoundingClientRect().width;
   const shift=panelWidth*zoom*Math.tan(Math.PI/8)/canvas.height;
   return {x:p.x+Math.cos(camYaw)*shift,y:p.y,z:p.z-Math.sin(camYaw)*shift};
 }
@@ -1442,6 +1601,13 @@ function placeWalkCamera(){
   applyCam();
 }
 function placeDriveCamera(){
+  if(typeof session.drive_camera==='function'){
+    const frame=JSON.parse(session.drive_camera(driveSimulation,vehicleRig,driveView==='aerial',
+      driveLook.yaw,driveLook.pitch,worldCenter.x,worldCenter.y,worldCenter.z,worldScale));
+    camYaw=frame.yaw;camPitch=frame.pitch;camZoom=frame.zoom;
+    camTarget={x:frame.target[0],y:frame.target[1],z:frame.target[2]};
+    applyCam();return;
+  }
   if(driveView==='aerial'){
     camZoom=3.8;
     camTarget={x:(walk.x-worldCenter.x)*worldScale,
@@ -1452,7 +1618,7 @@ function placeDriveCamera(){
   const eye={x:(walk.x-worldCenter.x)*worldScale,
     y:(m.terrain_height_world(walk.x,walk.z)+1.35-worldCenter.y)*worldScale,
     z:(walk.z-worldCenter.z)*worldScale};
-  const distance=0.30, flat=Math.cos(camPitch);
+  const distance=0.35, flat=Math.cos(camPitch);
   camZoom=distance;
   camTarget={x:eye.x-distance*flat*Math.sin(camYaw),
     y:eye.y-distance*Math.sin(camPitch),
@@ -1460,12 +1626,17 @@ function placeDriveCamera(){
   applyCam();
 }
 function setCameraMode(mode){
+  if(cameraMode==='drive'&&mode!=='drive'&&typeof session.drive_park==='function'){
+    session.drive_park(driveSimulation,vehicleRig);
+    session.present_drive_rig?.(driveSimulation,portal,vehicleRig);
+  }
   if(mode==='drive'&&!driveModeAvailable){
     note('Driving is temporarily unavailable because the served WASM package does not contain the VibeScript drive module.');
     return;
   }
   if(mode!==cameraMode)portal.invalidate_temporal_history?.();
   cameraMode=mode;camGoal=null;zoomGoal=null;
+  document.body.dataset.cameraMode=mode;
   if(mode==='walk'){
     const c=playing(), place=characterPlace(c.place);
     territory=c.place;
@@ -1474,9 +1645,13 @@ function setCameraMode(mode){
   }else if(mode==='drive'){
     // The first driving slice is a short, authored inland road through the
     // connected Kestrel/Saltwind demo ground. Geographic packs can replace it.
-    const priorPeriod=drive.period||'dusk';
     driveView='first-person';
-    drive=driveStateFromVibe(vehicleRig);drive.period=priorPeriod;
+    driveLook={yaw:0,pitch:0.045};
+    if(typeof session.drive_camera==='function'){
+      session.drive_park(driveSimulation,vehicleRig);
+      session.present_drive_rig?.(driveSimulation,portal,vehicleRig);
+    }
+    drive=driveStateFromVibe(vehicleRig);
     walk={x:drive.x,z:drive.z};
     hudPage='orders';walkKeys.clear();
     camPitch=0.045;camYaw=drive.heading;placeDriveCamera();
@@ -1547,7 +1722,7 @@ function focusTerritory(id, immediate=false){
     placeWalkCamera();return;
   }
   zoomGoal=cameraMode==='survey'?0.94:
-    id==='highlands'?1.25:canvas.width<900?1.85:1.55;
+    id==='highlands'?1.25:canvas.width<900?1.42:1.12;
   camGoal=framedTarget(p,zoomGoal);
   if(immediate){camTarget={...camGoal};camZoom=zoomGoal;camGoal=null;zoomGoal=null;applyCam();}
 }
@@ -1562,6 +1737,7 @@ for (const id of ['kestrel','saltwind','highlands']) {
 }
 
 let sceneMeshes = 0;
+let sceneMode='community',workshopSceneKey='';
 let sceneSource = '';
 let hmcPack = null, hmcManifest = null, hmcResidentScene = '';
 let hmcSceneReceipt = null;
@@ -1642,8 +1818,11 @@ function applySceneQuality(bridge, previous) {
   portal.set_lighting(light[0],light[1],light[2],light[3]+waterLift,light[4]);
   const water=bridge.water_state==='high-tide'?[0.12,0.29,0.36,0.96]:
     bridge.water_state==='flowing'?[0.12,0.39,0.42,0.92]:[0.22,0.36,0.34,0.48];
-  portal.set_water_surface?.(water[0],water[1],water[2],water[3],
-    bridge.water_state==='flowing'?0.018:0.011,1.25,bridge.quality_tier);
+  const waveMetres=bridge.water_state==='flowing'?0.025:bridge.water_state==='high-tide'?0.016:0.010;
+  if(typeof portal.set_water_surface_metres==='function')
+    portal.set_water_surface_metres(water[0],water[1],water[2],water[3],waveMetres,1.8,worldScale,bridge.quality_tier);
+  else portal.set_water_surface?.(water[0],water[1],water[2],water[3],
+    waveMetres*worldScale,1.8/worldScale,bridge.quality_tier);
   // The generic tensor particle field is optional decoration. Authored scene
   // effects remain visible on every tier; only enable the field on the
   // explicit GPU-quality path and assert the choice again in the frame loop.
@@ -1677,6 +1856,8 @@ function tryLoadHmcScene(bridge) {
     }else if(receipt.materials_loaded>0){
       note(`Qualia scene materials retained · renderer using ${receipt.renderer||'supported fallback'}`);
     }
+    if(driveSimulation&&typeof session.present_drive_rig==='function')
+      session.present_drive_rig(driveSimulation,portal,vehicleRig);
     return sceneMeshes>0;
   } catch(e) {
     note(`HMC scene fallback (${bridge.scene_key}): ${String(e).slice(0,100)}`);
@@ -1686,6 +1867,35 @@ function tryLoadHmcScene(bridge) {
 }
 function rebuild() {
   const st = state();
+  if(sceneMode==='workshop'&&typeof session.workshop_scene==='function'){
+    const view=workshopView(),key=`${vehicleRig}:${JSON.stringify(view.state)}:${artStyle}`;
+    if(key!==workshopSceneKey){
+      const keepCamera=workshopSceneKey.startsWith(`${vehicleRig}:`)&&camTarget;
+      const sourceTarget=keepCamera?{x:camTarget.x/worldScale+worldCenter.x,
+        y:camTarget.y/worldScale+worldCenter.y,z:camTarget.z/worldScale+worldCenter.z}:null;
+      const sourceDistance=keepCamera?camZoom/worldScale:0;
+      const scene=session.workshop_scene(vehicleRig);
+      const receipt=toObj(portal.load_scene_textured(scene.assets,scene.textures||[]));
+      if(!receipt||receipt.organs_loaded!==scene.assets.length)
+        throw new Error('Workshop scene admission did not accept all components');
+      sceneMeshes=receipt.organs_loaded;worldCenter=scene.worldCenter;worldScale=scene.worldScale;
+      scenePickTargets=scene.pickTargets;placePositions=[];tileCenters={};
+      portal.upload_tensor(scene.tensor);portal.set_tensor_projection_enabled(false);
+      hmcResidentScene='';workshopSceneKey=key;
+      focusedPlace=null;camGoal=null;zoomGoal=null;
+      if(keepCamera){
+        camZoom=sourceDistance*worldScale;
+        camTarget={x:(sourceTarget.x-worldCenter.x)*worldScale,
+          y:(sourceTarget.y-worldCenter.y)*worldScale,z:(sourceTarget.z-worldCenter.z)*worldScale};
+      }else{
+        camYaw=0.55;camPitch=0.48;camZoom=0.85;
+        camTarget={x:(0.35-worldCenter.x)*worldScale,y:(0.85-worldCenter.y)*worldScale,
+          z:(-0.3-worldCenter.z)*worldScale};
+      }
+      applySceneQuality(sceneQualityState(st),lastSceneBridge);applyCam();
+    }
+    return st;
+  }
   const bridge=sceneQualityState(st);
   m.set_vehicle_rig?.(vehicleRig);
   m.set_fauna_selection?.(JSON.stringify(ECOLOGY_PROFILE.fauna));
@@ -1700,7 +1910,8 @@ function rebuild() {
   // Prefer the verified HMC snapshot when the rebuilt shell exposes the
   // loader. Dynamic compilation remains the checked-in compatibility path.
   if(!tryLoadHmcScene(bridge)){
-    const receipt = toObj(portal.load_scene(scene.assets));
+    const receipt = toObj(typeof portal.load_scene_textured==='function'?
+      portal.load_scene_textured(scene.assets,scene.textures||[]):portal.load_scene(scene.assets));
     sceneMeshes = receipt.organs_loaded;
     hmcSceneReceipt=receipt;
     hmcResidentScene='';
@@ -1709,6 +1920,8 @@ function rebuild() {
     note(`scene receipt differs from source recipes: ${sceneMeshes}/${scene.assets.length}`);
   portal.upload_tensor(scene.tensor);
   portal.set_tensor_projection_enabled(false);
+  if(driveSimulation&&typeof session.present_drive_rig==='function')
+    session.present_drive_rig(driveSimulation,portal,vehicleRig);
   if(cameraMode==='walk')placeWalkCamera();
   else if(!camTarget)focusTerritory(territory,true);
   else if(focusedPlace!==null)focusSite(focusedPlace);
@@ -1737,15 +1950,13 @@ function selectArtStyle(next){
 }
 
 function selectVehicleRig(next){
+  if(cameraMode==='drive'&&typeof session.drive_park==='function')
+    session.drive_park(driveSimulation,vehicleRig);
   vehicleRig=((next%VEHICLE_RIGS.length)+VEHICLE_RIGS.length)%VEHICLE_RIGS.length;
   m.set_vehicle_rig?.(vehicleRig);
   if(cameraMode==='drive'){
-    const profile=driveStateFromVibe(vehicleRig);
-    drive.topSpeed=profile.topSpeed;drive.acceleration=profile.acceleration;
-    drive.braking=profile.braking;drive.steering=profile.steering;
-    drive.shoulder=profile.shoulder;drive.rigLoad=profile.rigLoad;
-    drive.trailer=profile.trailer;drive.trafficQueue=profile.trafficQueue;
-    drive.mirrorQueue=profile.mirrorQueue;drive.mirrorBlocked=profile.mirrorBlocked;
+    drive=driveStateFromVibe(vehicleRig);
+    walk={x:drive.x,z:drive.z};camYaw=drive.heading;
   }
   if(!VISUAL_REVIEW_REQUESTED)try { localStorage.setItem('maslows-vehicle-rig',String(vehicleRig)); } catch {}
   hmcResidentScene='';
@@ -1793,6 +2004,7 @@ function stepDrive(dt){
   const heightBehind=m.terrain_height_world(walk.x-0.55,walk.z);
   const input={dt,x:walk.x,z:walk.z,heading:drive.heading,speed:drive.speed,
     rig_id:vehicleRig,
+    ...workshopConditions(),
     throttle:walkKeys.has('w')||walkKeys.has('arrowup'),
     reverse,brake:walkKeys.has(' '),steer:(walkKeys.has('d')?1:0)-(walkKeys.has('a')?1:0),
     terrain_height:heightHere,terrain_height_ahead:heightAhead,
@@ -1804,10 +2016,14 @@ function stepDrive(dt){
     engine_health:drive.engineHealth,overheat_seconds:drive.overheatSeconds,
     traffic_queue:drive.trafficQueue,hazard_stops:drive.hazardStops,
     emergency_stops:drive.emergencyStops,last_warning:drive.lastWarning||''};
-  const step=toObj(driveSimulation.step(JSON.stringify(input)));
+  const step=typeof session.drive_tick==='function'
+    ?JSON.parse(session.drive_tick(driveSimulation,vehicleRig,JSON.stringify(input)))
+    :toObj(driveSimulation.step(JSON.stringify(input)));
+  if(typeof session.present_drive_rig==='function')
+    session.present_drive_rig(driveSimulation,portal,vehicleRig);
   if(!step||step.error||step.ok===false)throw new Error(`VibeScript drive step failed: ${step?.error||step?.detail||'invalid result'}`);
   walk={x:step.x,z:step.z};drive.speed=step.speed;drive.heading=step.heading;
-  drive.distance+=step.distance_delta;drive.warning=step.warning||'';
+  drive.distance=step.distance??drive.distance+step.distance_delta;drive.warning=step.warning||'';
   drive.hazardStops=step.hazard_stops;drive.emergencyStops=step.emergency_stops;
   drive.lastWarning=step.last_warning;drive.ambientC=step.ambient_c;
   drive.gradePercent=step.grade_percent;drive.roadSurface=step.road_surface;
@@ -1820,6 +2036,8 @@ function stepDrive(dt){
   drive.topSpeed=step.top_speed;drive.acceleration=step.acceleration;
   drive.braking=step.braking;drive.steering=step.steering;
   drive.shoulder=step.shoulder;drive.rigLoad=step.rig_load;drive.trailer=step.trailer;
+  drive.trailerHeading=step.trailer_heading;drive.trailerAngle=step.trailer_articulation;
+  drive.trailerWarning=step.trailer_warning||'';
   if(step.warning==='loose-shoulder')drive.warning='Loose shoulder · steer back toward the road';
   else if(step.warning==='crossing-closed')drive.warning='Canal crossing closed · secure the bridge before driving through';
   else if(step.warning==='route-end')drive.warning='End of the local demo road · regional destinations need a loaded place pack';
@@ -1889,8 +2107,9 @@ canvas.addEventListener('pointerdown', e=>{
   const py=(e.clientY-r.top)*canvas.height/r.height;
   drag={x:e.clientX,y:e.clientY,moved:false,hudAction:id,
     pan:e.shiftKey||e.button===1,
-    blockWorld:hudPage==='result'||py<58||py>canvas.height-58||
-      (cameraMode!=='walk'&&px>(canvas.width<900?canvas.width-290:canvas.width-358))};
+    blockWorld:!!id||(hudDockBounds&&px>=hudDockBounds.x&&px<=hudDockBounds.x+hudDockBounds.w&&
+      py>=hudDockBounds.y&&py<=hudDockBounds.y+hudDockBounds.h),
+    lastX:e.clientX,lastY:e.clientY};
   canvas.setPointerCapture(e.pointerId);
 });
 canvas.addEventListener('pointermove', e=>{ if(!drag) return;
@@ -1898,13 +2117,19 @@ canvas.addEventListener('pointermove', e=>{ if(!drag) return;
   if(drag.hudAction||drag.blockWorld)return;
   if (Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>4) drag.moved=true;
   if (drag.moved){
+    const movementX=e.clientX-drag.lastX,movementY=e.clientY-drag.lastY;
+    drag.lastX=e.clientX;drag.lastY=e.clientY;
     camGoal=null;zoomGoal=null;
     if(drag.pan&&cameraMode!=='walk'&&cameraMode!=='drive'){
-      camTarget.x-=(e.movementX||0)*0.0015;camTarget.z+=(e.movementY||0)*0.0015;
+      camTarget.x-=movementX*0.0015;camTarget.z+=movementY*0.0015;
     }
-    else{camYaw+=(e.movementX||0)*0.008;
+    else if(cameraMode==='drive'&&driveView==='first-person'&&typeof session.drive_camera==='function'){
+      driveLook.yaw=Math.max(-1.4,Math.min(1.4,driveLook.yaw+movementX*0.008));
+      driveLook.pitch=Math.max(-0.7,Math.min(0.7,driveLook.pitch+movementY*0.006));
+    }
+    else{camYaw+=movementX*0.008;
       camPitch=Math.max(cameraMode==='walk'?-0.9:-1.2,
-        Math.min(cameraMode==='walk'?0.9:1.4,camPitch+(e.movementY||0)*0.006));}
+        Math.min(cameraMode==='walk'?0.9:1.4,camPitch+movementY*0.006));}
     if(cameraMode==='walk')placeWalkCamera();
     else if(cameraMode==='drive')placeDriveCamera();else applyCam(); }});
 canvas.addEventListener('pointerup', e=>{
@@ -1928,7 +2153,11 @@ canvas.addEventListener('pointerup', e=>{
       const i=portal.poll_pick();
       if(i>=0 && i<scenePickTargets.length){
         const target=scenePickTargets[i];
-        if(target.activityId)handleHudAction(`activity:open:${target.activityId}`);
+        if(target.workshopPart){
+          workshopSelectedPart=target.workshopPart;
+          workshopFeedback=`Selected ${target.label}. Choose the matching assembly operation from the workshop panel.`;
+          hudPage='workshop';hudDockScroll=0;renderHud();
+        }else if(target.activityId)handleHudAction(`activity:open:${target.activityId}`);
         else inspect(PLACES[target.placeIndex]);
         if(target.label)note(`Selected ${target.label}`);
       }
@@ -1941,11 +2170,6 @@ canvas.addEventListener('pointerup', e=>{
 });
 canvas.addEventListener('wheel', e=>{
   e.preventDefault();
-  const r=canvas.getBoundingClientRect();
-  const px=(e.clientX-r.left)*canvas.width/r.width;
-  if(cameraMode!=='walk'&&px>(canvas.width<900?canvas.width-290:canvas.width-358)&&hudPage==='orders'){
-    hudOrderOffset=Math.max(0,hudOrderOffset+(e.deltaY>0?2:-2));renderHud();return;
-  }
   camGoal=null;zoomGoal=null;
   if(cameraMode==='walk')return;
   camZoom=Math.max(0.55,Math.min(20,camZoom*Math.exp(e.deltaY*0.001)));applyCam();
@@ -1972,14 +2196,72 @@ function inspect(s){
     triples().filter(t=>t.s===s).map(t=>`<dt>${short(t.p)}</dt><dd>${short(t.o)}</dd>`).join('') +
     `</dl>`;
   hudSiteLines=[title,brief,`QUALIA NODE  ${short(s)}`];
+  hudOrderOffset=0;
   hudPage='site'; renderHud();
 }
 
 // ---------- HUD ----------
+// These are presentation coordinates only. Choices still use the native HUD
+// hit-test and existing Qualia/VibeScript command path.
+function gamePanelRect(preferredHeight=600){
+  const W=hudCanvas.width,H=hudCanvas.height,mobile=W<900;
+  const landscape=mobile&&H<500;
+  const surface=canvas.getBoundingClientRect();
+  const scaleX=W/Math.max(1,surface.width),scaleY=H/Math.max(1,surface.height);
+  const territory=document.querySelector('.territory-nav').getBoundingClientRect();
+  const modes=document.querySelector('.header-mode-nav').getBoundingClientRect();
+  const top=Math.max(12,(territory.bottom-surface.top)*scaleY+8);
+  const bottom=mobile&&!landscape?Math.min(H-12,(modes.top-surface.top)*scaleY-8):H-12;
+  const right=landscape?Math.max(12,(surface.right-modes.left)*scaleX+8):12;
+  const width=mobile?Math.max(1,W-right-12):Math.min(360,W*.34);
+  const available=Math.max(1,bottom-top);
+  const height=Math.min(preferredHeight,available,mobile&&!landscape?H*.46:available*.78);
+  return {x:mobile?12:W-width-12,y:bottom-height,w:width,h:height};
+}
+function publishHudDock(content,originX,originY,title){
+  const {x,y,w:width,h:height}=gamePanelRect();
+  const bodyTop=y+54,bodyHeight=Math.max(44,height-108);
+  if(hudDockPage!==hudPage){hudDockPage=hudPage;hudDockScroll=0;}
+  const extent=Math.max(0,...content.map(item=>item.y-originY+item.h));
+  hudDockScroll=Math.max(0,Math.min(hudDockScroll,Math.max(0,extent-bodyHeight)));
+  hudDockBounds={x,y,w:width,h:height,step:Math.max(44,bodyHeight-44)};
+  const items=[{kind:'panel',id:'',text:'',x,y,w:width,h:height},
+    {kind:'label',id:'',text:title,x:x+12,y:y+12,w:width-96,h:26},
+    {kind:'button',id:'page:orders',text:'Close',x:x+width-76,y:y+8,w:64,h:40}];
+  const authoredWidth=Math.max(1,...content.filter(row=>row.kind==='button')
+    .map(row=>row.x-originX+row.w));
+  const rowScale=Math.min(1,(width-24)/authoredWidth);
+  for(const item of content){
+    const top=item.y-originY-hudDockScroll;
+    if(top<0||top+item.h>bodyHeight)continue;
+    // Scale authored rows to fit the dock, retaining both buttons in paired rows.
+    const left=12+Math.max(0,item.x-originX)*rowScale;
+    if(left>=width-12)continue;
+    items.push({...item,x:x+left,y:bodyTop+top,w:Math.min(item.w*rowScale,width-left-12)});
+  }
+  if(extent>bodyHeight){
+    items.push({kind:'button',id:'dock:prev',text:'↑ Earlier',x:x+12,y:y+height-48,
+      w:(width-30)/2,h:40,disabled:hudDockScroll===0},
+    {kind:'button',id:'dock:next',text:'Later ↓',x:x+18+(width-30)/2,y:y+height-48,
+      w:(width-30)/2,h:40,disabled:hudDockScroll>=extent-bodyHeight});
+  }
+  hud.set_document_json(JSON.stringify({items}));
+}
 function renderHud() {
+  hudDockBounds=null;
+  document.body.dataset.hudPage=hudPage;
+  // A contextual game interaction replaces the optional tools dock; the two
+  // surfaces must never obscure each other or trap a mobile player behind it.
+  if(hudPage!=='orders'&&document.body.classList.contains('panels-open')){
+    document.body.classList.remove('panels-open');$('game-panels').inert=true;
+    $('toggle-game-panels').setAttribute('aria-expanded','false');
+    $('toggle-game-panels').textContent='Panels';
+  }
+  document.body.dataset.cameraMode=cameraMode;
   const st=state(), W=hudCanvas.width, H=hudCanvas.height;
   const drivePanel=$('drive-dashboard');
   drivePanel.hidden=cameraMode!=='drive';
+  $('rig-idle-note').hidden=cameraMode==='drive';
   if(cameraMode==='drive'){
     const oil=Math.round(drive.oilTempC),coolant=Math.round(drive.coolantTempC);
     const oilPct=Math.max(0,Math.min(100,(oil-60)/90*100));
@@ -2007,7 +2289,97 @@ function renderHud() {
   const panel=(x,y,w,h)=>put('panel','','',x,y,w,h);
   const label=(text,x,y,w=300,h=23,color='')=>put('label','',String(text).slice(0,150),x,y,w,h,0,false,color);
   const button=(id,text,x,y,w,h=34,disabled=false)=>put('button',id,String(text).slice(0,44),x,y,w,h,0,disabled);
+  if(hudPage==='workshop'){
+    const view=workshopView();
+    if(!view){
+      label('Workshop source awaits the deferred WASM build.',12,12,320,44);
+      publishHudDock(items,0,12,'Rig workshop');return;
+    }
+    const rig=view.state;
+    let y=12;
+    label(VEHICLE_RIGS[vehicleRig],12,y,320,26);y+=30;
+    label(`Bonnet ${rig.hood?'open':'closed'} · power ${rig.isolated?'isolated':'connected'}`,12,y,320,22);y+=26;
+    label(`Radiator ${rig.radiator<0?'removed':rig.radiator===0?'faulty core':rig.radiator===1?'compact':'touring'}`,12,y,320,22);y+=26;
+    label(`Hoses ${rig.hose?'fitted':'removed'} · coolant ${rig.filled?'filled':'empty'}`,12,y,320,22);y+=26;
+    label(`Cooling ${rig.cooling_verified?'test passed':'unverified'} · solar ${rig.electrical_verified?'test passed':'unverified'}`,12,y,320,22);y+=26;
+    const detail=workshopFeedback||'Inspect the cooling fault, compare mount spacing and assemble the supplied solar kit.';
+    const words=detail.split(/\s+/);let line='';
+    for(const word of words){
+      if(line.length+word.length>40){label(line,12,y,320,22);y+=24;line='';}
+      line+=(line?' ':'')+word;
+    }
+    if(line){label(line,12,y,320,22);y+=28;}
+    button('workshop:rig','Change touring rig',12,y,320,44);y+=50;
+    if(workshopSelectedPart){button('workshop:all','Show all assemblies',12,y,320,44);y+=50;}
+    for(const operation of view.operations.filter(operation=>!workshopSelectedPart||operation.part===workshopSelectedPart)){
+      button(`workshop:op:${operation.id}`,operation.label,12,y,320,44,VISUAL_REVIEW_REQUESTED);y+=50;
+    }
+    label('Fictional repair puzzle · one supplied kit per rig',12,y,320,24);
+    publishHudDock(items,0,12,'Rig workshop');return;
+  }
+  if(hudPage==='orders'){
+    // Normal play keeps the scene open. Detailed campaign tools live in the
+    // collapsible DOM dock; these items use the native Qualia HUD renderer.
+    const mobile=W<900;
+    const bottom=mobile?H-74:H-18;
+    if(focusedPlace!==null&&placePositions[focusedPlace]){
+      const p=placePositions[focusedPlace], [text,icon,color]=PLACE_MARKERS[focusedPlace];
+      items.push({kind:'marker',id:`place:${focusedPlace}`,text,x:p.x,y:p.y,z:p.z,w:32,h:32,icon,color});
+    }
+    panel(12,112,Math.min(250,W-24),52);
+    label(`DAY ${st.day} · ${st.coins} coins`,24,119,Math.min(220,W-48),20);
+    label(focusedPlace===null?cameraMode.toUpperCase():PLACE_MARKERS[focusedPlace][0],
+      24,140,Math.min(220,W-48),18);
+    if(cameraMode==='drive'){
+      const landscape=mobile&&H<500;
+      const width=Math.min(430,W-(landscape?132:24)),x=landscape?12:W-width-12;
+      const y=landscape?112:mobile?Math.max(170,bottom-178):bottom-94;
+      panel(x,y,width,86);
+      label(`Oil ${Math.round(drive.oilTempC)} °C · Coolant ${Math.round(drive.coolantTempC)} °C`,
+        x+12,y+9,width-24,22,engineThermalReadout().color);
+      label(`${Math.round(Math.abs(drive.speed)*3.6)} km/h · ${drive.roadSurface} · ${Math.round(drive.engineHealth)}% engine`,
+        x+12,y+34,width-24,20);
+      label(drive.warning||drive.engineWarning||drive.trailerWarning||rearMirrorReadout(),x+12,y+57,width-24,20);
+    }else if(cameraMode==='walk'){
+      button('walk:site','Interact',W-124,bottom-40,110,40);
+      button('page:characters','Character',12,172,110,34);
+      if(!mobile)label('WASD move · drag to look · E interact',
+        16,Math.max(170,bottom-22),Math.min(390,W-32),22);
+    }else{
+      button('camera:in','+',W-108,bottom-40,44,40);
+      button('camera:out','−',W-58,bottom-40,44,40);
+      if(!mobile)button('showcase:toggle',showcaseTour?'End tour':'Showcase',16,bottom-40,110,40);
+    }
+    hud.set_document_json(JSON.stringify({items}));return;
+  }
+  if(hudPage==='site'||hudPage==='walk-site'){
+    const {x,y,w:width,h:height}=gamePanelRect(258);
+    hudDockBounds={x,y,w:width,h:height};
+    panel(x,y,width,height);
+    label(hudSiteLines[0]||activeWalkSite?.label||'Selected place',x+12,y+10,width-94,24);
+    button('page:orders','Close',x+width-76,y+8,64,32);
+    const brief=String(hudSiteLines[1]||'Select a task or return to the world.');
+    const chars=Math.max(20,Math.floor((width-24)/7));
+    const words=brief.split(/\s+/),lines=[];let line='';
+    for(const word of words){
+      if(line&&(line.length+word.length+1)>chars){lines.push(line);line='';}
+      line+=(line?' ':'')+word;
+    }
+    if(line)lines.push(line);
+    lines.slice(0,height<220?1:3).forEach((text,i)=>label(text,x+12,y+46+i*20,width-24,20));
+    const actionY=height<220?86:108;
+    const rows=Math.max(1,Math.min(3,Math.floor((height-actionY-38)/39)));
+    const offset=Math.min(hudOrderOffset,Math.max(0,hudSiteActions.length-1));
+    hudSiteActions.slice(offset,offset+rows).forEach((id,i)=>{
+      const copy=[...$('actions').querySelectorAll('button[data-action]')]
+        .find(control=>control.dataset.action===id)?.textContent||id;
+      button(`action:${id}`,copy,x+12,y+actionY+i*39,width-24,34);
+    });
+    if(hudSiteActions.length>rows)button('site:next','More tasks',x+12,y+height-31,width-24,26);
+    hud.set_document_json(JSON.stringify({items}));return;
+  }
   if(hudPage==='characters'){
+    const cardW=Math.min(380,W-24);
     panel(14,12,W-28,H-24);
     label('YOUR CHARACTERS',32,28,W-64,28);
     label('Choose who you walk as. Each keeps a story, field trait and separate place.',32,57,W-64,36);
@@ -2017,27 +2389,28 @@ function renderHud() {
       const trait=CHARACTER_TRAITS.find(a=>a.id===c.trait);
       const place=characterPlace(c.place);
       button(`character:select:${c.id}`,`${c.id===roster.selected?'▶ ':''}${c.name} · ${place.label}`,
-        32,y,W-64,33);
+        32,y,cardW-44,40);
       label(characterBio(c),38,y+35,W-76,21);
       label(`${arc.label} · ${trait.label} · ${characterChapter(c,st).title}`,38,y+57,W-76,21);
     });
-    const footer=H-56;
+    const footer=98+rows.length*94+44;
     if(roster.characters.length>pageSize){
-      button('roster:prev','‹ Earlier',32,footer-40,(W-78)/2,32);
-      button('roster:next','Later ›',46+(W-78)/2,footer-40,(W-78)/2,32);
+      button('roster:prev','‹ Earlier',32,footer-44,(cardW-54)/2,40);
+      button('roster:next','Later ›',38+(cardW-54)/2,footer-44,(cardW-54)/2,40);
     }
-    button('characters:new','Create character',32,footer,(W-78)/2,36);
-    button('characters:back','Return',46+(W-78)/2,footer,(W-78)/2,36);
-    hud.set_document_json(JSON.stringify({items}));return;
+    button('characters:new','Create character',32,footer,(cardW-54)/2,40);
+    button('characters:back','Return',38+(cardW-54)/2,footer,(cardW-54)/2,40);
+    publishHudDock(items.filter(item=>item.kind!=='panel'),20,28,'Your characters');return;
   }
   if(hudPage==='character-create'){
+    const cardW=Math.min(380,W-24);
     panel(14,12,W-28,H-24);
     label('CREATE A CHARACTER',32,28,W-64,28);
     label('Choose a name, personal story, field trait and starting place.',32,57,W-64,28);
     const arc=CHARACTER_ARCS.find(a=>a.id===characterDraft.arc);
     const trait=CHARACTER_TRAITS.find(a=>a.id===characterDraft.trait);
     const home=characterPlace(characterDraft.home);
-    const row=(id,title,value,y)=>button(id,`${title}: ${value}  ›`,32,y,W-64,38);
+    const row=(id,title,value,y)=>button(id,`${title}: ${value}  ›`,32,y,cardW-44,44);
     row('draft:name','Name',characterDraft.name,101);
     row('draft:arc','Story',arc.label,150);
     row('draft:trait','Field trait',trait.label,199);
@@ -2045,10 +2418,19 @@ function renderHud() {
     label(arc.opening,38,298,W-76,38);
     label(trait.detail,38,343,W-76,32);
     label(characterBio(characterDraft),38,383,W-76,48);
-    const footer=H-63;
-    button('characters:create','Begin this story',32,footer,(W-78)/2,36);
-    button('characters:cancel','Cancel',46+(W-78)/2,footer,(W-78)/2,36);
-    hud.set_document_json(JSON.stringify({items}));return;
+    const footer=447;
+    button('characters:create','Begin this story',32,footer,(cardW-54)/2,40);
+    button('characters:cancel','Cancel',38+(cardW-54)/2,footer,(cardW-54)/2,40);
+    publishHudDock(items.filter(item=>item.kind!=='panel'),20,28,'Create a character');return;
+  }
+  if(hudPage==='result'){
+    label(st.finale==='"commons"'?'The commons are open':'The canal is connected',right+12,148,panelW-24,28);
+    label(`Day ${st.day} · ${st.coins} coins remaining`,right+12,184,panelW-24,24);
+    button('result:explore','Explore the map',right+12,222,panelW-24,44);
+    button('result:replay','Verify replay',right+12,274,panelW-24,44);
+    button('result:new','Start a new campaign',right+12,326,panelW-24,44);
+    if(resultMessage)label(resultMessage,right+12,380,panelW-24,38);
+    publishHudDock(items,right,148,'Campaign complete');return;
   }
   placePositions.forEach((p,i)=>{
     const [text,icon,color]=PLACE_MARKERS[i];
@@ -2084,7 +2466,7 @@ function renderHud() {
     cameraMode==='walk'?'FIRST PERSON · WASD MOVE · DRAG LOOK':
     focusedPlace===null?`${cameraMode.toUpperCase()} VIEW`:
       PLACE_MARKERS[focusedPlace][0].toUpperCase(),18,compact?157:114,compact?280:395,23);
-  if(cameraMode==='drive'){
+  if(cameraMode==='drive'&&hudPage==='orders'){
     const compactDriveWidth=compact?Math.max(170,W-286):W-64;
     const thermal=engineThermalReadout(),oilColor=engineTempColor(drive.oilTempC,128,142),
       coolantColor=engineTempColor(drive.coolantTempC,104,114);
@@ -2123,7 +2505,7 @@ function renderHud() {
     label(`AUSTRALIA · ${ECOLOGY_PROFILE.label} · illustrative`,W-226,mirrorY+124,198,16);
     hud.set_document_json(JSON.stringify({items}));return;
   }
-  if(cameraMode==='walk'){
+  if(cameraMode==='walk'&&hudPage==='orders'){
     const c=playing(),trait=CHARACTER_TRAITS.find(t=>t.id===c.trait);
     const arc=CHARACTER_ARCS.find(a=>a.id===c.arc), chapter=characterChapter(c,st);
     button('page:characters',`Characters · ${c.name}`,18,compact?184:142,170,30);
@@ -2398,7 +2780,10 @@ function renderHud() {
     button('result:new','Start a new campaign',x+18,top+214,width-36,31);
     if(resultMessage)label(resultMessage,x+18,top+254,width-36,18);
   }
-  hud.set_document_json(JSON.stringify({items}));
+  publishHudDock(items.filter(item=>item.kind!=='panel'&&item.kind!=='marker'&&
+    item.x>=right&&item.y>=148&&item.y!==H-47),right,148,
+    ({activities:'Stories & work',places:'Places',goals:'Community goals',journal:'Journal',
+      system:'Game tools',script:'VibeScript',result:'Campaign record'})[hudPage]||'Community');
 }
 
 function playAsCharacter(id,saveCurrent=true){
@@ -2427,6 +2812,34 @@ function openWalkSite(site){
 }
 
 function handleHudAction(id){
+  if(id==='page:orders'&&sceneMode==='workshop'){selectGameView('world');return;}
+  if(id==='activity:open:workshop-repair'){selectGameView('workshop');return;}
+  if(id==='workshop:all'){workshopSelectedPart='';hudDockScroll=0;renderHud();return;}
+  if(id==='workshop:rig'){
+    if(VISUAL_REVIEW_REQUESTED)return;
+    selectVehicleRig(vehicleRig+1);workshopFeedback='';workshopSelectedPart='';rebuild();renderHud();return;
+  }
+  if(id.startsWith('workshop:op:')){
+    if(VISUAL_REVIEW_REQUESTED||showcaseTour)return;
+    const view=workshopView();
+    if(!view)return;
+    try{
+      const receipt=JSON.parse(session.workshop_operate(vehicleRig,id.slice('workshop:op:'.length),view.state.revision));
+      workshopFeedback=receipt.detail;
+      workshopViewCache=null;workshopDriveCache=null;
+      if(receipt.ok){
+        rebuild();note(`Workshop operation ${receipt.state.revision} · ${receipt.detail}`);
+      }
+    }catch(error){workshopFeedback=String(error);workshopViewCache=null;workshopDriveCache=null;}
+    renderHud();return;
+  }
+  if(id==='dock:prev'||id==='dock:next'){
+    hudDockScroll+=(id==='dock:next'?1:-1)*(hudDockBounds?.step||120);
+    renderHud();return;
+  }
+  if(id==='site:next'){
+    hudOrderOffset=(hudOrderOffset+1)%Math.max(1,hudSiteActions.length);renderHud();return;
+  }
   if(showcaseTour){if(id==='showcase:toggle')stopShowcaseTour();return;}
   if(id==='showcase:toggle'){toggleShowcaseTour();return;}
   if(id==='page:characters'){
@@ -2772,11 +3185,17 @@ function refresh() {
   renderHud();
 }
 
+function presentAcceptedActivity(receipt){
+  if(!receipt.ok||typeof session.present_accepted_activity!=='function')return;
+  try {session.present_accepted_activity(portal,receipt.seq);}
+  catch(error){note('Activity presentation: '+String(error));}
+}
 function tryAction(id) {
   if(showcaseTour){note('End the graphics showcase before changing campaign state');return;}
   if(VISUAL_REVIEW_REQUESTED){note('Graphics review fixtures are read-only');return;}
   const r = toObj(session.propose(id));
   if (r.ok) {
+    presentAcceptedActivity(r);
     $('why').style.display='none';
     hudSiteLines=[];hudSiteActions=[];
     if(hudPage==='site')hudPage='orders';
@@ -2875,8 +3294,17 @@ function tryAction(id) {
 }
 
 $('save').onclick = async () => {
-  if(VISUAL_REVIEW_REQUESTED)return;
-  await m.world_save('rc-save.n3', new TextEncoder().encode(session.world()));
+  if(VISUAL_REVIEW_REQUESTED||showcaseTour)return;
+  if(cameraMode==='drive'&&typeof session.drive_park==='function'){
+    walkKeys.clear();session.drive_park(driveSimulation,vehicleRig);
+    drive=driveStateFromVibe(vehicleRig);
+  }
+  const savedWorld=session.world();
+  const savedAnimation=typeof portal.animation_save_for_world==='function'
+    ?portal.animation_save_for_world(savedWorld):null;
+  await m.world_save('rc-save.n3', new TextEncoder().encode(savedWorld));
+  if(savedAnimation!==null)
+    await m.world_save('rc-animation.json',new TextEncoder().encode(savedAnimation));
   await saveCharacters();
   $('persist').textContent = 'saved';
   renderHud();
@@ -2899,6 +3327,15 @@ $('load').onclick = async () => {
     return;
   }
   session = new m.GameSession(saved, ACTIONS);
+  if(cameraMode==='drive'){
+    drive=driveStateFromVibe(vehicleRig);walk={x:drive.x,z:drive.z};camYaw=drive.heading;
+  }
+  try {
+    if(typeof portal.restore_animation_for_world==='function'){
+      const visual=await m.world_load('rc-animation.json');
+      portal.restore_animation_for_world(new TextDecoder().decode(visual),saved);
+    }
+  }catch {portal.clear_activity_presentation?.();}
   await loadCharacters();
   hudPage=state().finale?'result':'orders';resultMessage='';
   focusedPlace=null;
@@ -2911,14 +3348,22 @@ $('load').onclick = async () => {
 function verifyReplay() {
   const ids = toObj(session.events());
   const r = toObj(m.session_replay(SEED, ACTIONS, ids));
-  const same = r.diverged_at === null && r.world === session.world();
-  note(`replay ${same ? 'reproduced world byte-for-byte' : 'DIVERGED at '+r.diverged_at}`);
+  let same=false;
+  try{
+    same=r.diverged_at===null && (typeof session.verify_connected_replay==='function'
+      ?session.verify_connected_replay(r.world,driveSimulation):r.world===session.world());
+  }catch(error){note(`Replay rejected: ${String(error)}`);}
+  note(`replay ${same ? 'campaign and workshop tapes match; latest drive checkpoints match (driving history is not yet recorded)' : 'DIVERGED at '+r.diverged_at}`);
   return same;
 }
 $('replay').onclick = () => {verifyReplay();renderHud();};
 $('new-game').onclick = () => {
   if(showcaseTour){note('End the graphics showcase before changing campaign state');return;}
   session = new m.GameSession(SEED, ACTIONS);
+  if(cameraMode==='drive'){
+    drive=driveStateFromVibe(vehicleRig);walk={x:drive.x,z:drive.z};camYaw=drive.heading;
+  }
+  portal.clear_activity_presentation?.();
   territory=playing().place;hudPage='orders';resultMessage='';
   focusedPlace=null;
   if(cameraMode==='walk'){
@@ -2937,7 +3382,7 @@ $('vibe-propose').onclick = () => {
   if(showcaseTour){note('End the graphics showcase before changing campaign state');return;}
   const result = toObj(session.vibe_propose($('vibe-command').value));
   $('vibe-command-result').textContent = JSON.stringify(result, null, 2);
-  if (result.ok) { note(`VibeScript event ${result.seq}: ${result.action}`); refresh(); }
+  if (result.ok) {presentAcceptedActivity(result);note(`VibeScript event ${result.seq}: ${result.action}`);refresh();}
 };
 $('vibe-preview').onclick = () => {
   const previous = sceneSource;
@@ -2963,7 +3408,90 @@ async function finishSceneLoading(detail) {
 }
 
 const gameViewButtons=[...document.querySelectorAll('[data-game-view]')];
+let activePanelTab='tasks';
+const graphicsPanel=document.createElement('section');
+graphicsPanel.className='panel';graphicsPanel.id='graphics-panel';
+const graphicsTitle=document.createElement('h2');graphicsTitle.textContent='Graphics';
+graphicsPanel.append(graphicsTitle,document.querySelector('header .header-meta'));
+$('game-panels').append(graphicsPanel);
+$('game-panels').append($('inspector'),$('journal-panel'));
+for(const panel of $('game-panels').children){
+  if(panel.classList.contains('panel-tabs')||panel.classList.contains('panel-toolbar'))continue;
+  panel.dataset.panelTab=panel.id==='drive-dashboard'||panel.id==='rig-idle-note'?'rig':
+    panel.id==='route-planner'?'trip':
+    panel.id==='inspector'||panel.id==='journal-panel'?'journal':
+    panel.id==='graphics-panel'||panel.tagName==='DETAILS'||panel.classList.contains('utility-buttons')?'tools':'tasks';
+}
+function selectPanelTab(tab){
+  activePanelTab=tab;
+  for(const panel of $('game-panels').querySelectorAll('[data-panel-tab]'))
+    panel.toggleAttribute('data-panel-active',panel.dataset.panelTab===tab);
+  for(const button of document.querySelectorAll('[data-panel-choice]'))
+    button.setAttribute('aria-pressed',String(button.dataset.panelChoice===tab));
+  $('game-panels').scrollTop=0;
+}
+for(const button of document.querySelectorAll('[data-panel-choice]'))
+  button.onclick=()=>selectPanelTab(button.dataset.panelChoice);
+selectPanelTab(activePanelTab);
+function setGamePanels(open){
+  if(open&&sceneMode==='workshop')selectGameView('world');
+  document.body.classList.toggle('panels-open',open);
+  $('game-panels').inert=!open;
+  $('toggle-game-panels').setAttribute('aria-expanded',String(open));
+  $('toggle-game-panels').textContent=open?'Close panels':'Panels';
+  if(open){
+    walkKeys.clear();
+    hudPage='orders';renderHud();
+    selectPanelTab(cameraMode==='drive'?'rig':document.body.classList.contains('trip-planning')?'trip':activePanelTab);
+    $('game-panels').querySelector('[data-panel-choice][aria-pressed="true"]')?.focus({preventScroll:true});
+  }
+}
+$('toggle-game-panels').onclick=()=>setGamePanels(!document.body.classList.contains('panels-open'));
+$('close-game-panels').onclick=()=>{setGamePanels(false);$('toggle-game-panels').focus({preventScroll:true});};
+const fullscreenButton=$('fullscreen-game');
+fullscreenButton.hidden=!document.fullscreenEnabled;
+fullscreenButton.onclick=async()=>{
+  try {
+    if(document.fullscreenElement)await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  }catch { note('Fullscreen was unavailable. The game continues in this window.'); }
+};
+document.addEventListener('fullscreenchange',()=>{
+  const active=!!document.fullscreenElement;
+  fullscreenButton.setAttribute('aria-label',active?'Exit fullscreen':'Enter fullscreen');
+  fullscreenButton.title=active?'Exit fullscreen':'Fullscreen';
+  resizeGameViewport();
+});
+window.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&document.body.classList.contains('panels-open')){
+    setGamePanels(false);$('toggle-game-panels').focus();
+    event.preventDefault();event.stopImmediatePropagation();
+  }
+},true);
+const heldTouchKeys=new Set();
+for(const control of document.querySelectorAll('[data-touch-key]')){
+  const key=control.dataset.touchKey;
+  control.addEventListener('pointerdown',event=>{
+    if(cameraMode!=='walk'&&cameraMode!=='drive')return;
+    event.preventDefault();control.setPointerCapture(event.pointerId);
+    const input=cameraMode==='drive'&&key==='s'?' ':key;
+    control.dataset.heldInput=input;
+    heldTouchKeys.add(input);walkKeys.add(input);
+  });
+  const release=()=>{const input=control.dataset.heldInput||key;heldTouchKeys.delete(input);walkKeys.delete(input);};
+  control.addEventListener('pointerup',release);
+  control.addEventListener('pointercancel',release);
+  control.addEventListener('lostpointercapture',release);
+}
+window.addEventListener('blur',()=>{for(const key of heldTouchKeys)walkKeys.delete(key);heldTouchKeys.clear();});
 function selectGameView(view){
+  setGamePanels(false);
+  const nextScene=view==='workshop'?'workshop':'community';
+  const sceneChanged=nextScene!==sceneMode;
+  sceneMode=nextScene;
+  document.body.dataset.sceneMode=sceneMode;
+  if(sceneChanged){workshopSelectedPart='';workshopFeedback='';}
+  if(sceneChanged){workshopSceneKey='';camTarget=null;rebuild();}
   document.body.classList.toggle('trip-planning',view==='trip');
   for(const button of gameViewButtons){
     if(button.dataset.gameView===view)button.setAttribute('aria-current','page');
@@ -2971,6 +3499,9 @@ function selectGameView(view){
   }
   if(view==='drive'){
     setCameraMode('drive');hudPage='orders';
+  }else if(view==='workshop'){
+    setCameraMode('map');hudPage='workshop';
+    territory='kestrel';
   }else if(view==='walk'){
     setCameraMode('walk');hudPage='orders';
   }else if(view==='activities'){
@@ -3197,7 +3728,8 @@ if (new URLSearchParams(location.search).has('selftest')) {
     if(!packResponse.ok)throw new Error(`HTTP ${packResponse.status}`);
     const packBytes=new Uint8Array(await packResponse.arrayBuffer());
     const manifest=await (await fetch('./assets/manifest.json')).json();
-    note(`TEST Qualia HMC game assets: ${m.verify_game_hmc(packBytes)===manifest.assets.length+1?'PASS':'FAIL'}`);
+    note(`TEST Qualia HMC game assets: ${m.verify_game_hmc(packBytes)===manifest.assets.length+
+      new Set((manifest.textures||[]).map(texture=>texture.file)).size+1?'PASS':'FAIL'}`);
     packBytes[64]^=1;
     let tamperRejected=false;
     try { m.verify_game_hmc(packBytes); } catch(_) { tamperRejected=true; }

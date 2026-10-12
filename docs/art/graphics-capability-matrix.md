@@ -1,5 +1,62 @@
 # Game graphics capability matrix
 
+## 12 October material/texture continuation — source only
+
+The multi-asset portal now preserves `UV01` through `SceneMeshAccum` and submits
+the merged stream to `PortalGpu`. The GPU path generates UV-aligned tangent
+frames through caller-buffered `render::mesh_tangent_frames`, replacing arbitrary
+normal-derived tangents when authored UVs are present. Legacy streams retain
+their existing fallback. New `portal::texture_upload` hydrates encoded image
+dependencies with SHA-256 validation, bounded codec output, semantic mip filters
+and reuse of already-resident digest/colour-space/semantic bindings.
+
+`render::surface_authoring` owns bounded deterministic tiled colour/normal/ORM
+generation, standard PNG encoding into caller memory and planar UV projection.
+The game `material_library.rs` supplies authored family parameters and shares
+content-addressed images. Its MAT4/UV01 assets and PNG dependencies travel through
+both dynamic scene compilation and exported HMC. Native pack validation checks
+referenced images and UV counts; load receipts distinguish requested from
+resident texture bindings. Export/release verifiers have been updated accordingly.
+
+Ownership review: codec/map authoring, tangent kernels and portal hydration are
+separate focused modules. Existing portal/GPU upload modules contain only the
+delegating calls; further authoring or texture lifecycle behavior belongs in those
+focused modules, not in the oversized portal facade.
+
+No build, test or browser execution was performed for this continuation. Tests
+were authored for PNG normal-pixel round-trip, atomic admission failures, UV merge
+preservation, mirrored tangent orientation and missing HMC texture dependencies.
+That interim planar mapping has now been replaced for compiled game assets by
+the caller-buffered `render::mesh_surface_frames::box_project_mesh_into` chart
+builder. Dominant-face projection supplies noncollapsed coordinates on side,
+top and end surfaces; chart seams split vertices, while smooth charts reuse
+source vertices within their chart. Triangle order/material ranges are retained.
+Authoring supplies smooth source normals for curved models and flat normals for
+sheet/box parts. The `.10d` normal sidecar is now retained through scene merge
+and uploaded with UV01; nonuniform anatomical fits recompute their geometric
+normal frame before upload. Read-back receipts and pack validation inspect
+normal/UV stream counts. Authored tests additionally cover vertical face UVs,
+seam buffer admission, chart vertex reuse and merge/orbit normal preservation.
+
+Hand-designed texture atlases, cylindrical organic mappings and character
+skin/clip playback remain open. These entries are source evidence,
+not graphics acceptance or proof that the checked-in WASM executes the changes.
+
+## 12 October coachwork authoring addition — awaiting validation
+
+Qualia `specialized_libs::computational_geometry::authoring::loft_convex_sections_into`
+is implemented in focused `authoring_loft.rs` and re-exported by `authoring.rs`.
+It accepts bounded convex XY rings at ordered Z stations and writes closed loft
+geometry into caller-owned vertex/index buffers, returning counts and bounds.
+The game `ParametricRecipe::LoftedBody` consumes it for touring coachwork; shared
+Qualia primitives and transforms still own other model generation.
+
+Targets: native and game `wasm-full`. Status: source implemented, uncommitted,
+unbuilt and unverified. Authored tests cover deterministic geometry, cap winding,
+bad topology/coordinates and insufficient caller buffers. No tests have been run
+for this addition; user instruction defers build/testing until implementation is
+complete. No new engine SHA, browser receipt or approved asset sample is claimed.
+
 Inventory current symbols on the pinned Qualia revision before adding any call. The entries below record what was visible in source inspection on 2026-10-11; they are deliberately conservative.
 
 | Capability | Existing inspection evidence | Game status | Required next proof |

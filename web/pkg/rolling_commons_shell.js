@@ -295,6 +295,16 @@ export class GameHud {
         return this;
     }
     /**
+     * @param {number} metres
+     * @param {number} scale
+     */
+    set_camera_near_metres(metres, scale) {
+        const ret = wasm.gamehud_set_camera_near_metres(this.__wbg_ptr, metres, scale);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
      * @param {number} yaw
      * @param {number} pitch
      * @param {number} zoom
@@ -336,6 +346,57 @@ export class GamePortal {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_gameportal_free(ptr, 0);
+    }
+    /**
+     * @param {string} world
+     * @returns {string}
+     */
+    animation_save_for_world(world) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            const ptr0 = passStringToWasm0(world, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.gameportal_animation_save_for_world(this.__wbg_ptr, ptr0, len0);
+            var ptr2 = ret[0];
+            var len2 = ret[1];
+            if (ret[3]) {
+                ptr2 = 0; len2 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred3_0 = ptr2;
+            deferred3_1 = len2;
+            return getStringFromWasm0(ptr2, len2);
+        } finally {
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+        }
+    }
+    /**
+     * @returns {string}
+     */
+    animation_snapshot_json() {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.gameportal_animation_snapshot_json(this.__wbg_ptr);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    clear_activity_presentation() {
+        const ret = wasm.gameportal_clear_activity_presentation(this.__wbg_ptr);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
     }
     /**
      * Load a sealed `.10d` container into the scene (CRC + provenance
@@ -394,6 +455,19 @@ export class GamePortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Hydrate the dependencies before creating material bind groups.
+     * @param {Array<any>} assets
+     * @param {Array<any>} textures
+     * @returns {any}
+     */
+    load_scene_textured(assets, textures) {
+        const ret = wasm.gameportal_load_scene_textured(this.__wbg_ptr, assets, textures);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
      * @param {HTMLCanvasElement} canvas
      */
     constructor(canvas) {
@@ -404,6 +478,23 @@ export class GamePortal {
         this.__wbg_ptr = ret[0];
         GamePortalFinalization.register(this, this.__wbg_ptr, this);
         return this;
+    }
+    /**
+     * @param {string} joint_iri
+     * @param {string} clip_iri
+     * @param {number} fade_seconds
+     * @returns {number}
+     */
+    play_character_animation(joint_iri, clip_iri, fade_seconds) {
+        const ptr0 = passStringToWasm0(joint_iri, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(clip_iri, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.gameportal_play_character_animation(this.__wbg_ptr, ptr0, len0, ptr1, len1, fade_seconds);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] >>> 0;
     }
     /**
      * Poll the queued pick result: semantic node index or -1 when nothing
@@ -439,12 +530,62 @@ export class GamePortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * @param {string} json
+     * @param {string} world
+     */
+    restore_animation_for_world(json, world) {
+        const ptr0 = passStringToWasm0(json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(world, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.gameportal_restore_animation_for_world(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @param {string} json
+     */
+    restore_animation_snapshot_json(json) {
+        const ptr0 = passStringToWasm0(json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.gameportal_restore_animation_snapshot_json(this.__wbg_ptr, ptr0, len0);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @returns {any}
+     */
+    scene_animation_receipt() {
+        const ret = wasm.gameportal_scene_animation_receipt(this.__wbg_ptr);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * @param {number} time
+     */
+    seek_scene_animation(time) {
+        const ret = wasm.gameportal_seek_scene_animation(this.__wbg_ptr, time);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
      * Toggle the ambient particle field (tensor-node particle cloud).
      * Off in this game; exposed so the frame guard can assert it stays off.
      * @param {boolean} enabled
      */
     set_ambient_enabled(enabled) {
         wasm.gameportal_set_ambient_enabled(this.__wbg_ptr, enabled);
+    }
+    /**
+     * @param {boolean} reduced
+     */
+    set_animation_reduced_motion(reduced) {
+        wasm.gameportal_set_animation_reduced_motion(this.__wbg_ptr, reduced);
     }
     /**
      * @param {boolean} enabled
@@ -459,6 +600,16 @@ export class GamePortal {
      */
     set_camera(yaw, pitch, zoom) {
         const ret = wasm.gameportal_set_camera(this.__wbg_ptr, yaw, pitch, zoom);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @param {number} metres
+     * @param {number} scale
+     */
+    set_camera_near_metres(metres, scale) {
+        const ret = wasm.gameportal_set_camera_near_metres(this.__wbg_ptr, metres, scale);
         if (ret[1]) {
             throw takeFromExternrefTable0(ret[0]);
         }
@@ -568,6 +719,22 @@ export class GamePortal {
         wasm.gameportal_set_water_surface(this.__wbg_ptr, r, g, b, alpha, wave_amplitude, wave_frequency, quality);
     }
     /**
+     * @param {number} r
+     * @param {number} g
+     * @param {number} b
+     * @param {number} alpha
+     * @param {number} amplitude_metres
+     * @param {number} radians_per_metre
+     * @param {number} world_scale
+     * @param {number} quality
+     */
+    set_water_surface_metres(r, g, b, alpha, amplitude_metres, radians_per_metre, world_scale, quality) {
+        const ret = wasm.gameportal_set_water_surface_metres(this.__wbg_ptr, r, g, b, alpha, amplitude_metres, radians_per_metre, world_scale, quality);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
      * Return a bounded temporal schedule with current renderer-owned producer evidence.
      * @param {number} quality_tier
      * @param {boolean} scene_changed
@@ -629,6 +796,102 @@ export class GameSession {
         wasm.__wbg_gamesession_free(ptr, 0);
     }
     /**
+     * Native camera mount follows the same accepted pose as the touring body.
+     * @param {GameDriveSimulation} sim
+     * @param {number} rig
+     * @param {boolean} aerial
+     * @param {number} look_yaw
+     * @param {number} look_pitch
+     * @param {number} center_x
+     * @param {number} center_y
+     * @param {number} center_z
+     * @param {number} scale
+     * @returns {string}
+     */
+    drive_camera(sim, rig, aerial, look_yaw, look_pitch, center_x, center_y, center_z, scale) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            _assertClass(sim, GameDriveSimulation);
+            const ret = wasm.gamesession_drive_camera(this.__wbg_ptr, sim.__wbg_ptr, rig, aerial, look_yaw, look_pitch, center_x, center_y, center_z, scale);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
+     * @param {GameDriveSimulation} sim
+     * @param {number} rig
+     */
+    drive_park(sim, rig) {
+        _assertClass(sim, GameDriveSimulation);
+        const ret = wasm.gamesession_drive_park(this.__wbg_ptr, sim.__wbg_ptr, rig);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @param {GameDriveSimulation} sim
+     * @param {number} rig
+     * @returns {string}
+     */
+    drive_resume(sim, rig) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            _assertClass(sim, GameDriveSimulation);
+            const ret = wasm.gamesession_drive_resume(this.__wbg_ptr, sim.__wbg_ptr, rig);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
+     * Browser supplies controls and sampled scene facts. Saved motion,
+     * condition, counters and distance override any browser state fields.
+     * @param {GameDriveSimulation} sim
+     * @param {number} rig
+     * @param {string} facts_json
+     * @returns {string}
+     */
+    drive_tick(sim, rig, facts_json) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            _assertClass(sim, GameDriveSimulation);
+            const ptr0 = passStringToWasm0(facts_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.gamesession_drive_tick(this.__wbg_ptr, sim.__wbg_ptr, rig, ptr0, len0);
+            var ptr2 = ret[0];
+            var len2 = ret[1];
+            if (ret[3]) {
+                ptr2 = 0; len2 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred3_0 = ptr2;
+            deferred3_1 = len2;
+            return getStringFromWasm0(ptr2, len2);
+        } finally {
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+        }
+    }
+    /**
      * Accepted action ids — the replay tape.
      * @returns {any}
      */
@@ -654,6 +917,37 @@ export class GameSession {
         return this;
     }
     /**
+     * The session checks its own accepted tape, not a browser-supplied action.
+     * @param {GamePortal} portal
+     * @param {number} sequence
+     * @returns {number}
+     */
+    present_accepted_activity(portal, sequence) {
+        _assertClass(portal, GamePortal);
+        const ret = wasm.gamesession_present_accepted_activity(this.__wbg_ptr, portal.__wbg_ptr, sequence);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] >>> 0;
+    }
+    /**
+     * Apply accepted native driving state to the admitted touring bind rig.
+     * No browser-supplied model transform or wheel phase is accepted here.
+     * @param {GameDriveSimulation} sim
+     * @param {GamePortal} portal
+     * @param {number} rig
+     * @returns {number}
+     */
+    present_drive_rig(sim, portal, rig) {
+        _assertClass(sim, GameDriveSimulation);
+        _assertClass(portal, GamePortal);
+        const ret = wasm.gamesession_present_drive_rig(this.__wbg_ptr, sim.__wbg_ptr, portal.__wbg_ptr, rig);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] >>> 0;
+    }
+    /**
      * Compatibility entry point for UI hosts and deterministic replay. Even
      * this action-id form is converted to a VibeScript command cell before it
      * can reach the QualiaDB SHACL gate.
@@ -665,6 +959,23 @@ export class GameSession {
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.gamesession_propose(this.__wbg_ptr, ptr0, len0);
         return ret;
+    }
+    /**
+     * Verify all workshop tapes before comparing the independent campaign
+     * replay. No lines are excluded until their mode's replay has passed.
+     * @param {string} campaign_replayed_world
+     * @param {GameDriveSimulation} simulation
+     * @returns {boolean}
+     */
+    verify_connected_replay(campaign_replayed_world, simulation) {
+        const ptr0 = passStringToWasm0(campaign_replayed_world, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        _assertClass(simulation, GameDriveSimulation);
+        const ret = wasm.gamesession_verify_connected_replay(this.__wbg_ptr, ptr0, len0, simulation.__wbg_ptr);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] !== 0;
     }
     /**
      * A VibeScript cell may select one catalogued action id. It cannot edit
@@ -689,6 +1000,87 @@ export class GameSession {
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.gamesession_vibe_query(this.__wbg_ptr, ptr0, len0);
         return ret;
+    }
+    /**
+     * @param {number} rig
+     * @returns {string}
+     */
+    workshop_drive_conditions(rig) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.gamesession_workshop_drive_conditions(this.__wbg_ptr, rig);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
+     * @param {number} rig
+     * @param {string} command
+     * @param {number} expected_revision
+     * @returns {string}
+     */
+    workshop_operate(rig, command, expected_revision) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            const ptr0 = passStringToWasm0(command, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.gamesession_workshop_operate(this.__wbg_ptr, rig, ptr0, len0, expected_revision);
+            var ptr2 = ret[0];
+            var len2 = ret[1];
+            if (ret[3]) {
+                ptr2 = 0; len2 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred3_0 = ptr2;
+            deferred3_1 = len2;
+            return getStringFromWasm0(ptr2, len2);
+        } finally {
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+        }
+    }
+    /**
+     * @param {number} rig
+     * @returns {any}
+     */
+    workshop_scene(rig) {
+        const ret = wasm.gamesession_workshop_scene(this.__wbg_ptr, rig);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * @param {number} rig
+     * @returns {string}
+     */
+    workshop_view(rig) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.gamesession_workshop_view(this.__wbg_ptr, rig);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
     }
     /**
      * Current world document as N3 text (includes `ev:` event lines).
@@ -791,6 +1183,15 @@ export class QualiaHud {
      */
     paint() {
         wasm.qualiahud_paint(this.__wbg_ptr);
+    }
+    /**
+     * @param {number} near
+     */
+    set_camera_near_plane(near) {
+        const ret = wasm.qualiahud_set_camera_near_plane(this.__wbg_ptr, near);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
     }
     /**
      * Use the same orbit camera as Portal to project world markers into HUD pixels.
@@ -909,6 +1310,27 @@ export class QualiaPortal {
         wasm.qualiaportal_animate_artefact(this.__wbg_ptr, ptr0, len0, ax, ay, az, rate);
     }
     /**
+     * @returns {string}
+     */
+    animation_snapshot_json() {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.qualiaportal_animation_snapshot_json(this.__wbg_ptr);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
      * Phase 2 — whether the artefact's proposed motion is currently being refused (clamped).
      * @returns {boolean}
      */
@@ -1004,6 +1426,15 @@ export class QualiaPortal {
     camera_zoom() {
         const ret = wasm.qualiaportal_camera_zoom(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * @param {bigint} idle
+     */
+    clear_scene_activities(idle) {
+        const ret = wasm.qualiaportal_clear_scene_activities(this.__wbg_ptr, idle);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
     }
     /**
      * Wavefunction collapse — set node `q` to 0 in the resident session manifold.
@@ -1403,6 +1834,31 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Hydrate one content-addressed PNG/JPEG/KTX2 dependency. Role 0 is sRGB
+     * base colour, 1 a linear tangent-space normal, 2 linear packed data and
+     * 3 sRGB alpha-masked colour. Returns false for an unavailable GPU backend.
+     * Call before scene submission so the material bind groups see residency.
+     * @param {Uint8Array} digest
+     * @param {string} mime
+     * @param {Uint8Array} encoded
+     * @param {number} role
+     * @param {number} cutoff
+     * @returns {boolean}
+     */
+    load_texture_encoded(digest, mime, encoded, role, cutoff) {
+        const ptr0 = passArray8ToWasm0(digest, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(mime, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passArray8ToWasm0(encoded, wasm.__wbindgen_malloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ret = wasm.qualiaportal_load_texture_encoded(this.__wbg_ptr, ptr0, len0, ptr1, len1, ptr2, len2, role, cutoff);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] !== 0;
+    }
+    /**
      * Byte stride of the packed mesh-instance record ABI exposed by `set_mesh_instances`.
      * @returns {number}
      */
@@ -1520,6 +1976,24 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * A timed presentation cue from an accepted game event. This changes no
+     * campaign facts; completed and pending cues survive scene replacement.
+     * @param {bigint} token
+     * @param {bigint} joint
+     * @param {bigint} clip
+     * @param {bigint} idle
+     * @param {number} duration
+     * @param {number} fade
+     * @returns {number}
+     */
+    present_scene_activity(token, joint, clip, idle, duration, fade) {
+        const ret = wasm.qualiaportal_present_scene_activity(this.__wbg_ptr, token, joint, clip, idle, duration, fade);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] >>> 0;
+    }
+    /**
      * Phase 1.4 — the **2D view** of the resident manifold: each tensor node's `project(.., Plane2D)`
      * shadow as a flat `[x0,y0,x1,y1,...]` array (world units, ~[-1,1]). The 3D scene draws the same
      * nodes through the GPU projector (the `Volume3D` view); both are the *one* manifold projection
@@ -1572,10 +2046,31 @@ export class QualiaPortal {
         }
     }
     /**
+     * @param {string} json
+     */
+    restore_animation_snapshot_json(json) {
+        const ptr0 = passStringToWasm0(json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.qualiaportal_restore_animation_snapshot_json(this.__wbg_ptr, ptr0, len0);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
      * @returns {any}
      */
     sample_telemetry() {
         const ret = wasm.qualiaportal_sample_telemetry(this.__wbg_ptr);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * @returns {any}
+     */
+    scene_animation_receipt() {
+        const ret = wasm.qualiaportal_scene_animation_receipt(this.__wbg_ptr);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }
@@ -1621,6 +2116,15 @@ export class QualiaPortal {
         return ret >>> 0;
     }
     /**
+     * @param {number} time
+     */
+    seek_scene_animation(time) {
+        const ret = wasm.qualiaportal_seek_scene_animation(this.__wbg_ptr, time);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
      * Queue GPU picking at canvas pixel `(x, y)`. Result available after the next `tick`.
      * @param {number} x
      * @param {number} y
@@ -1632,6 +2136,20 @@ export class QualiaPortal {
         if (ret[1]) {
             throw takeFromExternrefTable0(ret[0]);
         }
+    }
+    /**
+     * Joint IDs group the pieces of one actor without game-specific naming.
+     * @param {bigint} joint_id
+     * @param {bigint} clip_id
+     * @param {number} fade_seconds
+     * @returns {number}
+     */
+    select_scene_animation_clip(joint_id, clip_id, fade_seconds) {
+        const ret = wasm.qualiaportal_select_scene_animation_clip(this.__wbg_ptr, joint_id, clip_id, fade_seconds);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] >>> 0;
     }
     /**
      * @returns {number}
@@ -1674,6 +2192,12 @@ export class QualiaPortal {
         wasm.qualiaportal_set_ambient_enabled(this.__wbg_ptr, on);
     }
     /**
+     * @param {boolean} reduced
+     */
+    set_animation_reduced_motion(reduced) {
+        wasm.qualiaportal_set_animation_reduced_motion(this.__wbg_ptr, reduced);
+    }
+    /**
      * @param {boolean} enabled
      */
     set_auto_temporal_enabled(enabled) {
@@ -1697,6 +2221,16 @@ export class QualiaPortal {
      */
     set_camera(yaw, pitch, zoom) {
         const ret = wasm.qualiaportal_set_camera(this.__wbg_ptr, yaw, pitch, zoom);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * Shared native lens state for hardware rendering and CPU picking.
+     * @param {number} near
+     */
+    set_camera_near_plane(near) {
+        const ret = wasm.qualiaportal_set_camera_near_plane(this.__wbg_ptr, near);
         if (ret[1]) {
             throw takeFromExternrefTable0(ret[0]);
         }
@@ -8876,32 +9410,32 @@ function __wbg_get_imports() {
             return ret;
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2239, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2627, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1511, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1907, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1512, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1908, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuDeviceLostInfo__GpuDeviceLostInfo______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000004: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1511, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1907, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__3);
             return ret;
         },
         __wbindgen_cast_0000000000000005: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1511, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1907, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__4);
             return ret;
         },
         __wbindgen_cast_0000000000000006: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 793, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 1126, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke_______true_);
             return ret;
         },

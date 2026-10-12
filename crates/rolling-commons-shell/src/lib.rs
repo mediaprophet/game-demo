@@ -11,12 +11,37 @@
 #![cfg(target_arch = "wasm32")]
 
 mod ants;
+mod animation_bridge;
+mod activity_presentation;
+mod rig_workshop;
+mod drive_session;
+mod drive_contacts;
+mod drive_contact_integration;
+mod vehicle_camera;
+mod macropod_models;
+mod fauna_animation;
+mod quadruped_models;
+mod quadruped_animation;
+mod camera_presentation;
 mod asset_catalog;
+mod asset_compile;
+mod workshop_assembly;
+mod camp_home;
 mod fauna;
 mod flora;
+mod mature_gums;
+mod material_library;
+mod resident_animation;
+mod resident_props;
 mod pack_validation;
 mod terrain;
 mod vehicles;
+mod vehicle_cabins;
+mod vehicle_exterior;
+mod vehicle_animation;
+mod workshop;
+mod workshop_structure;
+mod water_presentation;
 
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
@@ -103,6 +128,11 @@ pub fn set_flora_selection(selection_json: &str) -> Result<(), JsValue> {
 /// Object families keep their role colours, so state readings such as
 /// powered windows and online indicators stay legible at overview scale.
 fn community_grounds_color(id: &str, color: [f32; 4]) -> [f32; 4] {
+    // Hero families now have explicit material palettes. A family-name tint
+    // must not turn green steel roofing orange or wash out blue solar cells.
+    if id.contains("/workshop") || id.contains("/solar-") || id.contains("/camp-shelter") || id.contains("-attachment-") {
+        return color;
+    }
     let has = |words: &[&str]| words.iter().any(|word| id.contains(word));
     // State-bearing and character surfaces keep their authored reading.
     let keep = has(&[
@@ -122,7 +152,7 @@ fn community_grounds_color(id: &str, color: [f32; 4]) -> [f32; 4] {
         ([0.58, 0.53, 0.47], 0.10)
     } else if has(&["solar", "panel"]) {
         ([0.15, 0.24, 0.34], 0.42)
-    } else if has(&["trunk", "stem", "branch", "bark"]) {
+    } else if has(&["trunk", "stem", "branch", "bark", "fork"]) {
         ([0.64, 0.52, 0.38], 0.30)
     } else if has(&["awning", "roof", "chimney", "band", "banner", "fascia"])
         || id.contains("market-canopy")
@@ -199,7 +229,7 @@ fn style_color(id: &str, color: [f32; 4], style: u8) -> [f32; 4] {
     }
     // Earthlight: a restrained earth/foliage colour script. The same Qualia
     // geometry and `.10d` surface-reading path carries both styles.
-    let woody = ["trunk", "stem", "branch", "bark"]
+    let woody = ["trunk", "stem", "branch", "bark", "fork"]
         .iter()
         .any(|word| id.contains(word));
     let foliage = [
@@ -278,7 +308,9 @@ pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec
         let key = js_sys::Reflect::get(&item, &"key".into())?
             .as_string()
             .ok_or_else(|| JsValue::from_str("HMC entry key must be a string"))?;
-        if !key.starts_with("10d/") || !key.ends_with(".10d") || key.contains("..") {
+        let texture = key.strip_prefix("textures/sha256/").map_or(false, |hex|
+            hex.len() == 64 && hex.bytes().all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase()));
+        if ((!key.starts_with("10d/") || !key.ends_with(".10d")) && !texture) || key.contains("..") {
             return Err(JsValue::from_str("invalid game HMC entry key"));
         }
         let value = js_sys::Reflect::get(&item, &"bytes".into())?;
@@ -286,8 +318,9 @@ pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec
             .dyn_into::<js_sys::Uint8Array>()
             .map_err(|_| JsValue::from_str("HMC entry bytes must be Uint8Array"))?
             .to_vec();
+        let kind = if texture { "image/png" } else { "10d" };
         writer
-            .add_file(key, "10d", bytes, None)
+            .add_file(key, kind, bytes, None)
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
     }
     let bytes = writer
@@ -794,6 +827,15 @@ pub fn asset_verify_10d(bytes: &[u8]) -> Result<JsValue, JsValue> {
     use qualia_core_db::render::compile_10d::{compiled_digest, decode_10d_mesh};
 
     let mesh = decode_10d_mesh(bytes).map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
+    let (rig_joints,animation_clips)=crate::pack_validation::skeletal_counts(bytes)
+        .map_err(|e|JsValue::from_str(&e))?;
+    let normal_vertices=qualia_core_db::render::compile_10d::decode_10d_normals(bytes,mesh.vertex_count())
+        .map_err(|e|JsValue::from_str(&format!("normal stream: {e:?}")))?.map_or(0,|n|n.len());
+    let mut uv=vec![[0.0;2];mesh.vertex_count()];
+    let uv_vertices=match qualia_core_db::container_10d::read_texture_coordinate_section_into(bytes,mesh.vertex_count(),&mut uv) {
+        Ok(n)=>n,Err(qualia_core_db::container_10d::TextureCoordinateContainerError::Missing)=>0,
+        Err(e)=>return Err(JsValue::from_str(&format!("UV stream: {e:?}"))),
+    };
     let (materials, material_ranges) = match qualia_core_db::container_10d::material_container_counts(bytes) {
         Ok(counts) => counts,
         Err(qualia_core_db::container_10d::MaterialContainerError::Missing) => (0, 0),
@@ -805,6 +847,10 @@ pub fn asset_verify_10d(bytes: &[u8]) -> Result<JsValue, JsValue> {
         triangles: usize,
         materials: usize,
         material_ranges: usize,
+        normal_vertices: usize,
+        uv_vertices: usize,
+        rig_joints: usize,
+        animation_clips: usize,
         digest: u32,
         min: [f32; 3],
         max: [f32; 3],
@@ -814,6 +860,10 @@ pub fn asset_verify_10d(bytes: &[u8]) -> Result<JsValue, JsValue> {
         triangles: mesh.triangle_count(),
         materials,
         material_ranges,
+        normal_vertices,
+        uv_vertices,
+        rig_joints,
+        animation_clips,
         digest: compiled_digest(bytes),
         min: mesh.min,
         max: mesh.max,
@@ -841,165 +891,8 @@ pub fn scene_build(
     orchard_harvested: bool,
     vibe_scene: &str,
 ) -> Result<JsValue, JsValue> {
-    use qualia_core_db::container_10d::provenance_section::ProvenanceSidecar;
-    use qualia_core_db::render::assets::Mesh;
-    use qualia_core_db::render::compile_10d::compile_mesh_to_10d_with_surface_reading;
-    use qualia_core_db::render::scene_primitives::{
-        assemble_into, portal_point, recipe_write, Primitive,
-    };
-    use qualia_core_db::specialized_libs::computational_geometry::geometry_workspace::{
-        Cancellation, GeometryWorkspace,
-    };
-
-    /// Compile one authored asset recipe into its mesh and `.10d` receipt
-    /// object. The scene is composed of these compiled assets.
-    fn compile_asset(recipe: &asset_catalog::AssetRecipe) -> Result<(Mesh, JsValue), JsValue> {
-        let (mesh, source, mime) = if let Some(spec) = &recipe.parametric {
-            let mesh = spec
-                .compile()
-                .map_err(|e| JsValue::from_str(&format!("parametric geometry: {e}")))?;
-            if let Some(src) = &recipe.vibe_source {
-                (
-                    mesh,
-                    src.as_bytes().to_vec(),
-                    "application/vnd.rolling-commons.vibe-scene;version=1",
-                )
-            } else {
-                (
-                    mesh,
-                    spec.source_bytes(),
-                    "application/vnd.rolling-commons.parametric-recipe;version=1",
-                )
-            }
-        } else {
-            let parts: &[Primitive] = &recipe.parts;
-            let mut positions = vec![[0.0; 3]; parts.len() * 8];
-            let mut triangles = vec![[0; 3]; parts.len() * 12];
-            let mut arena = vec![0u8; 64 + parts.len() * 64];
-            let cancel = Cancellation::new();
-            let mut workspace = GeometryWorkspace::new(&mut arena, &cancel);
-            let receipt = assemble_into(parts, &mut positions, &mut triangles, &mut workspace)
-                .map_err(|e| JsValue::from_str(&format!("scene geometry: {e:?}")))?;
-            positions.truncate(receipt.vertex_count);
-            triangles.truncate(receipt.triangle_count);
-            let mesh = Mesh {
-                positions,
-                triangles,
-                min: receipt.min,
-                max: receipt.max,
-            };
-            let mut source = vec![0u8; 6 + parts.len() * 25];
-            recipe_write(parts, &mut source)
-                .map_err(|e| JsValue::from_str(&format!("scene recipe: {e:?}")))?;
-            (
-                mesh,
-                source,
-                "application/vnd.qualia.scene-primitives;version=1",
-            )
-        };
-        // The scene is original authored data with no external reuse grant.
-        // This records that status; it does not alter the QualiaDB licence.
-        let provenance =
-            ProvenanceSidecar::new(source, mime, "All rights reserved (licence not assigned)");
-        // The current Qualia .10d SRD1 section preserves authored colour on
-        // each vertex. A deterministic palette reading gives broad surfaces
-        // gentle height/position variation without a game-specific format.
-        let terrain_surface = recipe.id.contains("terrain-");
-        let landscape = terrain_surface
-            || recipe.id.contains("ground")
-            || recipe.id.contains("grass")
-            || recipe.id.contains("hill")
-            || recipe.id.contains("bed");
-        let foliage = recipe.id.contains("crown")
-            || recipe.id.contains("canopy")
-            || recipe.id.contains("shoot")
-            || recipe.id.contains("flower");
-        let span_y = (mesh.max[1] - mesh.min[1]).max(0.01);
-        let reading: Vec<[f32; 4]> = mesh
-            .positions
-            .iter()
-            .map(|p| {
-                let elevation = ((p[1] - mesh.min[1]) / span_y).clamp(0.0, 1.0);
-                let ripple = (p[0] * 1.17 + p[2] * 0.63).sin() * 0.055
-                    + (p[0] * 0.31 - p[2] * 1.09).cos() * 0.035;
-                let gain = if landscape {
-                    0.94 + ripple * 1.5
-                } else {
-                    0.91 + elevation * 0.14 + ripple
-                };
-                let green = if terrain_surface {
-                    1.07 - elevation * 0.24
-                } else if foliage || landscape {
-                    1.04
-                } else {
-                    1.0
-                };
-                let red = if terrain_surface {
-                    1.0 + elevation * 0.18
-                } else {
-                    1.0
-                };
-                [
-                    (recipe.color[0] * gain * red).clamp(0.0, 1.0),
-                    (recipe.color[1] * gain * green).clamp(0.0, 1.0),
-                    (recipe.color[2] * gain).clamp(0.0, 1.0),
-                    recipe.color[3],
-                ]
-            })
-            .collect();
-        let bytes = compile_mesh_to_10d_with_surface_reading(&mesh, Some(&provenance), &reading)
-            .map_err(|e| JsValue::from_str(&e.to_string()))?;
-        // Family and factors are authored on each game recipe. The Qualia
-        // scene loader retains this record when it merges the .10d meshes.
-        let family = recipe.material_family;
-        let mut material = qualia_core_db::container_10d::MaterialRecord::legacy_default();
-        material.id = qualia_core_db::q_hash(&format!("urn:rolling-commons:material:{}", family.id));
-        material.base_color = [1.0; 4];
-        // The per-vertex SurfaceReading carries the authored recipe palette
-        // and ground variation. Keep that colour in the PBR path as well as
-        // retaining the shared roughness/metallic response in MAT4.
-        material.multiply_vertex_color = true;
-        material.metallic = family.metallic;
-        material.roughness = family.roughness;
-        material.wind_animated = family.id == "living-foliage";
-        if family.id == "framed-glass" {
-            material.opacity_mode = qualia_core_db::container_10d::OpacityMode::Blend;
-            material.base_color[3] = 0.44;
-            material.double_sided = true;
-            material.casts_shadow = false;
-        }
-        let ranges = [qualia_core_db::container_10d::SubmeshRange {
-            first_index: 0,
-            index_count: (mesh.triangles.len() * 3) as u32,
-            material_id: material.id,
-            semantic_id: qualia_core_db::q_hash(&recipe.id),
-        }];
-        let bytes = qualia_core_db::container_10d::attach_material_section(
-            &bytes,
-            &[material],
-            &ranges,
-            ranges[0].index_count,
-        )
-        .map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
-        let obj = js_sys::Object::new();
-        js_sys::Reflect::set(&obj, &"id".into(), &JsValue::from_str(&recipe.id))?;
-        js_sys::Reflect::set(
-            &obj,
-            &"renderRole".into(),
-            &JsValue::from_str(&recipe.render_role),
-        )?;
-        js_sys::Reflect::set(&obj, &"materialFamily".into(), &JsValue::from_str(family.id))?;
-        js_sys::Reflect::set(
-            &obj,
-            &"bytes".into(),
-            &js_sys::Uint8Array::from(bytes.as_slice()),
-        )?;
-        for (key, value) in ["r", "g", "b", "a"].iter().zip(recipe.color) {
-            js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
-        }
-        Ok((mesh, obj.into()))
-    }
-
+    use qualia_core_db::render::scene_primitives::portal_point;
+    use crate::asset_compile::compile_asset;
     let assets = js_sys::Array::new();
     let mut min = [f32::INFINITY; 3];
     let mut max = [f32::NEG_INFINITY; 3];
@@ -1130,6 +1023,8 @@ pub fn scene_build(
     let tensor = tensor_buffer_build(&nodes)?;
     let result = js_sys::Object::new();
     js_sys::Reflect::set(&result, &"assets".into(), &assets)?;
+    let textures = crate::material_library::texture_receipts()?;
+    js_sys::Reflect::set(&result, &"textures".into(), &JsValue::from(textures))?;
     js_sys::Reflect::set(
         &result,
         &"tensor".into(),
@@ -1447,6 +1342,16 @@ impl GamePortal {
         )
     }
 
+    /// Hydrate the dependencies before creating material bind groups.
+    pub fn load_scene_textured(&mut self, assets: &js_sys::Array, textures: &js_sys::Array)
+        -> Result<JsValue, JsValue> {
+        let loaded=crate::material_library::hydrate(&mut self.inner, textures)?;
+        let receipt=self.load_scene(assets)?;
+        js_sys::Reflect::set(&receipt,&"texture_bindings_requested".into(),&JsValue::from_f64(textures.length() as f64))?;
+        js_sys::Reflect::set(&receipt,&"texture_bindings_resident".into(),&JsValue::from_f64(loaded as f64))?;
+        Ok(receipt)
+    }
+
     /// Load one game-authored scene snapshot from its verified HMC pack. The
     /// manifest selects a bounded scene, while Qualia's bundle reader verifies
     /// every referenced entry before the portal sees it. If this optional path
@@ -1465,7 +1370,11 @@ impl GamePortal {
             scenes: Vec<Scene>,
             #[serde(default)]
             assets: Vec<SceneAsset>,
+            #[serde(default)]
+            textures: Vec<TextureAsset>,
         }
+        #[derive(serde::Deserialize)]
+        struct TextureAsset { file: String, mime: String, role: u8 }
         #[derive(serde::Deserialize)]
         struct Scene {
             name: String,
@@ -1521,6 +1430,22 @@ impl GamePortal {
         use qualia_core_db::bundle::BundleReader;
         let reader = BundleReader::parse(hmc_bytes)
             .map_err(|e| JsValue::from_str(&format!("HMC scene bundle: {e}")))?;
+        if manifest.textures.len() > 96 { return Err(JsValue::from_str("HMC texture count exceeds bound")); }
+        let mut resident_textures=0u32;
+        for texture in &manifest.textures {
+            let entry = reader.entry(&texture.file).ok_or_else(|| JsValue::from_str("HMC texture missing"))?;
+            let digest: [u8; 32] = entry.sha256.as_slice().try_into()
+                .map_err(|_| JsValue::from_str("HMC texture digest invalid"))?;
+            let resource = qualia_core_db::render::asset_package::resolve_hmc_texture_resource(&reader, &digest)
+                .map_err(|e| JsValue::from_str(&format!("HMC texture: {e:?}")))?;
+            if resource.mime_type != texture.mime || texture.file !=
+                qualia_core_db::render::asset_package::texture_hmc_key(&digest) {
+                return Err(JsValue::from_str("HMC texture metadata mismatch"));
+            }
+            if self.inner.load_texture_encoded(&digest, &texture.mime, resource.bytes, texture.role, 0.5)? {
+                resident_textures+=1;
+            }
+        }
         let assets = js_sys::Array::new();
         let mut water_positions = Vec::new();
         let mut water_indices = Vec::new();
@@ -1568,14 +1493,17 @@ impl GamePortal {
         } else {
             water_colour_sum.map(|channel| channel / water_surfaces as f32)
         };
-        load_scene_assets(
+        let receipt=load_scene_assets(
             &mut self.inner,
             &assets,
             water_positions,
             water_indices,
             water_surfaces,
             water_colour,
-        )
+        )?;
+        js_sys::Reflect::set(&receipt,&"texture_bindings_requested".into(),&JsValue::from_f64(manifest.textures.len() as f64))?;
+        js_sys::Reflect::set(&receipt,&"texture_bindings_resident".into(),&JsValue::from_f64(resident_textures as f64))?;
+        Ok(receipt)
     }
 
     /// Render tier: 0 = CPU fallback, 1 = WebGL2 fallback, 2 = WebGPU path.
@@ -1986,6 +1914,7 @@ pub struct GameSession {
     /// Accepted action ids in order — the replay tape.
     events: Vec<String>,
     seq: u32,
+    drive_verified:[bool;4],
 }
 
 /// A checked VibeScript program that owns the driving simulation rules.
@@ -1994,22 +1923,24 @@ pub struct GameSession {
 #[wasm_bindgen]
 pub struct GameDriveSimulation {
     program: vibe::Program,
+    policy_hash:u64,
 }
 
 #[wasm_bindgen]
 impl GameDriveSimulation {
     #[wasm_bindgen(constructor)]
     pub fn new(source: &str) -> Result<GameDriveSimulation, JsValue> {
+        if source.len()>131_072 {return Err(JsValue::from_str("drive policy exceeds 128 KiB bound"));}
         let program = vibe::load_program(source)
             .map_err(|error| JsValue::from_str(&format!("VibeScript drive module: {error}")))?;
-        Ok(GameDriveSimulation { program })
+        Ok(GameDriveSimulation { program,policy_hash:qualia_core_db::q_hash(source) })
     }
 
     /// Return the initial driving state and handling profile authored by the
     /// loaded VibeScript module. The browser maps this record to HUD fields;
     /// route, rig and thermal defaults stay with the simulation rules.
     pub fn setup(&self, rig_id: u8) -> JsValue {
-        let mut host = vibe::LocalHost::default();
+        let mut host = qualia_core_db::poet_host::PoetSnapshot::default();
         let mut env = vibe::Env::default();
         match vibe::eval_function(
             &self.program,
@@ -2030,11 +1961,21 @@ impl GameDriveSimulation {
         if input_json.len() > 16_384 {
             return err_obj("VibeScript drive input", "record exceeds the 16 KiB bound");
         }
-        let input: serde_json::Value = match serde_json::from_str(input_json) {
+        let mut input: serde_json::Value = match serde_json::from_str(input_json) {
             Ok(value) => value,
             Err(error) => return err_obj("VibeScript drive input", &error.to_string()),
         };
-        let mut host = vibe::LocalHost::default();
+        // Older callers predate workshop integration. Their unchanged rig is
+        // roadworthy with baseline cooling; current callers submit saved state.
+        if let Some(record)=input.as_object_mut() {
+            record.entry("rig_roadworthy").or_insert(serde_json::Value::Bool(true));
+            record.entry("cooling_efficiency").or_insert(serde_json::json!(1.0));
+            record.entry("wheel_angle").or_insert(serde_json::json!(0.0));
+            let heading=record.get("heading").cloned().unwrap_or(serde_json::json!(0.0));
+            record.entry("trailer_heading").or_insert(heading);
+            record.entry("trailer_wheel_angle").or_insert(serde_json::json!(0.0));
+        }
+        let mut host = qualia_core_db::poet_host::PoetSnapshot::default();
         let mut env = vibe::Env::default();
         match vibe::eval_function(
             &self.program,
@@ -2108,6 +2049,7 @@ impl GameSession {
             actions,
             events: events.into_iter().map(|(_, id)| id).collect(),
             seq,
+            drive_verified:[false;4],
         })
     }
 
@@ -2222,6 +2164,7 @@ impl GameSession {
             .push(format!("ev:e{seq} ev:action \"{action_id}\" ."));
         self.lines.push(format!("ev:e{seq} ev:seq {seq} ."));
         self.events.push(action.id.clone());
+        self.drive_verified=[false;4];
         let mut o = js_sys::Object::new();
         set(&mut o, "ok", JsValue::TRUE);
         set(&mut o, "action", JsValue::from_str(&action.id));

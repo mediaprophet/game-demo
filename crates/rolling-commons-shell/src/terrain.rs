@@ -39,19 +39,49 @@ pub fn settlement_patch(center_x: f32) -> Mesh {
     build_patch(center_x, 0.0, 33, |x, z| settlement_height(center_x, x, z))
 }
 
+/// A graded landform under each technical tile replaces the vertical box
+/// walls. The apron overlaps adjoining land below the playable heightfield,
+/// leaving the settlement and ridge samples authoritative for movement.
+pub fn apron(center_x: f32, center_z: f32) -> Mesh {
+    build_patch_sized(center_x, center_z, 41, 16.0, |x, z| {
+        let dx = (x - center_x).abs();
+        let dz = (z - center_z).abs();
+        let edge = ((dx.max(dz) - 6.6) / 1.4).clamp(0.0, 1.0);
+        let eased = edge * edge * (3.0 - 2.0 * edge);
+        let underlying = if center_z < -7.0 {
+            height(x, z) - 0.12
+        } else {
+            settlement_height(center_x, x, z) - 0.12
+        };
+        let erosion = 0.035 * (x * 1.8 + z * 0.7).sin()
+            + 0.02 * (z * 2.1 - x * 0.5).cos();
+        underlying * (1.0 - eased) + (-0.64 + erosion) * eased
+    })
+}
+
 fn build_patch(
     center_x: f32,
     center_z: f32,
     side: usize,
     sample: impl Fn(f32, f32) -> f32 + Copy,
 ) -> Mesh {
-    let step = SIZE / (side - 1) as f32;
+    build_patch_sized(center_x, center_z, side, SIZE, sample)
+}
+
+fn build_patch_sized(
+    center_x: f32,
+    center_z: f32,
+    side: usize,
+    size: f32,
+    sample: impl Fn(f32, f32) -> f32 + Copy,
+) -> Mesh {
+    let step = size / (side - 1) as f32;
     let heights: Vec<f32> = (0..side)
         .flat_map(|row| {
             (0..side).map(move |column| {
                 sample(
-                    center_x - SIZE * 0.5 + column as f32 * step,
-                    center_z - SIZE * 0.5 + row as f32 * step,
+                    center_x - size * 0.5 + column as f32 * step,
+                    center_z - size * 0.5 + row as f32 * step,
                 )
             })
         })

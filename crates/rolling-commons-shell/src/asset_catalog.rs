@@ -24,6 +24,41 @@ pub enum ParametricRecipe {
     SettlementPatch {
         center_x: f32,
     },
+    TerrainApron {
+        center_x: f32,
+        center_z: f32,
+    },
+    /// Authored model placement, evaluated by Qualia's mesh transform API.
+    /// Pivot and target are explicit so scaling a resident does not move its
+    /// saved site or turn a model part into a new semantic identity.
+    Transform {
+        source: Box<ParametricRecipe>,
+        pivot: [f32; 3],
+        target: [f32; 3],
+        scale: [f32; 3],
+    },
+    /// Authored orientation through Qualia's public mesh transform surface.
+    Yawed {
+        source: Box<ParametricRecipe>,
+        pivot: [f32; 3],
+        degrees: f32,
+        target: [f32; 3],
+    },
+    /// Authored three-axis placement through Qualia's public transform surface.
+    Oriented {
+        source: Box<ParametricRecipe>,
+        pivot: [f32;3],
+        target: [f32;3],
+        degrees: [f32;3],
+    },
+    /// Station-authored coachwork compiled by Qualia's closed convex loft.
+    LoftedBody {
+        sections: Vec<Vec<[f32; 3]>>,
+    },
+    WheelClearancePanel {
+        center_x:f32,thickness:f32,z:[f32;2],bottom:f32,top:[f32;2],
+        wheel_y:f32,clearance_radius:f32,axles:Vec<f32>,segments:u16,
+    },
     Ribbon {
         control: &'static [[f32; 2]],
         width: f32,
@@ -193,9 +228,8 @@ fn limb_segment(
     }
 }
 
-/// Elbow/hand offsets for six readable, static work poses around the grounds.
-/// Character movement clips can later animate the same stable limb assets.
-fn community_work_pose(index: usize) -> ([f32; 3], [f32; 3], [f32; 3], [f32; 3]) {
+/// Authored elbow/hand offsets shared by resident bind geometry and rigs.
+pub(crate) fn community_work_pose(index: usize) -> ([f32; 3], [f32; 3], [f32; 3], [f32; 3]) {
     match index {
         // Planting: one hand stays close while the other reaches to a bed.
         0 => ([-0.36, 0.70, 0.02], [-0.39, 0.49, 0.12], [0.36, 0.71, 0.08], [0.27, 0.48, 0.34]),
@@ -267,15 +301,15 @@ fn tapered_limb_mesh(limb: LimbSegment, radial_segments: usize) -> Result<Mesh, 
     ];
     let length = (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]).sqrt();
     if !length.is_finite()
-        || length < 0.025
+        || length < 0.005
         || !limb.start_radius.is_finite()
         || !limb.end_radius.is_finite()
         || limb.start_radius <= 0.0
         || limb.end_radius <= 0.0
-        || limb.start_radius > 0.25
-        || limb.end_radius > 0.25
+        || limb.start_radius > 2.0
+        || limb.end_radius > 2.0
     {
-        return Err("invalid tapered limb dimensions".into());
+        return Err(format!("invalid tapered limb dimensions: length={length}, start={:?}, end={:?}, r0={}, r1={}", limb.start, limb.end, limb.start_radius, limb.end_radius));
     }
 
     let half = length * 0.5;
@@ -355,6 +389,71 @@ impl ParametricRecipe {
             }
             Self::SettlementPatch { center_x } => {
                 ([0.0, 0.0, 0.0], crate::terrain::settlement_patch(*center_x))
+            }
+            Self::TerrainApron { center_x, center_z } => {
+                ([0.0; 3], crate::terrain::apron(*center_x, *center_z))
+            }
+            Self::Transform { source, pivot, target, scale } => {
+                if pivot.iter().chain(target.iter()).chain(scale.iter()).any(|v| !v.is_finite())
+                    || scale.iter().any(|v| *v <= 0.0 || *v > 64.0)
+                {
+                    return Err("invalid authored model transform".into());
+                }
+                let mesh = source.compile()?;
+                let local = authoring::transform_mesh(&mesh, &authoring::translation(
+                    -pivot[0] as f64, -pivot[1] as f64, -pivot[2] as f64));
+                let scaled = authoring::transform_mesh(&local,
+                    &authoring::scale(scale[0] as f64, scale[1] as f64, scale[2] as f64));
+                return Ok(authoring::transform_mesh(&scaled, &authoring::translation(
+                    target[0] as f64, target[1] as f64, target[2] as f64)));
+            }
+            Self::WheelClearancePanel{center_x,thickness,z,bottom,top,wheel_y,clearance_radius,axles,segments}=>{
+                use qualia_core_db::specialized_libs::computational_geometry::wheel_panel::{WheelPanel,wheel_clearance_panel_into};
+                let count=(*segments as usize+1).min(193);
+                let mut positions=vec![[0.0;3];count*10];let mut triangles=vec![[0;3];count*8];
+                let receipt=wheel_clearance_panel_into(WheelPanel{center_x:*center_x,thickness:*thickness,z:*z,
+                    bottom:*bottom,top:*top,wheel_y:*wheel_y,clearance_radius:*clearance_radius,axles,segments:*segments},
+                    &mut positions,&mut triangles).map_err(|e|e.to_string())?;
+                positions.truncate(receipt.vertex_count);triangles.truncate(receipt.triangle_count);
+                return Ok(Mesh{positions,triangles,min:receipt.min,max:receipt.max});
+            }
+            Self::LoftedBody { sections } => {
+                let count = sections.first().map_or(0, Vec::len);
+                if !(2..=256).contains(&sections.len()) || !(3..=128).contains(&count) {
+                    return Err("coachwork exceeds bounded loft topology".into());
+                }
+                let mut positions = vec![[0.0; 3]; sections.len() * (count + 1) * 2];
+                let mut triangles = vec![[0; 3]; sections.len() * count * 2];
+                let receipt = authoring::loft_convex_sections_into(sections, &mut positions, &mut triangles)
+                    .map_err(|e| e.to_string())?;
+                positions.truncate(receipt.vertex_count);
+                triangles.truncate(receipt.triangle_count);
+                return Ok(Mesh { positions, triangles, min: receipt.min, max: receipt.max });
+            }
+            Self::Oriented {source,pivot,target,degrees}=>{
+                if pivot.iter().chain(target.iter()).chain(degrees.iter()).any(|value|!value.is_finite()) {
+                    return Err("invalid authored orientation".into());
+                }
+                let mesh=source.compile()?;
+                let local=authoring::transform_mesh(&mesh,&authoring::translation(
+                    -pivot[0] as f64,-pivot[1] as f64,-pivot[2] as f64));
+                let yaw=authoring::transform_mesh(&local,&authoring::rotation_y(degrees[1].to_radians() as f64));
+                let roll=authoring::transform_mesh(&yaw,&authoring::rotation_z(degrees[2].to_radians() as f64));
+                let pitch=authoring::transform_mesh(&roll,&authoring::rotation_x(degrees[0].to_radians() as f64));
+                return Ok(authoring::transform_mesh(&pitch,&authoring::translation(
+                    target[0] as f64,target[1] as f64,target[2] as f64)));
+            }
+            Self::Yawed { source, pivot, degrees, target } => {
+                if !degrees.is_finite() || pivot.iter().chain(target.iter()).any(|v| !v.is_finite()) {
+                    return Err("invalid authored model orientation".into());
+                }
+                let mesh = source.compile()?;
+                let local = authoring::transform_mesh(&mesh, &authoring::translation(
+                    -pivot[0] as f64, -pivot[1] as f64, -pivot[2] as f64));
+                let rotated = authoring::transform_mesh(&local,
+                    &authoring::rotation_y((*degrees as f64).to_radians()));
+                return Ok(authoring::transform_mesh(&rotated, &authoring::translation(
+                    target[0] as f64, target[1] as f64, target[2] as f64)));
             }
             Self::Ribbon {
                 control,
@@ -548,8 +647,8 @@ impl ParametricRecipe {
                 limbs,
                 radial_segments,
             } => {
-                if limbs.is_empty() || limbs.len() > 24 {
-                    return Err("limb cluster must contain 1–24 segments".into());
+                if limbs.is_empty() || limbs.len() > 64 {
+                    return Err(format!("limb cluster must contain 1–64 segments (had {})", limbs.len()));
                 }
                 let sides = (*radial_segments).clamp(8, 24);
                 let mut positions = Vec::with_capacity(limbs.len() * sides * 4);
@@ -1005,11 +1104,11 @@ pub struct MaterialFamily {
     pub roughness: f32,
 }
 
-pub const SOLAR_GLASS: MaterialFamily = MaterialFamily { id: "solar-glass", metallic: 0.46, roughness: 0.23 };
+pub const SOLAR_GLASS: MaterialFamily = MaterialFamily { id: "solar-glass", metallic: 0.0, roughness: 0.23 };
 pub const RUBBER: MaterialFamily = MaterialFamily { id: "rubber", metallic: 0.0, roughness: 0.84 };
-pub const FRAMED_GLASS: MaterialFamily = MaterialFamily { id: "framed-glass", metallic: 0.08, roughness: 0.24 };
+pub const FRAMED_GLASS: MaterialFamily = MaterialFamily { id: "framed-glass", metallic: 0.0, roughness: 0.24 };
 pub const GALVANISED_METAL: MaterialFamily = MaterialFamily { id: "galvanised-metal", metallic: 0.62, roughness: 0.34 };
-pub const WEATHERED_TIMBER: MaterialFamily = MaterialFamily { id: "weathered-timber", metallic: 0.02, roughness: 0.78 };
+pub const WEATHERED_TIMBER: MaterialFamily = MaterialFamily { id: "weathered-timber", metallic: 0.0, roughness: 0.78 };
 pub const LIVING_FOLIAGE: MaterialFamily = MaterialFamily { id: "living-foliage", metallic: 0.0, roughness: 0.88 };
 pub const SOIL_AND_GRAVEL: MaterialFamily = MaterialFamily { id: "soil-and-gravel", metallic: 0.0, roughness: 0.96 };
 pub const FUR_AND_HIDE: MaterialFamily = MaterialFamily { id: "fur-and-hide", metallic: 0.0, roughness: 0.91 };
@@ -1048,7 +1147,13 @@ pub(crate) fn material_family_for(id: &str) -> MaterialFamily {
         WEATHERED_TIMBER
     } else if id.contains("/flora/") {
         LIVING_FOLIAGE
-    } else if has(&["shade", "awning", "canvas", "tent", "canopy"])
+    } else if has(&["trunk", "stem", "branch", "bark", "fork"]) {
+        WEATHERED_TIMBER
+    } else if has(&["foliage", "crown", "leaf", "spray"])
+        || component.starts_with("canopy-")
+    {
+        LIVING_FOLIAGE
+    } else if has(&["shade", "awning", "canvas", "tent"])
         && !has(&["frame", "metal"])
     {
         SHADE_CANVAS
@@ -1103,7 +1208,7 @@ pub struct AssetRecipe {
     pub render_role: String,
 }
 
-fn block(center: [f32; 3], size: [f32; 3]) -> Primitive {
+pub(crate) fn block(center: [f32; 3], size: [f32; 3]) -> Primitive {
     Primitive::Box { center, size }
 }
 
@@ -1111,7 +1216,7 @@ fn roof(center: [f32; 3], size: [f32; 3]) -> Primitive {
     Primitive::Roof { center, size }
 }
 
-fn asset(id: &str, color: [f32; 4], parts: Vec<Primitive>) -> AssetRecipe {
+pub(crate) fn asset(id: &str, color: [f32; 4], parts: Vec<Primitive>) -> AssetRecipe {
     asset_with_family(id, color, parts, material_family_for(id))
 }
 
@@ -1181,10 +1286,10 @@ pub fn kestrel_flats(
         [0.0, 1.36],
     ];
     let mut scene = Vec::with_capacity(160);
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/kestrel-earth-skirt",
-        [0.46, 0.31, 0.24, 1.0],
-        vec![block([0.0, -0.49, 0.0], [14.18, 0.38, 14.18])],
+        [0.51, 0.52, 0.33, 1.0],
+        ParametricRecipe::TerrainApron { center_x: 0.0, center_z: 0.0 },
     ));
     scene.push(parametric(
         "rc:asset/ground",
@@ -1204,161 +1309,14 @@ pub fn kestrel_flats(
         "rc:asset/main-road-workshop-spur",
         [0.77, 0.56, 0.39, 1.0],
         ParametricRecipe::Ribbon {
-            control: &[[1.7, -4.35], [1.38, -2.60], [1.88, -0.45], [1.38, 0.42]],
+            control: &[[0.84, -4.35], [0.72, -2.60], [0.80, -0.45], [0.80, 0.42]],
             width: 1.46,
             elevation: 0.048,
         },
     ));
-    // The camp is a home on wheels: a rounded pod body on a chassis with
-    // wheels, hitch and awning. Shelter upgrades stretch the pod and add a
-    // canvas annex, keeping the site's original pick identity.
-    const HOME_PROFILE: &[[f32; 2]] = &[
-        [0.0, 0.0],
-        [0.55, 0.0],
-        [0.83, 0.09],
-        [0.85, 0.30],
-        [0.85, 0.62],
-        [0.78, 0.86],
-        [0.52, 1.06],
-        [0.0, 1.13],
-    ];
-    const HOME_BAND_PROFILE: &[[f32; 2]] =
-        &[[0.845, 0.20], [0.912, 0.26], [0.912, 0.32], [0.845, 0.36]];
-    const ANNEX_PROFILE: &[[f32; 2]] = &[
-        [0.0, 0.0],
-        [0.42, 0.0],
-        [0.62, 0.08],
-        [0.64, 0.50],
-        [0.50, 0.78],
-        [0.0, 0.90],
-    ];
-    let home_stretch_x = 1.95 + upgrades.min(4) as f32 * 0.09;
-    scene.push(parametric(
-        "rc:asset/camp-shelter",
-        [0.96, 0.92, 0.85, 1.0],
-        ParametricRecipe::Pod {
-            center: [-3.05, 0.52, 2.7],
-            profile: HOME_PROFILE,
-            segments: 18,
-            stretch: [home_stretch_x, 1.42, 1.0],
-        },
-    ));
-    scene.push(parametric(
-        "rc:asset/camp-shelter-band",
-        [0.87, 0.44, 0.20, 1.0],
-        ParametricRecipe::Pod {
-            center: [-3.05, 0.52, 2.7],
-            profile: HOME_BAND_PROFILE,
-            segments: 18,
-            stretch: [home_stretch_x, 1.42, 1.0],
-        },
-    ));
-    let home_half_length = 0.85 * home_stretch_x;
-    scene.push(asset(
-        "rc:asset/camp-shelter-chassis",
-        [0.24, 0.23, 0.22, 1.0],
-        vec![
-            block(
-                [-3.05, 0.40, 2.7],
-                [home_half_length * 2.0 + 0.14, 0.14, 1.06],
-            ),
-            block(
-                [-3.05, 0.52, 2.7],
-                [home_half_length * 2.0 + 0.04, 0.06, 0.9],
-            ),
-        ],
-    ));
-    for (id, z) in [
-        ("rc:asset/camp-shelter-wheel-port", 2.7 - 0.72),
-        ("rc:asset/camp-shelter-wheel-starboard", 2.7 + 0.72),
-    ] {
-        scene.push(parametric(
-            id,
-            [0.12, 0.11, 0.11, 1.0],
-            ParametricRecipe::Wheel {
-                center: [-3.55, 0.30, z],
-                radius: 0.30,
-                width: 0.20,
-                segments: 14,
-            },
-        ));
-    }
-    scene.push(asset(
-        "rc:asset/camp-shelter-hitch",
-        [0.42, 0.41, 0.40, 1.0],
-        vec![
-            block(
-                [-3.05 + home_half_length + 0.05, 0.30, 2.7],
-                [0.75, 0.08, 0.08],
-            ),
-            block(
-                [-3.05 + home_half_length + 0.42, 0.26, 2.7],
-                [0.13, 0.16, 0.13],
-            ),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/camp-shelter-windows",
-        [0.30, 0.43, 0.53, 1.0],
-        vec![
-            block([-3.45, 1.12, 3.56], [0.48, 0.34, 0.05]),
-            block([-2.55, 1.12, 3.56], [0.48, 0.34, 0.05]),
-            block([-3.45, 1.12, 1.84], [0.48, 0.34, 0.05]),
-            block([-2.55, 1.12, 1.84], [0.48, 0.34, 0.05]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/camp-shelter-door",
-        [0.85, 0.40, 0.22, 1.0],
-        vec![block(
-            [-3.05 + home_half_length - 0.03, 0.82, 2.7],
-            [0.06, 0.72, 0.44],
-        )],
-    ));
-    scene.push(parametric(
-        "rc:asset/camp-shelter-awning",
-        [0.97, 0.93, 0.82, 1.0],
-        ParametricRecipe::TiltedBox {
-            center: [-3.05 + home_half_length + 0.02, 1.62, 2.7],
-            size: [0.66, 0.05, 1.42],
-            pitch_deg: 0.0,
-            roll_deg: -16.0,
-            yaw_deg: 0.0,
-        },
-    ));
-    for (id, z) in [
-        ("rc:asset/camp-shelter-awning-post-a", 2.7 - 0.58),
-        ("rc:asset/camp-shelter-awning-post-b", 2.7 + 0.58),
-    ] {
-        scene.push(parametric(
-            id,
-            [0.40, 0.39, 0.38, 1.0],
-            ParametricRecipe::Cylinder {
-                center: [-3.05 + home_half_length + 0.24, 0.78, z],
-                radius: 0.035,
-                height: 1.56,
-                segments: 8,
-            },
-        ));
-    }
-    if upgrades > 0 {
-        let annex_stretch_x = 1.15 + upgrades.min(3) as f32 * 0.07;
-        let annex_half_length = 0.64 * annex_stretch_x;
-        scene.push(parametric(
-            "rc:asset/camp-shelter-annex",
-            [0.65, 0.67, 0.49, 1.0],
-            ParametricRecipe::Pod {
-                center: [
-                    -3.05 - home_half_length - annex_half_length + 0.16,
-                    0.42,
-                    2.7,
-                ],
-                profile: ANNEX_PROFILE,
-                segments: 14,
-                stretch: [annex_stretch_x, 1.35, 1.0],
-            },
-        ));
-    }
+    // Human-scale caravan coachwork, chassis, glazing and canvas annex.
+    // Shelter upgrades retain the site's original pick and action identities.
+    scene.extend(crate::camp_home::assets(upgrades));
     scene.push(asset(
         "rc:asset/camp-platform",
         [0.62, 0.39, 0.25, 1.0],
@@ -1433,350 +1391,7 @@ pub fn kestrel_flats(
             parts: SHADE_PANEL_PARTS.to_vec(),
         },
     ));
-    scene.push(asset(
-        "rc:asset/workshop",
-        if online {
-            [0.99, 0.77, 0.40, 1.0]
-        } else {
-            [0.93, 0.65, 0.41, 1.0]
-        },
-        vec![
-            // Compose the shed shell from walls around a usable interior.
-            // The former single solid box read as a blockout at ground level.
-            block([3.2, 0.78, -3.04], [2.42, 1.50, 0.16]),
-            block([2.04, 0.78, -2.24], [0.16, 1.50, 1.60]),
-            block([4.36, 0.78, -2.24], [0.16, 1.50, 1.60]),
-            block([2.54, 0.76, -1.43], [0.84, 1.46, 0.16]),
-            block([3.98, 0.76, -1.43], [0.88, 1.46, 0.16]),
-            block([3.22, 1.51, -1.43], [0.62, 0.12, 0.17]),
-            block([4.62, 0.49, -2.47], [0.9, 0.98, 1.15]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-floor",
-        [0.47, 0.45, 0.39, 1.0],
-        vec![
-            block([3.2, 0.035, -2.20], [2.24, 0.07, 1.45]),
-            block([3.2, 0.055, -1.38], [1.18, 0.11, 0.30]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-roof",
-        [0.72, 0.34, 0.25, 1.0],
-        vec![
-            roof([3.2, 1.6, -2.2], [2.75, 0.62, 2.12]),
-            roof([4.62, 0.98, -2.47], [1.18, 0.38, 1.42]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-fascia",
-        [0.27, 0.42, 0.46, 1.0],
-        vec![
-            block([1.96, 0.81, -1.17], [0.12, 1.62, 0.13]),
-            block([4.44, 0.81, -1.17], [0.12, 1.62, 0.13]),
-            block([2.43, 1.25, -1.18], [0.48, 0.08, 0.11]),
-            block([3.97, 1.25, -1.18], [0.48, 0.08, 0.11]),
-            block([3.2, 1.35, -1.17], [1.3, 0.11, 0.12]),
-        ],
-    ));
-    scene.push(parametric(
-        "rc:asset/workshop-chimney",
-        [0.69, 0.34, 0.28, 1.0],
-        ParametricRecipe::Cylinder {
-            center: [2.34, 2.02, -2.64],
-            radius: 0.19,
-            height: 1.08,
-            segments: 12,
-        },
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-chimney-cap",
-        [0.83, 0.83, 0.80, 1.0],
-        vec![block([2.34, 2.60, -2.64], [0.46, 0.09, 0.46])],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-window-glazing",
-        [0.22, 0.52, 0.60, 1.0],
-        vec![block([2.53, 1.00, -1.328], [0.43, 0.44, 0.035])],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-window-frame",
-        [0.27, 0.36, 0.37, 1.0],
-        vec![
-            // Framed front window beside the entry.
-            block([2.53, 1.00, -1.302], [0.035, 0.50, 0.055]),
-            block([2.53, 1.00, -1.302], [0.50, 0.035, 0.055]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-entry-step",
-        [0.72, 0.60, 0.45, 1.0],
-        vec![block([3.20, 0.06, -1.18], [1.18, 0.12, 0.42])],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-service-details",
-        [0.37, 0.43, 0.40, 1.0],
-        vec![
-            // Vent slots, switchboard face, cable conduit, and a downpipe make
-            // the energy workshop legible as a working community facility.
-            block([4.08, 1.19, -1.317], [0.34, 0.07, 0.035]),
-            block([4.08, 1.06, -1.317], [0.34, 0.07, 0.035]),
-            block([4.08, 0.93, -1.317], [0.34, 0.07, 0.035]),
-            block([4.13, 0.73, -1.306], [0.24, 0.27, 0.05]),
-            block([4.31, 0.82, -1.23], [0.035, 0.50, 0.04]),
-            block([2.02, 0.60, -2.94], [0.055, 1.15, 0.075]),
-        ],
-    ));
-    scene.push(parametric(
-        "rc:asset/workshop-folding-timber-doors",
-        [0.52, 0.37, 0.23, 1.0],
-        ParametricRecipe::PanelGroup {
-            center: [3.2, 0.68, -1.29],
-            parts: vec![
-                // Leave the repair bay open; the folded leaves sit by the
-                // jambs instead of closing its only visible entrance.
-                PanelPart {
-                    offset: [-0.30, 0.0, 0.0],
-                    size: [0.12, 1.30, 0.06],
-                    pitch_deg: 0.0,
-                    roll_deg: 0.0,
-                    yaw_deg: -64.0,
-                },
-                PanelPart {
-                    offset: [0.30, 0.0, 0.0],
-                    size: [0.12, 1.30, 0.06],
-                    pitch_deg: 0.0,
-                    roll_deg: 0.0,
-                    yaw_deg: 64.0,
-                },
-            ],
-        },
-    ));
-    // An open, two-bay repair canopy gives the hub the working depth seen in
-    // the Community Grounds reference. These are compiled as ordinary
-    // game-owned recipes through the existing Qualia mesh path.
-    scene.push(asset(
-        "rc:asset/workshop-bay-frame",
-        [0.34, 0.39, 0.36, 1.0],
-        vec![
-            block([2.03, 0.88, -0.38], [0.12, 1.72, 0.13]),
-            block([4.37, 0.88, -0.38], [0.12, 1.72, 0.13]),
-            block([2.03, 0.88, -1.28], [0.12, 1.72, 0.13]),
-            block([4.37, 0.88, -1.28], [0.12, 1.72, 0.13]),
-            block([3.20, 1.70, -0.38], [2.42, 0.13, 0.14]),
-            block([3.20, 1.84, -1.28], [2.42, 0.13, 0.14]),
-            block([3.20, 1.54, 0.04], [2.42, 0.11, 0.13]),
-            block([3.20, 1.76, -0.79], [2.42, 0.08, 0.09]),
-        ],
-    ));
-    for (bay, z) in [("outer", -0.38), ("inner", -1.28)] {
-        for (side, x, direction) in [
-            ("left", 2.03, 1.0_f32),
-            ("right", 4.37, -1.0_f32),
-        ] {
-            scene.push(parametric(
-                &format!("rc:asset/workshop-timber-knee-brace-{bay}-{side}"),
-                [0.45, 0.34, 0.23, 1.0],
-                ParametricRecipe::Stem {
-                    start: [x, 0.98, z],
-                    end: [x + direction * 0.38, 1.59, z],
-                    radius: 0.055,
-                    segments: 8,
-                },
-            ));
-        }
-    }
-    scene.push(parametric(
-        "rc:asset/workshop-bay-canopy",
-        [0.84, 0.79, 0.67, 1.0],
-        ParametricRecipe::PanelGroup {
-            center: [3.20, 1.78, -0.78],
-            parts: vec![
-                PanelPart {
-                    offset: [-0.88, 0.035, 0.0],
-                    size: [0.79, 0.09, 1.62],
-                    pitch_deg: -7.0,
-                    roll_deg: 0.0,
-                    yaw_deg: 0.0,
-                },
-                PanelPart {
-                    offset: [0.0, 0.035, 0.0],
-                    size: [0.79, 0.09, 1.62],
-                    pitch_deg: -7.0,
-                    roll_deg: 0.0,
-                    yaw_deg: 0.0,
-                },
-                PanelPart {
-                    offset: [0.88, 0.035, 0.0],
-                    size: [0.79, 0.09, 1.62],
-                    pitch_deg: -7.0,
-                    roll_deg: 0.0,
-                    yaw_deg: 0.0,
-                },
-            ],
-        },
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-benches",
-        [0.56, 0.38, 0.24, 1.0],
-        vec![
-            block([2.63, 0.73, -0.91], [0.92, 0.12, 0.38]),
-            block([2.27, 0.39, -0.91], [0.08, 0.64, 0.08]),
-            block([2.99, 0.39, -0.91], [0.08, 0.64, 0.08]),
-            block([3.78, 0.73, -0.91], [0.92, 0.12, 0.38]),
-            block([3.42, 0.39, -0.91], [0.08, 0.64, 0.08]),
-            block([4.14, 0.39, -0.91], [0.08, 0.64, 0.08]),
-            block([2.63, 0.91, -1.19], [0.64, 0.18, 0.12]),
-            block([3.78, 0.91, -1.19], [0.64, 0.18, 0.12]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-tool-wall",
-        [0.44, 0.48, 0.44, 1.0],
-        vec![
-            block([3.21, 1.12, -1.19], [0.95, 0.45, 0.06]),
-            block([2.88, 1.18, -1.105], [0.055, 0.26, 0.04]),
-            block([3.08, 1.21, -1.105], [0.055, 0.31, 0.04]),
-            block([3.30, 1.17, -1.105], [0.055, 0.23, 0.04]),
-            block([3.51, 1.22, -1.105], [0.055, 0.30, 0.04]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-service-shelf",
-        [0.39, 0.43, 0.42, 1.0],
-        vec![
-            block([4.14, 0.68, -2.65], [0.82, 0.09, 0.45]),
-            block([4.14, 1.15, -2.65], [0.82, 0.09, 0.45]),
-            block([3.76, 0.91, -2.65], [0.07, 0.58, 0.08]),
-            block([4.52, 0.91, -2.65], [0.07, 0.58, 0.08]),
-            block([3.90, 0.84, -2.55], [0.18, 0.20, 0.17]),
-            block([4.18, 0.84, -2.56], [0.18, 0.20, 0.18]),
-            block([4.38, 1.31, -2.55], [0.22, 0.20, 0.17]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-vice-and-jigs",
-        [0.25, 0.28, 0.27, 1.0],
-        vec![
-            block([2.31, 0.82, -0.91], [0.25, 0.07, 0.17]),
-            block([2.31, 0.89, -0.91], [0.22, 0.075, 0.12]),
-            block([2.31, 0.96, -0.91], [0.25, 0.04, 0.10]),
-            block([2.31, 0.82, -0.91], [0.06, 0.16, 0.06]),
-            block([2.31, 0.78, -0.91], [0.31, 0.025, 0.025]),
-            block([2.16, 0.78, -0.91], [0.025, 0.06, 0.025]),
-            block([2.48, 0.78, -0.91], [0.025, 0.06, 0.025]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-drill-press",
-        [0.39, 0.42, 0.41, 1.0],
-        vec![
-            block([3.95, 0.81, -0.91], [0.38, 0.06, 0.30]),
-            block([3.95, 0.94, -0.91], [0.30, 0.035, 0.22]),
-            block([3.95, 1.16, -0.91], [0.07, 0.46, 0.07]),
-            block([4.02, 1.34, -0.91], [0.28, 0.07, 0.09]),
-            block([4.12, 1.24, -0.91], [0.06, 0.20, 0.06]),
-            block([3.95, 1.02, -0.91], [0.035, 0.16, 0.035]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-spares-crates",
-        [0.60, 0.39, 0.20, 1.0],
-        vec![
-            block([2.34, 0.39, -2.63], [0.46, 0.43, 0.40]),
-            block([2.34, 0.64, -2.63], [0.50, 0.05, 0.43]),
-            block([2.34, 0.39, -2.40], [0.38, 0.30, 0.035]),
-            block([2.34, 0.39, -2.86], [0.38, 0.30, 0.035]),
-        ],
-    ));
-    if panels > 0 {
-        // Mounted on the workshop's gable slopes: each installed part adds a
-        // framed panel to the south row, then the north row, with rails and
-        // cell faces pitched to the roof plane.
-        let mut array_parts = Vec::new();
-        let mut cell_parts = Vec::new();
-        let mut grid_parts = Vec::new();
-        for i in 0..panels.min(8) {
-            let south = i < 4;
-            let (pitch, z_panel, z_cell) = if south {
-                (30.0_f32, 0.53_f32, 0.556_f32)
-            } else {
-                (-30.0, -0.53, -0.556)
-            };
-            let x = -0.78 + (i % 4) as f32 * 0.62;
-            array_parts.push(PanelPart {
-                offset: [x, 0.0, z_panel],
-                size: [0.56, 0.05, 1.02],
-                pitch_deg: pitch,
-                roll_deg: 0.0,
-                yaw_deg: 0.0,
-            });
-            array_parts.push(PanelPart {
-                offset: [x, -0.047, z_panel * 0.957],
-                size: [0.58, 0.05, 1.10],
-                pitch_deg: pitch,
-                roll_deg: 0.0,
-                yaw_deg: 0.0,
-            });
-            for row in 0..4 {
-                for column in 0..3 {
-                    cell_parts.push(PanelPart {
-                        offset: [
-                            x + (column as f32 - 1.0) * 0.145,
-                            0.052,
-                            z_cell + (row as f32 - 1.5) * 0.225,
-                        ],
-                        size: [0.134, 0.02, 0.211],
-                        pitch_deg: pitch,
-                        roll_deg: 0.0,
-                        yaw_deg: 0.0,
-                    });
-                }
-            }
-            for seam in 0..4 {
-                grid_parts.push(PanelPart {
-                    offset: [x + (seam as f32 - 1.5) * 0.145, 0.071, z_cell],
-                    size: [0.018, 0.015, 0.94],
-                    pitch_deg: pitch,
-                    roll_deg: 0.0,
-                    yaw_deg: 0.0,
-                });
-            }
-            for seam in 0..5 {
-                grid_parts.push(PanelPart {
-                    offset: [x, 0.071, z_cell + (seam as f32 - 2.0) * 0.188],
-                    size: [0.47, 0.015, 0.018],
-                    pitch_deg: pitch,
-                    roll_deg: 0.0,
-                    yaw_deg: 0.0,
-                });
-            }
-        }
-        scene.push(parametric(
-            "rc:asset/solar-array",
-            [0.10, 0.27, 0.47, 1.0],
-            ParametricRecipe::PanelGroup {
-                center: [3.2, 1.94, -2.2],
-                parts: array_parts,
-            },
-        ));
-        scene.push(parametric(
-            "rc:asset/solar-cells",
-            [0.13, 0.57, 0.80, 1.0],
-            ParametricRecipe::PanelGroup {
-                center: [3.2, 1.94, -2.2],
-                parts: cell_parts,
-            },
-        ));
-        scene.push(parametric(
-            "rc:asset/solar-grid",
-            [0.57, 0.64, 0.66, 1.0],
-            ParametricRecipe::PanelGroup {
-                center: [3.2, 1.94, -2.2],
-                parts: grid_parts,
-            },
-        ));
-    }
+    scene.extend(crate::workshop::assets(online, panels));
     scene.push(asset(
         "rc:asset/market-stall",
         [0.98, 0.64, 0.31, 1.0],
@@ -2187,53 +1802,6 @@ pub fn kestrel_flats(
             elevation: 0.052,
         },
     ));
-    scene.push(asset(
-        "rc:asset/workshop-roof-panels",
-        [0.32, 0.28, 0.31, 1.0],
-        vec![
-            block([3.2, 1.62, -1.11], [2.78, 0.08, 0.10]),
-            block([3.2, 1.62, -3.29], [2.78, 0.08, 0.10]),
-            block([3.2, 2.24, -2.2], [2.78, 0.09, 0.12]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-windows",
-        if online {
-            [0.98, 0.78, 0.38, 1.0]
-        } else {
-            [0.24, 0.46, 0.54, 1.0]
-        },
-        vec![
-            block([2.43, 1.0, -1.23], [0.38, 0.43, 0.045]),
-            block([3.97, 1.0, -1.23], [0.38, 0.43, 0.045]),
-            block([4.43, 0.95, -2.2], [0.045, 0.42, 0.75]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-sign",
-        [0.91, 0.64, 0.28, 1.0],
-        vec![block([3.2, 1.49, -1.19], [0.9, 0.18, 0.045])],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-entry-awning",
-        [0.22, 0.50, 0.58, 1.0],
-        vec![
-            roof([3.2, 1.66, -0.89], [1.70, 0.34, 0.78]),
-            block([3.2, 0.035, -0.62], [1.80, 0.07, 0.69]),
-        ],
-    ));
-    scene.push(asset(
-        "rc:asset/workshop-door-glow",
-        if online {
-            [0.99, 0.80, 0.37, 1.0]
-        } else {
-            [0.34, 0.48, 0.53, 1.0]
-        },
-        vec![
-            block([3.2, 1.05, -1.235], [0.54, 0.16, 0.035]),
-            block([3.2, 0.22, -1.235], [0.54, 0.09, 0.035]),
-        ],
-    ));
     scene.push(parametric(
         "rc:asset/market-canopy",
         [0.96, 0.35, 0.32, 1.0],
@@ -2616,91 +2184,7 @@ pub fn kestrel_flats(
             longitude: 10,
         },
     ));
-    // Eucalypts need a pale, slightly leaning trunk, open fork and fine
-    // blue-green leaf masses. Keep the established tree IDs for scene picks.
-    for (trunk_id, crown_id, fork_id, bark_id, x, z, lean, tint) in [
-        (
-            "rc:asset/tree-trunk-nw",
-            "rc:asset/tree-crown-nw",
-            "rc:asset/gum-fork-nw",
-            "rc:asset/gum-bark-nw",
-            -6.15,
-            -5.5,
-            -0.22,
-            [0.34, 0.57, 0.52, 1.0],
-        ),
-        (
-            "rc:asset/tree-trunk-ne",
-            "rc:asset/tree-crown-ne",
-            "rc:asset/gum-fork-ne",
-            "rc:asset/gum-bark-ne",
-            6.1,
-            -5.2,
-            0.25,
-            [0.40, 0.64, 0.54, 1.0],
-        ),
-        (
-            "rc:asset/tree-trunk-sw",
-            "rc:asset/tree-crown-sw",
-            "rc:asset/gum-fork-sw",
-            "rc:asset/gum-bark-sw",
-            -6.1,
-            5.2,
-            -0.26,
-            [0.38, 0.59, 0.50, 1.0],
-        ),
-        (
-            "rc:asset/tree-trunk-se",
-            "rc:asset/tree-crown-se",
-            "rc:asset/gum-fork-se",
-            "rc:asset/gum-bark-se",
-            6.1,
-            4.8,
-            0.21,
-            [0.35, 0.61, 0.55, 1.0],
-        ),
-    ] {
-        scene.push(parametric(
-            trunk_id,
-            [0.83, 0.79, 0.67, 1.0],
-            ParametricRecipe::Stem {
-                start: [x, 0.02, z],
-                end: [x + lean, 2.00, z - 0.12],
-                radius: 0.16,
-                segments: 9,
-            },
-        ));
-        scene.push(parametric(
-            fork_id,
-            [0.72, 0.65, 0.52, 1.0],
-            ParametricRecipe::Stem {
-                start: [x + lean * 0.70, 1.43, z - 0.08],
-                end: [x + lean + 0.68, 2.52, z + 0.26],
-                radius: 0.105,
-                segments: 8,
-            },
-        ));
-        scene.push(parametric(
-            bark_id,
-            [0.61, 0.48, 0.36, 1.0],
-            ParametricRecipe::Stem {
-                start: [x + lean * 0.28, 0.55, z - 0.02],
-                end: [x + lean * 0.45, 0.96, z - 0.04],
-                radius: 0.169,
-                segments: 9,
-            },
-        ));
-        scene.push(parametric(
-            crown_id,
-            tint,
-            ParametricRecipe::Ellipsoid {
-                center: [x + lean, 2.75, z - 0.14],
-                radii: [0.78, 0.36, 0.58],
-                latitude: 8,
-                longitude: 12,
-            },
-        ));
-    }
+    scene.extend(crate::mature_gums::assets());
     for (id, center) in [
         ("rc:asset/salvage-drum-a", [5.35, 0.38, 3.65]),
         ("rc:asset/salvage-drum-b", [5.76, 0.38, 3.64]),
@@ -2764,182 +2248,6 @@ pub fn kestrel_flats(
             },
         ));
     }
-    // Soft, asymmetric canopy lobes give each tree a readable silhouette.
-    // The colours and forms are original game-authored data; Qualia generates
-    // and seals every surface.
-    for (id, center, radius, color) in [
-        (
-            "rc:asset/canopy-nw-a",
-            [-6.48, 2.16, -5.40],
-            0.58,
-            [0.43, 0.67, 0.57, 1.0],
-        ),
-        (
-            "rc:asset/canopy-nw-b",
-            [-5.83, 2.31, -5.62],
-            0.56,
-            [0.57, 0.73, 0.59, 1.0],
-        ),
-        (
-            "rc:asset/canopy-ne-a",
-            [5.75, 2.22, -5.13],
-            0.59,
-            [0.40, 0.64, 0.55, 1.0],
-        ),
-        (
-            "rc:asset/canopy-ne-b",
-            [6.45, 2.30, -5.28],
-            0.55,
-            [0.58, 0.75, 0.61, 1.0],
-        ),
-        (
-            "rc:asset/canopy-sw-a",
-            [-6.48, 2.20, 5.28],
-            0.56,
-            [0.43, 0.65, 0.54, 1.0],
-        ),
-        (
-            "rc:asset/canopy-sw-b",
-            [-5.85, 2.29, 5.05],
-            0.59,
-            [0.57, 0.72, 0.58, 1.0],
-        ),
-        (
-            "rc:asset/canopy-se-a",
-            [5.76, 2.17, 4.74],
-            0.58,
-            [0.39, 0.64, 0.52, 1.0],
-        ),
-        (
-            "rc:asset/canopy-se-b",
-            [6.44, 2.26, 4.88],
-            0.56,
-            [0.53, 0.72, 0.59, 1.0],
-        ),
-    ] {
-        scene.push(parametric(
-            id,
-            color,
-            ParametricRecipe::Ellipsoid {
-                center: [center[0], center[1] + 0.38, center[2]],
-                radii: [radius, radius * 0.60, radius * 0.84],
-                latitude: 8,
-                longitude: 12,
-            },
-        ));
-    }
-    // Narrow pendent sprays keep the eucalypts distinct from the round fruit
-    // trees and stay visible in the territory camera.
-    for (id, center, color) in [
-        (
-            "rc:asset/gum-spray-nw-west",
-            [-6.77, 2.44, -5.38],
-            [0.30, 0.56, 0.48, 1.0],
-        ),
-        (
-            "rc:asset/gum-spray-nw-east",
-            [-5.52, 2.56, -5.54],
-            [0.48, 0.69, 0.54, 1.0],
-        ),
-        (
-            "rc:asset/gum-spray-ne-west",
-            [5.50, 2.48, -5.12],
-            [0.34, 0.59, 0.52, 1.0],
-        ),
-        (
-            "rc:asset/gum-spray-ne-east",
-            [6.76, 2.57, -5.26],
-            [0.50, 0.71, 0.59, 1.0],
-        ),
-        (
-            "rc:asset/gum-spray-sw-west",
-            [-6.75, 2.43, 5.26],
-            [0.33, 0.56, 0.49, 1.0],
-        ),
-        (
-            "rc:asset/gum-spray-sw-east",
-            [-5.48, 2.52, 5.02],
-            [0.51, 0.70, 0.56, 1.0],
-        ),
-        (
-            "rc:asset/gum-spray-se-west",
-            [5.49, 2.43, 4.75],
-            [0.33, 0.57, 0.48, 1.0],
-        ),
-        (
-            "rc:asset/gum-spray-se-east",
-            [6.76, 2.52, 4.87],
-            [0.49, 0.70, 0.56, 1.0],
-        ),
-    ] {
-        scene.push(parametric(
-            id,
-            color,
-            ParametricRecipe::Ellipsoid {
-                center,
-                radii: [0.22, 0.47, 0.23],
-                latitude: 8,
-                longitude: 10,
-            },
-        ));
-    }
-    // Individually oriented leaf forms break up the distant gum blobs. Each
-    // tree is a merged Qualia mesh, with seeded geometry authored in metres.
-    for (id, center, color, phase) in [
-        (
-            "rc:asset/gum-foliage-nw",
-            [-6.15, 2.52, -5.48],
-            [0.34, 0.49, 0.36, 1.0],
-            0.12,
-        ),
-        (
-            "rc:asset/gum-foliage-ne",
-            [6.12, 2.54, -5.22],
-            [0.36, 0.51, 0.37, 1.0],
-            0.63,
-        ),
-        (
-            "rc:asset/gum-foliage-sw",
-            [-6.14, 2.51, 5.16],
-            [0.33, 0.48, 0.35, 1.0],
-            0.37,
-        ),
-        (
-            "rc:asset/gum-foliage-se",
-            [6.12, 2.50, 4.81],
-            [0.35, 0.50, 0.36, 1.0],
-            0.88,
-        ),
-    ] {
-        let mut leaves = Vec::with_capacity(24);
-        for branch in 0..8 {
-            let angle = phase + branch as f32 * std::f32::consts::TAU / 8.0;
-            for tier in 0..3 {
-                let reach = 0.20 + tier as f32 * 0.16;
-                let droop = tier as f32 * 0.035;
-                leaves.push(EllipsoidInstance {
-                    center: [
-                        center[0] + angle.cos() * reach,
-                        center[1] + 0.16 - droop,
-                        center[2] + angle.sin() * reach,
-                    ],
-                    radii: [0.047, 0.15 - tier as f32 * 0.012, 0.038],
-                    pitch_deg: -angle.sin() * 28.0,
-                    yaw_deg: angle.to_degrees(),
-                    roll_deg: angle.cos() * 31.0,
-                });
-            }
-        }
-        scene.push(parametric(
-            id,
-            color,
-            ParametricRecipe::EllipsoidCluster {
-                instances: leaves,
-                latitude: 7,
-                longitude: 10,
-            },
-        ));
-    }
     for (id, center, color) in [
         (
             "rc:asset/wattle-bloom-nw",
@@ -2968,8 +2276,8 @@ pub fn kestrel_flats(
             },
         ));
     }
-    // Distinct, rounded character silhouettes. Separate limbs, faces and hair
-    // retain semantic identities for later Qualia animation clips.
+    // Resident bind geometry keeps separate limbs, faces and hair identities.
+    // The asset compiler attaches their shared Qualia rigs and activity clips.
     const COAT_PROFILE: &[[f32; 2]] = &[
         [0.0, -0.34],
         [0.23, -0.34],
@@ -3081,6 +2389,7 @@ pub fn kestrel_flats(
         [0.59, 0.40, 0.20, 1.0],
     ];
     for (resident_index, resident) in residents.into_iter().enumerate() {
+        let model_start = scene.len();
         let (
             body_id,
             head_id,
@@ -3294,6 +2603,30 @@ pub fn kestrel_flats(
                 longitude: 14,
             },
         ));
+        // Adult proportions: leg length, torso width and head size are authored
+        // independently. Qualia transforms the source meshes; stable IDs and
+        // the resident's world X/Z location remain unchanged.
+        scene.extend(crate::resident_props::assets(resident_key,
+            [x+left_hand[0],left_hand[1],z+left_hand[2]],
+            [x+right_hand[0],right_hand[1],z+right_hand[2]]));
+        let ground = crate::terrain::settlement_height(0.0, x, z);
+        for part in &mut scene[model_start..] {
+            let Some(source) = part.parametric.take() else { continue };
+            let head_part = part.id == head_id || part.id == face_id || part.id == hair_id
+                || part.id.ends_with("-nose");
+            let (pivot, target, scale) = if head_part {
+                ([x, 1.23, z], [x, ground + 1.64, z], [0.74, 0.64, 0.74])
+            } else if part.id == pants_id {
+                ([x, 0.10, z], [x, ground + 0.10, z], [0.74, 1.88, 0.74])
+            } else if part.id == feet_id {
+                ([x, 0.0, z], [x, ground, z], [0.80, 1.0, 0.85])
+            } else {
+                ([x, 0.48, z], [x, ground + 0.815, z], [0.74, 1.04, 0.74])
+            };
+            part.parametric = Some(ParametricRecipe::Transform {
+                source: Box::new(source), pivot, target, scale,
+            });
+        }
     }
     // Bright flowering planters mark the shared hall and garden route.
     for (id, center, color) in [
@@ -3494,10 +2827,10 @@ pub fn saltwind_reach(
     orchard_harvested: bool,
 ) -> Vec<AssetRecipe> {
     let mut scene = Vec::with_capacity(78);
-    scene.push(asset(
+    scene.push(parametric(
         "rc:asset/saltwind-earth-skirt",
-        [0.54, 0.38, 0.27, 1.0],
-        vec![block([16.0, -0.49, 0.0], [14.18, 0.38, 14.18])],
+        [0.55, 0.55, 0.35, 1.0],
+        ParametricRecipe::TerrainApron { center_x: 16.0, center_z: 0.0 },
     ));
     scene.push(parametric(
         "rc:asset/saltwind-ground",
@@ -4237,10 +3570,10 @@ pub fn northern_highlands() -> Vec<AssetRecipe> {
             [0.48, 0.70, 0.42, 1.0],
         ),
     ] {
-        scene.push(asset(
+        scene.push(parametric(
             base_id,
-            [0.47, 0.34, 0.26, 1.0],
-            vec![block([x, -0.49, -14.0], [14.0, 0.38, 14.0])],
+            [0.51, 0.53, 0.36, 1.0],
+            ParametricRecipe::TerrainApron { center_x: x, center_z: -14.0 },
         ));
         scene.push(parametric(
             id,

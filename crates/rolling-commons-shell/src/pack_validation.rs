@@ -16,6 +16,15 @@ const MAX_PACK_ENTRIES: usize = 4096;
 const MAX_MATERIALS_PER_ASSET: usize = 256;
 const MAX_RANGES_PER_ASSET: usize = 4096;
 
+pub fn skeletal_counts(bytes:&[u8])->Result<(usize,usize),String> {
+    use qualia_core_db::container_10d::skeletal_container::{read_skeletal_section,SkeletalContainerError};
+    match read_skeletal_section(bytes) {
+        Ok(section)=>{let counts=section.counts();Ok((counts.joints,counts.clips))},
+        Err(SkeletalContainerError::Missing)=>Ok((0,0)),
+        Err(error)=>Err(format!("skeletal section: {error:?}")),
+    }
+}
+
 pub fn verify_game_pack(bytes: &[u8]) -> Result<u32, String> {
     let reader = BundleReader::parse(bytes).map_err(|error| format!("HMC: {error:?}"))?;
     if reader.entries().is_empty() || reader.entries().len() > MAX_PACK_ENTRIES + 1 {
@@ -39,7 +48,30 @@ pub fn verify_game_pack(bytes: &[u8]) -> Result<u32, String> {
                 let asset = reader
                     .get(&entry.key)
                     .ok_or_else(|| format!("HMC asset is missing: {}", entry.key))?;
-                verify_10d_asset(asset).map_err(|error| format!("{}: {error}", entry.key))?;
+                let materials = verify_10d_asset(asset).map_err(|error| format!("{}: {error}", entry.key))?;
+                for material in materials {
+                    for digest in [material.base_color_texture, material.normal_texture,
+                        material.metallic_roughness_texture, material.occlusion_texture,
+                        material.emissive_texture, material.stylized_ramp_texture] {
+                        if digest == [0; 32] { continue; }
+                        let resource = qualia_core_db::render::asset_package::resolve_hmc_texture_resource(&reader, &digest)
+                            .map_err(|error| format!("{} dependency: {error:?}", entry.key))?;
+                        qualia_core_db::render::texture_decode::inspect_hmc_texture_requirements(
+                            &resource, qualia_core_db::render::texture_decode::TextureDecodeLimits {
+                                max_encoded_bytes: 4 * 1024 * 1024, max_decoded_bytes: 4 * 1024 * 1024,
+                                ..Default::default()
+                            }).map_err(|error| format!("{} image: {error:?}", entry.key))?;
+                    }
+                }
+            }
+            "image/png" if entry.key.starts_with("textures/sha256/") => {
+                let digest: [u8; 32] = entry.sha256.as_slice().try_into()
+                    .map_err(|_| "texture digest is invalid".to_owned())?;
+                if entry.key != qualia_core_db::render::asset_package::texture_hmc_key(&digest) {
+                    return Err("texture entry is not its canonical content-addressed key".into());
+                }
+                qualia_core_db::render::asset_package::resolve_hmc_texture_resource(&reader, &digest)
+                    .map_err(|error| format!("texture entry: {error:?}"))?;
             }
             _ => return Err(format!("unsupported game HMC entry: {}", entry.key)),
         }
@@ -50,7 +82,7 @@ pub fn verify_game_pack(bytes: &[u8]) -> Result<u32, String> {
     Ok(reader.entries().len() as u32)
 }
 
-fn verify_10d_asset(bytes: &[u8]) -> Result<(), String> {
+fn verify_10d_asset(bytes: &[u8]) -> Result<Vec<MaterialRecord>, String> {
     let header = Container10dHeader::parse(bytes).map_err(|error| format!("header: {error:?}"))?;
     let actual_crc = compute_whole_file_crc32c(bytes);
     if actual_crc != header.header_crc32c {
@@ -95,6 +127,7 @@ fn verify_10d_asset(bytes: &[u8]) -> Result<(), String> {
 
     let mesh =
         decode_mesh_section(mesh_bytes).map_err(|error| format!("mesh decode: {error:?}"))?;
+    skeletal_counts(bytes)?;
     if mesh.positions.len() != mesh_header.vertex_count as usize
         || mesh.triangles.len() != mesh_header.triangle_count as usize
         || mesh
@@ -136,5 +169,16 @@ fn verify_10d_asset(bytes: &[u8]) -> Result<(), String> {
     ];
     read_material_section_into(bytes, mesh_index_count, &mut materials, &mut ranges)
         .map_err(|error| format!("material bindings: {error:?}"))?;
-    Ok(())
+    qualia_core_db::render::compile_10d::decode_10d_normals(bytes,mesh.positions.len())
+        .map_err(|error|format!("normal stream: {error:?}"))?;
+    let mut uv = vec![[0.0; 2]; mesh.positions.len()];
+    match qualia_core_db::container_10d::read_texture_coordinate_section_into(bytes, mesh.positions.len(), &mut uv) {
+        Ok(_) => {}
+        Err(qualia_core_db::container_10d::TextureCoordinateContainerError::Missing)
+            if materials.iter().all(|m| [m.base_color_texture, m.normal_texture,
+                m.metallic_roughness_texture, m.occlusion_texture, m.emissive_texture,
+                m.stylized_ramp_texture].iter().all(|digest| *digest == [0; 32])) => {}
+        Err(error) => return Err(format!("textured asset UV01: {error:?}")),
+    }
+    Ok(materials)
 }

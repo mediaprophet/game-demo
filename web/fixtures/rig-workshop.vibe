@@ -1,0 +1,113 @@
+module <https://civics.au/game/modules/rig_workshop>;
+
+// Fictional assembly puzzle. Supplied scenario kit is owned by this rig;
+// installing/removing parts never grants campaign currency or duplicate stock.
+pure fn pick(c: bool, a: f64, b: f64) -> f64 {
+    if c { return a; }
+    return b;
+}
+pure fn workshop_initial(rig: f64) -> Record {
+    return {version: 1.0, revision: 0.0, rig: rig, hood: false,
+        isolated: false, diagnosed: false, drained: false, hose: true,
+        radiator: 0.0, filled: true, cooling_verified: false,
+        controller: false, fuse: false, panel: false, electrical_verified: false,
+        spare_radiator: 1.0, spare_panel: 1.0};
+}
+pure fn reject(s: Record, detail: string) -> Record {
+    return {ok: false, detail: detail, state: s};
+}
+pure fn workshop_drive(s: Record) -> Record {
+    return {rig_roadworthy: !s.hood && !s.isolated && s.hose && s.filled && s.radiator >= 0.0,
+        cooling_efficiency: pick(s.radiator == 0.0, 0.65, pick(s.radiator == 2.0, 1.20, 1.0)),
+        solar_ready: s.electrical_verified};
+}
+pure fn workshop_step(s: Record, cmd: string) -> Record {
+    if cmd == "open" && s.hood { return reject(s, "The bonnet is already open."); }
+    if cmd == "close" && !s.hood { return reject(s, "The bonnet is already closed."); }
+    if cmd == "isolate" && s.isolated { return reject(s, "Electrical power is already isolated."); }
+    if cmd == "reconnect" && !s.isolated { return reject(s, "Electrical power is already connected."); }
+    if cmd != "open" && cmd != "close" && cmd != "test-cooling" &&
+        cmd != "test-electrical" && !s.hood {
+        return reject(s, "Open the bonnet to access the assembly.");
+    }
+    if cmd == "measure" && s.diagnosed { return reject(s, "The pressure-test evidence is already recorded."); }
+    if cmd == "measure" && (!s.isolated || !s.filled) {
+        return reject(s, "Use the pressure gauge with the rig isolated and coolant present.");
+    }
+    if cmd == "drain" && (!s.isolated || s.drained || !s.diagnosed) {
+        return reject(s, "Record the pressure test and isolate power before using the catch tray.");
+    }
+    if cmd == "remove-hose" && (!s.isolated || !s.drained || !s.hose) {
+        return reject(s, "The hose clamps need a socket; first isolate power and drain into the catch tray.");
+    }
+    if cmd == "remove-radiator" && (!s.isolated || s.hose || s.radiator < 0.0) {
+        return reject(s, "Disconnect the hoses before undoing the radiator mounts with the socket.");
+    }
+    let compact = s.rig == 0.0 || s.rig == 2.0;
+    let install = cmd == "install-compact" || cmd == "install-touring";
+    if install && (!s.isolated || s.radiator >= 0.0 || s.spare_radiator < 1.0) {
+        return reject(s, "A replacement needs an empty mount, isolated power and the supplied radiator.");
+    }
+    if (cmd == "install-compact" && !compact) || (cmd == "install-touring" && compact) {
+        return reject(s, "Mount spacing does not match. Compare the rig's assembly plate with the replacement.");
+    }
+    if cmd == "install-hose" && (!s.isolated || s.hose || s.radiator < 0.0) {
+        return reject(s, "Fit the radiator before reconnecting and tightening the hose clamps.");
+    }
+    if cmd == "fill" && (!s.isolated || !s.hose || s.radiator < 0.0 || s.filled) {
+        return reject(s, "Use the funnel only after radiator and hoses are fitted; the system must be empty.");
+    }
+    if cmd == "controller" && (!s.isolated || s.controller) {
+        return reject(s, "Use the driver on the isolated, empty controller bracket.");
+    }
+    if cmd == "fuse" && (!s.isolated || !s.controller || s.fuse) {
+        return reject(s, "Fit the labelled protection cartridge after mounting the isolated controller.");
+    }
+    if cmd == "panel" && (!s.isolated || !s.controller || !s.fuse || s.panel || s.spare_panel < 1.0) {
+        return reject(s, "Panel connection needs the controller, protection cartridge and supplied panel.");
+    }
+    if cmd == "test-cooling" && (s.hood || s.isolated || !s.filled || !s.hose || s.radiator <= 0.0) {
+        return reject(s, "The test stand requires a closed bonnet, connected power, fitted hoses and a filled replacement radiator.");
+    }
+    if cmd == "test-electrical" && (s.hood || s.isolated || !s.panel || !s.controller || !s.fuse) {
+        return reject(s, "Use the load meter after closing the bonnet and reconnecting the complete protected solar circuit.");
+    }
+    if (cmd == "test-cooling" && s.cooling_verified) ||
+        (cmd == "test-electrical" && s.electrical_verified) {
+        return reject(s, "This test already passed; its result is saved.");
+    }
+    if cmd != "open" && cmd != "close" && cmd != "isolate" && cmd != "reconnect" &&
+        cmd != "measure" && cmd != "drain" && cmd != "remove-hose" && cmd != "remove-radiator" &&
+        cmd != "install-compact" && cmd != "install-touring" && cmd != "install-hose" &&
+        cmd != "fill" && cmd != "controller" && cmd != "fuse" && cmd != "panel" &&
+        cmd != "test-cooling" && cmd != "test-electrical" {
+        return reject(s, "That operation is not part of this assembly.");
+    }
+    let next = {version: s.version, revision: s.revision + 1.0, rig: s.rig,
+        hood: (s.hood || cmd == "open") && cmd != "close",
+        isolated: (s.isolated || cmd == "isolate") && cmd != "reconnect",
+        diagnosed: s.diagnosed || cmd == "measure",
+        drained: (s.drained || cmd == "drain") && cmd != "fill",
+        hose: (s.hose || cmd == "install-hose") && cmd != "remove-hose",
+        radiator: pick(cmd == "remove-radiator", -1.0,
+            pick(cmd == "install-compact", 1.0, pick(cmd == "install-touring", 2.0, s.radiator))),
+        filled: (s.filled || cmd == "fill") && cmd != "drain",
+        cooling_verified: (s.cooling_verified || cmd == "test-cooling") &&
+            cmd != "drain" && cmd != "remove-hose" && cmd != "remove-radiator",
+        controller: s.controller || cmd == "controller",
+        fuse: s.fuse || cmd == "fuse", panel: s.panel || cmd == "panel",
+        electrical_verified: s.electrical_verified || cmd == "test-electrical",
+        spare_radiator: s.spare_radiator - pick(install, 1.0, 0.0) +
+            pick(cmd == "remove-radiator" && s.radiator > 0.0, 1.0, 0.0),
+        spare_panel: s.spare_panel - pick(cmd == "panel", 1.0, 0.0)};
+    if cmd == "measure" {
+        return {ok: true, state: next, detail: "Pressure falls at the radiator seam; hoses and pump hold. The core is the faulty part. Compare mount spacing before replacement."};
+    }
+    if cmd == "test-cooling" {
+        return {ok: true, state: next, detail: "Cooling test passed: pressure holds and the simulated climb temperature stabilises."};
+    }
+    if cmd == "test-electrical" {
+        return {ok: true, state: next, detail: "Load test passed: protected controller supplies the touring circuit."};
+    }
+    return {ok: true, state: next, detail: "Operation accepted; assembly state and part use recorded."};
+}

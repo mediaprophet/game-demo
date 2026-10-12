@@ -1,0 +1,36 @@
+module <https://civics.au/game/modules/resident_activities>;
+
+// Presentation policy receives only an accepted campaign action. It grants no
+// game effects, currency, labour, relationships or project completion.
+pure fn activity_for(action: string) -> Record {
+    if action == "repairTankLabour" || action == "repairTankCoins" ||
+        action == "fulfilWorkshopOrder" || action == "fulfilRemoteOrder" ||
+        action == "connectMastLabour" || action == "connectMastCoins" {
+        return {actor: "bo", clip: "repair", duration: 8.0};
+    }
+    if action == "restoreBridge" || action == "braceBridge" ||
+        action == "restoreBridgeLateLabour" || action == "restoreBridgeLateCoins" ||
+        action == "raiseWindPump" {
+        return {actor: "dev", clip: "repair", duration: 9.0};
+    }
+    if action == "startGarden" {
+        return {actor: "ada", clip: "plant", duration: 10.0};
+    }
+    if action == "plantOrchard" {
+        return {actor: "eve", clip: "plant", duration: 10.0};
+    }
+    if action == "reserveHarvest" || action == "sellHarvest" {
+        return {actor: "cam", clip: "harvest", duration: 9.0};
+    }
+    if action == "launchTradeRoute" || action == "contributeInverter" || action == "contributePanel" {
+        return {actor: "finn", clip: "carry", duration: 8.0};
+    }
+    if action == "canvassMara" || action == "canvassEli" || action == "canvassSecondResident" ||
+        action == "formCommittee" || action == "teachCrewUnpaid" || action == "openCommons" || action == "openCommonsReserved" {
+        return {actor: "dev", clip: "talk", duration: 8.0};
+    }
+    if action == "endTurn" {
+        return {actor: "finn", clip: "rest", duration: 6.0};
+    }
+    return {actor: "", clip: "idle", duration: 0.0};
+}

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import init, { GameDriveSimulation, GameSession, asset_verify_10d, scene_build, scene_quality_state, session_replay } from '../web/pkg/rolling_commons_shell.js';
+import init, { GameDriveSimulation, GameSession, asset_verify_10d, scene_build, scene_quality_state, session_replay,
+  pack_game_hmc, validate_game_hmc } from '../web/pkg/rolling_commons_shell.js';
 
 const [wasm, seedBytes, actionsBytes, driveModuleBytes] = await Promise.all([
   readFile(new URL('../web/pkg/rolling_commons_shell_bg.wasm', import.meta.url)),
@@ -69,6 +70,37 @@ const materialized = scene.assets.find(asset => asset.renderRole !== 'water');
 const materialReceipt = toPlain(asset_verify_10d(materialized.bytes));
 assert.ok(materialReceipt.materials > 0 && materialReceipt.material_ranges > 0,
   'compiled game assets retain their PBR material and submesh binding in .10d');
+assert.equal(materialReceipt.normal_vertices,materialReceipt.vertices,
+  'authored smooth/hard normals survive sealed container read-back');
+assert.equal(materialReceipt.uv_vertices,materialReceipt.vertices,
+  'UV seam vertices have matching sealed coordinate counts');
+const residentAssets=scene.assets.filter(asset=>asset.id.startsWith('rc:asset/resident-'));
+const touringAssets=scene.assets.filter(asset=>asset.id.startsWith('rc:asset/rig/'));
+assert.ok(touringAssets.length>0,'touring geometry is included in the native scene');
+for(const asset of touringAssets){
+  const receipt=toPlain(asset_verify_10d(asset.bytes));
+  const expected=asset.id.startsWith('rc:asset/rig/4wd-caravan/')?10:
+    asset.id.startsWith('rc:asset/rig/car-trailer/')?8:5;
+  assert.equal(receipt.rig_joints,expected,`${asset.id}: body and wheel hinges survive SKL1 read-back`);
+  assert.equal(receipt.animation_clips,1,`${asset.id}: native controlled idle pose survives read-back`);
+}
+assert.equal(residentAssets.filter(asset=>!asset.id.includes('-attachment-')).length,60,
+  'six residents retain ten stable body mesh parts each');
+assert.equal(residentAssets.filter(asset=>asset.id.includes('-attachment-')).length,16,
+  'resident tools and carried objects have native rig attachments');
+for(const asset of residentAssets){
+  const receipt=toPlain(asset_verify_10d(asset.bytes));
+  assert.equal(receipt.rig_joints,18,`${asset.id}: articulated rig survives native read-back`);
+  assert.equal(receipt.animation_clips,8,`${asset.id}: all activity and rest clips survive native read-back`);
+  assert.equal(receipt.uv_vertices,receipt.vertices,`${asset.id}: rigged seam topology remains aligned`);
+}
+assert.ok(scene.textures.length>0,'native material library produces shared PNG dependencies');
+const textureEntries=new Map(scene.textures.map(image=>[image.key,{key:image.key,bytes:image.bytes}]));
+const specimen=[{key:'10d/material-specimen.10d',bytes:materialized.bytes},...textureEntries.values()];
+assert.equal(validate_game_hmc(pack_game_hmc(specimen,'{}')),specimen.length+1,
+  'native HMC verifier resolves textured material dependencies and matching UV stream');
+assert.throws(()=>validate_game_hmc(pack_game_hmc(specimen.filter(entry=>entry.key.startsWith('10d/')),'{}')),
+  /dependency|missing/i,'a mesh-only package must not silently pass a textured asset');
 const high = scene_quality_state(1, 2, true, true, true, true, true, false, false, false, false, false, false, 1, 2, true);
 assert.equal(high.quality_tier, 2, 'high-capability renderer can select the high feature tier');
 

@@ -1,5 +1,6 @@
 module <https://civics.au/game/modules/community_drive>;
 import "vibe:0.1/math" as m;
+requires [ capability("capability.invoke"), capability("PhysicsWorkbench.compute") ];
 
 pure fn choose_float(condition: bool, when_true: f64, when_false: f64) -> f64 {
     if condition { return when_true; }
@@ -26,10 +27,10 @@ pure fn ambient_for_period(period: string) -> f64 {
 }
 
 pure fn drive_rig_profile(rig_id: f64) -> Record {
-    if rig_id < 0.5 { return { top_speed: 4.0, acceleration: 2.0, braking: 3.7, steering: 0.72, shoulder: 1.8, load: 0.28, queue: 2.0, trailer: false }; }
-    if rig_id < 1.5 { return { top_speed: 3.0, acceleration: 1.25, braking: 2.25, steering: 0.48, shoulder: 1.25, load: 0.76, queue: 5.0, trailer: true }; }
-    if rig_id < 2.5 { return { top_speed: 3.4, acceleration: 1.55, braking: 2.7, steering: 0.58, shoulder: 1.35, load: 0.56, queue: 4.0, trailer: true }; }
-    return { top_speed: 4.2, acceleration: 2.1, braking: 3.9, steering: 0.82, shoulder: 2.0, load: 0.38, queue: 1.0, trailer: false };
+    if rig_id < 0.5 { return { top_speed: 4.0, acceleration: 2.0, braking: 3.7, steering: 0.72, shoulder: 1.8, load: 0.28, queue: 2.0, trailer: false, wheel_radius: 0.37 }; }
+    if rig_id < 1.5 { return { top_speed: 3.0, acceleration: 1.25, braking: 2.25, steering: 0.48, shoulder: 1.25, load: 0.76, queue: 5.0, trailer: true, wheel_radius: 0.34 }; }
+    if rig_id < 2.5 { return { top_speed: 3.4, acceleration: 1.55, braking: 2.7, steering: 0.58, shoulder: 1.35, load: 0.56, queue: 4.0, trailer: true, wheel_radius: 0.30 }; }
+    return { top_speed: 4.2, acceleration: 2.1, braking: 3.9, steering: 0.82, shoulder: 2.0, load: 0.38, queue: 1.0, trailer: false, wheel_radius: 0.34 };
 }
 
 pure fn drive_setup(rig_id: f64) -> Record {
@@ -45,8 +46,74 @@ pure fn drive_setup(rig_id: f64) -> Record {
         mirror_reveal: false, mirror_queue: rig.queue, mirror_blocked: rig.trailer,
         top_speed: rig.top_speed, acceleration: rig.acceleration,
         braking: rig.braking, steering: rig.steering, shoulder: rig.shoulder,
-        rig_load: rig.load, trailer: rig.trailer
+        rig_load: rig.load, trailer: rig.trailer, wheel_angle: 0.0, steering_angle: 0.0, wheel_radius: rig.wheel_radius,
+        trailer_heading: -1.5707963267948966, trailer_wheel_angle: 0.0,
+        trailer_articulation: 0.0, trailer_warning: "",
+        body_height: 0.0, body_velocity: 0.0, body_pitch: 0.0, body_roll: 0.0, contact_initialized: false,
+        suspension_fl: 0.0, suspension_fr: 0.0, suspension_rl: 0.0, suspension_rr: 0.0,
+        trailer_pitch: 0.0, trailer_roll: 0.0,
+        suspension_tfl: 0.0, suspension_tfr: 0.0, suspension_trl: 0.0, suspension_trr: 0.0
     };
+}
+
+// Explicit mode exit parks the rig without advancing the simulation clock or
+// resetting its temperatures, damage, route position or accumulated distance.
+pure fn drive_park() -> Record {
+    return {speed: 0.0, distance_delta: 0.0, warning: "", hazard_event: false, steering_angle: 0.0};
+}
+
+pure fn wheel_travel(height: f64, pitch: f64, roll: f64, x: f64, y: f64, z: f64,
+    ground: f64, radius: f64) -> f64 {
+    let predicted = height + m.cos(pitch) * (m.sin(roll) * x + m.cos(roll) * y) - m.sin(pitch) * z;
+    return m.clamp((ground + radius - predicted) / m.max(0.25, m.cos(pitch) * m.cos(roll)), -0.18, 0.18);
+}
+
+// Vibe supplies physical/game parameters. The native shell integrates these
+// with Qualia's fixed-state ODE kernel before evaluating the pose policy.
+pure fn drive_contact_parameters(state: Record, previous: Record, c: Record, dt: f64) -> Record {
+    let front = (c.fl + c.fr) * 0.5;
+    let rear = (c.rl + c.rr) * 0.5;
+    let ground = (front * c.rear_z - rear * c.front_z) / (c.rear_z - c.front_z);
+    let target = ground + state.wheel_radius - 0.29;
+    return {target: target, position: previous.body_height, velocity: previous.body_velocity,
+        reset: !previous.contact_initialized || m.abs(target - previous.body_height) > 0.5,
+        stiffness: 55.0, damping: 15.0, travel: 0.15, speed_limit: 3.0, dt: dt};
+}
+
+// Native geometry samples the accepted new position. This pure policy owns
+// lateral lean and bounded independent wheel placement after integration.
+pure fn drive_contact_step(state: Record, previous: Record, c: Record, dt: f64) -> Record {
+    let front = (c.fl + c.fr) * 0.5;
+    let rear = (c.rl + c.rr) * 0.5;
+    let length = c.rear_z - c.front_z;
+    let ground = (front * c.rear_z - rear * c.front_z) / length;
+    let target = ground + state.wheel_radius - 0.29;
+    let reset = !previous.contact_initialized || m.abs(target - previous.body_height) > 0.5;
+    let velocity = c.integrated_velocity;
+    let height = c.integrated_height;
+    let response = choose_float(reset, 1.0, 1.0 - m.exp(-dt * 10.0));
+    let pitch_target = m.clamp(m.atan((front - rear) / length), -0.40, 0.40);
+    let roll_target = m.clamp(m.atan((c.fr + c.rr - c.fl - c.rl) / (2.0 * c.track))
+        - state.steering_angle * m.abs(state.speed) / m.max(0.1, state.top_speed) * 0.05, -0.30, 0.30);
+    let pitch = previous.body_pitch + (pitch_target - previous.body_pitch) * response;
+    let roll = previous.body_roll + (roll_target - previous.body_roll) * response;
+    let hitch_y = height + m.cos(pitch) * m.cos(roll) * 0.39 - m.sin(pitch) * c.hitch_offset;
+    let trailer_ground = (c.tfl + c.tfr + c.trl + c.trr) * 0.25;
+    let trailer_pitch_target = m.clamp(m.atan((hitch_y - 0.10 - trailer_ground - 0.31)
+        / ((c.trailer_front_z + c.trailer_rear_z) * 0.5)), -0.40, 0.40);
+    let trailer_roll_target = m.clamp(m.atan((c.tfr + c.trr - c.tfl - c.trl) / (2.0 * c.trailer_track)), -0.30, 0.30);
+    let tp = choose_float(state.trailer, previous.trailer_pitch + (trailer_pitch_target - previous.trailer_pitch) * response, 0.0);
+    let tr = choose_float(state.trailer, previous.trailer_roll + (trailer_roll_target - previous.trailer_roll) * response, 0.0);
+    return {body_height: height, body_velocity: velocity, body_pitch: pitch, body_roll: roll, contact_initialized: true,
+        suspension_fl: wheel_travel(height,pitch,roll,-c.track*0.5,0.29,c.front_z,c.fl,state.wheel_radius),
+        suspension_fr: wheel_travel(height,pitch,roll,c.track*0.5,0.29,c.front_z,c.fr,state.wheel_radius),
+        suspension_rl: wheel_travel(height,pitch,roll,-c.track*0.5,0.29,c.rear_z,c.rl,state.wheel_radius),
+        suspension_rr: wheel_travel(height,pitch,roll,c.track*0.5,0.29,c.rear_z,c.rr,state.wheel_radius),
+        trailer_pitch: tp, trailer_roll: tr,
+        suspension_tfl: wheel_travel(hitch_y,tp,tr,-c.trailer_track*0.5,-0.10,c.trailer_front_z,c.tfl,0.31),
+        suspension_tfr: wheel_travel(hitch_y,tp,tr,c.trailer_track*0.5,-0.10,c.trailer_front_z,c.tfr,0.31),
+        suspension_trl: wheel_travel(hitch_y,tp,tr,-c.trailer_track*0.5,-0.10,c.trailer_rear_z,c.trl,0.31),
+        suspension_trr: wheel_travel(hitch_y,tp,tr,c.trailer_track*0.5,-0.10,c.trailer_rear_z,c.trr,0.31)};
 }
 
 pure fn road_center_z(x: f64) -> f64 {
@@ -72,26 +139,29 @@ pure fn road_surface_at(x: f64) -> Record {
 
 // One deterministic simulation tick. The browser supplies sampled terrain,
 // road, weather, rig and hazard facts; VibeScript owns the driving rules.
-pure fn drive_step(input: Record) budget(steps: 10000) -> Record {
+effect fn drive_step(input: Record) budget(steps: 10000) -> Record {
     let rig = drive_rig_profile(input.rig_id);
     let dt = m.clamp(input.dt, 0.0, 0.05);
     let ambient = ambient_for_period(input.period);
-    let speed = input.speed;
-    let throttle = input.engine_health > 0.0 && input.throttle;
-    let reverse = input.engine_health > 0.0 && input.reverse;
-    let braking = reverse || input.brake;
+    let speed = choose_float(input.rig_roadworthy, input.speed, 0.0);
+    let throttle = input.engine_health > 0.0 && input.rig_roadworthy && input.throttle;
+    let initial_articulation = m.atan2(m.sin(input.heading - input.trailer_heading), m.cos(input.heading - input.trailer_heading));
+    let reverse_limit = rig.trailer && m.abs(initial_articulation) > 1.10 && input.reverse;
+    let reverse = input.engine_health > 0.0 && input.rig_roadworthy && input.reverse && !reverse_limit;
+    let braking = reverse || input.brake || reverse_limit;
     let powered = choose_float(throttle,
         m.min(rig.top_speed, speed + rig.acceleration * dt), speed);
     let reversed = choose_float(reverse,
         m.max(-1.0, powered - rig.braking * dt), powered);
-    let stopped = choose_float(input.brake && !reverse,
-        m.max(0.0, reversed - rig.braking * dt), reversed);
+    let stopped = choose_float(reverse_limit, 0.0, choose_float(input.brake && !reverse,
+        m.max(0.0, reversed - rig.braking * dt), reversed));
     let coasted = choose_float(!throttle && !braking,
         choose_float(m.abs(speed) < 0.025, 0.0,
             speed - choose_float(speed > 0.0, 1.0, -1.0) * m.min(m.abs(speed), 0.26 * dt)),
         stopped);
-    let steer_scale = 0.22 + m.min(1.0, m.abs(coasted) / m.max(0.1, rig.top_speed));
-    let heading = input.heading + input.steer * rig.steering * dt * steer_scale;
+    let steer_scale = choose_float(m.abs(coasted) > 0.025,
+        0.22 + m.min(1.0, m.abs(coasted) / m.max(0.1, rig.top_speed)), 0.0);
+    let heading = input.heading - input.steer * rig.steering * dt * steer_scale * choose_float(coasted < 0.0, -1.0, 1.0);
     let direction = choose_float(coasted < 0.0, -1.0, 1.0);
     let travel = m.abs(coasted) * dt * direction;
     let center_z = road_center_z(input.x);
@@ -165,17 +235,27 @@ pure fn drive_step(input: Record) budget(steps: 10000) -> Record {
         input.terrain_height_ahead - input.terrain_height);
     let grade = m.clamp(terrain_delta / m.max(0.1, input.terrain_sample_distance), -0.18, 0.18);
     let surface = road_surface_at(input.x);
+    let climb_load = m.max(0.0, grade) * 10.0 * choose_float(throttle && m.abs(next_speed) > 0.1, 1.0, 0.0);
     let load = m.clamp(0.22 + choose_float(throttle, 0.55, 0.08)
         + m.abs(next_speed) / m.max(0.1, rig.top_speed) * 0.16
-        + m.max(0.0, grade) * 10.0 + surface.roughness * 0.60 + rig.load,
+        + climb_load + surface.roughness * 0.60 + rig.load * choose_float(throttle, 1.0, 0.1),
         0.12, 1.85);
     let airflow = m.min(12.0, m.abs(next_speed) * 1.35);
-    let target_oil = ambient + 62.0 + load * 30.0 - airflow;
-    let target_coolant = ambient + 42.0 + load * 23.0 - airflow * 0.62;
+    let cooling = m.clamp(input.cooling_efficiency, 0.5, 1.3);
+    let target_oil = choose_float(input.rig_roadworthy,
+        ambient + 62.0 + load * 30.0 / cooling - airflow, ambient);
+    let target_coolant = choose_float(input.rig_roadworthy,
+        ambient + 42.0 + load * 23.0 / cooling - airflow * 0.62, ambient);
     let oil_trend = trend(target_oil, input.oil_temp);
     let coolant_trend = trend(target_coolant, input.coolant_temp);
-    let oil_temp = input.oil_temp + (target_oil - input.oil_temp) * (1.0 - m.exp(-dt * 0.028));
-    let coolant_temp = input.coolant_temp + (target_coolant - input.coolant_temp) * (1.0 - m.exp(-dt * 0.040));
+    let thermal = capability.invoke("PhysicsWorkbench.compute", {
+        operation: "thermal_response", dt: dt,
+        oil_temp: input.oil_temp, coolant_temp: input.coolant_temp,
+        oil_target: target_oil, coolant_target: target_coolant,
+        oil_rate: 0.028, coolant_rate: 0.040
+    });
+    let oil_temp = thermal.oil_temp;
+    let coolant_temp = thermal.coolant_temp;
     let critical = oil_temp >= 142.0 || coolant_temp >= 114.0;
     let elevated = oil_temp >= 128.0 || coolant_temp >= 104.0;
     let overheat = choose_float(critical, input.overheat_seconds + dt,
@@ -183,10 +263,12 @@ pure fn drive_step(input: Record) budget(steps: 10000) -> Record {
     let health = choose_float(overheat > 10.0,
         m.max(0.0, input.engine_health - dt * 1.2), input.engine_health);
     let final_speed = choose_float(health <= 0.0, 0.0, next_speed);
-    let engine_warning = choose_text(health <= 0.0,
+    let engine_warning = choose_text(!input.rig_roadworthy,
+        "WORKSHOP ASSEMBLY INCOMPLETE · close and reconnect the filled cooling system before driving",
+        choose_text(health <= 0.0,
         "ENGINE FAILURE · temperature damage ended the drive",
         choose_text(critical, "CRITICAL ENGINE TEMP · ease off, stop safely and let it cool",
-        choose_text(elevated, "Engine temperature rising · reduce load and watch the next climb", "")));
+        choose_text(elevated, "Engine temperature rising · reduce load and watch the next climb", ""))));
 
     let trailer = rig.trailer;
     let traffic_target = choose_float(trailer, 4.2, 3.4);
@@ -201,6 +283,19 @@ pure fn drive_step(input: Record) budget(steps: 10000) -> Record {
     let mirror_blocked = trailer && !mirror_reveal;
     let distance_delta = m.sqrt((next_x - input.x) * (next_x - input.x)
         + (next_z - input.z) * (next_z - input.z));
+    // Single-track trailer model includes the rear hitch's lateral velocity.
+    // Reverse travel makes articulation diverge, requiring careful steering.
+    let hitch_offset = choose_float(input.rig_id < 1.5, 1.36, 1.55);
+    let hitch_to_axle = choose_float(input.rig_id < 1.5, 2.175, 1.10);
+    let trailer_relative = m.atan2(m.sin(heading - input.trailer_heading), m.cos(heading - input.trailer_heading));
+    let signed_distance = distance_delta * choose_float(final_speed < 0.0, -1.0, 1.0);
+    let trailer_turn = (signed_distance * m.sin(trailer_relative)
+        - hitch_offset * (heading - input.heading) * m.cos(trailer_relative)) / hitch_to_axle;
+    let trailer_heading = choose_float(rig.trailer, input.trailer_heading + trailer_turn, heading);
+    let articulation = m.atan2(m.sin(heading - trailer_heading), m.cos(heading - trailer_heading));
+    let trailer_warning = choose_text(reverse_limit,
+        "TRAILER ANGLE LIMIT · stop reversing and pull forward to straighten",
+        choose_text(rig.trailer && m.abs(articulation) > 0.75, "Trailer angle growing · use small steering changes", ""));
     let road_warning = choose_text(hazard_near, hazard_label, "");
 
     return {
@@ -219,6 +314,11 @@ pure fn drive_step(input: Record) budget(steps: 10000) -> Record {
         mirror_blocked: mirror_blocked, road_center_z: center_z,
         top_speed: rig.top_speed, acceleration: rig.acceleration,
         braking: rig.braking, steering: rig.steering, shoulder: rig.shoulder,
-        rig_load: rig.load, trailer: rig.trailer
+        rig_load: rig.load, trailer: rig.trailer,
+        wheel_angle: input.wheel_angle - final_speed * dt / rig.wheel_radius,
+        steering_angle: -input.steer * 0.40, wheel_radius: rig.wheel_radius,
+        trailer_heading: trailer_heading,
+        trailer_wheel_angle: input.trailer_wheel_angle - signed_distance * m.cos(articulation) / 0.31,
+        trailer_articulation: articulation, trailer_warning: trailer_warning
     };
 }

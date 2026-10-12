@@ -58,6 +58,12 @@ Do not reproduce the reference's apparent lettering errors. Use readable, origin
 
 ## 2. Baseline and boundaries
 
+The user's 12 October direction extends the focused modes into substantial
+driving, mechanical workshop puzzles, community/adventure stories and supply-chain
+management gameplay. See [38 — connected gameplay modes](38-connected-gameplay-modes.md)
+for these required experiences and the full-screen desktop/mobile presentation
+contract. Existing activity panels do not establish completion of these modes.
+
 The inspected local baseline is game commit `9c52d96db08673d7f579f14f83ac18ba7b4bdc57` and Qualia commit `9463dc6231a0ce10e04ea2837c039e9ec3018fb0`. The game pin has been expanded to the full Qualia commit because the local and Pages build scripts compare it to full `git rev-parse HEAD`. The user reports GitHub Actions processing the updated repositories; this plan does not assert those runs have passed.
 
 The newer commits add graphics capabilities and VibeScript authoring/host interfaces. Use that work. Do not restart the earlier engine programme. However, capabilities must reach the actual game render path:
