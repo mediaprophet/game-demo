@@ -1,20 +1,27 @@
-# Maslows Challenge, an SDGs game
+# Maslows Challenge — Interactive SDG Simulation & Systems Runtime
 
-A browser-first WASM game built alongside [dev.civics.au](https://dev.civics.au)
-and QualiaDB. It uses the local-first,
-semantic, spatial, collaborative technology developed for QualiaDB to make the
-civics concepts and practical considerations explored by dev.civics.au tangible
-through computer-game-based gamification. This is deliberately distinct from
-real-world gamification: the game explores fictional, bounded scenarios and
-does not score, rank, incentivise, or govern real people or communities.
+A browser-first WASM application built alongside [dev.civics.au](https://dev.civics.au)
+and QualiaDB. It uses the local-first, semantic, spatial, collaborative technology
+developed for QualiaDB to make the civics concepts, practical considerations, and
+Sustainable Development Goals (SDGs) tangible through embodied systems exploration.
+This is deliberately distinct from real-world gamification: the environment explores
+bounded scenarios and does not score, rank, incentivise, or govern real people or
+communities.
 
-Development is constrained to the **QualiaDB/Webizen ecosystem**. Missing game
-capabilities are added to QualiaDB and verified there before this project uses
-them; the game does not introduce a separate engine or substitute technical
-stack. See the [QualiaDB-only development contract](docs/planning/13-qualiadb-only-development-contract.md).
-The playable browser shell builds `qualia-core-db` with `wasm-full` and uses
-`QualiaPortal` for 3D rendering. WebCivics is a separate profile; it is not
-the game's engine or its licence.
+While presented as an accessible exploratory scenario, the underlying QualiaDB
+engine is an epistemic spatial runtime that unifies five distinct modes of inquiry:
+- **Fiction & Narrative:** Speculative worldbuilding, protagonist paths, traits, and consequential story branches.
+- **Non-Fiction & Field Sciences:** Authentic empirical datasets (Atlas of Living Australia / GBIF biodiversity observations, Australian ecological surveys, true geographic coordinates).
+- **Simulation & Digital Twins:** Physical engineering dynamics (radiator thermal dissipation, solar generation curves, fluid transport, off-grid battery balances).
+- **Hypothesis & Counterfactual Modeling:** Rigorous modal logic ("what-if" inquiries, deontic permissions/obligations, LTL temporal contracts, paraconsistent quarantine).
+- **Civics & Cooperative Governance:** Bilateral micro-commons, stewardship of shared resources, and mutual agreements without scoring or ranking.
+
+Development is constrained to the **QualiaDB/Webizen ecosystem**. Missing capabilities
+are added to QualiaDB and verified there before this project uses them; the shell does
+not introduce a separate engine or substitute technical stack. See the
+[QualiaDB-only development contract](docs/planning/13-qualiadb-only-development-contract.md).
+The browser shell builds `qualia-core-db` with `wasm-full` and uses `QualiaPortal` for
+volumetric 3D rendering. WebCivics is a separate profile; it is not the engine or its licence.
 
 ## The game now
 

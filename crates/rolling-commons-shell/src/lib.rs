@@ -1917,12 +1917,24 @@ pub struct GameSession {
     drive_verified:[bool;4],
 }
 
+/// Epistemic runtime type alias: `WorldSession` represents the general-purpose
+/// semantic state machine for non-fiction field data, digital twin simulations,
+/// scientific hypothesis testing, and collaborative civics stewardship.
+pub type WorldSession = GameSession;
+
+/// Scenario-scoped alias for narrative, speculative worldbuilding, and training runs.
+pub type ScenarioSession = GameSession;
+
 /// A checked VibeScript program that owns the driving simulation rules.
 /// The browser submits sampled world facts and control intent, then renders
 /// the returned state; it does not implement the vehicle or thermal model.
 #[wasm_bindgen]
 pub struct GameDriveSimulation {
     program: vibe::Program,
+}
+
+/// Epistemic alias for physical vehicle and thermal simulation runtimes.
+pub type WorldDriveSimulation = GameDriveSimulation;
     policy_hash:u64,
 }
 
