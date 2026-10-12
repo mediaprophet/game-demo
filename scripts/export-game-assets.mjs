@@ -5,7 +5,7 @@ import { readFile, writeFile, mkdir, readdir, unlink } from 'node:fs/promises';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import init, { pack_game_hmc, scene_build, set_art_style, set_vehicle_rig, set_fauna_selection, set_flora_selection,
-  taxon_binding_json, validate_game_hmc } from '../web/pkg/rolling_commons_shell.js';
+  taxon_binding_json, taxon_dwc_json, validate_game_hmc } from '../web/pkg/rolling_commons_shell.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const wasmPath = join(root, 'web', 'pkg', 'rolling_commons_shell_bg.wasm');
@@ -34,10 +34,14 @@ for (const key of [...ecologyProfile.render.faunaSelection, ...(ecologyProfile.r
   if (binding) taxonBindings[key] = binding;
 }
 function taxonForAsset(assetId) {
-  if (assetId.startsWith('rc:asset/flora/'))
-    return Object.values(taxonBindings).find(b => assetId.startsWith(`${b.assetFamily}/`)) ?? null;
-  if (assetId.startsWith('rc:asset/fauna/'))
-    return taxonBindings[Object.keys(taxonBindings).find(k => assetId.includes(k)) ?? ''] ?? null;
+  if (assetId.startsWith('rc:asset/flora/')) {
+    const entry = Object.entries(taxonBindings).find(([, b]) => assetId.startsWith(`${b.assetFamily}/`));
+    return entry ? { renderKey: entry[0], ...entry[1] } : null;
+  }
+  if (assetId.startsWith('rc:asset/fauna/')) {
+    const entry = Object.entries(taxonBindings).find(([k]) => assetId.includes(k));
+    return entry ? { renderKey: entry[0], ...entry[1] } : null;
+  }
   return null;
 }
 
@@ -99,10 +103,14 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
     if (!assets.has(key)) {
       await writeFile(join(out, file), bytes);
       const taxon = taxonForAsset(asset.id);
+      // dwc quins are emitted by taxon-bindings.vibe (quin.statement, sealed
+      // by the host) — six dwc statements plus the packed gbifTaxonKey quin.
+      // Fields are hex strings; u64s are not f64-lossless.
       assets.set(key, { id: asset.id, file: `10d/${file}`, bytes: bytes.length, sha256,
         rgba: [asset.r, asset.g, asset.b, asset.a], renderRole: asset.renderRole || 'opaque',
         materialFamily: asset.materialFamily,
-        ...(taxon ? { taxon: { gbifKey: taxon.gbifKey, iri: taxon.iri, rank: taxon.rank } } : {}) });
+        ...(taxon ? { taxon: { gbifKey: taxon.gbifKey, iri: taxon.iri, rank: taxon.rank,
+          quins: JSON.parse(taxon_dwc_json(taxon.renderKey, asset.id)) } } : {}) });
     }
     entries.push(key);
   }

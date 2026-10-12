@@ -107,3 +107,58 @@ pure fn taxon_for(render_key: string) -> Record {
     return {bound: 0.0, gbifKey: 0.0, iri: "", rank: "", scientificName: "",
         commonName: "", assetFamily: "", rankNote: "", accrualNote: ""};
 }
+
+// ── Darwin Core statement emission (G49 — pack semantic layer) ──────────
+//
+// quin.statement is a pure builtin: the host hashes IRIs with
+// generate_60bit_token and seals parity with NQuin::calculate_parity, so the
+// emitted statements are byte-identical to what the SPARQL layer resolves.
+// The host appends one packed-integer quin (gbifTaxonKey as
+// INLINE_TAG_INTEGER) that scripts cannot express — f64 loses precision
+// above 2^53, so the 0b001<<60 tag cannot be formed losslessly in script.
+
+// dwc:taxonRank uses a lowercase controlled vocabulary; GBIF reports
+// uppercase enum values. Map the ranks in use verbatim — unknown ranks
+// emit "" rather than a guessed value (same honesty rule as rankNote).
+pure fn dwc_rank(gbif_rank: string) -> string {
+    if gbif_rank == "SPECIES" { return "species"; }
+    if gbif_rank == "GENUS" { return "genus"; }
+    if gbif_rank == "FAMILY" { return "family"; }
+    if gbif_rank == "ORDER" { return "order"; }
+    return "";
+}
+
+// Statements for one bound render key. Five quins describe the taxon node
+// itself (subject = GBIF species IRI); when asset_iri is non-empty a sixth
+// foaf:depicts edge links the asset subject to the taxon node. Unbound
+// keys return [] — data-only, never a fabricated identity.
+pure fn dwc_statements_for(render_key: string, asset_iri: string) -> List {
+    let t = taxon_for(render_key);
+    if t.bound == 0.0 {
+        return [];
+    }
+    let statements = [
+        quin.statement(subject: t.iri,
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            object: "http://rs.tdwg.org/dwc/terms/Taxon", context: 0),
+        quin.statement(subject: t.iri,
+            predicate: "http://rs.tdwg.org/dwc/terms/taxonID",
+            object: t.iri, context: 0),
+        quin.statement(subject: t.iri,
+            predicate: "http://rs.tdwg.org/dwc/terms/scientificName",
+            object: t.scientificName, context: 0),
+        quin.statement(subject: t.iri,
+            predicate: "http://rs.tdwg.org/dwc/terms/taxonRank",
+            object: dwc_rank(t.rank), context: 0),
+        quin.statement(subject: t.iri,
+            predicate: "http://rs.tdwg.org/dwc/terms/vernacularName",
+            object: t.commonName, context: 0)
+    ];
+    if asset_iri != "" {
+        // list.push is pure — it returns the extended list.
+        return statements.push(quin.statement(subject: asset_iri,
+            predicate: "http://xmlns.com/foaf/0.1/depicts",
+            object: t.iri, context: 0));
+    }
+    return statements;
+}

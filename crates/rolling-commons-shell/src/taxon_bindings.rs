@@ -5,6 +5,9 @@
 //! bioacoustics taxon_id), name strings are display labels only. Unknown
 //! render keys return `bound: 0` — they stay data-only, same rule as the
 //! render selections.
+use qualia_core_db::lexicon::generate_60bit_token;
+use qualia_core_db::resolver::INLINE_TAG_INTEGER;
+use qualia_core_db::NQuin;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
@@ -87,11 +90,7 @@ fn binding_for(render_key: &str) -> Result<Option<TaxonBinding>, JsValue> {
     })
 }
 
-/// Resolve a render key to its canonical taxon record as JSON; `null` when
-/// the key is unbound. Used by the runtime and by export tooling so the
-/// .vibe fixture is the only authored copy of the mapping.
-#[wasm_bindgen]
-pub fn taxon_binding_json(render_key: &str) -> Result<String, JsValue> {
+fn check_render_key(render_key: &str) -> Result<(), JsValue> {
     if render_key.trim().is_empty()
         || render_key.len() > 128
         || !render_key
@@ -100,6 +99,15 @@ pub fn taxon_binding_json(render_key: &str) -> Result<String, JsValue> {
     {
         return Err(JsValue::from_str("taxon render key is outside bounds"));
     }
+    Ok(())
+}
+
+/// Resolve a render key to its canonical taxon record as JSON; `null` when
+/// the key is unbound. Used by the runtime and by export tooling so the
+/// .vibe fixture is the only authored copy of the mapping.
+#[wasm_bindgen]
+pub fn taxon_binding_json(render_key: &str) -> Result<String, JsValue> {
+    check_render_key(render_key)?;
     let Some(binding) = binding_for(render_key)? else {
         return Ok("null".to_owned());
     };
@@ -114,6 +122,110 @@ pub fn taxon_binding_json(render_key: &str) -> Result<String, JsValue> {
         "accrualNote": binding.accrual_note,
     }))
     .map_err(|_| JsValue::from_str("taxon binding serialisation failed"))
+}
+
+/// Maximum quins per bound taxon: five vibe-authored dwc statements, the
+/// foaf:depicts edge, and the host-packed gbifTaxonKey integer quin.
+pub const MAX_DWC_QUINS: usize = 7;
+
+/// Evaluate `dwc_statements_for` in the VibeScript fixture and copy the
+/// sealed quins into the caller-provided buffer, then append the
+/// `urn:qualia:gbif:taxonKey` quin with `INLINE_TAG_INTEGER` packing — the
+/// tag sits above 2^53 so scripts cannot form it losslessly; this is the
+/// same u64 the engine uses for `taxon_id` in gbif_adapter/bioacoustics.
+///
+/// `asset_iri` is the foaf:depicts subject; pass "" to emit taxon-node
+/// statements only. Returns the quin count written.
+pub fn dwc_quins(render_key: &str, asset_iri: &str, out: &mut [NQuin]) -> Result<usize, JsValue> {
+    check_render_key(render_key)?;
+    if asset_iri.len() > 512
+        || asset_iri
+            .bytes()
+            .any(|byte| byte.is_ascii_control() || byte == b' ')
+    {
+        return Err(JsValue::from_str("dwc subject iri is outside bounds"));
+    }
+    let Some(binding) = binding_for(render_key)? else {
+        return Ok(0);
+    };
+    TAXA.with(|cached| {
+        let cached = cached.borrow();
+        let program = match cached.as_ref() {
+            Some(program) => program,
+            None => return Err(JsValue::from_str("taxon VibeScript bindings could not load")),
+        };
+        let mut host = qualia_core_db::poet_host::PoetSnapshot::default();
+        let mut env = vibe::Env::default();
+        let value = vibe::eval_function(
+            program,
+            "dwc_statements_for",
+            vec![
+                vibe::Value::String(render_key.to_owned()),
+                vibe::Value::String(asset_iri.to_owned()),
+            ],
+            &mut host,
+            &mut env,
+        )
+        .map_err(|_| JsValue::from_str("dwc VibeScript emission failed"))?;
+        let vibe::Value::List(items) = value else {
+            return Err(JsValue::from_str("dwc emission did not return a list"));
+        };
+        if items.len() + 1 > out.len() {
+            return Err(JsValue::from_str("dwc quin buffer too small"));
+        }
+        let mut n = 0usize;
+        for item in &items {
+            let vibe::Value::QuinRef(quin) = item else {
+                return Err(JsValue::from_str("dwc emission returned a non-quin value"));
+            };
+            let f = quin.raw_fields();
+            out[n] = NQuin {
+                subject: f[0],
+                predicate: f[1],
+                object: f[2],
+                context: f[3],
+                metadata: f[4],
+                parity: f[5],
+            };
+            n += 1;
+        }
+        let subject = generate_60bit_token(binding.iri.as_bytes());
+        let predicate = generate_60bit_token(b"urn:qualia:gbif:taxonKey");
+        let object = INLINE_TAG_INTEGER | binding.gbif_key;
+        out[n] = NQuin {
+            subject,
+            predicate,
+            object,
+            context: 0,
+            metadata: 0,
+            parity: NQuin::calculate_parity(subject, predicate, object, 0, 0),
+        };
+        Ok(n + 1)
+    })
+}
+
+/// Emit the Darwin Core quins for a render key as JSON — fields are hex
+/// strings so u64 values survive JS's f64 losslessness boundary. Used by
+/// pack/export tooling; the .vibe fixture authors the statements.
+#[wasm_bindgen]
+pub fn taxon_dwc_json(render_key: &str, asset_iri: &str) -> Result<String, JsValue> {
+    let mut buf = [NQuin::default(); MAX_DWC_QUINS];
+    let n = dwc_quins(render_key, asset_iri, &mut buf)?;
+    let quins: Vec<serde_json::Value> = buf[..n]
+        .iter()
+        .map(|quin| {
+            serde_json::json!({
+                "subject": format!("0x{:016x}", quin.subject),
+                "predicate": format!("0x{:016x}", quin.predicate),
+                "object": format!("0x{:016x}", quin.object),
+                "context": format!("0x{:016x}", quin.context),
+                "metadata": format!("0x{:016x}", quin.metadata),
+                "parity": format!("0x{:016x}", quin.parity),
+            })
+        })
+        .collect();
+    serde_json::to_string(&quins)
+        .map_err(|_| JsValue::from_str("dwc quin serialisation failed"))
 }
 
 #[cfg(test)]
@@ -138,5 +250,20 @@ mod tests {
 
         assert_eq!(binding_for("not-a-taxon").unwrap(), None);
         assert_eq!(binding_for("").unwrap(), None);
+    }
+
+    #[test]
+    fn dwc_emission_seals_taxon_node_and_depicts() {
+        let mut buf = [NQuin::default(); MAX_DWC_QUINS];
+        let n = dwc_quins("kangaroo", "rc:asset/fauna/inland-kangaroo-01", &mut buf).unwrap();
+        assert_eq!(n, MAX_DWC_QUINS);
+        assert!(buf[..n].iter().all(|quin| quin.verify_ecc_parity()));
+        // Host-packed integer quin is last: INLINE_TAG_INTEGER | gbifKey.
+        assert_eq!(buf[n - 1].object, INLINE_TAG_INTEGER | 9372);
+        // Without an asset subject the depicts edge is omitted.
+        let n = dwc_quins("kangaroo", "", &mut buf).unwrap();
+        assert_eq!(n, MAX_DWC_QUINS - 1);
+        // Unbound keys emit nothing.
+        assert_eq!(dwc_quins("not-a-taxon", "rc:asset/fauna/x", &mut buf).unwrap(), 0);
     }
 }
