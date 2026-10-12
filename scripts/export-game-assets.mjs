@@ -94,6 +94,7 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
   const manifest = {
   format: 'maslows-challenge-asset-export-v1',
   artStyle: styleSlug,
+  epistemicMode: styleSlug === 'community' ? 'civics' : 'simulation',
   generator: 'scripts/export-game-assets.mjs',
   sourceRecipes: ['crates/rolling-commons-shell/src/asset_catalog.rs',
     'crates/rolling-commons-shell/src/vehicles.rs',

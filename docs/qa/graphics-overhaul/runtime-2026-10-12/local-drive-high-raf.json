@@ -1,0 +1,81 @@
+{
+  "intervalsMs": [
+    9458.599999999977,
+    8576.400000000023,
+    10141.599999999977,
+    9775.300000000047,
+    9825.199999999953
+  ],
+  "timedOut": true,
+  "visibility": "visible",
+  "debug": {
+    "sceneMeshes": 617,
+    "hmcSceneApi": true,
+    "hmcResidentScene": "",
+    "renderer": {
+      "mesh_receipt": {
+        "renderer": "webgpu",
+        "vertex_count": 280500,
+        "index_count": 779436,
+        "frames_presented": 73,
+        "uploaded": true,
+        "success": true
+      },
+      "backend": "webgpu",
+      "portal_tier": 2,
+      "renderer_admitted": true,
+      "frame_presented": true,
+      "gpu_policy_admitted": true,
+      "gpu_execution_observed": true,
+      "producer_views": {
+        "scene_color": true,
+        "linear_depth": true,
+        "motion_vectors": true,
+        "reactive_mask": true
+      },
+      "temporal_producer_ready": true,
+      "temporal_execution_observed": true,
+      "temporal_execution_count": 30,
+      "screen_space_ao_available": true,
+      "shadows_available": true,
+      "fallback": "temporal-resolve",
+      "webgpu_runtime_observed": true,
+      "canvas2d_fallback_observed": false
+    },
+    "camera": {
+      "mode": "drive",
+      "yaw": -1.5707907676696777,
+      "pitch": -0.05979687348008156,
+      "zoom": 0.3499999940395355,
+      "target": {
+        "x": -0.30406174063682556,
+        "y": -0.00991651602089405,
+        "z": 0.41061338782310486
+      }
+    },
+    "canvas": {
+      "width": 1280,
+      "height": 800
+    },
+    "scene": {
+      "scene_key": "opening",
+      "terrain_phase": "settled",
+      "water_state": "dry",
+      "water_level": 0.18000000715255737,
+      "water_phase": 1,
+      "ambient_seed": 3349376988,
+      "effect_seed": 3164379030,
+      "water_ripples": false,
+      "shore_foam": false,
+      "harvest_glow": false,
+      "quality_tier": 2,
+      "ambient_enabled": true,
+      "hmc_resident": false,
+      "fallback": "webgpu",
+      "camera_cue": "map",
+      "camera_focus": -1,
+      "temporal_slice": 1,
+      "temporal_window": 1
+    }
+  }
+}

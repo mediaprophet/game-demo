@@ -1,6 +1,7 @@
 {
   "format": "maslows-challenge-asset-export-v1",
   "artStyle": "community",
+  "epistemicMode": "civics",
   "generator": "scripts/export-game-assets.mjs",
   "sourceRecipes": [
     "crates/rolling-commons-shell/src/asset_catalog.rs",

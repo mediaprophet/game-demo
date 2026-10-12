@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "epistemicMode": "civics",
   "moduleSet": "community-grounds-situations-v1",
   "modules": [
     {

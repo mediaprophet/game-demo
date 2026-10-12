@@ -2314,7 +2314,7 @@ function renderHud() {
     for(const operation of view.operations.filter(operation=>!workshopSelectedPart||operation.part===workshopSelectedPart)){
       button(`workshop:op:${operation.id}`,operation.label,12,y,320,44,VISUAL_REVIEW_REQUESTED);y+=50;
     }
-    label('Fictional repair puzzle · one supplied kit per rig',12,y,320,24);
+    label('Systems diagnostic & repair · one supplied kit per rig',12,y,320,24);
     publishHudDock(items,0,12,'Rig workshop');return;
   }
   if(hudPage==='orders'){
@@ -2471,7 +2471,7 @@ function renderHud() {
     const thermal=engineThermalReadout(),oilColor=engineTempColor(drive.oilTempC,128,142),
       coolantColor=engineTempColor(drive.coolantTempC,104,114);
     panel(16,H-256,W-32,248);
-    label(compact?'LOCAL DRIVE · FICTIONAL ROAD':'LOCAL DRIVE · KESTREL FLATS TO SALTWIND REACH',
+    label(compact?'LOCAL DRIVE · SIMULATION SECTOR':'LOCAL DRIVE · KESTREL FLATS TO SALTWIND REACH',
       32,H-248,compactDriveWidth,21);
     label(`${drive.speed<0?'R ':''}${Math.abs(drive.speed*3.6).toFixed(0)} km/h  ·  ${drive.distance.toFixed(0)} m  ·  ${VEHICLE_RIGS[vehicleRig]}`,
       32,H-226,compactDriveWidth,21);
@@ -2623,7 +2623,7 @@ function renderHud() {
     if(PLACE_PACKAGE.routeGraph.edges.length){
       label(`${PLACE_PACKAGE.routeGraph.edges.length} route segments · see pack provenance`,right+14,y,panelW-28,19);y+=20;
     }else{
-      const noteText='Road routing is not loaded. Direct Drive is a fictional local simulation.';
+      const noteText='Road routing is not loaded. Direct Drive is an autonomous local simulation.';
       const words=noteText.split(' ');let line='';
       for(const word of words){if((line+' '+word).length>Math.max(26,Math.floor((panelW-30)/7))){label(line,right+14,y,panelW-28,18);y+=19;line='';}line+=(line?' ':'')+word;}
       if(line)label(line,right+14,y,panelW-28,18);
@@ -3239,7 +3239,7 @@ function tryAction(id) {
       'activity.housekeeping.linen-first':'You prioritised the guest linen request in the practice shift.',
       'activity.housekeeping.hygiene-first':'You prioritised the room hygiene check in the practice shift.',
       'activity.housekeeping.checklist-first':'You sequenced the room tasks from the checklist in the practice shift.',
-      'activity.housekeeping.complete':'You completed the fictional housekeeping practice shift.'
+      'activity.housekeeping.complete':'You completed the housekeeping practice shift.'
     };
     note(`Day ${state().day} · ${eventCopy[id]||catalog.find(a=>a.id===id)?.label||id} [${r.seq}]`);
     const actionSite=siteForAction(id);

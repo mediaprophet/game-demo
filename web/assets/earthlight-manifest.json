@@ -1,6 +1,7 @@
 {
   "format": "maslows-challenge-asset-export-v1",
   "artStyle": "earthlight",
+  "epistemicMode": "simulation",
   "generator": "scripts/export-game-assets.mjs",
   "sourceRecipes": [
     "crates/rolling-commons-shell/src/asset_catalog.rs",

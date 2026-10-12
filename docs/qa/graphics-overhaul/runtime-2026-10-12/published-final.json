@@ -1,0 +1,286 @@
+{
+  "url": "https://mediaprophet.github.io/game-demo/game.html?renderer-debug",
+  "readyState": "complete",
+  "visibility": "visible",
+  "dpr": 1,
+  "viewport": [
+    1280,
+    800
+  ],
+  "hardwareConcurrency": 8,
+  "crossOriginIsolated": false,
+  "loader": {
+    "className": "world-loader",
+    "stage": "Downloading the illustrated ground",
+    "message": "8.0 of 7.0 MB",
+    "busy": "true"
+  },
+  "quality": "2",
+  "pin": "QualiaDB · 204863ad",
+  "tier": "WebGPU active · 4 land tiles · 617 .10d meshes",
+  "debug": {
+    "sceneMeshes": 617,
+    "hmcSceneApi": true,
+    "hmcResidentScene": "",
+    "renderer": {
+      "mesh_receipt": {
+        "renderer": "webgpu",
+        "vertex_count": 280500,
+        "index_count": 779436,
+        "frames_presented": 7,
+        "uploaded": true,
+        "success": true
+      },
+      "backend": "webgpu",
+      "portal_tier": 2,
+      "renderer_admitted": true,
+      "frame_presented": true,
+      "gpu_policy_admitted": true,
+      "gpu_execution_observed": true,
+      "producer_views": {
+        "scene_color": true,
+        "linear_depth": true,
+        "motion_vectors": true,
+        "reactive_mask": true
+      },
+      "temporal_producer_ready": true,
+      "temporal_execution_observed": true,
+      "temporal_execution_count": 45,
+      "screen_space_ao_available": true,
+      "shadows_available": true,
+      "fallback": "temporal-resolve",
+      "webgpu_runtime_observed": true,
+      "canvas2d_fallback_observed": false
+    },
+    "camera": {
+      "mode": "map",
+      "yaw": 0.6,
+      "pitch": 0.42,
+      "zoom": 1.12,
+      "target": {
+        "id": "kestrel",
+        "x": -0.4005773067474365,
+        "y": -0.10657688230276108,
+        "z": 0.3647516965866089
+      }
+    },
+    "canvas": {
+      "width": 1280,
+      "height": 800
+    },
+    "scene": {
+      "scene_key": "opening",
+      "terrain_phase": "settled",
+      "water_state": "dry",
+      "water_level": 0.18000000715255737,
+      "water_phase": 1,
+      "ambient_seed": 3349376988,
+      "effect_seed": 3164379030,
+      "water_ripples": false,
+      "shore_foam": false,
+      "harvest_glow": false,
+      "quality_tier": 2,
+      "ambient_enabled": true,
+      "hmc_resident": false,
+      "fallback": "webgpu",
+      "camera_cue": "map",
+      "camera_focus": -1,
+      "temporal_slice": 1,
+      "temporal_window": 1
+    }
+  },
+  "journal": "Graphics quality · High detailGraphics quality · Balancedslice ready — WebGPU active; navigator.gpu=yes; adapter=confirmed; device=confirmed; init=armed; runtime=not-observed; canvas2d=confirmed; portalTier=2; policy=admitted; gpuExecution=observed; temporal=closedHMC optional path unavailable: Error: verified 945, expected 906",
+  "gpuErrors": [],
+  "pipelineErrors": [],
+  "shaderErrors": [],
+  "resources": [
+    {
+      "name": "https://mediaprophet.github.io/game-demo/pkg/rolling_commons_shell.js?v=9dbdf0c45bd40ab3-community-overhaul",
+      "startTime": 1106.199999999255,
+      "duration": 481.1000000014901,
+      "transferSize": 65861,
+      "encodedBodySize": 65561,
+      "decodedBodySize": 359464
+    },
+    {
+      "name": "https://mediaprophet.github.io/favicon.ico",
+      "startTime": 1135.8999999985099,
+      "duration": 249,
+      "transferSize": 5442,
+      "encodedBodySize": 5142,
+      "decodedBodySize": 9115
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/pkg/rolling_commons_shell_bg.wasm?v=9dbdf0c45bd40ab3-community-overhaul",
+      "startTime": 1623.300000000745,
+      "duration": 2114.39999999851,
+      "transferSize": 3379985,
+      "encodedBodySize": 3379685,
+      "decodedBodySize": 9158724
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/characters.mjs?v=9dbdf0c45bd40ab3-community-overhaul",
+      "startTime": 3818.300000000745,
+      "duration": 251.69999999925494,
+      "transferSize": 3967,
+      "encodedBodySize": 3667,
+      "decodedBodySize": 9100
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/fixtures/seed.ttl",
+      "startTime": 4083.099999997765,
+      "duration": 394.9000000022352,
+      "transferSize": 5599,
+      "encodedBodySize": 5299,
+      "decodedBodySize": 5299
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/fixtures/actions.json",
+      "startTime": 4083.39999999851,
+      "duration": 264.1000000014901,
+      "transferSize": 15036,
+      "encodedBodySize": 14736,
+      "decodedBodySize": 142233
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/fixtures/community-beacon.vibe",
+      "startTime": 4083.699999999255,
+      "duration": 261.8999999985099,
+      "transferSize": 387,
+      "encodedBodySize": 87,
+      "decodedBodySize": 87
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/fixtures/drive-simulation.vibe",
+      "startTime": 4084,
+      "duration": 271,
+      "transferSize": 5680,
+      "encodedBodySize": 5380,
+      "decodedBodySize": 19486
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/fixtures/investment-taxonomy.json",
+      "startTime": 4084.199999999255,
+      "duration": 921.6999999992549,
+      "transferSize": 3385,
+      "encodedBodySize": 3085,
+      "decodedBodySize": 15136
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/fixtures/scenarios/community-grounds-v1.json",
+      "startTime": 4084.599999997765,
+      "duration": 443.9000000022352,
+      "transferSize": 3233,
+      "encodedBodySize": 2933,
+      "decodedBodySize": 11925
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/fixtures/places/fictional-community-v1.json",
+      "startTime": 4084.800000000745,
+      "duration": 280.29999999701977,
+      "transferSize": 1225,
+      "encodedBodySize": 925,
+      "decodedBodySize": 4186
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/fixtures/graphics/review-cameras.json",
+      "startTime": 6711.699999999255,
+      "duration": 245.39999999850988,
+      "transferSize": 1498,
+      "encodedBodySize": 1198,
+      "decodedBodySize": 4004
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/assets/ecology/profiles/se-corridor-reference.json",
+      "startTime": 7200.800000000745,
+      "duration": 591.7999999970198,
+      "transferSize": 1889,
+      "encodedBodySize": 1589,
+      "decodedBodySize": 6260
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/assets/maslows-challenge-community.hmc",
+      "startTime": 15828.300000000745,
+      "duration": 209968.3999999985,
+      "transferSize": 7363542,
+      "encodedBodySize": 7363242,
+      "decodedBodySize": 28989894
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/assets/community-manifest.json",
+      "startTime": 15829.300000000745,
+      "duration": 888.5999999977648,
+      "transferSize": 86577,
+      "encodedBodySize": 86277,
+      "decodedBodySize": 733558
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/assets/earthlight-manifest.json",
+      "startTime": 943479.5999999978,
+      "duration": 808.6000000014901,
+      "transferSize": 85444,
+      "encodedBodySize": 85144,
+      "decodedBodySize": 733626
+    },
+    {
+      "name": "https://mediaprophet.github.io/game-demo/assets/manifest.json",
+      "startTime": 946348.5999999978,
+      "duration": 476.6000000014901,
+      "transferSize": 77131,
+      "encodedBodySize": 76831,
+      "decodedBodySize": 733302
+    }
+  ],
+  "navigation": [
+    {
+      "name": "https://mediaprophet.github.io/game-demo/game.html?renderer-debug",
+      "entryType": "navigation",
+      "startTime": 0,
+      "duration": 1119.0999999977648,
+      "navigationId": 5444,
+      "initiatorType": "navigation",
+      "deliveryType": "",
+      "nextHopProtocol": "h2",
+      "renderBlockingStatus": "non-blocking",
+      "contentType": "text/html",
+      "contentEncoding": "gzip",
+      "workerStart": 0,
+      "workerRouterEvaluationStart": 0,
+      "workerCacheLookupStart": 0,
+      "workerMatchedSourceType": "",
+      "workerFinalSourceType": "",
+      "redirectStart": 0,
+      "redirectEnd": 0,
+      "fetchStart": 2.199999999254942,
+      "domainLookupStart": 4.099999997764826,
+      "domainLookupEnd": 73.59999999776483,
+      "connectStart": 73.59999999776483,
+      "secureConnectionStart": 97.80000000074506,
+      "connectEnd": 155.69999999925494,
+      "requestStart": 156.69999999925494,
+      "responseStart": 674.1999999992549,
+      "firstInterimResponseStart": 0,
+      "finalResponseHeadersStart": 674.1999999992549,
+      "responseEnd": 733.0999999977648,
+      "transferSize": 76150,
+      "encodedBodySize": 75850,
+      "decodedBodySize": 262909,
+      "responseStatus": 200,
+      "serverTiming": [],
+      "unloadEventStart": 0,
+      "unloadEventEnd": 0,
+      "domInteractive": 1050.3999999985099,
+      "domContentLoadedEventStart": 1108.5,
+      "domContentLoadedEventEnd": 1108.5999999977648,
+      "domComplete": 1118.699999999255,
+      "loadEventStart": 1119.0999999977648,
+      "loadEventEnd": 1119.0999999977648,
+      "type": "navigate",
+      "redirectCount": 0,
+      "activationStart": 0,
+      "criticalCHRestart": 0,
+      "notRestoredReasons": null,
+      "confidence": {}
+    }
+  ]
+}

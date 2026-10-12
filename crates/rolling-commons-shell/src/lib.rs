@@ -1915,6 +1915,7 @@ pub struct GameSession {
     events: Vec<String>,
     seq: u32,
     drive_verified:[bool;4],
+    epistemic_mode: String,
 }
 
 /// Epistemic runtime type alias: `WorldSession` represents the general-purpose
@@ -1931,12 +1932,11 @@ pub type ScenarioSession = GameSession;
 #[wasm_bindgen]
 pub struct GameDriveSimulation {
     program: vibe::Program,
+    policy_hash: u64,
 }
 
 /// Epistemic alias for physical vehicle and thermal simulation runtimes.
 pub type WorldDriveSimulation = GameDriveSimulation;
-    policy_hash:u64,
-}
 
 #[wasm_bindgen]
 impl GameDriveSimulation {
@@ -2056,13 +2056,43 @@ impl GameSession {
             }
         }
         events.sort_by_key(|(n, _)| *n);
+        let epistemic_mode = catalog
+            .get("epistemicMode")
+            .or_else(|| catalog.get("epistemic_mode"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("simulation")
+            .to_string();
         Ok(GameSession {
             lines,
             actions,
             events: events.into_iter().map(|(_, id)| id).collect(),
             seq,
             drive_verified:[false;4],
+            epistemic_mode,
         })
+    }
+
+    /// Active epistemic modality mode ("fiction", "non-fiction", "simulation", "hypothesis", "civics").
+    pub fn epistemic_mode(&self) -> String {
+        self.epistemic_mode.clone()
+    }
+
+    /// Set the epistemic modality mode.
+    pub fn set_epistemic_mode(&mut self, mode: &str) -> Result<(), JsValue> {
+        let normalized = match mode.to_ascii_lowercase().as_str() {
+            "fiction" => "fiction",
+            "non-fiction" | "nonfiction" => "non-fiction",
+            "simulation" => "simulation",
+            "hypothesis" => "hypothesis",
+            "civics" => "civics",
+            _ => {
+                return Err(JsValue::from_str(
+                    "invalid epistemic_mode: must be fiction | non-fiction | simulation | hypothesis | civics",
+                ))
+            }
+        };
+        self.epistemic_mode = normalized.to_string();
+        Ok(())
     }
 
     /// Current world document as N3 text (includes `ev:` event lines).
@@ -2627,7 +2657,7 @@ mod vibe_scene_expansion_tests {
 
     #[test]
     fn test_vibe_eval_session_with_modalities() {
-        let session = GameSession {
+        let mut session = GameSession {
             lines: vec![
                 "rc:player rc:coin 10 .".into(),
                 "rc:workshop rc:status \"online\" .".into(),
@@ -2637,7 +2667,12 @@ mod vibe_scene_expansion_tests {
             events: vec!["init".into()],
             seq: 1,
             drive_verified: [false; 4],
+            epistemic_mode: "simulation".into(),
         };
+        assert_eq!(session.epistemic_mode(), "simulation");
+        assert!(session.set_epistemic_mode("civics").is_ok());
+        assert_eq!(session.epistemic_mode(), "civics");
+        assert!(session.set_epistemic_mode("invalid-mode").is_err());
         // Verify line_to_quin converts Turtle triples
         assert!(line_to_quin("rc:player rc:coin 10 .").is_some());
         assert!(line_to_quin(".").is_none());

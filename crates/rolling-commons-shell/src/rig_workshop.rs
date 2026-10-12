@@ -178,7 +178,7 @@ impl GameSession {
             serde_json::json!({"id":id,"label":label,"part":part})
         }).collect();
         serde_json::to_string(&serde_json::json!({"state":state,"operations":operations,
-            "kit":"One compatible radiator and one protected solar kit supplied for this fictional puzzle."}))
+            "kit":"One compatible radiator and one protected solar kit supplied for this systems diagnostic."}))
             .map_err(|_|fail("workshop view encoding failed"))
     }
     pub fn workshop_operate(&mut self,rig:u8,command:&str,expected_revision:u32)->Result<String,JsValue> {
@@ -222,14 +222,14 @@ mod tests {
     }
     #[wasm_bindgen_test]
     fn saved_disassembly_replays_and_stale_receipts_cannot_consume_parts() {
-        let mut session=GameSession{lines:Vec::new(),actions:Vec::new(),events:Vec::new(),seq:0,drive_verified:[false;4]};
+        let mut session=GameSession{lines:Vec::new(),actions:Vec::new(),events:Vec::new(),seq:0,drive_verified:[false;4],epistemic_mode:"simulation".into()};
         for (revision,command) in ["open","isolate","measure","drain","remove-hose","remove-radiator"].iter().enumerate() {
             session.workshop_operate(0,command,revision as u32).unwrap();
         }
         let before=session.world();
         assert!(session.workshop_operate(0,"install-compact",0).is_err());
         assert_eq!(session.world(),before);
-        let loaded=GameSession{lines:before.lines().map(str::to_owned).collect(),actions:Vec::new(),events:Vec::new(),seq:0,drive_verified:[false;4]};
+        let loaded=GameSession{lines:before.lines().map(str::to_owned).collect(),actions:Vec::new(),events:Vec::new(),seq:0,drive_verified:[false;4],epistemic_mode:"simulation".into()};
         assert_eq!(read(&session,0).unwrap(),read(&loaded,0).unwrap());
         assert!(session.events.is_empty());assert_eq!(session.seq,0);
         let mut corrupt=loaded;

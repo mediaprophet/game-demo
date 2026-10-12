@@ -1,6 +1,6 @@
 module <https://civics.au/game/modules/rig_workshop>;
 
-// Fictional assembly puzzle. Supplied scenario kit is owned by this rig;
+// Systems diagnostic & assembly. Supplied scenario kit is owned by this rig;
 // installing/removing parts never grants campaign currency or duplicate stock.
 pure fn pick(c: bool, a: f64, b: f64) -> f64 {
     if c { return a; }

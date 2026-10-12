@@ -1,0 +1,134 @@
+[
+  {
+    "name": "published",
+    "loader": {
+      "className": "world-loader is-dismissed",
+      "stage": "Ready to explore",
+      "message": "The local ground is ready. The shared model pack is unavailable, so the built-in scene is active.",
+      "busy": "false"
+    },
+    "samples": [
+      {
+        "label": "default",
+        "count": 5,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 11687.059999999998,
+        "rafRate": 0.08556471858619706,
+        "p50Ms": 11140.900000000023,
+        "p95Ms": 13738.699999999953,
+        "p99Ms": 13738.699999999953
+      },
+      {
+        "label": "balanced",
+        "count": 5,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 10691.220000000007,
+        "rafRate": 0.09353469482435113,
+        "p50Ms": 10874.399999999965,
+        "p95Ms": 11906.900000000023,
+        "p99Ms": 11906.900000000023
+      },
+      {
+        "label": "high",
+        "count": 5,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 10597.96000000001,
+        "rafRate": 0.09435778206371784,
+        "p50Ms": 10458.099999999977,
+        "p95Ms": 12406.5,
+        "p99Ms": 12406.5
+      },
+      {
+        "label": "walk-high",
+        "count": 4,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 11911.024999999994,
+        "rafRate": 0.08395583083739648,
+        "p50Ms": 11457.20000000007,
+        "p95Ms": 12856.099999999977,
+        "p99Ms": 12856.099999999977
+      },
+      {
+        "label": "drive-high",
+        "count": 5,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 10091.719999999996,
+        "rafRate": 0.09909113609969365,
+        "p50Ms": 9542,
+        "p95Ms": 12006.79999999993,
+        "p99Ms": 12006.79999999993
+      }
+    ]
+  },
+  {
+    "name": "local",
+    "loader": {
+      "className": "world-loader is-dismissed",
+      "stage": "Ready to explore",
+      "message": "The local ground is ready. The shared model pack is unavailable, so the built-in scene is active.",
+      "busy": "false"
+    },
+    "samples": [
+      {
+        "label": "default",
+        "count": 6,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 8501.349999999997,
+        "rafRate": 0.11762837666958782,
+        "p50Ms": 8276.600000000006,
+        "p95Ms": 9042.600000000006,
+        "p99Ms": 9042.600000000006
+      },
+      {
+        "label": "balanced",
+        "count": 5,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 9755.319999999996,
+        "rafRate": 0.10250816990114117,
+        "p50Ms": 9358.699999999953,
+        "p95Ms": 11457.200000000012,
+        "p99Ms": 11457.200000000012
+      },
+      {
+        "label": "high",
+        "count": 6,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 8853.86666666666,
+        "rafRate": 0.11294500331305353,
+        "p50Ms": 8925.899999999965,
+        "p95Ms": 9492.299999999988,
+        "p99Ms": 9492.299999999988
+      },
+      {
+        "label": "walk-high",
+        "count": 5,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 11344.03999999999,
+        "rafRate": 0.08815201638922296,
+        "p50Ms": 11723.5,
+        "p95Ms": 13721,
+        "p99Ms": 13721
+      },
+      {
+        "label": "drive-high",
+        "count": 5,
+        "timedOut": true,
+        "visibility": "visible",
+        "meanMs": 9555.419999999995,
+        "rafRate": 0.10465264739802128,
+        "p50Ms": 9775.300000000047,
+        "p95Ms": 10141.599999999977,
+        "p99Ms": 10141.599999999977
+      }
+    ]
+  }
+]

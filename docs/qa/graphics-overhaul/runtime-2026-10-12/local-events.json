@@ -1,0 +1,5344 @@
+[
+  {
+    "method": "Runtime.executionContextCreated",
+    "params": {
+      "context": {
+        "id": 1,
+        "origin": "://",
+        "name": "",
+        "uniqueId": "-3142115585992580019.988532971508618193",
+        "auxData": {
+          "isDefault": true,
+          "type": "default",
+          "frameId": "573194E84B9F133712C379774CF15537"
+        }
+      }
+    }
+  },
+  {
+    "method": "Page.frameResized",
+    "params": {}
+  },
+  {
+    "method": "Page.frameStartedNavigating",
+    "params": {
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "navigationType": "differentDocument"
+    }
+  },
+  {
+    "method": "Page.frameStartedLoading",
+    "params": {
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "method": "GET",
+        "headers": {
+          "Upgrade-Insecure-Requests": "1",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        },
+        "mixedContentType": "none",
+        "initialPriority": "VeryHigh",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.156266,
+      "wallTime": 1791789142.220435,
+      "initiator": {
+        "type": "other"
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Document",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.158129
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "266841",
+        "Content-Type": "text/html; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: 266841\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:22 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.172805,
+      "type": "Document",
+      "response": {
+        "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive",
+          "Content-Length": "266841",
+          "Content-Type": "text/html; charset=utf-8",
+          "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+          "Keep-Alive": "timeout=5"
+        },
+        "mimeType": "text/html",
+        "charset": "utf-8",
+        "connectionReused": true,
+        "connectionId": 1208,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 224,
+        "timing": {
+          "requestTime": 26460.158129,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 2.148,
+          "sendEnd": 2.288,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 11.821,
+          "receiveHeadersEnd": 12.242
+        },
+        "responseTime": 1791789142234.098,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Runtime.executionContextsCleared",
+    "params": {}
+  },
+  {
+    "method": "Runtime.executionContextsCleared",
+    "params": {}
+  },
+  {
+    "method": "Page.frameNavigated",
+    "params": {
+      "frame": {
+        "id": "573194E84B9F133712C379774CF15537",
+        "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+        "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "domainAndRegistry": "",
+        "securityOrigin": "http://127.0.0.1:8089",
+        "securityOriginDetails": {
+          "isLocalhost": true
+        },
+        "mimeType": "text/html",
+        "adFrameStatus": {
+          "adFrameType": "none"
+        },
+        "secureContextType": "SecureLocalhost",
+        "crossOriginIsolatedContextType": "NotIsolated",
+        "gatedAPIFeatures": []
+      },
+      "type": "Navigation"
+    }
+  },
+  {
+    "method": "Network.policyUpdated",
+    "params": {}
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.187189,
+      "dataLength": 266841,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Runtime.executionContextCreated",
+    "params": {
+      "context": {
+        "id": 2,
+        "origin": "http://127.0.0.1:8089",
+        "name": "",
+        "uniqueId": "6493317234641877955.3282046924780426200",
+        "auxData": {
+          "isDefault": true,
+          "type": "default",
+          "frameId": "573194E84B9F133712C379774CF15537"
+        }
+      }
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.178353,
+      "encodedDataLength": 267065
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.2",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Origin": "http://127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "script",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.425838
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.2",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/pkg/rolling_commons_shell.js?v=c9f41788cc40b056-community-overhaul",
+        "method": "GET",
+        "headers": {
+          "Origin": "http://127.0.0.1:8089",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.422501,
+      "wallTime": 1791789142.487615,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 744,
+              "columnNumber": 59
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Script",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false,
+      "renderBlockingBehavior": "NonBlocking"
+    }
+  },
+  {
+    "method": "Page.domContentEventFired",
+    "params": {
+      "timestamp": 26460.425271
+    }
+  },
+  {
+    "method": "Page.loadEventFired",
+    "params": {
+      "timestamp": 26460.440531
+    }
+  },
+  {
+    "method": "Page.frameStoppedLoading",
+    "params": {
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.2",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "359394",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/javascript; charset=utf-8\r\nContent-Length: 359394\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:22 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.3",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/favicon.ico",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.454817,
+      "wallTime": 1791789142.519027,
+      "initiator": {
+        "type": "other"
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Other",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.3",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "image",
+        "Sec-Fetch-Mode": "no-cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.456437
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.3",
+      "blockedCookies": [],
+      "headers": {
+        "Connection": "keep-alive",
+        "Content-Length": "23",
+        "Content-Type": "text/plain; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 404,
+      "headersText": "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain; charset=utf-8\r\nDate: Mon, 12 Oct 2026 07:12:22 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\nContent-Length: 23\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.3",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.474591,
+      "type": "Other",
+      "response": {
+        "url": "http://127.0.0.1:8089/favicon.ico",
+        "status": 404,
+        "statusText": "Not Found",
+        "headers": {
+          "Keep-Alive": "timeout=5",
+          "Content-Length": "23",
+          "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+          "Content-Type": "text/plain; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "text/plain",
+        "charset": "utf-8",
+        "connectionReused": true,
+        "connectionId": 1208,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 171,
+        "timing": {
+          "requestTime": 26460.456437,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 2.957,
+          "sendEnd": 3.122,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 9.49,
+          "receiveHeadersEnd": 14.188
+        },
+        "responseTime": 1791789142530.075,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Log.entryAdded",
+    "params": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "timestamp": 1791789142538.795,
+        "url": "http://127.0.0.1:8089/favicon.ico",
+        "networkRequestId": "24672.3"
+      }
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.3",
+      "timestamp": 26460.474954,
+      "dataLength": 23,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.3",
+      "timestamp": 26460.473762,
+      "encodedDataLength": 194
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.2",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.502129,
+      "type": "Script",
+      "response": {
+        "url": "http://127.0.0.1:8089/pkg/rolling_commons_shell.js?v=c9f41788cc40b056-community-overhaul",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "359394",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+          "Content-Type": "application/javascript; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/javascript",
+        "charset": "utf-8",
+        "connectionReused": true,
+        "connectionId": 1208,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 237,
+        "timing": {
+          "requestTime": 26460.425838,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 1.019,
+          "sendEnd": 1.238,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 8.23,
+          "receiveHeadersEnd": 25.804
+        },
+        "responseTime": 1791789142498.216,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.2",
+      "timestamp": 26460.502207,
+      "dataLength": 331539,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.2",
+      "timestamp": 26460.502212,
+      "dataLength": 27855,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.2",
+      "timestamp": 26460.502762,
+      "dataLength": 0,
+      "encodedDataLength": 359394
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.2",
+      "timestamp": 26460.457567,
+      "encodedDataLength": 359631
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.4",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/pkg/rolling_commons_shell_bg.wasm?v=c9f41788cc40b056-community-overhaul",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.508951,
+      "wallTime": 1791789142.574389,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "__wbg_init",
+              "scriptId": "7",
+              "url": "http://127.0.0.1:8089/pkg/rolling_commons_shell.js?v=c9f41788cc40b056-community-overhaul",
+              "lineNumber": 10080,
+              "columnNumber": 25
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 746,
+              "columnNumber": 15
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.4",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.511254
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.4",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "9153234",
+        "Content-Type": "application/wasm",
+        "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/wasm\r\nContent-Length: 9153234\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:22 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.4",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.522005,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/pkg/rolling_commons_shell_bg.wasm?v=c9f41788cc40b056-community-overhaul",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "9153234",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+          "Content-Type": "application/wasm",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/wasm",
+        "charset": "",
+        "connectionReused": true,
+        "connectionId": 1208,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 217,
+        "timing": {
+          "requestTime": 26460.511254,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 4.97,
+          "sendEnd": 5.124,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 8.85,
+          "receiveHeadersEnd": 9.131
+        },
+        "responseTime": 1791789142584.252,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.525432,
+      "dataLength": 266023,
+      "encodedDataLength": 266023
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.532631,
+      "dataLength": 127193,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.536957,
+      "dataLength": 327680,
+      "encodedDataLength": 127193
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.539791,
+      "dataLength": 65536,
+      "encodedDataLength": 393216
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.540398,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.541367,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.543311,
+      "dataLength": 131072,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.55081,
+      "dataLength": 196608,
+      "encodedDataLength": 458752
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.560172,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.56174,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.565813,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.570662,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.571382,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.571846,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.577716,
+      "dataLength": 65536,
+      "encodedDataLength": 196608
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.583282,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.583865,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.584345,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.584962,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.585941,
+      "dataLength": 65536,
+      "encodedDataLength": 262144
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.587158,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.587836,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.588213,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.597451,
+      "dataLength": 65536,
+      "encodedDataLength": 196608
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.603336,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.604813,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.605303,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.60663,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.609554,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.610179,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.61093,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.611502,
+      "dataLength": 131072,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.619099,
+      "dataLength": 65536,
+      "encodedDataLength": 458752
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.619918,
+      "dataLength": 65536,
+      "encodedDataLength": 262144
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.620357,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.621029,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.62161,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.624057,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.625605,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.626224,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.626663,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.633364,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.633987,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.636487,
+      "dataLength": 65536,
+      "encodedDataLength": 196608
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.637686,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.638279,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.638794,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.641286,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.642081,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.643322,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.650959,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.672887,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.674159,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.677531,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.683881,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.684928,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.686365,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.687731,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.688737,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.689564,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.690457,
+      "dataLength": 131072,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.692341,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.693757,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.69457,
+      "dataLength": 65536,
+      "encodedDataLength": 393216
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.700669,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.701662,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.705309,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.705881,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.706425,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.707085,
+      "dataLength": 131072,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.708041,
+      "dataLength": 131072,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.710384,
+      "dataLength": 65536,
+      "encodedDataLength": 458752
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.711042,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.719543,
+      "dataLength": 65536,
+      "encodedDataLength": 196608
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.721548,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.722628,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.72318,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.724547,
+      "dataLength": 131072,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.725543,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.727695,
+      "dataLength": 65536,
+      "encodedDataLength": 327680
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.732406,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.734364,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.7363,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.750883,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.754925,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.767765,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.772806,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.775339,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.776628,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.779415,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.783692,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.785005,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.786004,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.786467,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.788438,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.789349,
+      "dataLength": 196608,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.794044,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.801812,
+      "dataLength": 65536,
+      "encodedDataLength": 262144
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.805374,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.806219,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.807218,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.815466,
+      "dataLength": 196608,
+      "encodedDataLength": 262144
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.81691,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.818263,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.818935,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.82044,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.82142,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.823117,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.8262,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.82888,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.830513,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.832183,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.834187,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.836632,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.837172,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.837673,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.838347,
+      "dataLength": 131072,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.83903,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.84426,
+      "dataLength": 43730,
+      "encodedDataLength": 371410
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.4",
+      "timestamp": 26460.843217,
+      "encodedDataLength": 9153451
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.5",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/characters.mjs?v=c9f41788cc40b056-community-overhaul",
+        "method": "GET",
+        "headers": {
+          "Origin": "http://127.0.0.1:8089",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.900751,
+      "wallTime": 1791789142.964978,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 748,
+              "columnNumber": 54
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Script",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false,
+      "renderBlockingBehavior": "NonBlocking"
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.5",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Origin": "http://127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "script",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.901691
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.5",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "9100",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/javascript; charset=utf-8\r\nContent-Length: 9100\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:22 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.5",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.912026,
+      "type": "Script",
+      "response": {
+        "url": "http://127.0.0.1:8089/characters.mjs?v=c9f41788cc40b056-community-overhaul",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "9100",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+          "Content-Type": "application/javascript; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/javascript",
+        "charset": "utf-8",
+        "connectionReused": true,
+        "connectionId": 1208,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 235,
+        "timing": {
+          "requestTime": 26460.901691,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 1.969,
+          "sendEnd": 2.126,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 5.595,
+          "receiveHeadersEnd": 6.121
+        },
+        "responseTime": 1791789142971.432,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.5",
+      "timestamp": 26460.912237,
+      "dataLength": 3861,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.5",
+      "timestamp": 26460.912245,
+      "dataLength": 5239,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.5",
+      "timestamp": 26460.912476,
+      "dataLength": 0,
+      "encodedDataLength": 9100
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.5",
+      "timestamp": 26460.909197,
+      "encodedDataLength": 9335
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.6",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/fixtures/seed.ttl",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.91868,
+      "wallTime": 1791789142.982907,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 27
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 5
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.7",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/fixtures/actions.json",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.919046,
+      "wallTime": 1791789142.983256,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 27
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 5
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.8",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/fixtures/community-beacon.vibe",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.919305,
+      "wallTime": 1791789142.9835,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 27
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 5
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.9",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/fixtures/drive-simulation.vibe",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.919685,
+      "wallTime": 1791789142.984069,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 27
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 5
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.10",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/fixtures/investment-taxonomy.json",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.920194,
+      "wallTime": 1791789142.984424,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 27
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 5
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.11",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/fixtures/scenarios/community-grounds-v1.json",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.920518,
+      "wallTime": 1791789142.984716,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 27
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 5
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.12",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/fixtures/places/fictional-community-v1.json",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26460.921536,
+      "wallTime": 1791789142.985745,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 27
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 757,
+              "columnNumber": 5
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.6",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Pragma": "no-cache",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.919489
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.7",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Pragma": "no-cache",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.920439
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.8",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Pragma": "no-cache",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.921235
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.9",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Pragma": "no-cache",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.922694
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.6",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "5299",
+        "Content-Type": "text/turtle; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: text/turtle; charset=utf-8\r\nContent-Length: 5299\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:22 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.10",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Pragma": "no-cache",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.92476
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.11",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Pragma": "no-cache",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.926555
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.12",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Pragma": "no-cache",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26460.928278
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.7",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "142233",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 142233\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:22 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.6",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.932963,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/fixtures/seed.ttl",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "5299",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+          "Content-Type": "text/turtle; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "text/turtle",
+        "charset": "utf-8",
+        "connectionReused": true,
+        "connectionId": 1208,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 224,
+        "timing": {
+          "requestTime": 26460.919489,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.412,
+          "sendEnd": 0.585,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 9.116,
+          "receiveHeadersEnd": 9.168
+        },
+        "responseTime": 1791789142992.753,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.6",
+      "timestamp": 26460.933571,
+      "dataLength": 5299,
+      "encodedDataLength": 5299
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.6",
+      "timestamp": 26460.929603,
+      "encodedDataLength": 5523
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.7",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.934804,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/fixtures/actions.json",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "142233",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:22 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/json",
+        "charset": "utf-8",
+        "connectionReused": true,
+        "connectionId": 1222,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 231,
+        "timing": {
+          "requestTime": 26460.920439,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.348,
+          "sendEnd": 0.507,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 12.497,
+          "receiveHeadersEnd": 12.555
+        },
+        "responseTime": 1791789142997.083,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.7",
+      "timestamp": 26460.935313,
+      "dataLength": 65536,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.7",
+      "timestamp": 26460.939322,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.8",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "87",
+        "Content-Type": "text/plain; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 87\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:23 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.7",
+      "timestamp": 26460.941919,
+      "dataLength": 11161,
+      "encodedDataLength": 65536
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.9",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "19486",
+        "Content-Type": "text/plain; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 19486\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:23 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.7",
+      "timestamp": 26460.943866,
+      "dataLength": 0,
+      "encodedDataLength": 11161
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.7",
+      "timestamp": 26460.941381,
+      "encodedDataLength": 142464
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.12",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "4186",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 4186\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:23 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.8",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.947216,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/fixtures/community-beacon.vibe",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "87",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+          "Content-Type": "text/plain; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "text/plain",
+        "charset": "utf-8",
+        "connectionReused": false,
+        "connectionId": 1274,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 221,
+        "timing": {
+          "requestTime": 26460.921235,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 0.178,
+          "dnsEnd": 0.194,
+          "connectStart": 0.194,
+          "connectEnd": 2.697,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 2.896,
+          "sendEnd": 3.019,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 19.012,
+          "receiveHeadersEnd": 19.071
+        },
+        "responseTime": 1791789143004.395,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.10",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "15688",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 15688\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:23 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.9",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.949504,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/fixtures/drive-simulation.vibe",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "19486",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+          "Content-Type": "text/plain; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "text/plain",
+        "charset": "utf-8",
+        "connectionReused": false,
+        "connectionId": 1279,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 224,
+        "timing": {
+          "requestTime": 26460.922694,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 0.204,
+          "dnsEnd": 0.22,
+          "connectStart": 0.22,
+          "connectEnd": 1.303,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 1.664,
+          "sendEnd": 1.764,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 20.864,
+          "receiveHeadersEnd": 20.924
+        },
+        "responseTime": 1791789143007.706,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.8",
+      "timestamp": 26460.949978,
+      "dataLength": 87,
+      "encodedDataLength": 87
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.8",
+      "timestamp": 26460.940947,
+      "encodedDataLength": 308
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.9",
+      "timestamp": 26460.950373,
+      "dataLength": 19486,
+      "encodedDataLength": 19486
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.9",
+      "timestamp": 26460.944348,
+      "encodedDataLength": 19710
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.12",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.950987,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/fixtures/places/fictional-community-v1.json",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "4186",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/json",
+        "charset": "utf-8",
+        "connectionReused": true,
+        "connectionId": 1208,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 229,
+        "timing": {
+          "requestTime": 26460.928278,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 2.192,
+          "sendEnd": 2.31,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 18.682,
+          "receiveHeadersEnd": 18.745
+        },
+        "responseTime": 1791789143011.107,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.11",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "11925",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 11925\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:23 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.12",
+      "timestamp": 26460.951447,
+      "dataLength": 4186,
+      "encodedDataLength": 4186
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.12",
+      "timestamp": 26460.947768,
+      "encodedDataLength": 4415
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.10",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.952503,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/fixtures/investment-taxonomy.json",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "15688",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/json",
+        "charset": "utf-8",
+        "connectionReused": false,
+        "connectionId": 1284,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 230,
+        "timing": {
+          "requestTime": 26460.92476,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 0.215,
+          "dnsEnd": 0.232,
+          "connectStart": 0.232,
+          "connectEnd": 4.566,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 5.196,
+          "sendEnd": 5.358,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 24.57,
+          "receiveHeadersEnd": 24.668
+        },
+        "responseTime": 1791789143013.478,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.10",
+      "timestamp": 26460.953203,
+      "dataLength": 15688,
+      "encodedDataLength": 15688
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.10",
+      "timestamp": 26460.950166,
+      "encodedDataLength": 15918
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.11",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26460.953868,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/fixtures/scenarios/community-grounds-v1.json",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "11925",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:23 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/json",
+        "charset": "utf-8",
+        "connectionReused": false,
+        "connectionId": 1289,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 230,
+        "timing": {
+          "requestTime": 26460.926555,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 0.286,
+          "dnsEnd": 0.305,
+          "connectStart": 0.305,
+          "connectEnd": 2.842,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 3.681,
+          "sendEnd": 3.792,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 24.772,
+          "receiveHeadersEnd": 24.835
+        },
+        "responseTime": 1791789143015.475,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.11",
+      "timestamp": 26460.95434,
+      "dataLength": 11925,
+      "encodedDataLength": 11925
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.11",
+      "timestamp": 26460.952307,
+      "encodedDataLength": 12155
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.13",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/fixtures/graphics/review-cameras.json",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26462.118769,
+      "wallTime": 1791789144.183109,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 1405,
+              "columnNumber": 23
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.13",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Pragma": "no-cache",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26462.119988
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.13",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "4004",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:24 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 4004\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:24 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.13",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26462.128858,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/fixtures/graphics/review-cameras.json",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "4004",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:24 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/json",
+        "charset": "utf-8",
+        "connectionReused": true,
+        "connectionId": 1289,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 229,
+        "timing": {
+          "requestTime": 26462.119988,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.434,
+          "sendEnd": 0.594,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 6.663,
+          "receiveHeadersEnd": 6.725
+        },
+        "responseTime": 1791789144190.799,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.13",
+      "timestamp": 26462.130139,
+      "dataLength": 4004,
+      "encodedDataLength": 4004
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.13",
+      "timestamp": 26462.127544,
+      "encodedDataLength": 4233
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.14",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/assets/ecology/profiles/se-corridor-reference.json",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26462.396154,
+      "wallTime": 1791789144.460549,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "loadEcologyProfile",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 1974,
+              "columnNumber": 25
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3624,
+              "columnNumber": 6
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.14",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Pragma": "no-cache",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26462.397537
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.14",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "6260",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:24 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 6260\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:24 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.14",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26462.40343,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/assets/ecology/profiles/se-corridor-reference.json",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "6260",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:24 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/json",
+        "charset": "utf-8",
+        "connectionReused": true,
+        "connectionId": 1289,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 229,
+        "timing": {
+          "requestTime": 26462.397537,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.417,
+          "sendEnd": 0.657,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 3.184,
+          "receiveHeadersEnd": 3.246
+        },
+        "responseTime": 1791789144464.869,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.14",
+      "timestamp": 26462.403925,
+      "dataLength": 6260,
+      "encodedDataLength": 6260
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.14",
+      "timestamp": 26462.402243,
+      "encodedDataLength": 6489
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.15",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/assets/maslows-challenge-community.hmc",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26468.622766,
+      "wallTime": 1791789150.687289,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "hydrateHmcScenePack",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3555,
+              "columnNumber": 61
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3628,
+              "columnNumber": 19
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.16",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/assets/community-manifest.json",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 26468.623993,
+      "wallTime": 1791789150.688631,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "hydrateHmcScenePack",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3555,
+              "columnNumber": 91
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3628,
+              "columnNumber": 19
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.15",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26468.624981
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.16",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 26468.625421
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.15",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "28989894",
+        "Content-Type": "application/octet-stream",
+        "Date": "Mon, 12 Oct 2026 07:12:30 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 28989894\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:30 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.16",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "733558",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:12:30 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 733558\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:12:30 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.15",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26481.186144,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/assets/maslows-challenge-community.hmc",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "28989894",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:30 GMT",
+          "Content-Type": "application/octet-stream",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/octet-stream",
+        "charset": "",
+        "connectionReused": false,
+        "connectionId": 1320,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 226,
+        "timing": {
+          "requestTime": 26468.624981,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 2.586,
+          "dnsEnd": 3.304,
+          "connectStart": 3.304,
+          "connectEnd": 5.129,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 5.28,
+          "sendEnd": 5.414,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 38.054,
+          "receiveHeadersEnd": 38.621
+        },
+        "responseTime": 1791789150727.183,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.16",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 26481.186763,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/assets/community-manifest.json",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "733558",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:12:30 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/json",
+        "charset": "utf-8",
+        "connectionReused": false,
+        "connectionId": 1325,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 231,
+        "timing": {
+          "requestTime": 26468.625421,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 3.803,
+          "dnsEnd": 3.817,
+          "connectStart": 3.817,
+          "connectEnd": 5.576,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 5.72,
+          "sendEnd": 5.851,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 61.652,
+          "receiveHeadersEnd": 70.024
+        },
+        "responseTime": 1791789150751.221,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.16",
+      "timestamp": 26491.857083,
+      "dataLength": 733558,
+      "encodedDataLength": 733558
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.16",
+      "timestamp": 26468.711359,
+      "encodedDataLength": 733789
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26502.306016,
+      "dataLength": 2097152,
+      "encodedDataLength": 2097152
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26512.008932,
+      "dataLength": 2097152,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26512.012068,
+      "dataLength": 327680,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26512.013049,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26521.270253,
+      "dataLength": 1703936,
+      "encodedDataLength": 4587520
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26521.272348,
+      "dataLength": 589824,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26521.274328,
+      "dataLength": 327680,
+      "encodedDataLength": 524288
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26521.278182,
+      "dataLength": 524288,
+      "encodedDataLength": 196608
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26529.63987,
+      "dataLength": 655360,
+      "encodedDataLength": 2424832
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26529.642058,
+      "dataLength": 1441792,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26529.645846,
+      "dataLength": 327680,
+      "encodedDataLength": 327680
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26529.646607,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26529.647103,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26529.648275,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26538.595125,
+      "dataLength": 131072,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26538.596534,
+      "dataLength": 1966080,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26538.599277,
+      "dataLength": 131072,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26538.602055,
+      "dataLength": 262144,
+      "encodedDataLength": 2424832
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26538.602747,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26547.382846,
+      "dataLength": 1769472,
+      "encodedDataLength": 2162688
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26547.386094,
+      "dataLength": 524288,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26556.673026,
+      "dataLength": 1572864,
+      "encodedDataLength": 2293760
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26556.676076,
+      "dataLength": 524288,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26568.013784,
+      "dataLength": 1572864,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26568.016792,
+      "dataLength": 524288,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26579.031325,
+      "dataLength": 1572864,
+      "encodedDataLength": 2097152
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26579.035652,
+      "dataLength": 655360,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26590.436837,
+      "dataLength": 1441792,
+      "encodedDataLength": 4325376
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26590.440061,
+      "dataLength": 720896,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26590.443374,
+      "dataLength": 131072,
+      "encodedDataLength": 196608
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26600.953373,
+      "dataLength": 1245184,
+      "encodedDataLength": 2097152
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26600.95503,
+      "dataLength": 983040,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26600.956922,
+      "dataLength": 131072,
+      "encodedDataLength": 262144
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26600.957242,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26600.957652,
+      "dataLength": 65536,
+      "encodedDataLength": 131072
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26610.226986,
+      "dataLength": 851968,
+      "encodedDataLength": 2097152
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26610.228368,
+      "dataLength": 1245184,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26610.229194,
+      "dataLength": 196608,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26610.229549,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26610.231809,
+      "dataLength": 196608,
+      "encodedDataLength": 458752
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26610.232618,
+      "dataLength": 22982,
+      "encodedDataLength": 22982
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.15",
+      "timestamp": 26610.23166,
+      "encodedDataLength": 28990120
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.17",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 27264.943118
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.18",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 27264.943503
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.17",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "28989882",
+        "Content-Type": "application/octet-stream",
+        "Date": "Mon, 12 Oct 2026 07:25:47 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 28989882\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:25:47 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.18",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "733626",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:25:47 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 733626\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:25:47 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.17",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/assets/maslows-challenge-earthlight.hmc",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 27264.942198,
+      "wallTime": 1791789947.006447,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "hydrateHmcScenePack",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3555,
+              "columnNumber": 61
+            },
+            {
+              "functionName": "selectArtStyle",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 1946,
+              "columnNumber": 2
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3518,
+              "columnNumber": 48
+            },
+            {
+              "functionName": "",
+              "scriptId": "18",
+              "url": "",
+              "lineNumber": 0,
+              "columnNumber": 84
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.18",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/assets/earthlight-manifest.json",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 27264.942565,
+      "wallTime": 1791789947.006761,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "hydrateHmcScenePack",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3555,
+              "columnNumber": 91
+            },
+            {
+              "functionName": "selectArtStyle",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 1946,
+              "columnNumber": 2
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3518,
+              "columnNumber": 48
+            },
+            {
+              "functionName": "",
+              "scriptId": "18",
+              "url": "",
+              "lineNumber": 0,
+              "columnNumber": 84
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.19",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/assets/maslows-challenge-scenes.hmc",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 27268.016407,
+      "wallTime": 1791789950.080622,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "hydrateHmcScenePack",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3555,
+              "columnNumber": 61
+            },
+            {
+              "functionName": "selectArtStyle",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 1946,
+              "columnNumber": 2
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3518,
+              "columnNumber": 48
+            },
+            {
+              "functionName": "",
+              "scriptId": "18",
+              "url": "",
+              "lineNumber": 0,
+              "columnNumber": 203
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "24672.20",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "documentURL": "http://127.0.0.1:8089/game.html?renderer-debug",
+      "request": {
+        "url": "http://127.0.0.1:8089/assets/manifest.json",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 27268.016665,
+      "wallTime": 1791789950.080856,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "hydrateHmcScenePack",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3555,
+              "columnNumber": 91
+            },
+            {
+              "functionName": "selectArtStyle",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 1946,
+              "columnNumber": 2
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:8089/game.html?renderer-debug",
+              "lineNumber": 3518,
+              "columnNumber": 48
+            },
+            {
+              "functionName": "",
+              "scriptId": "18",
+              "url": "",
+              "lineNumber": 0,
+              "columnNumber": 203
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Fetch",
+      "frameId": "573194E84B9F133712C379774CF15537",
+      "hasUserGesture": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.19",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 27268.018617
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "24672.20",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:8089",
+        "Referer": "http://127.0.0.1:8089/game.html?renderer-debug",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"154\", \"Google Chrome\";v=\"154\", \"Not A(Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "connectTiming": {
+        "requestTime": 27268.019752
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.19",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "28989600",
+        "Content-Type": "application/octet-stream",
+        "Date": "Mon, 12 Oct 2026 07:25:50 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 28989600\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:25:50 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "24672.20",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Length": "733302",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 12 Oct 2026 07:25:50 GMT",
+        "Keep-Alive": "timeout=5"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 733302\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nDate: Mon, 12 Oct 2026 07:25:50 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.17",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 27277.2612,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/assets/maslows-challenge-earthlight.hmc",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "28989882",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:25:47 GMT",
+          "Content-Type": "application/octet-stream",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/octet-stream",
+        "charset": "",
+        "connectionReused": false,
+        "connectionId": 1383,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 226,
+        "timing": {
+          "requestTime": 27264.943118,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 0.534,
+          "dnsEnd": 0.955,
+          "connectStart": 0.955,
+          "connectEnd": 2.112,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 2.246,
+          "sendEnd": 2.322,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 4.107,
+          "receiveHeadersEnd": 6.222
+        },
+        "responseTime": 1791789947011.372,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.18",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 27277.261746,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/assets/earthlight-manifest.json",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "733626",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:25:47 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/json",
+        "charset": "utf-8",
+        "connectionReused": false,
+        "connectionId": 1387,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 231,
+        "timing": {
+          "requestTime": 27264.943503,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 1.221,
+          "dnsEnd": 1.227,
+          "connectStart": 1.227,
+          "connectEnd": 1.777,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 1.987,
+          "sendEnd": 2.03,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 3.957,
+          "receiveHeadersEnd": 6.407
+        },
+        "responseTime": 1791789947011.607,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.19",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 27277.263636,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/assets/maslows-challenge-scenes.hmc",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "28989600",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:25:50 GMT",
+          "Content-Type": "application/octet-stream",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/octet-stream",
+        "charset": "",
+        "connectionReused": true,
+        "connectionId": 1387,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 226,
+        "timing": {
+          "requestTime": 27268.018617,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.756,
+          "sendEnd": 0.908,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 2.819,
+          "receiveHeadersEnd": 3.219
+        },
+        "responseTime": 1791789950085.583,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "24672.20",
+      "loaderId": "EAAF6F5181CA7D85C4E04822030CEE0E",
+      "timestamp": 27277.264052,
+      "type": "Fetch",
+      "response": {
+        "url": "http://127.0.0.1:8089/assets/manifest.json",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Length": "733302",
+          "Keep-Alive": "timeout=5",
+          "Date": "Mon, 12 Oct 2026 07:25:50 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "application/json",
+        "charset": "utf-8",
+        "connectionReused": false,
+        "connectionId": 1399,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 8089,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 231,
+        "timing": {
+          "requestTime": 27268.019752,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 0.491,
+          "dnsEnd": 1.015,
+          "connectStart": 1.015,
+          "connectEnd": 1.83,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 1.923,
+          "sendEnd": 2.003,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 5.188,
+          "receiveHeadersEnd": 5.493
+        },
+        "responseTime": 1791789950089.087,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "573194E84B9F133712C379774CF15537"
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.18",
+      "timestamp": 27289.744236,
+      "dataLength": 733626,
+      "encodedDataLength": 733626
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.18",
+      "timestamp": 27264.961954,
+      "encodedDataLength": 733857
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.20",
+      "timestamp": 27289.753682,
+      "dataLength": 733302,
+      "encodedDataLength": 733302
+    }
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "24672.20",
+      "timestamp": 27268.031491,
+      "encodedDataLength": 733533
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.17",
+      "timestamp": 27319.752053,
+      "dataLength": 2097152,
+      "encodedDataLength": 2097152
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.19",
+      "timestamp": 27319.765216,
+      "dataLength": 2097152,
+      "encodedDataLength": 2097152
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.17",
+      "timestamp": 27337.302126,
+      "dataLength": 2097152,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.19",
+      "timestamp": 27337.322628,
+      "dataLength": 2097152,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.17",
+      "timestamp": 27352.055837,
+      "dataLength": 2097152,
+      "encodedDataLength": 2162688
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.19",
+      "timestamp": 27352.059955,
+      "dataLength": 2097152,
+      "encodedDataLength": 2162688
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.19",
+      "timestamp": 27352.062769,
+      "dataLength": 65536,
+      "encodedDataLength": 2097152
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.19",
+      "timestamp": 27352.063698,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.17",
+      "timestamp": 27365.093184,
+      "dataLength": 2097152,
+      "encodedDataLength": 4128768
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.19",
+      "timestamp": 27365.098158,
+      "dataLength": 1966080,
+      "encodedDataLength": 2162688
+    }
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "24672.19",
+      "timestamp": 27365.101417,
+      "dataLength": 131072,
+      "encodedDataLength": 0
+    }
+  }
+]

@@ -43,6 +43,18 @@ pub fn verify_game_pack(bytes: &[u8]) -> Result<u32, String> {
         match entry.kind.as_str() {
             "manifest" if entry.key == "manifest.json" => {
                 manifest_count += 1;
+                if let Some(manifest_bytes) = reader.get(&entry.key) {
+                    if let Ok(val) = serde_json::from_slice::<serde_json::Value>(manifest_bytes) {
+                        if let Some(mode_val) = val.get("epistemicMode").or_else(|| val.get("epistemic_mode")) {
+                            if let Some(m) = mode_val.as_str() {
+                                match m.to_ascii_lowercase().as_str() {
+                                    "fiction" | "non-fiction" | "nonfiction" | "simulation" | "hypothesis" | "civics" => {}
+                                    _ => return Err(format!("manifest specifies unrecognized epistemicMode: {m}")),
+                                }
+                            }
+                        }
+                    }
+                }
             }
             "10d" if entry.key.starts_with("10d/") && entry.key.ends_with(".10d") => {
                 let asset = reader
