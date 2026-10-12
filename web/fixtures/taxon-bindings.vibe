@@ -13,99 +13,101 @@ pure fn taxon_for(render_key: string) -> Record {
     if render_key == "goat" {
         return {bound: 1.0, gbifKey: 2441056.0, iri: "https://www.gbif.org/species/2441056",
             rank: "SPECIES", scientificName: "Capra hircus Linnaeus, 1758",
-            commonName: "goat", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "goat", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "horse" {
         return {bound: 1.0, gbifKey: 2440886.0, iri: "https://www.gbif.org/species/2440886",
             rank: "SPECIES", scientificName: "Equus caballus Linnaeus, 1758",
-            commonName: "horse", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "horse", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "rabbit" {
         return {bound: 1.0, gbifKey: 2436940.0, iri: "https://www.gbif.org/species/2436940",
             rank: "SPECIES", scientificName: "Oryctolagus cuniculus (Linnaeus, 1758)",
-            commonName: "rabbit", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "rabbit", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "kangaroo" {
         return {bound: 1.0, gbifKey: 9372.0, iri: "https://www.gbif.org/species/9372",
             rank: "FAMILY", scientificName: "Macropodidae",
-            commonName: "kangaroo", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "kangaroo", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "wallaby" {
         return {bound: 1.0, gbifKey: 9372.0, iri: "https://www.gbif.org/species/9372",
             rank: "FAMILY", scientificName: "Macropodidae",
-            commonName: "wallaby", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "wallaby", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "wombat" {
         return {bound: 1.0, gbifKey: 9376.0, iri: "https://www.gbif.org/species/9376",
             rank: "FAMILY", scientificName: "Vombatidae",
-            commonName: "wombat", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "wombat", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "deer" {
         return {bound: 1.0, gbifKey: 5298.0, iri: "https://www.gbif.org/species/5298",
             rank: "FAMILY", scientificName: "Cervidae",
-            commonName: "deer", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "deer", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "roadkill-crows" {
         return {bound: 1.0, gbifKey: 5235.0, iri: "https://www.gbif.org/species/5235",
             rank: "FAMILY", scientificName: "Corvidae",
-            commonName: "crows feeding on roadkill", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "crows feeding on roadkill", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "kookaburra" {
         return {bound: 1.0, gbifKey: 2475648.0, iri: "https://www.gbif.org/species/2475648",
             rank: "SPECIES", scientificName: "Dacelo novaeguineae (Hermann, 1783)",
-            commonName: "laughing kookaburra", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "laughing kookaburra", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "snake" {
         return {bound: 1.0, gbifKey: 11205692.0, iri: "https://www.gbif.org/species/11205692",
             rank: "FAMILY", scientificName: "Serpentes",
             commonName: "snake", assetFamily: "rc:asset/fauna",
             rankNote: "GBIF backbone files Serpentes at family rank; standard taxonomy treats it as suborder under Squamata. Recorded verbatim.",
-            accrualNote: ""};
+            accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "goanna" {
         return {bound: 1.0, gbifKey: 5023.0, iri: "https://www.gbif.org/species/5023",
             rank: "FAMILY", scientificName: "Varanidae",
-            commonName: "goanna", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: ""};
+            commonName: "goanna", assetFamily: "rc:asset/fauna", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "eucalypt-gum" {
         return {bound: 1.0, gbifKey: 7493935.0, iri: "https://www.gbif.org/species/7493935",
             rank: "GENUS", scientificName: "Eucalyptus L'Hér.",
             commonName: "eucalypt gum", assetFamily: "rc:asset/flora/eucalypt-gum", rankNote: "",
-            accrualNote: "mature/centennial gums carry IrreversibilityClass-relevant structure; hollows are horizon-exceeding"};
+            accrualNote: "mature/centennial gums carry IrreversibilityClass-relevant structure; hollows are horizon-exceeding",
+            maturityIri: "qualia:accrual:Centennial", irreversibilityIri: "qualia:accrual:HorizonExceeding"};
     }
     if render_key == "golden-wattle" {
         return {bound: 1.0, gbifKey: 2978604.0, iri: "https://www.gbif.org/species/2978604",
             rank: "SPECIES", scientificName: "Acacia pycnantha Benth.",
-            commonName: "golden wattle", assetFamily: "rc:asset/flora/golden-wattle", rankNote: "", accrualNote: ""};
+            commonName: "golden wattle", assetFamily: "rc:asset/flora/golden-wattle", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "coastal-bottlebrush" {
         return {bound: 1.0, gbifKey: 3173347.0, iri: "https://www.gbif.org/species/3173347",
             rank: "GENUS", scientificName: "Callistemon R.Br.",
-            commonName: "coastal bottlebrush", assetFamily: "rc:asset/flora/coastal-bottlebrush", rankNote: "", accrualNote: ""};
+            commonName: "coastal bottlebrush", assetFamily: "rc:asset/flora/coastal-bottlebrush", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "banksia" {
         return {bound: 1.0, gbifKey: 8399031.0, iri: "https://www.gbif.org/species/8399031",
             rank: "GENUS", scientificName: "Banksia L.f.",
-            commonName: "banksia", assetFamily: "rc:asset/flora/banksia", rankNote: "", accrualNote: ""};
+            commonName: "banksia", assetFamily: "rc:asset/flora/banksia", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "grass-tree" {
         return {bound: 1.0, gbifKey: 2779409.0, iri: "https://www.gbif.org/species/2779409",
             rank: "GENUS", scientificName: "Xanthorrhoea Sm.",
             commonName: "grass tree", assetFamily: "rc:asset/flora/grass-tree", rankNote: "",
-            accrualNote: "exceptionally slow accrual (~1-2cm/yr); mature specimens carry horizon-exceeding time-depth"};
+            accrualNote: "exceptionally slow accrual (~1-2cm/yr); mature specimens carry horizon-exceeding time-depth",
+            maturityIri: "qualia:accrual:Centennial", irreversibilityIri: "qualia:accrual:HorizonExceeding"};
     }
     if render_key == "saltbush" {
         return {bound: 1.0, gbifKey: 10651755.0, iri: "https://www.gbif.org/species/10651755",
             rank: "GENUS", scientificName: "Atriplex L.",
-            commonName: "saltbush", assetFamily: "rc:asset/flora/saltbush", rankNote: "", accrualNote: ""};
+            commonName: "saltbush", assetFamily: "rc:asset/flora/saltbush", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     if render_key == "kangaroo-paw" {
         return {bound: 1.0, gbifKey: 2765832.0, iri: "https://www.gbif.org/species/2765832",
             rank: "GENUS", scientificName: "Anigozanthos Labill.",
-            commonName: "kangaroo paw", assetFamily: "rc:asset/flora/kangaroo-paw", rankNote: "", accrualNote: ""};
+            commonName: "kangaroo paw", assetFamily: "rc:asset/flora/kangaroo-paw", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
     }
     return {bound: 0.0, gbifKey: 0.0, iri: "", rank: "", scientificName: "",
-        commonName: "", assetFamily: "", rankNote: "", accrualNote: ""};
+        commonName: "", assetFamily: "", rankNote: "", accrualNote: "", maturityIri: "", irreversibilityIri: ""};
 }
 
 // ── Darwin Core statement emission (G49 — pack semantic layer) ──────────
@@ -156,9 +158,24 @@ pure fn dwc_statements_for(render_key: string, asset_iri: string) -> List {
     ];
     if asset_iri != "" {
         // list.push is pure — it returns the extended list.
-        return statements.push(quin.statement(subject: asset_iri,
+        let mut out = statements.push(quin.statement(subject: asset_iri,
             predicate: "http://xmlns.com/foaf/0.1/depicts",
             object: t.iri, context: 0));
+        // Accrual classifies the standing stock (the asset instance), never
+        // the taxon — Eucalyptus-as-concept is not centennial; this gum is.
+        // Object IRIs are the modality's class names verbatim so the quins
+        // join with accrual.rs predicates via the shared 60-bit hash space.
+        if t.maturityIri != "" {
+            out = out.push(quin.statement(subject: asset_iri,
+                predicate: "qualia:accrual:maturityClass",
+                object: t.maturityIri, context: 0));
+        }
+        if t.irreversibilityIri != "" {
+            out = out.push(quin.statement(subject: asset_iri,
+                predicate: "qualia:accrual:irreversibilityClass",
+                object: t.irreversibilityIri, context: 0));
+        }
+        return out;
     }
     return statements;
 }

@@ -23,6 +23,10 @@ pub struct TaxonBinding {
     pub asset_family: String,
     pub rank_note: String,
     pub accrual_note: String,
+    /// `qualia:accrual:*` class IRI when the stock is accrual-classified;
+    /// empty for unclassified bindings.
+    pub maturity_iri: String,
+    pub irreversibility_iri: String,
 }
 
 thread_local! {static TAXA:RefCell<Option<vibe::Program>>=const {RefCell::new(None)};}
@@ -82,6 +86,8 @@ fn binding_for(render_key: &str) -> Result<Option<TaxonBinding>, JsValue> {
             asset_family: text(&record, "assetFamily")?.to_owned(),
             rank_note: text(&record, "rankNote")?.to_owned(),
             accrual_note: text(&record, "accrualNote")?.to_owned(),
+            maturity_iri: text(&record, "maturityIri")?.to_owned(),
+            irreversibility_iri: text(&record, "irreversibilityIri")?.to_owned(),
         };
         if binding.iri.is_empty() || !binding.iri.starts_with("https://www.gbif.org/species/") {
             return Err(JsValue::from_str("taxon iri exceeds bounds"));
@@ -120,13 +126,16 @@ pub fn taxon_binding_json(render_key: &str) -> Result<String, JsValue> {
         "assetFamily": binding.asset_family,
         "rankNote": binding.rank_note,
         "accrualNote": binding.accrual_note,
+        "maturityIri": binding.maturity_iri,
+        "irreversibilityIri": binding.irreversibility_iri,
     }))
     .map_err(|_| JsValue::from_str("taxon binding serialisation failed"))
 }
 
 /// Maximum quins per bound taxon: five vibe-authored dwc statements, the
-/// foaf:depicts edge, and the host-packed gbifTaxonKey integer quin.
-pub const MAX_DWC_QUINS: usize = 7;
+/// foaf:depicts edge, up to two accrual-class quins, and the host-packed
+/// gbifTaxonKey integer quin.
+pub const MAX_DWC_QUINS: usize = 9;
 
 /// Evaluate `dwc_statements_for` in the VibeScript fixture and copy the
 /// sealed quins into the caller-provided buffer, then append the
@@ -256,13 +265,20 @@ mod tests {
     fn dwc_emission_seals_taxon_node_and_depicts() {
         let mut buf = [NQuin::default(); MAX_DWC_QUINS];
         let n = dwc_quins("kangaroo", "rc:asset/fauna/inland-kangaroo-01", &mut buf).unwrap();
-        assert_eq!(n, MAX_DWC_QUINS);
+        assert_eq!(n, 7);
         assert!(buf[..n].iter().all(|quin| quin.verify_ecc_parity()));
         // Host-packed integer quin is last: INLINE_TAG_INTEGER | gbifKey.
         assert_eq!(buf[n - 1].object, INLINE_TAG_INTEGER | 9372);
         // Without an asset subject the depicts edge is omitted.
         let n = dwc_quins("kangaroo", "", &mut buf).unwrap();
-        assert_eq!(n, MAX_DWC_QUINS - 1);
+        assert_eq!(n, 6);
+        // Accrual-classified stocks emit maturity + irreversibility quins on
+        // the asset subject (the stock), not the taxon.
+        let n = dwc_quins("eucalypt-gum", "rc:asset/flora/eucalypt-gum/mature-gums-01", &mut buf)
+            .unwrap();
+        assert_eq!(n, MAX_DWC_QUINS);
+        let irrev_pred = generate_60bit_token(b"qualia:accrual:irreversibilityClass");
+        assert!(buf[..n].iter().any(|quin| quin.predicate == irrev_pred));
         // Unbound keys emit nothing.
         assert_eq!(dwc_quins("not-a-taxon", "rc:asset/fauna/x", &mut buf).unwrap(), 0);
     }
