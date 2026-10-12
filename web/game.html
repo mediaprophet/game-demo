@@ -3581,7 +3581,11 @@ async function hydrateHmcScenePack() {
     const bytes=await readPackResponse(packResponse,ART_STYLES[artStyle]);
     window.setWorldLoading('Checking the scene pack','Verifying its assets before showing the world');
     const verified=m.verify_game_hmc(bytes);
-    if(verified!==parsed.assets.length+1)throw new Error(`verified ${verified}, expected ${parsed.assets.length+1}`);
+    // The pack carries assets + texture files + the manifest entry; the same
+    // texture count is used by scripts/verify-game-release.mjs.
+    const textureCount=new Set((parsed.textures||[]).map(texture=>texture.file)).size;
+    const expected=parsed.assets.length+textureCount+1;
+    if(verified!==expected)throw new Error(`verified ${verified}, expected ${expected}`);
     hmcPack=bytes;hmcManifest=parsed;
     note(`HMC ${parsed.artStyle||'scene'} verified · ${verified-1} assets`);
     if(hmcSceneApi){hmcResidentScene='';refresh();}
@@ -3596,7 +3600,11 @@ async function hydrateHmcScenePack() {
 }
 
 async function readPackResponse(response,styleName){
-  const total=Number(response.headers.get('content-length'))||0;
+  // content-length reports the *compressed* transfer size while the reader
+  // yields decoded bytes — when an encoding is present the true total is
+  // unknowable from headers, so show indeterminate progress, not a wrong one.
+  const encoded=!!response.headers.get('content-encoding');
+  const total=encoded?0:Number(response.headers.get('content-length'))||0;
   if(!response.body?.getReader){
     const bytes=new Uint8Array(await response.arrayBuffer());
     window.setWorldLoading('Checking the scene pack',`${styleName} pack received · ${(bytes.byteLength/1048576).toFixed(1)} MB`,99);
