@@ -39,6 +39,10 @@ try {
     if (Test-Path -LiteralPath $pkgIgnore) { Remove-Item -LiteralPath $pkgIgnore }
     node scripts/export-game-assets.mjs
     if ($LASTEXITCODE -ne 0) { throw 'asset export failed' }
+    # Semantic section is authored by taxon-bindings.vibe; pack-export
+    # evaluates it natively, embeds sem/taxonomy.q42, and repacks the HMCs.
+    cargo run --locked -p pack-export -- --all
+    if ($LASTEXITCODE -ne 0) { throw 'pack-export failed' }
 } finally {
     Pop-Location
 }

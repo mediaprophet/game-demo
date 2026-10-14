@@ -14,11 +14,15 @@
 
 use qualia_core_db::bundle::{BundleReader, BundleWriter};
 use qualia_core_db::lexicon::generate_60bit_token;
+use qualia_core_db::q42_volume::{StreamingQ42VolumeWriter, Q42_MAGIC};
+use qualia_core_db::query::shacl_compiler::{
+    validate_shacl_property, ShaclConstraint, ShaclDatatype,
+};
 use qualia_core_db::resolver::INLINE_TAG_INTEGER;
-use qualia_core_db::NQuin;
+use qualia_core_db::{NQuin, QUINS_PER_BLOCK};
 use serde_json::{json, Map, Value as Json};
 use sha2::{Digest, Sha256};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
 use vibe::Value;
 
@@ -207,6 +211,53 @@ fn taxon_for_asset<'a>(
     None
 }
 
+/// SHACL shape check over the emitted quins — runs on the real
+/// `validate_shacl_property` engine surface, same as the browser's
+/// SemanticSlice. Every bound taxon node needs the four dwc/rdf
+/// properties plus the packed-integer GBIF key; every bound asset
+/// needs its foaf:depicts edge.
+fn validate_semantic_shape(
+    stmts: &[&Statement],
+    bound_asset_ids: &[String],
+    bindings: &BTreeMap<String, Binding>,
+) -> Result<(), DynErr> {
+    const RDF_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+    let quins: Vec<NQuin> = stmts.iter().map(|st| st.quin).collect();
+    let one = [ShaclConstraint::MinCount(1)];
+    for binding in bindings.values() {
+        let taxon = generate_60bit_token(binding.iri.as_bytes());
+        for prop in [
+            RDF_TYPE,
+            "http://rs.tdwg.org/dwc/terms/taxonID",
+            "http://rs.tdwg.org/dwc/terms/scientificName",
+            "http://rs.tdwg.org/dwc/terms/taxonRank",
+        ] {
+            if !validate_shacl_property(&quins, taxon, generate_60bit_token(prop.as_bytes()), &one) {
+                return Err(format!("taxon {} missing {prop}", binding.iri).into());
+            }
+        }
+        if !validate_shacl_property(
+            &quins,
+            taxon,
+            generate_60bit_token(b"urn:qualia:gbif:taxonKey"),
+            &[
+                ShaclConstraint::MinCount(1),
+                ShaclConstraint::Datatype(ShaclDatatype::Integer),
+            ],
+        ) {
+            return Err(format!("taxon {} missing integer taxonKey", binding.iri).into());
+        }
+    }
+    let depicts = generate_60bit_token(b"http://xmlns.com/foaf/0.1/depicts");
+    for id in bound_asset_ids {
+        let asset = generate_60bit_token(id.as_bytes());
+        if !validate_shacl_property(&quins, asset, depicts, &one) {
+            return Err(format!("asset {id} missing foaf:depicts edge").into());
+        }
+    }
+    Ok(())
+}
+
 fn valid_entry_key(key: &str) -> bool {
     if key.contains("..") {
         return false;
@@ -223,7 +274,7 @@ fn valid_entry_key(key: &str) -> bool {
     if let Some(name) = key.strip_prefix("sem/") {
         return name.bytes().all(|b| {
             b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-' || b == b'.'
-        }) && (name.ends_with(".quins") || name.ends_with(".lex"));
+        }) && name.ends_with(".q42");
     }
     false
 }
@@ -266,6 +317,7 @@ fn run_style(
     // Collect deduped semantic statements; stamp per-asset taxon links.
     let mut stmt_map: BTreeMap<[u64; 5], Statement> = BTreeMap::new();
     let mut stamped_assets = Vec::with_capacity(assets.len());
+    let mut bound_asset_ids: Vec<String> = Vec::new();
     for asset in &assets {
         let mut asset = asset.clone();
         let id = asset
@@ -274,6 +326,7 @@ fn run_style(
             .ok_or("asset missing id")?
             .to_owned();
         if let Some((key, binding)) = taxon_for_asset(&id, bindings) {
+            bound_asset_ids.push(id.clone());
             for st in statements_for(program, key, &id, binding.gbif_key, &binding.iri)? {
                 stmt_map
                     .entry([
@@ -297,23 +350,11 @@ fn run_style(
         return Err("semantic statement count exceeds bound".into());
     }
     let stmts: Vec<&Statement> = stmt_map.values().collect();
+    validate_semantic_shape(&stmts, &bound_asset_ids, bindings)?;
 
-    // 48-byte NQuins, little-endian u64 fields in struct order.
-    let mut quin_bytes = Vec::with_capacity(stmts.len() * 48);
-    for st in &stmts {
-        for f in [
-            st.quin.subject,
-            st.quin.predicate,
-            st.quin.object,
-            st.quin.context,
-            st.quin.metadata,
-            st.quin.parity,
-        ] {
-            quin_bytes.extend_from_slice(&f.to_le_bytes());
-        }
-    }
-    // Lexicon: "<hex-hash> <iri>" lines; integer-typed objects carry no hash.
-    let mut lex_terms: BTreeMap<u64, String> = BTreeMap::new();
+    // Lexicon: hash→term map; integer-typed objects carry no hash. It feeds
+    // the `.q42` volume's embedded Q42LEX section.
+    let mut lex_terms: HashMap<u64, String> = HashMap::new();
     for st in &stmts {
         for (hash, term) in [
             (st.quin.subject, &st.s),
@@ -334,27 +375,47 @@ fn run_style(
             }
         }
     }
-    let mut lex_lines: Vec<String> = lex_terms
-        .iter()
-        .map(|(h, t)| format!("{h:016x} {t}"))
-        .collect();
-    lex_lines.sort();
-    let lex_text = lex_lines.join("\n") + "\n";
+    // Canonical ontology package: a unified v4 .q42 volume (object-sorted
+    // SuperBlocks, embedded lexicon, BIDX + field-range + postings indexes,
+    // Merkle root) inside the HMC. StreamingQ42VolumeWriter is deterministic
+    // — assertion_timestamp is fixed at 0 and there are no wall-clock DAG
+    // commits, so identical input gives identical bytes. The browser decodes
+    // this volume through `Q42RangeVolume` over the verified pack bytes.
+    let q42_bytes = if stmts.is_empty() {
+        Vec::new()
+    } else {
+        let mut sorted: Vec<NQuin> = stmts.iter().map(|st| st.quin).collect();
+        sorted.sort_unstable_by_key(|q| q.object);
+        let mut writer = StreamingQ42VolumeWriter::new(&lex_terms)
+            .map_err(|e| format!("q42 writer: {e}"))?;
+        writer.declare_permissive_commons();
+        for (seq, chunk) in sorted.chunks(QUINS_PER_BLOCK).enumerate() {
+            writer
+                .push_block(seq as u64, chunk)
+                .map_err(|e| format!("q42 push_block: {e}"))?;
+        }
+        let temp = tempfile::NamedTempFile::new().map_err(|e| e.to_string())?;
+        writer
+            .finish(temp.path())
+            .map_err(|e| format!("q42 finish: {e}"))?;
+        let bytes = std::fs::read(temp.path())?;
+        if !bytes.starts_with(&Q42_MAGIC) {
+            return Err("q42 volume missing magic".into());
+        }
+        bytes
+    };
 
     let semantic_files: Vec<(String, Vec<u8>)> = if stmts.is_empty() {
         Vec::new()
     } else {
-        vec![
-            ("sem/taxonomy.quins".to_owned(), quin_bytes),
-            ("sem/taxonomy.lex".to_owned(), lex_text.into_bytes()),
-        ]
+        vec![("sem/taxonomy.q42".to_owned(), q42_bytes)]
     };
     let semantics: Vec<Json> = semantic_files
         .iter()
         .map(|(key, bytes)| {
             json!({
                 "key": key,
-                "quins": if key.ends_with(".quins") { Json::from(stmts.len()) } else { Json::Null },
+                "quins": Json::from(stmts.len()),
                 "bytes": bytes.len(),
                 "sha256": sha256_hex(bytes),
             })
@@ -433,11 +494,11 @@ fn run_style(
         if !valid_entry_key(key) {
             return Err(format!("invalid semantic entry key {key}").into());
         }
-        if key.ends_with(".quins") && (bytes.is_empty() || bytes.len() % 48 != 0) {
-            return Err("semantic quin blob is not 48-byte aligned".into());
+        if !bytes.starts_with(&Q42_MAGIC) {
+            return Err("semantic q42 volume missing magic".into());
         }
         writer
-            .add_file(key, "quins", bytes.clone(), None)
+            .add_file(key, "q42", bytes.clone(), None)
             .map_err(|e| format!("{e:?}"))?;
         entry_count += 1;
     }

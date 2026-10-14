@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QualiaDB Entity &amp; .10d Living Asset Review Portal</title>
+<link rel="stylesheet" href="./asset-review.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="brand-title">
+      <strong>QualiaDB .10d Asset Review &amp; Virtualization Studio</strong>
+      <span class="version-tag">Standard v2.0.0</span>
+    </div>
+    <span class="eyebrow">Multi-Modal Entity UAT · Continuous EMF Spectral · Zero-Heap Architecture</span>
+  </div>
+  <nav class="header-nav">
+    <a href="./model-development-guide.html" class="nav-link highlight" target="_blank" rel="noopener">
+      <span class="nav-icon">📖</span> Model Development Guide &amp; Kit
+    </a>
+  </nav>
+  <div class="header-meta">
+    <span class="badge" id="engine-badge">engine: starting</span>
+    <span class="badge" id="renderer-badge">renderer: pending</span>
+    <span class="badge badge-accent" id="ontology-realm-badge">realm: unassigned</span>
+    <span class="badge badge-success" id="audit-status-badge">audit: ready</span>
+  </div>
+</header>
+
+<main>
+  <!-- Left Viewport & Interactive Testing Column -->
+  <section class="viewport-column">
+    <div class="banner-note">
+      <div class="banner-icon">ℹ️</div>
+      <div class="banner-text">
+        <strong>Ontological Embodiment Review:</strong> Inspecting one exported <code>.10d</code> container or <code>.hmc</code> pack. Evaluates 4-Tier virtualized geometry, Jakob-Hanika continuous spectral reflectance, and AudioWorklet acoustics under zero-heap contracts.
+      </div>
+    </div>
+
+    <!-- Viewport Container -->
+    <div class="scene-shell" id="scene-shell">
+      <canvas id="scene" width="960" height="600" aria-label="3D Viewport for asset review"></canvas>
+      <div class="scene-overlay-top">
+        <div class="scene-label" id="scene-label">No asset loaded</div>
+        <div class="scene-badges">
+          <span class="overlay-badge" id="viewport-tier-badge">Tier: Auto</span>
+          <span class="overlay-badge" id="viewport-dim-badge">960 × 600</span>
+          <span class="overlay-badge" id="viewport-fps-badge">60 FPS</span>
+        </div>
+      </div>
+      <div class="scene-overlay-bottom">
+        <div class="overlay-hint">Drag canvas or use controls below to inspect · Zero fragment overhead</div>
+      </div>
+    </div>
+
+    <!-- Interactive Viewport Controls & Animations -->
+    <div class="panel controls-panel">
+      <div class="panel-header">
+        <h2>Interactive Controls &amp; Physical Animation Harness</h2>
+        <span class="badge-subtle">Human &amp; Machine Testbed</span>
+      </div>
+
+      <!-- Viewport Navigation & Turntable -->
+      <div class="control-grid">
+        <div class="control-card">
+          <h3>Camera &amp; Turntable</h3>
+          <div class="sliders">
+            <label class="slider-row"><span>Yaw</span>
+              <input type="range" id="cam-yaw" min="-3.14" max="3.14" step="0.01" value="0.7">
+              <output id="cam-yaw-v">0.70</output>
+            </label>
+            <label class="slider-row"><span>Pitch</span>
+              <input type="range" id="cam-pitch" min="-1.2" max="1.2" step="0.01" value="0.25">
+              <output id="cam-pitch-v">0.25</output>
+            </label>
+            <label class="slider-row"><span>Zoom</span>
+              <input type="range" id="cam-zoom" min="1" max="12" step="0.1" value="3.5">
+              <output id="cam-zoom-v">3.5</output>
+            </label>
+          </div>
+          <div class="btn-cluster">
+            <button type="button" id="cam-reset" class="btn-secondary">Reset Camera</button>
+            <button type="button" id="btn-turntable" class="btn-toggle" aria-pressed="false">▶ Start Turntable</button>
+            <label class="compact-select-label">
+              <span>RPM:</span>
+              <select id="turntable-speed">
+                <option value="0.5">0.5 rpm</option>
+                <option value="1.0" selected>1.0 rpm</option>
+                <option value="2.0">2.0 rpm</option>
+                <option value="4.0">4.0 rpm</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <!-- Kinematic Joint & Motion Drive -->
+        <div class="control-card">
+          <h3>Phase 2 Kinematic Joints &amp; Deterministic Refusal</h3>
+          <p class="card-desc">Drive the artefact through kinematic joint motors or test deterministic wall refusal gates.</p>
+          <div class="btn-cluster">
+            <button type="button" id="btn-joint-revolute" class="btn-action">Spin (Revolute +Y)</button>
+            <button type="button" id="btn-joint-prismatic" class="btn-action">Slide (Prismatic +X)</button>
+            <button type="button" id="btn-joint-refusal" class="btn-action btn-warn">Test Wall Refusal</button>
+            <button type="button" id="btn-joint-stop" class="btn-secondary">Stop Motion</button>
+          </div>
+          <div class="status-indicator" id="joint-status">Joint motor: idle (no force applied)</div>
+        </div>
+
+        <!-- Lighting & Atmosphere Audition -->
+        <div class="control-card">
+          <h3>Spectral Lighting &amp; Atmosphere</h3>
+          <div class="field-row">
+            <label for="sky-preset">Sky Illuminant</label>
+            <select id="sky-preset">
+              <option value="1" selected>CIE D65 Daylight (Clean 6500K)</option>
+              <option value="2">CIE D50 Horizon Sunset (5000K)</option>
+              <option value="3">CIE Illuminant A Incandescent (2856K)</option>
+              <option value="0">Monochromatic 550nm (Chlorophyll Notch)</option>
+            </select>
+          </div>
+          <div class="sliders">
+            <label class="slider-row"><span>Ambient</span>
+              <input type="range" id="ambient-intensity" min="0" max="2" step="0.05" value="0.4">
+              <output id="ambient-intensity-v">0.40</output>
+            </label>
+          </div>
+          <div class="btn-cluster">
+            <button type="button" id="btn-ambient-toggle" class="btn-toggle" aria-pressed="false">Toggle Ambient</button>
+            <button type="button" id="btn-wind-toggle" class="btn-toggle" aria-pressed="false">PGA Wind Oscillation</button>
+          </div>
+        </div>
+
+        <!-- Continuous Spectral Acoustics Audition -->
+        <div class="control-card">
+          <h3>Continuous Spectral Acoustics (DF2T AudioWorklet)</h3>
+          <p class="card-desc">Audition the 3-band anchor biquad (Low 200Hz, Mid 1kHz, High 8kHz) with denormal protection ($10^{-24}$ DC offset).</p>
+          <div class="sliders">
+            <label class="slider-row"><span>Pan</span>
+              <input type="range" id="audio-pan" min="-1" max="1" step="0.05" value="0.0">
+              <output id="audio-pan-v">Center (0.0)</output>
+            </label>
+          </div>
+          <div class="btn-cluster">
+            <button type="button" id="btn-audition-audio" class="btn-action btn-audio">🔊 Audition Acoustic Impulse</button>
+          </div>
+          <div class="status-indicator" id="audio-status">Acoustic state: ready for synthetic impulse</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Automated Machine Verification Gates Panel -->
+    <div class="panel audit-panel" id="panel-machine-audit">
+      <div class="panel-header">
+        <h2>Autonomous Agent Machine Audit &amp; Verification Gates</h2>
+        <span class="badge-accent">Automated CI/CD Acceptance</span>
+      </div>
+      <p class="card-desc">Evaluates all 5 mandatory qualification gates against this asset's binary payload and semantic manifest.</p>
+      <div class="btn-cluster">
+        <button type="button" id="btn-run-audit" class="btn-primary">⚡ Run Automated Machine Audit</button>
+        <button type="button" id="btn-download-audit" class="btn-secondary" disabled>Download Audit Receipt (JSON)</button>
+        <button type="button" id="btn-copy-audit" class="btn-secondary" disabled>Copy Receipt</button>
+      </div>
+
+      <!-- Live Gate Checklist -->
+      <div class="gates-grid" id="gates-grid">
+        <div class="gate-card" id="gate-card-1">
+          <div class="gate-status-pill" id="gate-1-pill">PENDING</div>
+          <h4>Gate 1: Spectral Plausibility &amp; Energy</h4>
+          <p class="gate-desc">Asserts Jakob-Hanika polynomial evaluated reflectance $R(\lambda) \in [0.0, 1.0]$ across $380\text{--}780\text{ nm}$ and positive BSSRDF mean free paths.</p>
+        </div>
+        <div class="gate-card" id="gate-card-2">
+          <div class="gate-status-pill" id="gate-2-pill">PENDING</div>
+          <h4>Gate 2: Virtualized Geometry Confinement</h4>
+          <p class="gate-desc">Asserts Tier 1-4 bounding sphere alignment within 5 cm decimation margin and Reverse-LOD layout order.</p>
+        </div>
+        <div class="gate-card" id="gate-card-3">
+          <div class="gate-status-pill" id="gate-3-pill">PENDING</div>
+          <h4>Gate 3: Ontological &amp; Kinematic Rig</h4>
+          <p class="gate-desc">Asserts semantic ontology class resolution against dictionary and normalized bone weights $\sum w_i = 1.0$.</p>
+        </div>
+        <div class="gate-card" id="gate-card-4">
+          <div class="gate-status-pill" id="gate-4-pill">PENDING</div>
+          <h4>Gate 4: Wasm/VibeScript Determinism</h4>
+          <p class="gate-desc">Asserts zero unseeded entropy, zero unauthorized host calls, and instruction budget $\le 1,000,000$ cycles.</p>
+        </div>
+        <div class="gate-card" id="gate-card-5">
+          <div class="gate-status-pill" id="gate-5-pill">PENDING</div>
+          <h4>Gate 5: Anti-Commodification of Persons</h4>
+          <p class="gate-desc">OHCHR Human Rights Invariant: Rejects commercial asset classification for human subjects (`GateError::HumanPersonCannotBeCommodifiedAsAsset`).</p>
+        </div>
+      </div>
+
+      <h3>Cryptographic Audit Receipt</h3>
+      <pre class="json" id="audit-receipt-json">No machine audit executed yet. Click "Run Automated Machine Audit".</pre>
+    </div>
+  </section>
+
+  <!-- Right Metadata & Inspection Column -->
+  <aside class="meta-column">
+    <!-- Asset Selection Panel -->
+    <section class="panel" id="panel-selection">
+      <h2>Asset Selection &amp; Catalog</h2>
+      <div class="field">
+        <label for="style">Art Style Manifest</label>
+        <select id="style">
+          <option value="community" selected>Community Grounds (community-manifest.json)</option>
+          <option value="earthlight">Earthlight (earthlight-manifest.json)</option>
+          <option value="storybook">Storybook (manifest.json)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="search">Filter Assets</label>
+        <input type="search" id="search" placeholder="filter by id, file name, or taxon" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="asset">Candidate Asset Entry <span class="muted" id="asset-count"></span></label>
+        <select id="asset" size="10" disabled></select>
+      </div>
+      <button type="button" id="load" class="btn-primary" disabled>Load into Viewport Engine</button>
+      <p class="status" id="status" role="status">Initialising…</p>
+    </section>
+
+    <!-- Ontological Classification & Anti-Commodification Panel -->
+    <section class="panel" id="panel-ontology-spec">
+      <h2>Ontological Classification &amp; Sovereignty</h2>
+      <dl class="kv" id="ontology-kv"><dt>state</dt><dd>no asset loaded</dd></dl>
+      <div class="ontology-callout" id="ontology-callout">
+        <div class="callout-pill" id="callout-realm-pill">Unspecified Realm</div>
+        <p id="callout-realm-desc">Load an asset to evaluate its ontological classification against the 3 realms of reality.</p>
+      </div>
+    </section>
+
+    <!-- 4-Tier Virtualized Geometry Panel -->
+    <section class="panel" id="panel-geometry-tiers">
+      <h2>4-Tier Virtualized Geometry Pipeline</h2>
+      <div class="tier-summary-grid">
+        <div class="tier-box">
+          <div class="tier-num">Tier 1</div>
+          <div class="tier-name">Hero Meshlets</div>
+          <div class="tier-spec">&ge; 256 px · ~128 tris/cone</div>
+        </div>
+        <div class="tier-box">
+          <div class="tier-num">Tier 2</div>
+          <div class="tier-name">Decimated QEM</div>
+          <div class="tier-spec">64 to 256 px · Edge collapse</div>
+        </div>
+        <div class="tier-box">
+          <div class="tier-num">Tier 3</div>
+          <div class="tier-name">Octahedral Impostor</div>
+          <div class="tier-spec">8 to 64 px · 16x16 Atlas</div>
+        </div>
+        <div class="tier-box">
+          <div class="tier-num">Tier 4</div>
+          <div class="tier-name">Hierarchical Surfels</div>
+          <div class="tier-spec">1 to 8 px · Gaussian Splats</div>
+        </div>
+      </div>
+      <h3>Reverse-LOD Layout Order</h3>
+      <dl class="kv" id="geometry-tiers-kv"><dt>layout</dt><dd>pending ingest</dd></dl>
+    </section>
+
+    <!-- Continuous EMF Spectral Materials Panel -->
+    <section class="panel" id="panel-spectral-materials">
+      <h2>Continuous EMF Spectral Materials</h2>
+      <p class="muted">Jakob &amp; Hanika (2019) polynomial basis: $f(u) = c_0 u^2 + c_1 u + c_2$, $R(u) = 0.5 + 0.5 \cdot \frac{f(u)}{\sqrt{1 + f(u)^2}}$</p>
+      <div class="spectral-eval-box" id="spectral-eval-box">
+        <div class="spectral-sample-row">
+          <span class="sample-label">Blue 450nm:</span>
+          <span class="sample-val" id="spec-blue-val">0.000</span>
+          <div class="spec-bar-wrap"><div class="spec-bar bg-blue" id="spec-blue-bar"></div></div>
+        </div>
+        <div class="spectral-sample-row">
+          <span class="sample-label">Green 550nm:</span>
+          <span class="sample-val" id="spec-green-val">0.000</span>
+          <div class="spec-bar-wrap"><div class="spec-bar bg-green" id="spec-green-bar"></div></div>
+        </div>
+        <div class="spectral-sample-row">
+          <span class="sample-label">Red 650nm:</span>
+          <span class="sample-val" id="spec-red-val">0.000</span>
+          <div class="spec-bar-wrap"><div class="spec-bar bg-red" id="spec-red-bar"></div></div>
+        </div>
+        <div class="spectral-sample-row">
+          <span class="sample-label">NIR 750nm:</span>
+          <span class="sample-val" id="spec-nir-val">0.000</span>
+          <div class="spec-bar-wrap"><div class="spec-bar bg-nir" id="spec-nir-bar"></div></div>
+        </div>
+      </div>
+      <dl class="kv" id="spectral-kv"><dt>spectral basis</dt><dd>not evaluated</dd></dl>
+    </section>
+
+    <!-- Manifest & Verification Details -->
+    <section class="panel" id="panel-verify">
+      <h2>Manifest &amp; Verification Receipts</h2>
+      <h3>Manifest Declaration Row</h3>
+      <pre class="json" id="manifest-row">No entry selected.</pre>
+      <h3>Digest &amp; Size Claims</h3>
+      <dl class="kv" id="verify-claims"><dt>state</dt><dd>not loaded</dd></dl>
+      <p class="warning" id="water-note" hidden>direct .10d preview; game water pass not exercised</p>
+      <h3>Engine asset_verify_10d Report</h3>
+      <pre class="json" id="engine-report">Not loaded.</pre>
+      <h3>Comprehensive Entity Verification (WASM)</h3>
+      <pre class="json" id="entity-report">Not loaded.</pre>
+      <h3>Renderer Load Receipt</h3>
+      <pre class="json" id="load-receipt">Not loaded.</pre>
+    </section>
+
+    <!-- Renderer Telemetry Panel -->
+    <section class="panel" id="panel-renderer">
+      <h2>Renderer Telemetry &amp; Textures</h2>
+      <dl class="kv" id="renderer-kv"><dt>state</dt><dd>pending</dd></dl>
+      <h3>Texture Residency</h3>
+      <p class="warning" id="residency-warning" hidden>texture residency unavailable</p>
+      <dl class="kv" id="texture-kv"><dt>state</dt><dd>no manifest</dd></dl>
+    </section>
+
+    <!-- Taxon Declaration Panel -->
+    <section class="panel" id="panel-taxon">
+      <h2>Taxon Declaration</h2>
+      <dl class="kv" id="taxon-kv"><dt>state</dt><dd>no entry selected</dd></dl>
+      <h3>Manifest taxonBindings</h3>
+      <pre class="json tall" id="taxon-bindings">No manifest loaded.</pre>
+    </section>
+
+    <!-- Authored RDF Source Preview -->
+    <section class="panel" id="panel-rdf">
+      <h2>Authored RDF Source Preview</h2>
+      <div class="field">
+        <label for="render-key">Render key (manifest.taxonBindings)</label>
+        <select id="render-key" disabled><option value="">none</option></select>
+      </div>
+      <dl class="kv" id="rdf-kv"><dt>status</dt><dd>not-requested</dd></dl>
+      <h3>Statements</h3>
+      <table class="statements" id="rdf-statements">
+        <thead><tr><th>s</th><th>p</th><th>o</th></tr></thead>
+        <tbody><tr><td colspan="3" class="muted">no statements</td></tr></tbody>
+      </table>
+    </section>
+
+    <!-- Provenance & Packages -->
+    <section class="panel" id="panel-provenance">
+      <h2>Source &amp; Engine Package Provenance</h2>
+      <h3>WASM package (reused, not rebuilt)</h3>
+      <dl class="kv" id="wasm-kv"><dt>state</dt><dd>loading</dd></dl>
+      <h3>Manifest Evidence</h3>
+      <dl class="kv" id="manifest-kv"><dt>state</dt><dd>loading</dd></dl>
+      <h3>Source Recipes</h3>
+      <pre class="json tall" id="source-recipes">No manifest loaded.</pre>
+    </section>
+
+    <!-- Manual & Agent Review Note -->
+    <section class="panel" id="panel-review">
+      <h2>Review Disposition Note</h2>
+      <div class="field">
+        <label for="disposition">Disposition Assessment</label>
+        <select id="disposition">
+          <option value="not-reviewed" selected>Not reviewed</option>
+          <option value="needs-changes">Needs changes</option>
+          <option value="accepted-for-this-view">Accepted for this view</option>
+          <option value="agent-automated-acceptance">Agent automated acceptance</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="notes">Notes <span class="muted">(4000 characters max)</span></label>
+        <textarea id="notes" maxlength="4000" rows="4" placeholder="Enter human or agent audit findings, visual fidelity notes, or conformance feedback…"></textarea>
+      </div>
+      <div class="btn-cluster">
+        <button type="button" id="download" class="btn-primary">Download Review JSON</button>
+      </div>
+      <p class="status" id="review-status" role="status"></p>
+    </section>
+  </aside>
+</main>
+
+<script type="module" src="./asset-review.js"></script>
+</body>
+</html>

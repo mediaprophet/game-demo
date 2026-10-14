@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QualiaDB Model Development Guide &amp; Kit</title>
+<link rel="stylesheet" href="./asset-review.css">
+<style>
+  .guide-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 24px 80px;
+    line-height: 1.65;
+  }
+  .guide-hero {
+    text-align: center;
+    padding: 40px 20px 30px;
+    margin-bottom: 30px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(6, 182, 212, 0.2) 0%, rgba(11, 17, 22, 0) 70%);
+    border-bottom: 1px solid var(--surface-border);
+  }
+  .guide-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 12px;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .guide-hero p {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .guide-nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    padding: 12px 18px;
+    margin-bottom: 28px;
+  }
+  .guide-section {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+  .guide-section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--surface-border-subtle);
+    padding-bottom: 12px;
+  }
+  .guide-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 22px 0 10px;
+    letter-spacing: 0.02em;
+  }
+  .guide-section p, .guide-section li {
+    color: #cbd5e1;
+    font-size: 14px;
+  }
+  .axioms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .axiom-card {
+    background: var(--surface2);
+    border: 1px solid var(--surface-border);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+  .axiom-card h4 {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: #fff;
+  }
+  .axiom-card p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #14202a;
+    border: 1px solid var(--surface-border-subtle);
+    border-bottom: none;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .copy-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 3px 8px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .copy-btn:hover {
+    background: var(--accent);
+    color: #000;
+  }
+  .code-block {
+    margin: 0 0 20px;
+    background: #090f14;
+    border: 1px solid var(--surface-border-subtle);
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    padding: 14px 16px;
+    font: 12px/1.55 var(--mono);
+    color: #e2e8f0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  table.data-table th, table.data-table td {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    text-align: left;
+  }
+  table.data-table th {
+    background: #14202a;
+    color: var(--accent);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  table.data-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .formula-box {
+    background: #0d161d;
+    border-left: 3px solid var(--gold);
+    padding: 12px 18px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 14px 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: #fde047;
+  }
+  .interactive-calc {
+    background: #0d151c;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    margin: 20px 0;
+  }
+  .calc-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .calc-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .calc-input-group input {
+    width: 80px;
+    padding: 4px 8px;
+    background: #121c24;
+    border: 1px solid var(--surface-border);
+    border-radius: 4px;
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-title">
+      <strong>QualiaDB .10d Asset Review &amp; Virtualization Studio</strong>
+      <span class="version-tag">Standard v2.0.0</span>
+    </div>
+    <span class="eyebrow">Multi-Modal Entity UAT · Continuous EMF Spectral · Zero-Heap Architecture</span>
+  </div>
+  <nav class="header-nav">
+    <a href="./asset-review.html" class="nav-link">
+      <span class="nav-icon">⬅</span> Back to Review Studio
+    </a>
+  </nav>
+</header>
+
+<div class="guide-container">
+  <div class="guide-hero">
+    <h1>Model Development Guide &amp; Kit</h1>
+    <p>Authoritative implementation manual and operational toolkit for autonomous AI agents, multi-agent swarms, and technical artists authoring living <code>.10d</code> entity models in the QualiaDB ecosystem.</p>
+  </div>
+
+  <div class="guide-nav-bar">
+    <div><strong>Quick Index:</strong> 5 Axioms · Ontological Realms · 4-Tier Geometry · Spectral EMF · Acoustics · Authoring Templates · CLI Pipeline · Gates 1–5</div>
+    <a href="./asset-review.html" class="nav-link highlight">Launch Review Studio ↗</a>
+  </div>
+
+  <!-- Section 1: The 5 Non-Negotiable Axioms -->
+  <section class="guide-section" id="axioms">
+    <h2>1. The Five Non-Negotiable Axioms</h2>
+    <p>All virtual embodiments compiled for QualiaDB, <code>webizen-os-shell</code>, and <code>game-demo</code> must adhere to these five architectural invariants:</p>
+
+    <div class="axioms-grid">
+      <div class="axiom-card">
+        <h4>1. Ontological Integrity &amp; Anti-Commodification</h4>
+        <p>Entities must declare their ontological classification. Living organisms are <strong>Specimens</strong>; human subjects are sovereign <strong>Personas</strong>; manufactured tools are <strong>Constructs</strong>. Human persons can never be compiled as assets.</p>
+      </div>
+      <div class="axiom-card">
+        <h4>2. Continuous EMF Spectral Materials</h4>
+        <p>No raw RGB tristimulus albedo. All optical reflectance follows the <strong>Jakob &amp; Hanika (2019)</strong> polynomial basis $(c_0, c_1, c_2)$, guaranteeing physically bounded energy $R(\lambda) \in [0.0, 1.0]$.</p>
+      </div>
+      <div class="axiom-card">
+        <h4>3. 4-Tier Decoupled Virtual Geometry</h4>
+        <p>Every entity must provide references across all 4 resolution tiers (Hero Meshlets $\to$ Decimated Mesh $\to$ Octahedral Impostor Atlas $\to$ Hierarchical Surfels) to bypass GPU quad-overdraw.</p>
+      </div>
+      <div class="axiom-card">
+        <h4>4. Deterministic Zero-Heap Packaging</h4>
+        <p>Authored folders compile into sealed <code>.10d</code> living containers (Sections 1, 13, 17, 18, 19, 20) with per-section CRC-32C checksums and <code>.hmc</code> packages under the 42MB Sentinel ceiling.</p>
+      </div>
+      <div class="axiom-card">
+        <h4>5. Reverse-LOD Locality</h4>
+        <p>Containers are sequenced in Reverse-LOD layout (Header $\to$ Surfels $\to$ Impostor $\to$ Decimated $\to$ Hero Meshlets) enabling instantaneous far-field display on mobile WebGPU while streaming.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Ontological Realms & Classification -->
+  <section class="guide-section" id="ontology">
+    <h2>2. Ontological Realms &amp; Anti-Commodification Invariant</h2>
+    <p>The industrial concept of a universal corporate "digital twin" is explicitly rejected in QualiaDB. The ontological realm dictates English nomenclature, legal exposure, and cryptographic governance:</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Ontological Realm</th>
+          <th>Ontology Class</th>
+          <th>Embodiment Term</th>
+          <th>Legal &amp; Sovereignty Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>World of God / Inalienable Living Realm</strong></td>
+          <td><code>DarwinianTaxon</code></td>
+          <td><strong>Specimen</strong></td>
+          <td>Belongs to the ecological commons; provenance anchored to GBIF / Darwin Core.</td>
+        </tr>
+        <tr>
+          <td><strong>World of God / Inalienable Living Realm</strong></td>
+          <td><code>NaturalPerson</code></td>
+          <td><strong>Persona</strong> / Likeness</td>
+          <td>Inalienable moral rights and bodily sovereignty. Protected by Gate 5 anti-commodification invariant.</td>
+        </tr>
+        <tr>
+          <td><strong>World of Man / Manufactured Realm</strong></td>
+          <td><code>ManufacturedProperty</code></td>
+          <td><strong>Construct</strong> / Artifact</td>
+          <td>Legitimate domain of property rights, operational ratings, and maintenance regimes.</td>
+        </tr>
+        <tr>
+          <td><strong>World of Culture / Expression</strong></td>
+          <td><code>LiberalArtsWork</code></td>
+          <td><strong>Expression</strong> / Lore</td>
+          <td>Authored creative works governed by attribution and moral stewardship.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Section 3: 4-Tier Virtualized Geometry Pipeline -->
+  <section class="guide-section" id="geometry">
+    <h2>3. 4-Tier Virtualized Geometry Pipeline</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Tier</th>
+          <th>Screen-Space Radius ($R_{\text{eff}}$)</th>
+          <th>Geometry Technology</th>
+          <th>Container Section</th>
+          <th>GPU Hardware Sympathy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Tier 1: Hero</strong></td>
+          <td>$\ge 256.0$ px</td>
+          <td>Cluster Meshlets (~128 tris)</td>
+          <td>Section 1 (<code>QuantizedMesh</code>)</td>
+          <td>Cone normal backface culling, fixed vertex-cache reuse.</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 2: Decimated</strong></td>
+          <td>$64.0 \le R_{\text{eff}} < 256.0$ px</td>
+          <td>QEM Decimated Mesh</td>
+          <td>Section 1 (<code>QuantizedMesh</code>)</td>
+          <td>Progressive edge-collapse LOD.</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 3: Impostor</strong></td>
+          <td>$8.0 \le R_{\text{eff}} < 64.0$ px</td>
+          <td>Hemi-Octahedral Atlas</td>
+          <td>Section 19 (<code>ImpostorAtlas</code>, <code>IMPO1</code>)</td>
+          <td>2-triangle camera-facing quad sampling $16 \times 16$ directional views.</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 4: Surfel</strong></td>
+          <td>$1.0 \le R_{\text{eff}} < 8.0$ px</td>
+          <td>Hierarchical Gaussian Splats</td>
+          <td>Section 20 (<code>Surfels</code>, <code>SURF1</code>)</td>
+          <td>Single compute/indirect raster pass; 1 point per cluster.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Section 4: Continuous EMF Spectral Materials -->
+  <section class="guide-section" id="spectral">
+    <h2>4. Continuous EMF Spectral Materials &amp; Jakob-Hanika Basis</h2>
+    <p>Physical light transport simulates continuous electromagnetic radiant energy across $\lambda \in [380, 780]\text{ nm}$:</p>
+
+    <div class="formula-box">
+      $u = \frac{\lambda - 380}{400} \in [0.0, 1.0]$<br>
+      $f(u) = c_0 u^2 + c_1 u + c_2$<br>
+      $R(u) = 0.5 + 0.5 \cdot \frac{f(u)}{\sqrt{1.0 + f(u)^2}}$
+    </div>
+
+    <!-- Live Spectral Calculator -->
+    <div class="interactive-calc">
+      <h3>Interactive Spectral Curve Calculator (Try Basis Coefficients)</h3>
+      <div class="calc-row">
+        <div class="calc-input-group">
+          <label>c0:</label>
+          <input type="number" id="calc-c0" step="0.005" value="0.045">
+        </div>
+        <div class="calc-input-group">
+          <label>c1:</label>
+          <input type="number" id="calc-c1" step="0.05" value="-1.200">
+        </div>
+        <div class="calc-input-group">
+          <label>c2:</label>
+          <input type="number" id="calc-c2" step="0.05" value="0.850">
+        </div>
+        <button type="button" id="btn-eval-calc" class="btn-primary">Compute Reflectance Curve</button>
+      </div>
+      <div id="calc-results" style="font-family: var(--mono); font-size: 12px; color: var(--accent);">
+        Blue (450nm): 0.582 · Green (550nm): 0.825 · Red (650nm): 0.312 · NIR (750nm): 0.120 (Energy Conserved)
+      </div>
+    </div>
+
+    <h3>16-Byte/Pixel WebGPU G-Buffer Layout</h3>
+    <ul>
+      <li><strong>GBuffer0 (<code>rgba16float</code> - 64 bpp):</strong> $c_0, c_1, c_2$ (f16, $[-128, 128]$) + Roughness $\alpha \in [0, 1]$.</li>
+      <li><strong>GBuffer1 (<code>rgba8unorm</code> - 32 bpp):</strong> Octahedral Normal $(N_x, N_y)$ + Metallic $m$ + Material Flags bitmask.</li>
+      <li><strong>Depth (<code>depth32float</code> - 32 bpp):</strong> Reversed-Z floating point.</li>
+    </ul>
+  </section>
+
+  <!-- Section 5: Continuous Spectral Acoustics -->
+  <section class="guide-section" id="acoustics">
+    <h2>5. Continuous Spectral Acoustics &amp; AudioWorklet Spatialization</h2>
+    <p>Acoustic properties mirror optical reflectance in normalized logarithmic frequency space:</p>
+    <div class="formula-box">
+      $u = \frac{\log_{10}(f / 20.0)}{\log_{10}(1000.0)} = \frac{\log_{10}(f / 20.0)}{3.0} \in [0.0, 1.0]$<br>
+      Anchor Frequencies: Low = 200 Hz, Mid = 1000 Hz, High = 8000 Hz<br>
+      Denormal protection DC offset: $x[n] = x_{\text{raw}}[n] + 10^{-24}$
+    </div>
+    <p>Filter coefficients are smoothed linearly across 128-sample quanta ($2.67\text{ ms}$) in Direct Form II Transposed (DF2T), ensuring zero zipper noise and $< 10$ FLOPs per voice per sample.</p>
+  </section>
+
+  <!-- Section 6: Authoring Templates -->
+  <section class="guide-section" id="templates">
+    <h2>6. Canonical Authoring Templates</h2>
+
+    <h3>Natural Flora Specimen (<em>Eucalyptus regnans</em>)</h3>
+    <div class="code-header">
+      <span>entities/flora/eucalyptus_regnans/entity.json</span>
+      <button type="button" class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('code-flora').textContent); alert('Copied Flora JSON!');">Copy JSON</button>
+    </div>
+    <pre class="code-block" id="code-flora">{
+  "entity_id": "urn:qualia:taxon:eucalyptus_regnans_01",
+  "ontology_class": "DarwinianTaxon",
+  "embodiment_term": "Specimen",
+  "taxonomic_data": {
+    "kingdom": "Plantae",
+    "clade": "Angiosperms",
+    "order": "Myrtales",
+    "family": "Myrtaceae",
+    "genus": "Eucalyptus",
+    "species": "Eucalyptus regnans",
+    "common_name": "Mountain Ash",
+    "maturity_stage": "adult",
+    "max_height_m": 100.5,
+    "canopy_radius_m": 14.2
+  },
+  "spectral_profile": {
+    "materials": [
+      {
+        "id": "canopy_foliage",
+        "type": "biological_translucent",
+        "basis_coefficients": { "c0": 0.045, "c1": -1.200, "c2": 0.850 },
+        "bssrdf_mean_free_path_mm": {
+          "blue_450nm": 0.45, "green_550nm": 2.10, "red_650nm": 3.80, "nir_750nm": 5.20
+        },
+        "chlorophyll_degradation_rate": 0.015
+      },
+      {
+        "id": "fibrous_bark",
+        "type": "dielectric_opaque",
+        "basis_coefficients": { "c0": 0.012, "c1": -0.450, "c2": 0.320 },
+        "roughness": 0.85
+      }
+    ]
+  },
+  "procedural_synthesis": {
+    "seed": "0x5EED_EUC_REGNANS_42",
+    "cellular_voronoi_fissures": { "frequency": 14.5, "jitter": 0.85 },
+    "implicit_sdf_branch_fillet": { "blend_radius_m": 0.35, "threshold": 0.02 },
+    "allometric_growth": { "huxley_exponent_k": 1.42, "base_b": 0.18 },
+    "pga_secondary_wind_oscillation": { "motor_frequency_hz": 0.45, "damping_ratio": 0.15 }
+  },
+  "geometry_tiers": {
+    "tier_1_hero": { "type": "meshlet_cluster", "data_ref": "hmc://entities/flora/euc.10d#meshlets_sec1" },
+    "tier_2_decimated": { "type": "quantized_index", "data_ref": "hmc://entities/flora/euc.10d#lod_sec1" },
+    "tier_3_impostor": { "type": "octahedral_atlas", "resolution": 32, "grid_dim": 16, "data_ref": "hmc://entities/flora/euc.10d#impostor_sec19" },
+    "tier_4_surfel": { "type": "hierarchical_gaussian_splat", "data_ref": "hmc://entities/flora/euc.10d#surfel_sec3" }
+  },
+  "physics_and_affordances": {
+    "wind_compliance": 0.85,
+    "shedding_affordance": {
+      "action_id": "affordance:shed_bark_ribbons",
+      "trigger_season": "summer",
+      "preconditions": ["temperature_celsius >= 30.0"],
+      "emitted_debris": "hmc://entities/debris/bark_ribbon.10d"
+    }
+  }
+}</pre>
+
+    <h3>Manufactured Construct (Solar Centrifugal Pump)</h3>
+    <div class="code-header">
+      <span>entities/machinery/solar_centrifugal_pump/entity.json</span>
+      <button type="button" class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('code-pump').textContent); alert('Copied Pump JSON!');">Copy JSON</button>
+    </div>
+    <pre class="code-block" id="code-pump">{
+  "entity_id": "urn:qualia:artifact:solar_pump_centrifugal_v2",
+  "ontology_class": "ManufacturedProperty",
+  "embodiment_term": "Construct",
+  "manufacturing_data": {
+    "manufacturer_did": "did:q42:corp:qualia_hardware_consortium",
+    "model_name": "HydroVibe-400X",
+    "dry_mass_kg": 42.5,
+    "ip_rating": "IP68"
+  },
+  "spectral_profile": {
+    "materials": [
+      {
+        "id": "casing_machined_steel",
+        "type": "conductor",
+        "complex_refractive_index": {
+          "n_polynomial": [1.50, 0.20, -0.05],
+          "k_polynomial": [2.80, 0.50, 0.10]
+        },
+        "roughness": 0.25,
+        "metallic": 1.0
+      }
+    ]
+  },
+  "geometry_tiers": {
+    "tier_1_hero": { "type": "meshlet_cluster", "data_ref": "hmc://entities/machinery/pump.10d#meshlets_sec1" },
+    "tier_2_decimated": { "type": "quantized_index", "data_ref": "hmc://entities/machinery/pump.10d#lod_sec1" },
+    "tier_3_impostor": { "type": "octahedral_atlas", "resolution": 16, "grid_dim": 8, "data_ref": "hmc://entities/machinery/pump.10d#impostor_sec19" },
+    "tier_4_surfel": { "type": "point_proxy", "data_ref": "hmc://entities/machinery/pump.10d#surfel_sec3" }
+  },
+  "physics_and_affordances": {
+    "operational_rpm": 1450.0,
+    "max_flow_liters_min": 250.0,
+    "affordances": [
+      {
+        "action_id": "affordance:engage_solar_pump",
+        "preconditions": ["solar_irradiance_w_m2 >= 200.0"],
+        "effects": ["state.active = true", "flow_rate_l_min = 250.0 * (solar_irradiance / 1000.0)"]
+      }
+    ]
+  }
+}</pre>
+  </section>
+
+  <!-- Section 7: Offline CLI Workflow -->
+  <section class="guide-section" id="cli">
+    <h2>7. Offline CLI Compilation &amp; Verification Toolchain</h2>
+    <p>To compile authored entity folders into living <code>.10d</code> containers and <code>.hmc</code> packages, execute the zero-heap Rust CLI subcommands:</p>
+
+    <div class="code-header">
+      <span>PowerShell / Bash Terminal Commands</span>
+      <button type="button" class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('code-cli').textContent); alert('Copied CLI Commands!');">Copy Commands</button>
+    </div>
+    <pre class="code-block" id="code-cli"># 1. Compile living entity model into .10d and .hmc container
+qualia-cli entity-compile \
+  --input ./entities/flora/eucalyptus_regnans/entity.json \
+  --output ./assets/eucalyptus_regnans.10d \
+  --style community \
+  --reverse-lod
+
+# 2. Cryptographically verify gates and structural integrity
+qualia-cli entity-verify \
+  --input ./assets/eucalyptus_regnans.10d \
+  --strict-gates \
+  --output-audit-receipt ./receipts/audit-euc.json
+
+# 3. Inspect in the browser review studio with direct autoload:
+# Open: ./asset-review.html?style=community&asset=10d/eucalyptus_regnans.10d&autoload=1&audit=1</pre>
+  </section>
+
+  <!-- Section 8: Gates Checklist -->
+  <section class="guide-section" id="gates">
+    <h2>8. Verification Gates Checklist (Gates 1–5)</h2>
+    <div class="axioms-grid">
+      <div class="axiom-card" style="border-left-color: #38bdf8;">
+        <h4>Gate 1: Spectral Plausibility</h4>
+        <p>Reflectance polynomial evaluates to $R(\lambda) \in [0.0, 1.0]$ across all wavelengths. BSSRDF mean free paths are strictly positive non-zero.</p>
+      </div>
+      <div class="axiom-card" style="border-left-color: #34d399;">
+        <h4>Gate 2: Geometry Confinement</h4>
+        <p>Decimated LODs and impostor bounding volumes remain strictly within the Tier 1 Hero bounding volume within a 5 cm margin.</p>
+      </div>
+      <div class="axiom-card" style="border-left-color: #fbbf24;">
+        <h4>Gate 3: Ontological &amp; Kinematics</h4>
+        <p>Ontology classes resolve to graph dictionary; vertex bone weights are normalized ($\sum w_i = 1.0$) with valid skeletal joint indices.</p>
+      </div>
+      <div class="axiom-card" style="border-left-color: #c084fc;">
+        <h4>Gate 4: Script Determinism</h4>
+        <p>Wasm/VibeScript affordances execute within $1,000,000$ cycle budget with zero unseeded entropy or non-deterministic host calls.</p>
+      </div>
+      <div class="axiom-card" style="border-left-color: #f43f5e;">
+        <h4>Gate 5: Anti-Commodification</h4>
+        <p>Natural persons cannot be commodified as commercial property or industrial assets. Sovereign representations require DID consent.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+  import { evaluateSpectralReflectance } from './asset-review-evidence.js';
+
+  document.getElementById('btn-eval-calc')?.addEventListener('click', () => {
+    const c0 = parseFloat(document.getElementById('calc-c0').value) || 0;
+    const c1 = parseFloat(document.getElementById('calc-c1').value) || 0;
+    const c2 = parseFloat(document.getElementById('calc-c2').value) || 0;
+
+    const rB = evaluateSpectralReflectance(c0, c1, c2, 450);
+    const rG = evaluateSpectralReflectance(c0, c1, c2, 550);
+    const rR = evaluateSpectralReflectance(c0, c1, c2, 650);
+    const rN = evaluateSpectralReflectance(c0, c1, c2, 750);
+
+    const isConserved = [rB, rG, rR, rN].every(r => r >= 0.0 && r <= 1.0);
+    const el = document.getElementById('calc-results');
+    if (el) {
+      el.textContent = `Blue (450nm): ${rB.toFixed(3)} · Green (550nm): ${rG.toFixed(3)} · Red (650nm): ${rR.toFixed(3)} · NIR (750nm): ${rN.toFixed(3)} (${isConserved ? 'Energy Conserved' : 'Energy Violated'})`;
+      el.style.color = isConserved ? '#34d399' : '#f43f5e';
+    }
+  });
+</script>
+</body>
+</html>

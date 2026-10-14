@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(__dirname, '..', 'web');
+const generatedRoot = path.resolve(__dirname, '..', 'assets', 'generated');
 const port = parseInt(process.env.PORT || '8089', 10);
 const host = process.env.HOST || '127.0.0.1';
 
@@ -27,39 +28,118 @@ const mimeTypes = {
   '.txt': 'text/plain; charset=utf-8',
 };
 
+const realpathSyncSafe = candidate => {
+  try {
+    return fs.realpathSync(candidate);
+  } catch {
+    return null;
+  }
+};
+
+const webRootReal = realpathSyncSafe(webRoot);
+const assetRoots = {
+  storybook: realpathSyncSafe(generatedRoot),
+  earthlight: realpathSyncSafe(path.join(generatedRoot, 'earthlight')),
+  community: realpathSyncSafe(path.join(generatedRoot, 'community')),
+};
+
+const assetFileRoute = /^\/asset-files\/(storybook|earthlight|community)\/(10d\/[A-Za-z0-9_-]+\.10d|textures\/sha256\/[a-f0-9]{64})$/;
+
+const insideRoot = (root, filePath) => {
+  const normalize = value => (process.platform === 'win32' ? value.toLowerCase() : value);
+  const relative = path.relative(normalize(root), normalize(filePath));
+  return relative === '' || (relative !== '..' && !relative.startsWith('..' + path.sep) && !path.isAbsolute(relative));
+};
+
+const deny = (res, status, message) => {
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.end(message);
+};
+
+const sendFile = (req, res, filePath, stats, contentType) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', contentType);
+  res.setHeader('Content-Length', stats.size);
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  if (req.method === 'HEAD') {
+    res.end();
+    return;
+  }
+  fs.createReadStream(filePath).pipe(res);
+};
+
+const serveContained = (req, res, rootReal, relPath, contentTypeFor) => {
+  if (!rootReal) {
+    deny(res, 404, 'Not found');
+    return;
+  }
+  const candidate = path.resolve(rootReal, relPath);
+  if (!insideRoot(rootReal, candidate)) {
+    deny(res, 403, 'Access denied');
+    return;
+  }
+  fs.realpath(candidate, (realErr, realPath) => {
+    if (realErr) {
+      deny(res, 404, 'Not found');
+      return;
+    }
+    if (!insideRoot(rootReal, realPath)) {
+      deny(res, 403, 'Access denied');
+      return;
+    }
+    fs.stat(realPath, (statErr, stats) => {
+      if (statErr || !stats.isFile()) {
+        deny(res, 404, 'Not found');
+        return;
+      }
+      sendFile(req, res, realPath, stats, contentTypeFor(realPath));
+    });
+  });
+};
+
 const server = http.createServer((req, res) => {
-  const parsedUrl = new URL(req.url, `http://${req.headers.host || host}`);
-  let pathname = decodeURIComponent(parsedUrl.pathname);
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.statusCode = 405;
+    res.setHeader('Allow', 'GET, HEAD');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.end('Method not allowed');
+    return;
+  }
+
+  let pathname;
+  try {
+    const parsedUrl = new URL(req.url, `http://${req.headers.host || host}`);
+    pathname = decodeURIComponent(parsedUrl.pathname);
+  } catch {
+    deny(res, 400, 'Bad request');
+    return;
+  }
+
+  const assetMatch = assetFileRoute.exec(pathname);
+  if (assetMatch) {
+    const [, style, relPath] = assetMatch;
+    const contentType = relPath.startsWith('textures/')
+      ? () => 'image/png'
+      : () => 'application/octet-stream';
+    serveContained(req, res, assetRoots[style], relPath, contentType);
+    return;
+  }
+
   if (pathname === '/' || pathname === '') {
     pathname = '/game.html';
   }
 
-  const filePath = path.normalize(path.join(webRoot, pathname));
-  if (!filePath.startsWith(webRoot)) {
-    res.statusCode = 403;
-    res.end('Access denied');
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.some(segment => segment.startsWith('.'))) {
+    deny(res, 403, 'Access denied');
     return;
   }
 
-  fs.stat(filePath, (err, stats) => {
-    if (err || !stats.isFile()) {
-      res.statusCode = 404;
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.end(`Not found: ${pathname}`);
-      return;
-    }
-
+  serveContained(req, res, webRootReal, segments.join('/'), filePath => {
     const ext = path.extname(filePath).toLowerCase();
-    const contentType = mimeTypes[ext] || 'application/octet-stream';
-
-    res.statusCode = 200;
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Content-Length', stats.size);
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(res);
+    return mimeTypes[ext] || 'application/octet-stream';
   });
 });
 

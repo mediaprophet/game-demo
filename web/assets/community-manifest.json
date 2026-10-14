@@ -39779,16 +39779,10 @@
   ],
   "semantics": [
     {
-      "bytes": 15744,
-      "key": "sem/taxonomy.quins",
+      "bytes": 16646,
+      "key": "sem/taxonomy.q42",
       "quins": 328,
-      "sha256": "430c48084436befa8fc5d03c697ebe36b082da2954d5f20323fde8579fab5254"
-    },
-    {
-      "bytes": 14293,
-      "key": "sem/taxonomy.lex",
-      "quins": null,
-      "sha256": "de68f0964cd8651aaec06da2b3c57cde9e83f352e6fba04031b7d1cd18630b00"
+      "sha256": "827354f0976b274d7f9a174d6a79750cbff7a64a85bdfd1a370939214ac2ee7d"
     }
   ],
   "sourceRecipes": [
@@ -40042,6 +40036,20 @@
       "rankNote": "",
       "scientificName": "Vombatidae"
     }
+  },
+  "taxonConvention": {
+    "canonicalId": "gbifKey",
+    "gbifIriPattern": "https://www.gbif.org/species/{gbifKey}",
+    "ontologyBindings": {
+      "auNsl": "urn:qualia:ontology:aunsl",
+      "darwinCore": "urn:qualia:ontology:dwc",
+      "note": "dwc:Taxon / dwc:scientificName / dwc:taxonID terms apply at pack-compile time; auNSL covers flora nomenclature — fauna binding rides GBIF backbone until an AFD source is registered (G51).",
+      "tern": "urn:qualia:ontology:tern"
+    },
+    "rankHonesty": "taxon.rank reports the GBIF backbone rank verbatim, including backbone quirks — see the snake entry. Do not silently 'fix' ranks; record the backbone value and a note.",
+    "rationale": "QualiaDB engine interop ID is the GBIF backbone taxon key (u64) — see crates/qualia-core-db/src/domains/geospatial/adapters/gbif_adapter.rs and audio/bioacoustics.rs::taxon_id. Scientific-name strings are display/lookup convenience only; they are NOT identity (homonyms, synonyms, rank moves).",
+    "resolvedAt": "2026-10-12",
+    "resolvedVia": "https://api.gbif.org/v1/species/match (GBIF backbone v1)"
   },
   "textures": [
     {

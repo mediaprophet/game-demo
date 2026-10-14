@@ -5,7 +5,7 @@ import { readFile, writeFile, mkdir, readdir, unlink } from 'node:fs/promises';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import init, { pack_game_hmc, scene_build, set_art_style, set_vehicle_rig, set_fauna_selection, set_flora_selection,
-  taxon_binding_json, taxon_dwc_json, validate_game_hmc } from '../web/pkg/rolling_commons_shell.js';
+  validate_game_hmc } from '../web/pkg/rolling_commons_shell.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const wasmPath = join(root, 'web', 'pkg', 'rolling_commons_shell_bg.wasm');
@@ -22,28 +22,11 @@ await writeFile(join(publicProfiles, 'se-corridor-reference.json'),
 set_fauna_selection(JSON.stringify(ecologyProfile.render.faunaSelection));
 set_flora_selection(JSON.stringify(ecologyProfile.render.floraSelection || []));
 
-// Taxon bindings come from the VibeScript fixture (web/fixtures/
-// taxon-bindings.vibe) through the WASM host — the single authored source.
-// GBIF backbone keys are the engine-interop identity; name strings are
-// display labels. Fauna asset instance ids embed the renderKey token
-// (inland-goat-01, road-kangaroo-01); flora assets prefix-match
-// `rc:asset/flora/<renderKey>` via assetFamily.
-const taxonBindings = {};
-for (const key of [...ecologyProfile.render.faunaSelection, ...(ecologyProfile.render.floraSelection || [])]) {
-  const binding = JSON.parse(taxon_binding_json(key));
-  if (binding) taxonBindings[key] = binding;
-}
-function taxonForAsset(assetId) {
-  if (assetId.startsWith('rc:asset/flora/')) {
-    const entry = Object.entries(taxonBindings).find(([, b]) => assetId.startsWith(`${b.assetFamily}/`));
-    return entry ? { renderKey: entry[0], ...entry[1] } : null;
-  }
-  if (assetId.startsWith('rc:asset/fauna/')) {
-    const entry = Object.entries(taxonBindings).find(([k]) => assetId.includes(k));
-    return entry ? { renderKey: entry[0], ...entry[1] } : null;
-  }
-  return null;
-}
+// Semantic section is authored by VibeScript (web/fixtures/taxon-bindings.vibe)
+// and packed by `cargo run -p pack-export -- --all` — it evaluates the fixture
+// natively and emits the canonical `sem/taxonomy.q42` volume. This script only
+// regenerates .10d assets, textures, and the manifest skeleton; the `semantics`,
+// `taxonBindings`, and per-asset `taxon` fields are stamped by pack-export.
 
 const beacon = (await readFile(join(root, 'web', 'fixtures', 'community-beacon.vibe'), 'utf8')).trim();
 const cases = [
@@ -68,9 +51,6 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
   const assets = new Map();
   const textures = new Map();
   const scenes = [];
-  // Semantic statements for the pack's `sem/` section (G50): deduped across
-  // assets — taxon-node quins repeat per asset, depicts/accrual quins differ.
-  const stmtMap = new Map();
   for (const [name, args] of cases) {
     for (const rig of [0, 1, 2, 3]) {
       set_vehicle_rig(rig);
@@ -105,19 +85,9 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
     const key = `${asset.id}:${sha256}`;
     if (!assets.has(key)) {
       await writeFile(join(out, file), bytes);
-      const taxon = taxonForAsset(asset.id);
-      // dwc/accrual statements are authored in taxon-bindings.vibe and sealed
-      // by the host (quin.statement); fields are hex strings — u64s are not
-      // f64-lossless. Each entry carries its source terms so the pack lexicon
-      // needs no second mapping.
-      for (const st of taxon ? JSON.parse(taxon_dwc_json(taxon.renderKey, asset.id)) : []) {
-        const stmtId = Object.values(st.quin).join('|');
-        if (!stmtMap.has(stmtId)) stmtMap.set(stmtId, st);
-      }
       assets.set(key, { id: asset.id, file: `10d/${file}`, bytes: bytes.length, sha256,
         rgba: [asset.r, asset.g, asset.b, asset.a], renderRole: asset.renderRole || 'opaque',
-        materialFamily: asset.materialFamily,
-        ...(taxon ? { taxon: { gbifKey: taxon.gbifKey, iri: taxon.iri, rank: taxon.rank } } : {}) });
+        materialFamily: asset.materialFamily });
     }
     entries.push(key);
   }
@@ -128,33 +98,6 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
   const globalAssets = [...assets.entries()].sort((a, b) => a[1].file.localeCompare(b[1].file));
   const assetIndex = new Map(globalAssets.map(([key], index) => [key, index]));
 
-  // Pack semantic section: 48-byte NQuins (little-endian u64 fields in
-  // struct order) + a `<hex-hash> <iri>` lexicon so the hashes resolve
-  // in-browser. Integer-typed objects carry no hash — skipped in the lexicon.
-  const stmtList = [...stmtMap.values()];
-  const quinBytes = Buffer.alloc(stmtList.length * 48);
-  stmtList.forEach((st, i) => {
-    for (const [j, field] of ['subject','predicate','object','context','metadata','parity'].entries())
-      quinBytes.writeBigUInt64LE(BigInt(st.quin[field]), i * 48 + j * 8);
-  });
-  const lexTerms = new Map();
-  for (const st of stmtList) {
-    for (const [hash, term] of [[st.quin.subject, st.s], [st.quin.predicate, st.p],
-        ...(st.integer ? [] : [[st.quin.object, st.o]])]) {
-      if (lexTerms.has(hash) && lexTerms.get(hash) !== term)
-        throw new Error(`lexicon hash collision: ${hash}`);
-      lexTerms.set(hash, term);
-    }
-  }
-  const lexText = [...lexTerms.entries()]
-    .map(([hash, term]) => `${hash.slice(2)} ${term}`).sort().join('\n') + '\n';
-  const semanticFiles = stmtList.length ? [
-    { key: 'sem/taxonomy.quins', bytes: quinBytes },
-    { key: 'sem/taxonomy.lex', bytes: Buffer.from(lexText, 'utf8') },
-  ] : [];
-  const semantics = semanticFiles.map(f => ({ key: f.key,
-    quins: f.key.endsWith('.quins') ? stmtList.length : undefined,
-    bytes: f.bytes.length, sha256: createHash('sha256').update(f.bytes).digest('hex') }));
   const manifest = {
   format: 'maslows-challenge-asset-export-v1',
   artStyle: styleSlug,
@@ -194,8 +137,6 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
     'assets/ecology/profiles/se-corridor-reference.json'],
   wasm: { file: 'web/pkg/rolling_commons_shell_bg.wasm', sha256: createHash('sha256').update(wasm).digest('hex') },
   taxonConvention: ecologyProfile.taxonConvention || null,
-  taxonBindings,
-  semantics,
   assets: globalAssets.map(([, asset]) => asset),
   textures: [...textures.values()].sort((a,b)=>a.file.localeCompare(b.file)||a.role-b.role),
   scenes: scenes.map(({ assetKeys, ...scene }) => ({
@@ -213,12 +154,11 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
   const textureFiles=[...new Set(manifest.textures.map(texture=>texture.file))];
   for(const file of textureFiles)entries.push({key:file,
     bytes:new Uint8Array(await readFile(join(styleRoot,file)))});
-  for(const sem of semanticFiles)entries.push({key:sem.key,bytes:new Uint8Array(sem.bytes)});
 // Keep the checked-in manifest readable; pack the same data compactly so
 // growing scene catalogs stay within the game shell's bounded HMC input.
+// The sem/*.q42 entry is added by pack-export when it repacks this bundle.
   const pack = pack_game_hmc(entries, JSON.stringify(manifest));
-  if (validate_game_hmc(pack) !== manifest.assets.length + textureFiles.length
-      + semantics.length + 1) {
+  if (validate_game_hmc(pack) !== manifest.assets.length + textureFiles.length + 1) {
     throw new Error('Qualia HMC reader rejected an entry');
   }
   const packDir = join(root, 'web', 'assets');

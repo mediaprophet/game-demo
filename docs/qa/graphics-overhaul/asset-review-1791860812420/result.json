@@ -1,0 +1,788 @@
+{
+  "kind": "single-asset-browser-integration-check",
+  "origin": "http://127.0.0.1:8090",
+  "output": "C:\\github\\game-demo\\docs\\qa\\graphics-overhaul\\asset-review-1791860812420",
+  "steps": [
+    {
+      "name": "Vibe catalog loads without geometry or HMC fetch",
+      "outcome": "passed"
+    },
+    {
+      "name": "one banksia entry decodes and authored Vibe RDF remains explicitly non-pack evidence",
+      "outcome": "passed"
+    },
+    {
+      "name": "camera input crosses the Vibe admission path",
+      "outcome": "passed"
+    },
+    {
+      "name": "switching fetches only the two explicitly selected model files and no whole pack",
+      "outcome": "passed"
+    },
+    {
+      "name": "Vibe-authored note preserves selected identity and no automatic art acceptance",
+      "outcome": "passed"
+    },
+    {
+      "name": "corrupted transport bytes are refused by the Vibe digest decision before render",
+      "outcome": "passed"
+    }
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:8090/asset-review.html",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-review.css",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-review.js",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-review-evidence.js",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/pkg/rolling_commons_shell.js",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/pkg/rolling_commons_shell_bg.wasm",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/fixtures/taxon-bindings.vibe",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/fixtures/asset-review.vibe",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/assets/community-manifest.json",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/10d/flora-banksia-branch-0--a00fdcca3ed8.10d",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/06ee2d64cf178b43d3d3c17bc938b464f660da36efcbcd24f6fe8a1b3e54c2ad",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/1172a8848e519c22c0d41039969cf288bb1d99e85aee0e4859f7587f3a45c2cf",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/1a1faa3b9ebbd8acbfb7b7eb9a794d364dc23812171ece5e0f2b780e6dd39dfa",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/1b7101f47a6d44a4e4352efadec4e5771787de8ce2090805efbad240524c5d40",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/235de555f0a57dc45a7146522bac78561942c9697780ed280b80eeee185a713e",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/24b852f71bbd5982c5a39c214ffc93aaa523d3f7121b4af97bfef1b4db0d2013",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/3502cb416858690b26fd18c1da17e3099620a5a22436124c8665f61697c980c8",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/388b82e8d9103d758619aeb6528abc3c851fc4605959596bd7a2534975a1fed5",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/42f5d86b1d5d9b307cd12f25050838d12e9a13c288391136e144d337416f708c",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/432324ca8b6a2ed4c95784b36fc6d906b6f1fc7e00f242f154e61110cfc0dbf1",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/4e97eb14b7897f76fdf197ea113c82381e6228131a8388da18ea5cb0406d9fab",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/4f24cfdf3636d8c4cc1ad68ecd1df0f404647db38511cc20ea236996a221924e",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/5013f8ec7b8c90be1255dee0897a09317e18bb7e1be3475fb1081db1824e7618",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/51c91319f23e3cda28fc0e934c57ed1f323bf710c60b46cb29d2df8a39a91f80",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/591d838304d16a3b7cb749d72a9739521a341d3ca42e1fdc049190bb4122c142",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/59d3c69c75e4d9de983fd1a9a4358a42f063a945c99c56064869d7c2a37d3901",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/63c34a6edfeebb738ec9e71fc66496a1e8c8993c7c00c577ea6d392f1b735cf6",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/64ee68fff7fd531334b0e0ed92902467efc1c0274a4d27c7732849b23806470a",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/67ffcd6fd7105929c3fc7bd222f7073bc12f269b129e49d81407659c940021e6",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/68b2d96ce99fed918b2c9eca8a0e3c1dca166e790952a58b681891e82b6355ad",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/6bde25710b76b9bda0ac074f6f52e6401cf4f884df181ad9967a5f6823bf8fe2",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/6d41caf09b64ea5b3a01c4000107de63382f59beed7d684769d5903b63b8636d",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/799ca3efa0f16645313d720002a0e8940ade63c60c1fd77c375ff3a04808b76f",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/7f0ddf8c38e5cb7bc6e46d2b4abf6d66f157c66f81fb2fb3053be7a5c1118dd6",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/9a57d7a62bd77671162a080d86d33ec5230e0120d280b84c35b42bf650c0e0d3",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/9da3f26c7a734fd3b9d5c2e5a7e1801bf712f69a514b9234ae5427b7b89be435",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/a48fd3892d88b9f6e1f4a4dd07931e980667483acdcfa2f20790d1513278e57b",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/a5f211be47fe090896d9be7e31019b397b5edd12ca4b0d5dadc4023cbe0226e3",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ac0fc1115d2315a380da11f9436f234702df8178ef221a930eafbad9c2890949",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ad69710eae42906d02e9d46748005a107f654d08dbe8d4900a96bcabde328035",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/b296a1d8f038ab1edd349bcb7a419e660fb33678eb2ad78316b4cb8e0dbe4538",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/bc7cf413f900a5cd67390c740297a4601dca2f07b1bbf17311798e69012cbfa5",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/bd4c2cc705882044d460123fc1fafd29ffd76f5a1b6d8402771d346eb18e5437",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ccc8e2fef0f53ffba6d2f60fa1b1d5d25eae66db64c954eda62e34639b14e2e7",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/d2d80421ea342250116bbddea267fe615df84a1864836339a13ee43248996b2c",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/d385cef8a44faf46eac59679a357dc23157bb4a82c6d6369c00ae61b3d2ea11a",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/e91243c46d20e9e2539781b8bca9703fb06d9d03736f26cfe29e777d8c2156f4",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ed9c39d792adc216f15a416ac92e7dda1f107b4570e086e1e474bd1fdebf8706",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/f5b63982e40de5a36c1180f1a55c3f24649859a210db25bc13c81003bfe46c57",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/10d/barn-door--5db32e09f9b2.10d",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/06ee2d64cf178b43d3d3c17bc938b464f660da36efcbcd24f6fe8a1b3e54c2ad",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/1172a8848e519c22c0d41039969cf288bb1d99e85aee0e4859f7587f3a45c2cf",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/1a1faa3b9ebbd8acbfb7b7eb9a794d364dc23812171ece5e0f2b780e6dd39dfa",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/1b7101f47a6d44a4e4352efadec4e5771787de8ce2090805efbad240524c5d40",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/235de555f0a57dc45a7146522bac78561942c9697780ed280b80eeee185a713e",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/24b852f71bbd5982c5a39c214ffc93aaa523d3f7121b4af97bfef1b4db0d2013",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/3502cb416858690b26fd18c1da17e3099620a5a22436124c8665f61697c980c8",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/388b82e8d9103d758619aeb6528abc3c851fc4605959596bd7a2534975a1fed5",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/42f5d86b1d5d9b307cd12f25050838d12e9a13c288391136e144d337416f708c",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/432324ca8b6a2ed4c95784b36fc6d906b6f1fc7e00f242f154e61110cfc0dbf1",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/4e97eb14b7897f76fdf197ea113c82381e6228131a8388da18ea5cb0406d9fab",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/4f24cfdf3636d8c4cc1ad68ecd1df0f404647db38511cc20ea236996a221924e",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/5013f8ec7b8c90be1255dee0897a09317e18bb7e1be3475fb1081db1824e7618",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/51c91319f23e3cda28fc0e934c57ed1f323bf710c60b46cb29d2df8a39a91f80",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/591d838304d16a3b7cb749d72a9739521a341d3ca42e1fdc049190bb4122c142",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/59d3c69c75e4d9de983fd1a9a4358a42f063a945c99c56064869d7c2a37d3901",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/63c34a6edfeebb738ec9e71fc66496a1e8c8993c7c00c577ea6d392f1b735cf6",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/64ee68fff7fd531334b0e0ed92902467efc1c0274a4d27c7732849b23806470a",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/67ffcd6fd7105929c3fc7bd222f7073bc12f269b129e49d81407659c940021e6",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/68b2d96ce99fed918b2c9eca8a0e3c1dca166e790952a58b681891e82b6355ad",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/6bde25710b76b9bda0ac074f6f52e6401cf4f884df181ad9967a5f6823bf8fe2",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/6d41caf09b64ea5b3a01c4000107de63382f59beed7d684769d5903b63b8636d",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/799ca3efa0f16645313d720002a0e8940ade63c60c1fd77c375ff3a04808b76f",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/7f0ddf8c38e5cb7bc6e46d2b4abf6d66f157c66f81fb2fb3053be7a5c1118dd6",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/9a57d7a62bd77671162a080d86d33ec5230e0120d280b84c35b42bf650c0e0d3",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/9da3f26c7a734fd3b9d5c2e5a7e1801bf712f69a514b9234ae5427b7b89be435",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/a48fd3892d88b9f6e1f4a4dd07931e980667483acdcfa2f20790d1513278e57b",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/a5f211be47fe090896d9be7e31019b397b5edd12ca4b0d5dadc4023cbe0226e3",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ac0fc1115d2315a380da11f9436f234702df8178ef221a930eafbad9c2890949",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ad69710eae42906d02e9d46748005a107f654d08dbe8d4900a96bcabde328035",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/b296a1d8f038ab1edd349bcb7a419e660fb33678eb2ad78316b4cb8e0dbe4538",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/bc7cf413f900a5cd67390c740297a4601dca2f07b1bbf17311798e69012cbfa5",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/bd4c2cc705882044d460123fc1fafd29ffd76f5a1b6d8402771d346eb18e5437",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ccc8e2fef0f53ffba6d2f60fa1b1d5d25eae66db64c954eda62e34639b14e2e7",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/d2d80421ea342250116bbddea267fe615df84a1864836339a13ee43248996b2c",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/d385cef8a44faf46eac59679a357dc23157bb4a82c6d6369c00ae61b3d2ea11a",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/e91243c46d20e9e2539781b8bca9703fb06d9d03736f26cfe29e777d8c2156f4",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ed9c39d792adc216f15a416ac92e7dda1f107b4570e086e1e474bd1fdebf8706",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/f5b63982e40de5a36c1180f1a55c3f24649859a210db25bc13c81003bfe46c57",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/10d/flora-banksia-branch-0--a00fdcca3ed8.10d",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/10d/flora-banksia-branch-0--a00fdcca3ed8.10d",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/06ee2d64cf178b43d3d3c17bc938b464f660da36efcbcd24f6fe8a1b3e54c2ad",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/1172a8848e519c22c0d41039969cf288bb1d99e85aee0e4859f7587f3a45c2cf",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/1a1faa3b9ebbd8acbfb7b7eb9a794d364dc23812171ece5e0f2b780e6dd39dfa",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/1b7101f47a6d44a4e4352efadec4e5771787de8ce2090805efbad240524c5d40",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/235de555f0a57dc45a7146522bac78561942c9697780ed280b80eeee185a713e",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/24b852f71bbd5982c5a39c214ffc93aaa523d3f7121b4af97bfef1b4db0d2013",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/3502cb416858690b26fd18c1da17e3099620a5a22436124c8665f61697c980c8",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/388b82e8d9103d758619aeb6528abc3c851fc4605959596bd7a2534975a1fed5",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/42f5d86b1d5d9b307cd12f25050838d12e9a13c288391136e144d337416f708c",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/432324ca8b6a2ed4c95784b36fc6d906b6f1fc7e00f242f154e61110cfc0dbf1",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/4e97eb14b7897f76fdf197ea113c82381e6228131a8388da18ea5cb0406d9fab",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/4f24cfdf3636d8c4cc1ad68ecd1df0f404647db38511cc20ea236996a221924e",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/5013f8ec7b8c90be1255dee0897a09317e18bb7e1be3475fb1081db1824e7618",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/51c91319f23e3cda28fc0e934c57ed1f323bf710c60b46cb29d2df8a39a91f80",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/591d838304d16a3b7cb749d72a9739521a341d3ca42e1fdc049190bb4122c142",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/59d3c69c75e4d9de983fd1a9a4358a42f063a945c99c56064869d7c2a37d3901",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/63c34a6edfeebb738ec9e71fc66496a1e8c8993c7c00c577ea6d392f1b735cf6",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/64ee68fff7fd531334b0e0ed92902467efc1c0274a4d27c7732849b23806470a",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/67ffcd6fd7105929c3fc7bd222f7073bc12f269b129e49d81407659c940021e6",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/68b2d96ce99fed918b2c9eca8a0e3c1dca166e790952a58b681891e82b6355ad",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/6bde25710b76b9bda0ac074f6f52e6401cf4f884df181ad9967a5f6823bf8fe2",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/6d41caf09b64ea5b3a01c4000107de63382f59beed7d684769d5903b63b8636d",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/799ca3efa0f16645313d720002a0e8940ade63c60c1fd77c375ff3a04808b76f",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/7f0ddf8c38e5cb7bc6e46d2b4abf6d66f157c66f81fb2fb3053be7a5c1118dd6",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/9a57d7a62bd77671162a080d86d33ec5230e0120d280b84c35b42bf650c0e0d3",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/9da3f26c7a734fd3b9d5c2e5a7e1801bf712f69a514b9234ae5427b7b89be435",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/a48fd3892d88b9f6e1f4a4dd07931e980667483acdcfa2f20790d1513278e57b",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/a5f211be47fe090896d9be7e31019b397b5edd12ca4b0d5dadc4023cbe0226e3",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ac0fc1115d2315a380da11f9436f234702df8178ef221a930eafbad9c2890949",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ad69710eae42906d02e9d46748005a107f654d08dbe8d4900a96bcabde328035",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/b296a1d8f038ab1edd349bcb7a419e660fb33678eb2ad78316b4cb8e0dbe4538",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/bc7cf413f900a5cd67390c740297a4601dca2f07b1bbf17311798e69012cbfa5",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/bd4c2cc705882044d460123fc1fafd29ffd76f5a1b6d8402771d346eb18e5437",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ccc8e2fef0f53ffba6d2f60fa1b1d5d25eae66db64c954eda62e34639b14e2e7",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/d2d80421ea342250116bbddea267fe615df84a1864836339a13ee43248996b2c",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/d385cef8a44faf46eac59679a357dc23157bb4a82c6d6369c00ae61b3d2ea11a",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/e91243c46d20e9e2539781b8bca9703fb06d9d03736f26cfe29e777d8c2156f4",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/ed9c39d792adc216f15a416ac92e7dda1f107b4570e086e1e474bd1fdebf8706",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-files/community/textures/sha256/f5b63982e40de5a36c1180f1a55c3f24649859a210db25bc13c81003bfe46c57",
+      "method": "GET"
+    }
+  ],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "pageErrors": [],
+  "disposition": "not-art-acceptance",
+  "browser": "154.0.8037.98",
+  "renderer": {
+    "renderer": "webgpu",
+    "vertex_count": 46,
+    "index_count": 108,
+    "frames_presented": 1,
+    "uploaded": true,
+    "success": true
+  },
+  "textureEvidence": {
+    "scope": "Shared manifest texture set; exact per-asset dependency inspection is not exposed by this package.",
+    "residency": [
+      {
+        "sha256": "06ee2d64cf178b43d3d3c17bc938b464f660da36efcbcd24f6fe8a1b3e54c2ad",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "1172a8848e519c22c0d41039969cf288bb1d99e85aee0e4859f7587f3a45c2cf",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "1a1faa3b9ebbd8acbfb7b7eb9a794d364dc23812171ece5e0f2b780e6dd39dfa",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "1b7101f47a6d44a4e4352efadec4e5771787de8ce2090805efbad240524c5d40",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "235de555f0a57dc45a7146522bac78561942c9697780ed280b80eeee185a713e",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "24b852f71bbd5982c5a39c214ffc93aaa523d3f7121b4af97bfef1b4db0d2013",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "3502cb416858690b26fd18c1da17e3099620a5a22436124c8665f61697c980c8",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "388b82e8d9103d758619aeb6528abc3c851fc4605959596bd7a2534975a1fed5",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "42f5d86b1d5d9b307cd12f25050838d12e9a13c288391136e144d337416f708c",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "432324ca8b6a2ed4c95784b36fc6d906b6f1fc7e00f242f154e61110cfc0dbf1",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "4e97eb14b7897f76fdf197ea113c82381e6228131a8388da18ea5cb0406d9fab",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "4f24cfdf3636d8c4cc1ad68ecd1df0f404647db38511cc20ea236996a221924e",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "5013f8ec7b8c90be1255dee0897a09317e18bb7e1be3475fb1081db1824e7618",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "51c91319f23e3cda28fc0e934c57ed1f323bf710c60b46cb29d2df8a39a91f80",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "591d838304d16a3b7cb749d72a9739521a341d3ca42e1fdc049190bb4122c142",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "59d3c69c75e4d9de983fd1a9a4358a42f063a945c99c56064869d7c2a37d3901",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "63c34a6edfeebb738ec9e71fc66496a1e8c8993c7c00c577ea6d392f1b735cf6",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "64ee68fff7fd531334b0e0ed92902467efc1c0274a4d27c7732849b23806470a",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "67ffcd6fd7105929c3fc7bd222f7073bc12f269b129e49d81407659c940021e6",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "68b2d96ce99fed918b2c9eca8a0e3c1dca166e790952a58b681891e82b6355ad",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "6bde25710b76b9bda0ac074f6f52e6401cf4f884df181ad9967a5f6823bf8fe2",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "6d41caf09b64ea5b3a01c4000107de63382f59beed7d684769d5903b63b8636d",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "799ca3efa0f16645313d720002a0e8940ade63c60c1fd77c375ff3a04808b76f",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "7f0ddf8c38e5cb7bc6e46d2b4abf6d66f157c66f81fb2fb3053be7a5c1118dd6",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "9a57d7a62bd77671162a080d86d33ec5230e0120d280b84c35b42bf650c0e0d3",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "9da3f26c7a734fd3b9d5c2e5a7e1801bf712f69a514b9234ae5427b7b89be435",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "a48fd3892d88b9f6e1f4a4dd07931e980667483acdcfa2f20790d1513278e57b",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "a5f211be47fe090896d9be7e31019b397b5edd12ca4b0d5dadc4023cbe0226e3",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "ac0fc1115d2315a380da11f9436f234702df8178ef221a930eafbad9c2890949",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "ad69710eae42906d02e9d46748005a107f654d08dbe8d4900a96bcabde328035",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "b296a1d8f038ab1edd349bcb7a419e660fb33678eb2ad78316b4cb8e0dbe4538",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "bc7cf413f900a5cd67390c740297a4601dca2f07b1bbf17311798e69012cbfa5",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "bd4c2cc705882044d460123fc1fafd29ffd76f5a1b6d8402771d346eb18e5437",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "ccc8e2fef0f53ffba6d2f60fa1b1d5d25eae66db64c954eda62e34639b14e2e7",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "d2d80421ea342250116bbddea267fe615df84a1864836339a13ee43248996b2c",
+        "role": 1,
+        "admitted": true
+      },
+      {
+        "sha256": "d385cef8a44faf46eac59679a357dc23157bb4a82c6d6369c00ae61b3d2ea11a",
+        "role": 2,
+        "admitted": true
+      },
+      {
+        "sha256": "e91243c46d20e9e2539781b8bca9703fb06d9d03736f26cfe29e777d8c2156f4",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "ed9c39d792adc216f15a416ac92e7dda1f107b4570e086e1e474bd1fdebf8706",
+        "role": 0,
+        "admitted": true
+      },
+      {
+        "sha256": "f5b63982e40de5a36c1180f1a55c3f24649859a210db25bc13c81003bfe46c57",
+        "role": 0,
+        "admitted": true
+      }
+    ],
+    "status": {
+      "detail": "Texture residency unavailable; do not treat this view as textured-asset acceptance evidence.",
+      "texture_scope": "Engine-reported residency, not independent material or pixel verification.",
+      "texture_warning": false
+    }
+  },
+  "package": {
+    "actual": {
+      "sha256": "910dca7af46a778723f72296dc46b33d948d02fabe79aaf8a47140f05e148af7",
+      "pinned_revision": "95c174ffbe4e9b48dfbecf0e57a4b406c05ddedb"
+    },
+    "manifest_declaration": {
+      "file": "web/pkg/rolling_commons_shell_bg.wasm",
+      "sha256": "910dca7af46a778723f72296dc46b33d948d02fabe79aaf8a47140f05e148af7"
+    },
+    "matches_manifest_digest": true,
+    "scope": "Existing package reused without a game build. Digest agreement is not publisher authentication."
+  },
+  "ok": true
+}

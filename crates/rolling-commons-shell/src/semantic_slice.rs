@@ -1,16 +1,21 @@
 //! Pack-resident semantic slices — the browser ontology delivery path (G50).
 //!
 //! `ontology_loader.rs` is `cfg !wasm32`, so ontology/semantic data reaches
-//! the browser only through packs. A slice is the `sem/` entries of a
-//! verified HMC pack: `.quins` blobs (raw 48-byte NQuins, little-endian
-//! fields in struct order) plus `.lex` lexicons (`<16-hex-hash> <iri>` lines)
-//! that make the hashes resolvable. Digests are verified before any bytes
-//! are read; parity is re-checked on every quin.
+//! the browser only through packs. A slice is the `sem/*.q42` entry of a
+//! verified HMC pack: a canonical Q42 volume whose LZ4 SuperBlocks carry the
+//! semantic Quins and whose embedded Q42LEX section makes the hashes
+//! resolvable. Digests are verified before any bytes are read; parity is
+//! re-checked on every quin.
 use qualia_core_db::lexicon::generate_60bit_token;
+use qualia_core_db::q42_lex::Q42LexMmap;
+use qualia_core_db::q42_volume::{
+    OpfsSliceRangeSource, Q42RangeVolume, MAX_COMPRESSED_SUPERBLOCK_SIZE, QUIN_SIZE,
+    SUPERBLOCK_HEADER, SUPERBLOCK_SIZE,
+};
 use qualia_core_db::query::shacl_compiler::{
     validate_shacl_property, ShaclConstraint, ShaclDatatype,
 };
-use qualia_core_db::NQuin;
+use qualia_core_db::{NQuin, QUINS_PER_BLOCK};
 use wasm_bindgen::prelude::*;
 
 const MAX_SEMANTIC_QUINS: usize = 65_536;
@@ -41,8 +46,10 @@ fn quin_from_bytes(bytes: &[u8]) -> NQuin {
 
 #[wasm_bindgen]
 impl SemanticSlice {
-    /// Parse a verified HMC pack and collect its `sem/` entries. Every pack
-    /// entry digest is verified first; quin parity is re-checked on load.
+    /// Parse a verified HMC pack and decode its `sem/*.q42` volume. Every pack
+    /// entry digest is verified first; quin parity is re-checked on load. The
+    /// pack must carry exactly one Q42 semantic volume — loose `.quins`/`.lex`
+    /// entries are retired.
     #[wasm_bindgen(constructor)]
     pub fn from_pack(pack: &[u8]) -> Result<SemanticSlice, JsValue> {
         use qualia_core_db::bundle::BundleReader;
@@ -55,46 +62,77 @@ impl SemanticSlice {
         {
             return Err(JsValue::from_str("pack entry digest verification failed"));
         }
-        let mut quins: Vec<NQuin> = Vec::new();
-        let mut lexicon: Vec<(u64, String)> = Vec::new();
+        let mut semantic_bytes: Option<&[u8]> = None;
         for entry in reader.entries() {
             let Some(name) = entry.key.strip_prefix("sem/") else {
                 continue;
             };
-            let Some(bytes) = reader.get(&entry.key) else {
-                return Err(JsValue::from_str("semantic entry missing from pack"));
-            };
-            if name.ends_with(".quins") {
-                if bytes.len() % 48 != 0 {
-                    return Err(JsValue::from_str("semantic quin blob is not 48-byte aligned"));
+            if !name.ends_with(".q42") {
+                return Err(JsValue::from_str(
+                    "unsupported semantic pack entry (expected a .q42 volume)",
+                ));
+            }
+            if semantic_bytes.is_some() {
+                return Err(JsValue::from_str(
+                    "pack carries more than one semantic .q42 volume",
+                ));
+            }
+            semantic_bytes = Some(
+                reader
+                    .get(&entry.key)
+                    .ok_or_else(|| JsValue::from_str("semantic entry missing from pack"))?,
+            );
+        }
+        let bytes = semantic_bytes
+            .ok_or_else(|| JsValue::from_str("pack has no sem/*.q42 semantic volume"))?;
+        let source = OpfsSliceRangeSource::new(bytes);
+        let volume = Q42RangeVolume::open(source)
+            .map_err(|e| JsValue::from_str(&format!("semantic q42 volume: {e}")))?;
+
+        let mut quins: Vec<NQuin> = Vec::new();
+        let mut lexicon: Vec<(u64, String)> = Vec::new();
+
+        let lex_length = volume.header().lex_length as usize;
+        if lex_length > 0 {
+            let mut lex_bytes = vec![0u8; lex_length];
+            volume
+                .read_lexicon_into(&mut lex_bytes)
+                .map_err(|e| JsValue::from_str(&format!("semantic q42 lexicon: {e}")))?;
+            let lex = Q42LexMmap::from_bytes(&lex_bytes)
+                .map_err(|e| JsValue::from_str(&format!("semantic q42 lexicon: {e:?}")))?;
+            for i in 0..lex.entry_count() {
+                if lexicon.len() >= MAX_LEXICON_LINES {
+                    return Err(JsValue::from_str("lexicon exceeds bounds"));
                 }
-                for chunk in bytes.chunks_exact(48) {
-                    if quins.len() >= MAX_SEMANTIC_QUINS {
-                        return Err(JsValue::from_str("semantic slice exceeds quin bound"));
+                let Some(hash) = lex.hash_at(i) else {
+                    continue;
+                };
+                if let Some(term) = lex.lookup_owned(hash) {
+                    if term.len() > MAX_LEX_LINE {
+                        return Err(JsValue::from_str("lexicon term exceeds bounds"));
                     }
-                    let quin = quin_from_bytes(chunk);
-                    if !quin.verify_ecc_parity() {
-                        return Err(JsValue::from_str("semantic quin parity check failed"));
-                    }
-                    quins.push(quin);
+                    lexicon.push((hash, term));
                 }
-            } else if name.ends_with(".lex") {
-                let text = std::str::from_utf8(bytes)
-                    .map_err(|_| JsValue::from_str("lexicon is not utf-8"))?;
-                for line in text.lines() {
-                    if line.is_empty() {
-                        continue;
-                    }
-                    if lexicon.len() >= MAX_LEXICON_LINES || line.len() > MAX_LEX_LINE {
-                        return Err(JsValue::from_str("lexicon exceeds bounds"));
-                    }
-                    let (hash_hex, iri) = line
-                        .split_once(' ')
-                        .ok_or_else(|| JsValue::from_str("lexicon line is not '<hash> <iri>'"))?;
-                    let hash = u64::from_str_radix(hash_hex.trim_start_matches("0x"), 16)
-                        .map_err(|_| JsValue::from_str("lexicon hash is not hex"))?;
-                    lexicon.push((hash, iri.to_owned()));
+            }
+        }
+
+        let mut compressed = vec![0u8; MAX_COMPRESSED_SUPERBLOCK_SIZE];
+        let mut block = vec![0u8; SUPERBLOCK_SIZE];
+        for index in 0..volume.block_count() as usize {
+            volume
+                .read_superblock_into(index, &mut compressed, &mut block)
+                .map_err(|e| JsValue::from_str(&format!("semantic q42 block: {e}")))?;
+            let live = u64::from_le_bytes(block[16..24].try_into().unwrap()) as usize;
+            for quin_index in 0..live.min(QUINS_PER_BLOCK) {
+                if quins.len() >= MAX_SEMANTIC_QUINS {
+                    return Err(JsValue::from_str("semantic slice exceeds quin bound"));
                 }
+                let offset = SUPERBLOCK_HEADER + quin_index * QUIN_SIZE;
+                let quin = quin_from_bytes(&block[offset..offset + QUIN_SIZE]);
+                if !quin.verify_ecc_parity() {
+                    return Err(JsValue::from_str("semantic quin parity check failed"));
+                }
+                quins.push(quin);
             }
         }
         Ok(SemanticSlice { quins, lexicon })

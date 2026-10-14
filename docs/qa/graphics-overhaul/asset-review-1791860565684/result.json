@@ -1,0 +1,72 @@
+{
+  "kind": "single-asset-browser-integration-check",
+  "origin": "http://127.0.0.1:8090",
+  "output": "C:\\github\\game-demo\\docs\\qa\\graphics-overhaul\\asset-review-1791860565684",
+  "steps": [],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:8090/asset-review.html",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-review.css",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-review.js",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/asset-review-evidence.js",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/pkg/rolling_commons_shell.js",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/pkg/rolling_commons_shell_bg.wasm",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/fixtures/taxon-bindings.vibe",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/fixtures/asset-review.vibe",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/assets/community-manifest.json",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/fixtures/taxon-bindings.vibe",
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8090/fixtures/asset-review.vibe",
+      "method": "GET"
+    }
+  ],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "pageErrors": [],
+  "disposition": "not-art-acceptance",
+  "browser": "154.0.8037.98",
+  "ok": false,
+  "error": "page.waitForFunction: Error: VibeScript: {\"valid\":false,\"error_code\":\"E400\",\"civics_code\":\"E400\",\"span\":[10965,10968],\"message\":\"instruction budget exhausted\",\"suggested_fix\":\"add budget(steps: N) or a loop bound\",\"evidential\":null,\"shacl_violations\":[]}\n    at eval (eval at predicate (eval at evaluate (:290:30)), <anonymous>:3:47)\n    at predicate (eval at evaluate (:290:30), <anonymous>:7:23)\n    at next (eval at evaluate (:290:30), <anonymous>:29:29)\n    at C:\\github\\game-demo\\scripts\\check-asset-review.mjs:40:14",
+  "status": "VibeScript: {\"valid\":false,\"error_code\":\"E400\",\"civics_code\":\"E400\",\"span\":[10965,10968],\"message\":\"instruction budget exhausted\",\"suggested_fix\":\"add budget(steps: N) or a loop bound\",\"evidential\":null,\"shacl_violations\":[]}",
+  "sourceContext": {
+    "span": [
+      10965,
+      10968
+    ],
+    "token": "key",
+    "context": "00) {\n    if record == null { return null; }\n    for item in record.fields {\n        if item.key == key { return item.value; }\n    }\n    return null;\n}\n\npure fn review_config(input: Record) -> Record {\n "
+  }
+}
