@@ -12,6 +12,11 @@
 //! Usage: `cargo run -p pack-export` (from the workspace root). Writes
 //! `web/assets/*-manifest.json` and `web/assets/maslows-challenge-*.hmc`.
 
+#[cfg(target_arch = "wasm32")]
+fn main() {}
+
+#[cfg(not(target_arch = "wasm32"))]
+mod imp {
 use qualia_core_db::bundle::{BundleReader, BundleWriter};
 use qualia_core_db::lexicon::generate_60bit_token;
 use qualia_core_db::q42_volume::{StreamingQ42VolumeWriter, Q42_MAGIC};
@@ -559,39 +564,39 @@ fn parse_styles() -> Result<Vec<String>, DynErr> {
     Ok(styles)
 }
 
-fn main() -> Result<(), DynErr> {
-    let root = repo_root();
-    let styles = parse_styles()?;
-    let program = vibe::load_program(include_str!("../../../web/fixtures/taxon-bindings.vibe"))
-        .map_err(|e| format!("taxon-bindings.vibe: {e}"))?;
+    pub fn run() -> Result<(), DynErr> {
+        let root = repo_root();
+        let styles = parse_styles()?;
+        let program = vibe::load_program(include_str!("../../../web/fixtures/taxon-bindings.vibe"))
+            .map_err(|e| format!("taxon-bindings.vibe: {e}"))?;
 
-    let profile_path = root.join("assets/ecology/profiles/se-corridor-reference.json");
-    let profile: Json = serde_json::from_str(&std::fs::read_to_string(&profile_path)?)?;
-    let mut keys: Vec<String> = Vec::new();
-    for field in ["faunaSelection", "floraSelection"] {
-        for key in profile["render"][field].as_array().into_iter().flatten() {
-            if let Some(k) = key.as_str() {
-                keys.push(k.to_owned());
+        let profile_path = root.join("assets/ecology/profiles/se-corridor-reference.json");
+        let profile: Json = serde_json::from_str(&std::fs::read_to_string(&profile_path)?)?;
+        let mut keys: Vec<String> = Vec::new();
+        for field in ["faunaSelection", "floraSelection"] {
+            for key in profile["render"][field].as_array().into_iter().flatten() {
+                if let Some(k) = key.as_str() {
+                    keys.push(k.to_owned());
+                }
             }
         }
-    }
-    let mut bindings: BTreeMap<String, Binding> = BTreeMap::new();
-    for key in &keys {
-        if let Some(binding) = binding_for(&program, key)? {
-            bindings.insert(key.clone(), binding);
+        let mut bindings: BTreeMap<String, Binding> = BTreeMap::new();
+        for key in &keys {
+            if let Some(binding) = binding_for(&program, key)? {
+                bindings.insert(key.clone(), binding);
+            }
         }
-    }
-    println!("taxon bindings resolved: {}", bindings.len());
+        println!("taxon bindings resolved: {}", bindings.len());
 
-    for slug in &styles {
-        run_style(&root, &program, slug, &bindings)?;
+        for slug in &styles {
+            run_style(&root, &program, slug, &bindings)?;
+        }
+        Ok(())
     }
-    Ok(())
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    #[cfg(test)]
+    mod tests {
+        use super::*;
 
     fn program() -> vibe::Program {
         vibe::load_program(include_str!("../../../web/fixtures/taxon-bindings.vibe"))
@@ -651,4 +656,10 @@ mod tests {
         tampered.object ^= 1;
         assert!(!valid_parity(&tampered));
     }
+}
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    imp::run()
 }
