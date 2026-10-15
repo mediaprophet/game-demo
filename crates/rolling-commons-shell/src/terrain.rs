@@ -43,18 +43,21 @@ pub fn settlement_patch(center_x: f32) -> Mesh {
 /// walls. The apron overlaps adjoining land below the playable heightfield,
 /// leaving the settlement and ridge samples authoritative for movement.
 pub fn apron(center_x: f32, center_z: f32) -> Mesh {
-    build_patch_sized(center_x, center_z, 41, 16.0, |x, z| {
+    build_patch_sized(center_x, center_z, 49, 280.0, |x, z| {
         let dx = (x - center_x).abs();
         let dz = (z - center_z).abs();
-        let edge = ((dx.max(dz) - 6.6) / 1.4).clamp(0.0, 1.0);
+        let dist = dx.max(dz);
+        let edge = ((dist - 6.4) / 3.6).clamp(0.0, 1.0);
         let eased = edge * edge * (3.0 - 2.0 * edge);
         let underlying = if center_z < -7.0 {
-            height(x, z) - 0.12
+            height(x, z) - 0.10
         } else {
-            settlement_height(center_x, x, z) - 0.12
+            settlement_height(center_x, x, z) - 0.10
         };
-        let erosion = 0.035 * (x * 1.8 + z * 0.7).sin() + 0.02 * (z * 2.1 - x * 0.5).cos();
-        underlying * (1.0 - eased) + (-0.64 + erosion) * eased
+        let macro_h = continuous_landscape_height(x, z);
+        let feather = organic_radial_feather(x, z, center_x, center_z, 138.0);
+        let blended = underlying * (1.0 - eased) + macro_h * eased;
+        blended * feather - 0.35 * (1.0 - feather)
     })
 }
 

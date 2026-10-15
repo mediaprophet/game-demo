@@ -1453,6 +1453,85 @@ export class GameSession {
 if (Symbol.dispose) GameSession.prototype[Symbol.dispose] = GameSession.prototype.free;
 
 /**
+ * Browser-resident offline-first `.q42j` session journal.
+ */
+export class GameSessionJournal {
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        GameSessionJournalFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_gamesessionjournal_free(ptr, 0);
+    }
+    /**
+     * Returns the total number of committed transaction frames.
+     * @returns {number}
+     */
+    frame_count() {
+        const ret = wasm.gamesessionjournal_frame_count(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * Create a new in-memory session journal.
+     * @param {number} world_did_hash
+     * @param {number} author_did_hash
+     */
+    constructor(world_did_hash, author_did_hash) {
+        const ret = wasm.gamesessionjournal_new(world_did_hash, author_did_hash);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        this.__wbg_ptr = ret[0];
+        GameSessionJournalFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * Record a field biodiversity observation as a committed transaction frame.
+     * @param {string} taxon_iri
+     * @param {number} confidence_permill
+     * @returns {number}
+     */
+    record_observation(taxon_iri, confidence_permill) {
+        const ptr0 = passStringToWasm0(taxon_iri, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.gamesessionjournal_record_observation(this.__wbg_ptr, ptr0, len0, confidence_permill);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] >>> 0;
+    }
+    /**
+     * Record a geospatial waypoint / trajectory point as a committed transaction frame.
+     * @param {number} x
+     * @param {number} _y
+     * @param {number} z
+     * @param {number} _speed
+     * @returns {number}
+     */
+    record_waypoint(x, _y, z, _speed) {
+        const ret = wasm.gamesessionjournal_record_waypoint(this.__wbg_ptr, x, _y, z, _speed);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] >>> 0;
+    }
+    /**
+     * Export the journal bytes formatted as a standard `.q42j` binary payload.
+     * @returns {Uint8Array}
+     */
+    to_bytes() {
+        const ret = wasm.gamesessionjournal_to_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+}
+if (Symbol.dispose) GameSessionJournal.prototype[Symbol.dispose] = GameSessionJournal.prototype.free;
+
+/**
  * Browser canvas HUD. Place its transparent canvas above the Portal canvas.
  * Coordinates are in canvas pixels, independent of CSS scaling.
  */
@@ -10055,32 +10134,32 @@ function __wbg_get_imports() {
             return ret;
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2718, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2717, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1977, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1976, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1978, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1977, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuDeviceLostInfo__GpuDeviceLostInfo______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000004: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1977, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1976, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__3);
             return ret;
         },
         __wbindgen_cast_0000000000000005: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1977, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1976, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__4);
             return ret;
         },
         __wbindgen_cast_0000000000000006: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 1190, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 1189, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke_______true_);
             return ret;
         },
@@ -10295,6 +10374,9 @@ const GamePortalFinalization = (typeof FinalizationRegistry === 'undefined')
 const GameSessionFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_gamesession_free(ptr, 1));
+const GameSessionJournalFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_gamesessionjournal_free(ptr, 1));
 const QualiaHudFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_qualiahud_free(ptr, 1));

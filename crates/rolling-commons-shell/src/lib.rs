@@ -1151,7 +1151,14 @@ pub fn scene_build(
     }
     // Mesh-adjacent semantic nodes turn visible props into direct entry points
     // for the corresponding place/activity instead of relying on the tiny HUD.
-    let hotspots: [(&str, [f32; 3], usize, &str, &str); 5] = [
+    let hotspots: [(&str, [f32; 3], usize, &str, &str); 10] = [
+        (
+            "touring-vehicle",
+            [2.35, 0.85, 4.65],
+            0,
+            "Touring Rig · Click to Drive",
+            "vehicle-drive",
+        ),
         (
             "workshop-repair-bench",
             [3.24, 0.92, -0.91],
@@ -1164,7 +1171,7 @@ pub fn scene_build(
             [-3.0, 0.48, -3.30],
             6,
             "Hydroponic growing table",
-            "",
+            "garden-produce",
         ),
         (
             "touring-camp-rig",
@@ -1186,6 +1193,34 @@ pub fn scene_build(
             9,
             "Produce preparation table",
             "shared-meal",
+        ),
+        (
+            "cistern-water-tank",
+            [-5.0, 0.7, -0.5],
+            5,
+            "Community water cistern",
+            "water-inspect",
+        ),
+        (
+            "solar-power-array",
+            [-2.2, 0.8, -3.4],
+            2,
+            "Solar photovoltaic array",
+            "solar-inspect",
+        ),
+        (
+            "wind-pump-station",
+            [19.0, 1.2, -2.0],
+            8,
+            "Saltwind bore wind pump",
+            "pump-inspect",
+        ),
+        (
+            "signal-mast-repeater",
+            [5.75, 2.1, 5.3],
+            10,
+            "Highlands signal mast",
+            "mast-inspect",
         ),
     ];
     for (id, point, place_index, label, activity_id) in hotspots {
@@ -1258,14 +1293,17 @@ pub fn scene_build(
 /// height function used to generate the Qualia terrain patches.
 #[wasm_bindgen]
 pub fn terrain_height_world(x: f32, z: f32) -> f32 {
-    if (-7.0..=23.0).contains(&x) && (-21.0..=-7.0).contains(&z) {
-        terrain::height(x, z)
-    } else if (-7.0..=7.0).contains(&x) && (-7.0..=7.0).contains(&z) {
+    let dist_kestrel = (x - 0.0).abs().max(z.abs());
+    let dist_saltwind = (x - 16.0).abs().max(z.abs());
+    let dist_ridge = (x - 8.0).abs().max((z + 14.0).abs());
+    if dist_kestrel <= 6.5 {
         terrain::settlement_height(0.0, x, z)
-    } else if (9.0..=23.0).contains(&x) && (-7.0..=7.0).contains(&z) {
+    } else if dist_saltwind <= 6.5 {
         terrain::settlement_height(16.0, x, z)
+    } else if dist_ridge <= 8.5 && z <= -7.0 {
+        terrain::height(x, z)
     } else {
-        0.0
+        terrain::continuous_landscape_height(x, z)
     }
 }
 
@@ -1339,6 +1377,31 @@ fn append_water_mesh(
     Ok(())
 }
 
+fn read_10d_bounds(bytes: &[u8]) -> Option<([f32; 3], [f32; 3])> {
+    use qualia_core_db::container_10d::header::Container10dHeader;
+    use qualia_core_db::container_10d::section::{parse_section_table, SectionType};
+    let header = Container10dHeader::parse(bytes).ok()?;
+    let descs = parse_section_table(bytes, &header).ok()?;
+    for d in descs {
+        if d.typ() == Some(SectionType::QuantizedMesh) {
+            let start = d.byte_offset as usize;
+            let payload = bytes.get(start..start + 40)?;
+            let min = [
+                f32::from_le_bytes(payload[12..16].try_into().ok()?),
+                f32::from_le_bytes(payload[16..20].try_into().ok()?),
+                f32::from_le_bytes(payload[20..24].try_into().ok()?),
+            ];
+            let max = [
+                f32::from_le_bytes(payload[24..28].try_into().ok()?),
+                f32::from_le_bytes(payload[28..32].try_into().ok()?),
+                f32::from_le_bytes(payload[32..36].try_into().ok()?),
+            ];
+            return Some((min, max));
+        }
+    }
+    None
+}
+
 fn load_scene_assets(
     inner: &mut qualia_core_db::QualiaPortal,
     assets: &js_sys::Array,
@@ -1359,12 +1422,19 @@ fn load_scene_assets(
         let bytes = js_get(&asset, "bytes")
             .ok_or_else(|| JsValue::from_str("scene asset missing bytes"))?;
         let bytes = js_sys::Uint8Array::new(&bytes).to_vec();
-        let mesh = qualia_core_db::render::compile_10d::decode_10d_mesh(&bytes)
-            .map_err(|e| JsValue::from_str(&format!("scene bounds: {e}")))?;
-        for position in &mesh.positions {
+        if let Some((b_min, b_max)) = read_10d_bounds(&bytes) {
             for axis in 0..3 {
-                min[axis] = min[axis].min(position[axis]);
-                max[axis] = max[axis].max(position[axis]);
+                min[axis] = min[axis].min(b_min[axis]);
+                max[axis] = max[axis].max(b_max[axis]);
+            }
+        } else {
+            let mesh = qualia_core_db::render::compile_10d::decode_10d_mesh(&bytes)
+                .map_err(|e| JsValue::from_str(&format!("scene bounds: {e}")))?;
+            for position in &mesh.positions {
+                for axis in 0..3 {
+                    min[axis] = min[axis].min(position[axis]);
+                    max[axis] = max[axis].max(position[axis]);
+                }
             }
         }
     }

@@ -13130,7 +13130,7 @@
       }
     },
     {
-      "bytes": 131296,
+      "bytes": 9200,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -13141,7 +13141,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:flora/eucalypt-gum/blue-grey-leaves-0"
       },
-      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-0--ff9ec3ac5b6c.10d",
+      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-0--831e3e50603f.10d",
       "id": "rc:asset/flora/eucalypt-gum/blue-grey-leaves-0",
       "materialFamily": "living-foliage",
       "renderRole": "opaque",
@@ -13151,7 +13151,7 @@
         0.3700000047683716,
         1
       ],
-      "sha256": "ff9ec3ac5b6ce41c5d417822a658c2c1165de82f2380cb915a81eade8a349253",
+      "sha256": "831e3e50603ff0706f11e000a580f1f21cfc06b3686565b7adaab8c9e713f25b",
       "spectral": {
         "c0": -6.608558654785156,
         "c1": 4.653195381164551,
@@ -13165,26 +13165,26 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/flora-eucalypt-gum-blue-grey-leaves-0--ff9ec3ac5b6c--tier3--753d4f1d.impo",
+          "file": "impo/flora-eucalypt-gum-blue-grey-leaves-0--831e3e50603f--tier3--e16d3542.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "753d4f1d2be695b15dcdcf6c86a934b7b708152b99dac831001257eed97714cf",
+          "sha256": "e16d3542f02fa95fb357afbeaffa181f7ca810aa82f6f2e6f793cd62fe2ee0a9",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 29772,
-          "file": "10d/flora-eucalypt-gum-blue-grey-leaves-0--ff9ec3ac5b6c--tier2--52a30e58.10d",
-          "sha256": "52a30e586e5f10ecf0702023800ab70c9e03f8d6006d1414f3c8f731581849ca",
-          "triangles": 2040
+          "bytes": 2064,
+          "file": "10d/flora-eucalypt-gum-blue-grey-leaves-0--831e3e50603f--tier2--d59767d0.10d",
+          "sha256": "d59767d0ca48ca8dabea9e1620933600ac5fccaf8461effc2d8ab98297a93786",
+          "triangles": 182
         },
         "surfels": {
-          "count": 32,
+          "count": 3,
           "inHero": true
         }
       }
     },
     {
-      "bytes": 131296,
+      "bytes": 9184,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -13195,7 +13195,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:flora/eucalypt-gum/blue-grey-leaves-1"
       },
-      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-1--cb3eccdbff64.10d",
+      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-1--68b0715f8321.10d",
       "id": "rc:asset/flora/eucalypt-gum/blue-grey-leaves-1",
       "materialFamily": "living-foliage",
       "renderRole": "opaque",
@@ -13205,7 +13205,7 @@
         0.3400000035762787,
         1
       ],
-      "sha256": "cb3eccdbff6479d70c6c4ddabffc0d2207e5be6f868bb9f3dc0b27e6b09b5cdb",
+      "sha256": "68b0715f83217043f9e394a044818f8389accdff3738f07b38505698c227cd1b",
       "spectral": {
         "c0": -6.4208760261535645,
         "c1": 4.4133992195129395,
@@ -13219,26 +13219,26 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/flora-eucalypt-gum-blue-grey-leaves-1--cb3eccdbff64--tier3--b02c7bbb.impo",
+          "file": "impo/flora-eucalypt-gum-blue-grey-leaves-1--68b0715f8321--tier3--e1090a90.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "b02c7bbb9da778cd97c5f408ab74546de334f76a94ad7525b28ff43ac6d364a3",
+          "sha256": "e1090a901203e56c3f8b538e73f44d48215c63edfe6a4fae4bab4716f779adad",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 29760,
-          "file": "10d/flora-eucalypt-gum-blue-grey-leaves-1--cb3eccdbff64--tier2--cc0e1029.10d",
-          "sha256": "cc0e1029bc9071a830fcb0379841e00b133fe7bd6fe68070e0f2150fd38daaea",
-          "triangles": 2040
+          "bytes": 2064,
+          "file": "10d/flora-eucalypt-gum-blue-grey-leaves-1--68b0715f8321--tier2--dd66eabc.10d",
+          "sha256": "dd66eabc2fcd71ff055cc4d7c536ac3d98db2a011ed6bef6dbca013de0b6130a",
+          "triangles": 182
         },
         "surfels": {
-          "count": 32,
+          "count": 3,
           "inHero": true
         }
       }
     },
     {
-      "bytes": 131312,
+      "bytes": 9184,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -13249,7 +13249,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:flora/eucalypt-gum/blue-grey-leaves-2"
       },
-      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-2--028ddb39ba93.10d",
+      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-2--7e34cb4d7461.10d",
       "id": "rc:asset/flora/eucalypt-gum/blue-grey-leaves-2",
       "materialFamily": "living-foliage",
       "renderRole": "opaque",
@@ -13259,7 +13259,7 @@
         0.38999998569488525,
         1
       ],
-      "sha256": "028ddb39ba937c435627739736f86b5ee256beb217aaa8800d1e9c48ab8331bf",
+      "sha256": "7e34cb4d7461f1a26d38ca90572b1b536daa77b42864bf80f1f1cab6df13b3eb",
       "spectral": {
         "c0": -6.537797927856445,
         "c1": 4.6743268966674805,
@@ -13273,20 +13273,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/flora-eucalypt-gum-blue-grey-leaves-2--028ddb39ba93--tier3--c761fe88.impo",
+          "file": "impo/flora-eucalypt-gum-blue-grey-leaves-2--7e34cb4d7461--tier3--14cda3e4.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "c761fe88fd1390150ab1f237f09c52de824fca4cb28fa7b75a3de7b41d5c6fd8",
+          "sha256": "14cda3e49e01af11f1452f6e7570c44249a89546f0d2e5005a0718a48622b495",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 29790,
-          "file": "10d/flora-eucalypt-gum-blue-grey-leaves-2--028ddb39ba93--tier2--b09052c0.10d",
-          "sha256": "b09052c017183e25a8d46094646ba33aa8744aef3da725bb51671a62b4038804",
-          "triangles": 2040
+          "bytes": 2064,
+          "file": "10d/flora-eucalypt-gum-blue-grey-leaves-2--7e34cb4d7461--tier2--a27be22e.10d",
+          "sha256": "a27be22eb818e2eefd6f8c3f9f2d5663b12e05a0f96d60e1d0f308336f86d45e",
+          "triangles": 182
         },
         "surfels": {
-          "count": 32,
+          "count": 3,
           "inHero": true
         }
       }
@@ -13616,7 +13616,7 @@
       }
     },
     {
-      "bytes": 71488,
+      "bytes": 9280,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -13627,7 +13627,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:flora/golden-wattle/blue-green-phyllodes-0"
       },
-      "file": "10d/flora-golden-wattle-blue-green-phyllodes-0--5afce6317376.10d",
+      "file": "10d/flora-golden-wattle-blue-green-phyllodes-0--30f7d70ada20.10d",
       "id": "rc:asset/flora/golden-wattle/blue-green-phyllodes-0",
       "materialFamily": "living-foliage",
       "renderRole": "opaque",
@@ -13637,7 +13637,7 @@
         0.38999998569488525,
         1
       ],
-      "sha256": "5afce63173765070617868ff772313663f0220cdc62077bf8c46106843d47a75",
+      "sha256": "30f7d70ada20b05c0c7475a9c7e811642fadb149c1934f7fed6929b768c443dd",
       "spectral": {
         "c0": -7.747586727142334,
         "c1": 5.624973773956299,
@@ -13651,26 +13651,26 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/flora-golden-wattle-blue-green-phyllodes-0--5afce6317376--tier3--d38d5707.impo",
+          "file": "impo/flora-golden-wattle-blue-green-phyllodes-0--30f7d70ada20--tier3--8d318200.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "d38d570795d7ab0e8cd54bf1f1d5bf9cdaebd1889cacc4f789acb575d1cd5178",
+          "sha256": "8d31820007d8415ce6df1e8043f72d2ee0c540b3a2e604681b355d889b986d63",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 15852,
-          "file": "10d/flora-golden-wattle-blue-green-phyllodes-0--5afce6317376--tier2--33c5c206.10d",
-          "sha256": "33c5c2066ba710d31dbba53c747fdf48a2c8cbbf5ddf34a1e466eb6f474e226c",
-          "triangles": 1080
+          "bytes": 2088,
+          "file": "10d/flora-golden-wattle-blue-green-phyllodes-0--30f7d70ada20--tier2--fcbdc0ba.10d",
+          "sha256": "fcbdc0badd2920ff883c37b65d944a3b52ed0291f68281fb72fd6d1f02fc893a",
+          "triangles": 182
         },
         "surfels": {
-          "count": 17,
+          "count": 3,
           "inHero": true
         }
       }
     },
     {
-      "bytes": 71488,
+      "bytes": 9296,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -13681,7 +13681,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:flora/golden-wattle/blue-green-phyllodes-1"
       },
-      "file": "10d/flora-golden-wattle-blue-green-phyllodes-1--6fe463eb50aa.10d",
+      "file": "10d/flora-golden-wattle-blue-green-phyllodes-1--0b15e7f18fac.10d",
       "id": "rc:asset/flora/golden-wattle/blue-green-phyllodes-1",
       "materialFamily": "living-foliage",
       "renderRole": "opaque",
@@ -13691,7 +13691,7 @@
         0.38999998569488525,
         1
       ],
-      "sha256": "6fe463eb50aadc8f8158b58ed7de4c73418e294658c97acb4f796376ef76523f",
+      "sha256": "0b15e7f18facead82797e41a1ef4a791c8857f02e16bd672402d5eeeb0b822d7",
       "spectral": {
         "c0": -7.747586727142334,
         "c1": 5.624973773956299,
@@ -13705,26 +13705,26 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/flora-golden-wattle-blue-green-phyllodes-1--6fe463eb50aa--tier3--e40bf498.impo",
+          "file": "impo/flora-golden-wattle-blue-green-phyllodes-1--0b15e7f18fac--tier3--9a6a7889.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "e40bf498d6076ec4de57f156d5e79847a661aa33de2cd151e6811f349b619b82",
+          "sha256": "9a6a78898da63ea57a6f1585a0f8d7a4f8941d9c413985641d6190a447ac538c",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 15852,
-          "file": "10d/flora-golden-wattle-blue-green-phyllodes-1--6fe463eb50aa--tier2--6b62f7e8.10d",
-          "sha256": "6b62f7e806fe9c624b42524eec40a6e5be1c3c08add4def9ca575a1a59e3e868",
-          "triangles": 1080
+          "bytes": 2094,
+          "file": "10d/flora-golden-wattle-blue-green-phyllodes-1--0b15e7f18fac--tier2--8c85b0df.10d",
+          "sha256": "8c85b0df49ee70d5e9680312da94b56a375ac874b66ebdce6015e0699fe665ed",
+          "triangles": 182
         },
         "surfels": {
-          "count": 17,
+          "count": 3,
           "inHero": true
         }
       }
     },
     {
-      "bytes": 71456,
+      "bytes": 9280,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -13735,7 +13735,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:flora/golden-wattle/blue-green-phyllodes-2"
       },
-      "file": "10d/flora-golden-wattle-blue-green-phyllodes-2--e0b82c3dd278.10d",
+      "file": "10d/flora-golden-wattle-blue-green-phyllodes-2--cf438db0ad53.10d",
       "id": "rc:asset/flora/golden-wattle/blue-green-phyllodes-2",
       "materialFamily": "living-foliage",
       "renderRole": "opaque",
@@ -13745,7 +13745,7 @@
         0.38999998569488525,
         1
       ],
-      "sha256": "e0b82c3dd27891f04d2987e6b8d8870b6bd3e7f4d1d7369a43367e28c80978a1",
+      "sha256": "cf438db0ad53bda48bafc6009335169643979ebf0e613a4244d02afff3e79d1c",
       "spectral": {
         "c0": -7.747586727142334,
         "c1": 5.624973773956299,
@@ -13759,26 +13759,26 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/flora-golden-wattle-blue-green-phyllodes-2--e0b82c3dd278--tier3--64746c2a.impo",
+          "file": "impo/flora-golden-wattle-blue-green-phyllodes-2--cf438db0ad53--tier3--ffe76d88.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "64746c2a6ae31d6969f2b1d9b7f5921520988849d6f675f43672112d266733c7",
+          "sha256": "ffe76d8848534eca77ef8b245434fd5d6b7638f7c324078689749d59ea661e49",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 15840,
-          "file": "10d/flora-golden-wattle-blue-green-phyllodes-2--e0b82c3dd278--tier2--41183e32.10d",
-          "sha256": "41183e329f880fac241f1f39757ee71880b74b2283b2e3c95b4580a881a0d40d",
-          "triangles": 1080
+          "bytes": 2088,
+          "file": "10d/flora-golden-wattle-blue-green-phyllodes-2--cf438db0ad53--tier2--83d6eb1b.10d",
+          "sha256": "83d6eb1bc80e679811c6887a64d51b9d2bd15de6abe233a5a0fb8f5005d35641",
+          "triangles": 182
         },
         "surfels": {
-          "count": 17,
+          "count": 3,
           "inHero": true
         }
       }
     },
     {
-      "bytes": 71504,
+      "bytes": 9296,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -13789,7 +13789,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:flora/golden-wattle/blue-green-phyllodes-3"
       },
-      "file": "10d/flora-golden-wattle-blue-green-phyllodes-3--81fd5479f35b.10d",
+      "file": "10d/flora-golden-wattle-blue-green-phyllodes-3--43f7791003b4.10d",
       "id": "rc:asset/flora/golden-wattle/blue-green-phyllodes-3",
       "materialFamily": "living-foliage",
       "renderRole": "opaque",
@@ -13799,7 +13799,7 @@
         0.38999998569488525,
         1
       ],
-      "sha256": "81fd5479f35bbabc6c9a158b0352202fc31c2ccca20e7bc83b3dd5bd8373f1cb",
+      "sha256": "43f7791003b46ed986998ec0a523b95cb0ce1b516f64dfc05d8796b76036122a",
       "spectral": {
         "c0": -7.747586727142334,
         "c1": 5.624973773956299,
@@ -13813,20 +13813,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/flora-golden-wattle-blue-green-phyllodes-3--81fd5479f35b--tier3--f09fdbcd.impo",
+          "file": "impo/flora-golden-wattle-blue-green-phyllodes-3--43f7791003b4--tier3--3e1844cb.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "f09fdbcd68e3e02db7e1583df21394f46dede73d8a925bc06f8b90b85ed01a58",
+          "sha256": "3e1844cb2df76abfd3eab85170c6e193610726644c899159f1f975dbd7a749ff",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 15828,
-          "file": "10d/flora-golden-wattle-blue-green-phyllodes-3--81fd5479f35b--tier2--15fdc19a.10d",
-          "sha256": "15fdc19ae89402c74d4e84ff35ddacb74c47400fbc505f650a85169f751f70ea",
-          "triangles": 1080
+          "bytes": 2088,
+          "file": "10d/flora-golden-wattle-blue-green-phyllodes-3--43f7791003b4--tier2--c648e12b.10d",
+          "sha256": "c648e12bdb3c968541393167b03e2b99f057660aa9b587bb0e28264c593729e2",
+          "triangles": 182
         },
         "surfels": {
-          "count": 17,
+          "count": 3,
           "inHero": true
         }
       }
@@ -16593,7 +16593,7 @@
       }
     },
     {
-      "bytes": 368960,
+      "bytes": 4304,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -16604,7 +16604,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:garden-shoots"
       },
-      "file": "10d/garden-shoots--58ab601e5db0.10d",
+      "file": "10d/garden-shoots--0e4a042db091.10d",
       "id": "rc:asset/garden-shoots",
       "materialFamily": "painted-metal",
       "renderRole": "opaque",
@@ -16614,7 +16614,7 @@
         0.27000001072883606,
         1
       ],
-      "sha256": "58ab601e5db044061cd90286aa395d80da90ccb903d2143b44e941515d902632",
+      "sha256": "0e4a042db09138a96fd36273c965fd70325035a72298efeb89c22300bef81ae0",
       "spectral": {
         "c0": -20.558177947998047,
         "c1": 15.813511848449709,
@@ -16623,20 +16623,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/garden-shoots--58ab601e5db0--tier3--cfb6839a.impo",
+          "file": "impo/garden-shoots--0e4a042db091--tier3--1aeb6072.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "cfb6839a8a8fe309426bd0e5da864eb0f76e72f9bdc25bec9301c4e0adaaf902",
+          "sha256": "1aeb6072406cede7fe340d1fe82c43f9ceb02e75861dbcc6b7642ed536bf2ed7",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 87192,
-          "file": "10d/garden-shoots--58ab601e5db0--tier2--dc8cd1eb.10d",
-          "sha256": "dc8cd1eb76ee0f844afe61446ffbaae91bb1f2ae9a4f9ac0b2bf2b0d3622d733",
-          "triangles": 6237
+          "bytes": 600,
+          "file": "10d/garden-shoots--0e4a042db091--tier2--3136e04c.10d",
+          "sha256": "3136e04c359cf3260df54246a9ddb643e1cf0c968ca39da69ac9fc2bfca983ac",
+          "triangles": 18
         },
         "surfels": {
-          "count": 98,
+          "count": 1,
           "inHero": true
         }
       }
@@ -18775,7 +18775,7 @@
       }
     },
     {
-      "bytes": 59968,
+      "bytes": 7328,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -18786,7 +18786,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:hydroponic-greens"
       },
-      "file": "10d/hydroponic-greens--5f774ef3ab16.10d",
+      "file": "10d/hydroponic-greens--5d01ac28d5e2.10d",
       "id": "rc:asset/hydroponic-greens",
       "materialFamily": "painted-metal",
       "renderRole": "opaque",
@@ -18796,7 +18796,7 @@
         0.2800000011920929,
         1
       ],
-      "sha256": "5f774ef3ab16046213077ace21422b80b2561b152c3253b5d54de8ed9884cd74",
+      "sha256": "5d01ac28d5e2782314cf840b18d4394d5efb9ee03aee6cda6a5a1bbda52af060",
       "spectral": {
         "c0": -19.138090133666992,
         "c1": 14.740033149719238,
@@ -18805,20 +18805,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/hydroponic-greens--5f774ef3ab16--tier3--679260c7.impo",
+          "file": "impo/hydroponic-greens--5d01ac28d5e2--tier3--bd27b114.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "679260c7799833408d75fc25f1abe98263a75b65503568dadbfcefed54fe69ad",
+          "sha256": "bd27b114b842e24e0f57264be75f909e715c5469b7dbe0e25fda38269fb9972a",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 12696,
-          "file": "10d/hydroponic-greens--5f774ef3ab16--tier2--48aeadbd.10d",
-          "sha256": "48aeadbd05172579e046037d72b70b8874d49e573e394d4c517fff37a167db01",
-          "triangles": 900
+          "bytes": 1608,
+          "file": "10d/hydroponic-greens--5d01ac28d5e2--tier2--48ff9362.10d",
+          "sha256": "48ff9362f973806b4189efb96058f6ed24dd04bd6a46ffbe5889a0513b71726e",
+          "triangles": 132
         },
         "surfels": {
-          "count": 15,
+          "count": 3,
           "inHero": true
         }
       }
@@ -18971,7 +18971,7 @@
       }
     },
     {
-      "bytes": 58608,
+      "bytes": 83248,
       "entity": {
         "affordances": [
           "traverse",
@@ -18982,7 +18982,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:feature:kestrel-earth-skirt"
       },
-      "file": "10d/kestrel-earth-skirt--883d2ec1c16a.10d",
+      "file": "10d/kestrel-earth-skirt--a8bdab2b86bc.10d",
       "id": "rc:asset/kestrel-earth-skirt",
       "materialFamily": "soil-and-gravel",
       "renderRole": "opaque",
@@ -18992,7 +18992,7 @@
         0.33000001311302185,
         1
       ],
-      "sha256": "883d2ec1c16a734a3c03951c79c5b1424dea4c9c0bb8dc046f95add4bfab8dec",
+      "sha256": "a8bdab2b86bc95015b3e9119ccdd9146703fe7c8c10538e1894d08e69625d9f2",
       "spectral": {
         "c0": -5.8060526847839355,
         "c1": 4.890224456787109,
@@ -19001,20 +19001,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/kestrel-earth-skirt--883d2ec1c16a--tier3--1dfe3309.impo",
+          "file": "impo/kestrel-earth-skirt--a8bdab2b86bc--tier3--80c08d2e.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "1dfe3309ce02d8d1d1a80055d3b95fbcd5948b24b357d62decc6332c150c4cf9",
+          "sha256": "80c08d2e86d0f1d8c6f21810eb6308c2e702ac7f560f1fdc9343706e27232fae",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 15036,
-          "file": "10d/kestrel-earth-skirt--883d2ec1c16a--tier2--fa075643.10d",
-          "sha256": "fa0756438ff44645bde07e7a158862445945371afa97a63fd89df4d3a5787c3d",
-          "triangles": 1599
+          "bytes": 21000,
+          "file": "10d/kestrel-earth-skirt--a8bdab2b86bc--tier2--1a9a004f.10d",
+          "sha256": "1a9a004f15d04264168c436b1bc5f372ab40ab897c550815c325bff30ac63cd4",
+          "triangles": 2304
         },
         "surfels": {
-          "count": 25,
+          "count": 36,
           "inHero": true
         }
       }
@@ -24982,7 +24982,7 @@
       }
     },
     {
-      "bytes": 59888,
+      "bytes": 83248,
       "entity": {
         "affordances": [
           "traverse",
@@ -24993,7 +24993,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:feature:ridge-east-earth"
       },
-      "file": "10d/ridge-east-earth--1c3472155d7d.10d",
+      "file": "10d/ridge-east-earth--28c10750346a.10d",
       "id": "rc:asset/ridge-east-earth",
       "materialFamily": "soil-and-gravel",
       "renderRole": "opaque",
@@ -25003,7 +25003,7 @@
         0.36000001430511475,
         1
       ],
-      "sha256": "1c3472155d7d57c4e31a68ccd9af06417341f086bad72b96bed69c15e10d595a",
+      "sha256": "28c10750346ab6a0fda70dbff0937d6520d79bc2cf9656eb6f490cf6a802c04a",
       "spectral": {
         "c0": -5.538572788238525,
         "c1": 4.530085563659668,
@@ -25012,20 +25012,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/ridge-east-earth--1c3472155d7d--tier3--7f4bbc7a.impo",
+          "file": "impo/ridge-east-earth--28c10750346a--tier3--c66451f7.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "7f4bbc7ae3853b9daee5012e50a34cd9a53d79d7d07de7e24aed9358944a131e",
+          "sha256": "c66451f7b1d4d268f8c1a108b43c240858f0147ed307b787245b1790d8bfe5b5",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 15240,
-          "file": "10d/ridge-east-earth--1c3472155d7d--tier2--b3cda303.10d",
-          "sha256": "b3cda30394220ff9e0190876920b00394a329a01fb213ce657e021f51d3526b3",
-          "triangles": 1600
+          "bytes": 21000,
+          "file": "10d/ridge-east-earth--28c10750346a--tier2--b9fae6c4.10d",
+          "sha256": "b9fae6c4bdcf79e077dbaacbf6735a2e2a37d8b5d795ffd959a51c50165db070",
+          "triangles": 2304
         },
         "surfels": {
-          "count": 25,
+          "count": 36,
           "inHero": true
         }
       }
@@ -25227,7 +25227,7 @@
       }
     },
     {
-      "bytes": 59792,
+      "bytes": 83248,
       "entity": {
         "affordances": [
           "traverse",
@@ -25238,7 +25238,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:feature:ridge-west-earth"
       },
-      "file": "10d/ridge-west-earth--5400bae22de3.10d",
+      "file": "10d/ridge-west-earth--76dc8ab20c7a.10d",
       "id": "rc:asset/ridge-west-earth",
       "materialFamily": "soil-and-gravel",
       "renderRole": "opaque",
@@ -25248,7 +25248,7 @@
         0.36000001430511475,
         1
       ],
-      "sha256": "5400bae22de31d734d0be4af9b2ddcbeec1428ec1f351c1b39e1d964e6aadb51",
+      "sha256": "76dc8ab20c7af473a02baf0518d60ca5a07215727f2febeaf3e04aa1ae7d3318",
       "spectral": {
         "c0": -5.538572788238525,
         "c1": 4.530085563659668,
@@ -25257,20 +25257,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/ridge-west-earth--5400bae22de3--tier3--d1bb365b.impo",
+          "file": "impo/ridge-west-earth--76dc8ab20c7a--tier3--c6c2f81b.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "d1bb365b4049c443fe49d9caaa9c6e9add123aa75ee78fcc1fc82626a06d61be",
+          "sha256": "c6c2f81b5d2352dea48dc7ac094d68e6c9d1464bdefea1d8d62fca446fe30a3f",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 15228,
-          "file": "10d/ridge-west-earth--5400bae22de3--tier2--e58f4915.10d",
-          "sha256": "e58f4915b1087598436f517333130c2a6db1e4f844256110b0cc776afecf4a21",
-          "triangles": 1599
+          "bytes": 20994,
+          "file": "10d/ridge-west-earth--76dc8ab20c7a--tier2--8a265054.10d",
+          "sha256": "8a265054268fcc7a1b90751d3080ee5151c80b941fd719e7f70119636b22e713",
+          "triangles": 2304
         },
         "surfels": {
-          "count": 25,
+          "count": 36,
           "inHero": true
         }
       }
@@ -38878,7 +38878,7 @@
       }
     },
     {
-      "bytes": 58624,
+      "bytes": 83264,
       "entity": {
         "affordances": [
           "traverse",
@@ -38889,7 +38889,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:feature:saltwind-earth-skirt"
       },
-      "file": "10d/saltwind-earth-skirt--0d57670f90d4.10d",
+      "file": "10d/saltwind-earth-skirt--38606cf22bbd.10d",
       "id": "rc:asset/saltwind-earth-skirt",
       "materialFamily": "soil-and-gravel",
       "renderRole": "opaque",
@@ -38899,7 +38899,7 @@
         0.3499999940395355,
         1
       ],
-      "sha256": "0d57670f90d403d03928309c1d5dd49f5f1e85b9563705582c40b52ae473ff31",
+      "sha256": "38606cf22bbdcf2c6a69be363196fa392653b5b71f5ac0bec3667a2059f2f593",
       "spectral": {
         "c0": -5.865908622741699,
         "c1": 4.98165225982666,
@@ -38908,20 +38908,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/saltwind-earth-skirt--0d57670f90d4--tier3--7e43a16b.impo",
+          "file": "impo/saltwind-earth-skirt--38606cf22bbd--tier3--0addc051.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "7e43a16b3d69c2846bb31bc4f40eed55069b54b64bd75f5d64508d23205983d7",
+          "sha256": "0addc05181f8da3e094a337223cff4cb92c43611d1900871b2f44709809af108",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 15036,
-          "file": "10d/saltwind-earth-skirt--0d57670f90d4--tier2--df035ac6.10d",
-          "sha256": "df035ac6f8476afa1a66036e2677c6f4eff7d5e2e84fe16c681db47bf3693e4b",
-          "triangles": 1599
+          "bytes": 20994,
+          "file": "10d/saltwind-earth-skirt--38606cf22bbd--tier2--70ae0005.10d",
+          "sha256": "70ae0005ca447d39acdbdc11e03f014b8918587fed15fd7cf7dd9724ca6ec208",
+          "triangles": 2303
         },
         "surfels": {
-          "count": 25,
+          "count": 36,
           "inHero": true
         }
       }
@@ -42431,7 +42431,7 @@
       }
     },
     {
-      "bytes": 61392,
+      "bytes": 7376,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -42442,7 +42442,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:veggie-leaves-chard-a"
       },
-      "file": "10d/veggie-leaves-chard-a--ba4bdbbf1a83.10d",
+      "file": "10d/veggie-leaves-chard-a--caa72e5608b4.10d",
       "id": "rc:asset/veggie-leaves-chard-a",
       "materialFamily": "painted-metal",
       "renderRole": "opaque",
@@ -42452,7 +42452,7 @@
         0.3400000035762787,
         1
       ],
-      "sha256": "ba4bdbbf1a8303943e9d2212a0d7261d58ccbdd022c086db32ce82e6c58d2524",
+      "sha256": "caa72e5608b4815d49ac2718a328d02f10516b55389bf773738163bfad8db953",
       "spectral": {
         "c0": -13.266533851623535,
         "c1": 10.29189395904541,
@@ -42461,26 +42461,26 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/veggie-leaves-chard-a--ba4bdbbf1a83--tier3--8b5ac7b4.impo",
+          "file": "impo/veggie-leaves-chard-a--caa72e5608b4--tier3--e4133a9f.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "8b5ac7b4fd78eb0e8fbb962a040061305e399b264578814a925e470fb08872b3",
+          "sha256": "e4133a9f0689faaab358df97424b499ffe7220b1395424bd972d9ddfa3af5e22",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 13974,
-          "file": "10d/veggie-leaves-chard-a--ba4bdbbf1a83--tier2--e802e91c.10d",
-          "sha256": "e802e91ceea205dee764a180c65dc0c25385dcaa1bf1289ca30e93b667e39116",
-          "triangles": 960
+          "bytes": 1620,
+          "file": "10d/veggie-leaves-chard-a--caa72e5608b4--tier2--b2b886d4.10d",
+          "sha256": "b2b886d4dfcebbcf1a9bfb7c76cd1a430a344449f086fb51fcf290cb8e82083c",
+          "triangles": 132
         },
         "surfels": {
-          "count": 15,
+          "count": 3,
           "inHero": true
         }
       }
     },
     {
-      "bytes": 61392,
+      "bytes": 7376,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -42491,7 +42491,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:veggie-leaves-chard-b"
       },
-      "file": "10d/veggie-leaves-chard-b--d45a32ab3882.10d",
+      "file": "10d/veggie-leaves-chard-b--79b6d9b5ab23.10d",
       "id": "rc:asset/veggie-leaves-chard-b",
       "materialFamily": "painted-metal",
       "renderRole": "opaque",
@@ -42501,7 +42501,7 @@
         0.3100000023841858,
         1
       ],
-      "sha256": "d45a32ab38824408e3509bc4e9b5b410736df2e47bda97cec78972974aba9ad9",
+      "sha256": "79b6d9b5ab23448dba21d11e723fe19a28d815f6670ee0d998e7a18ea8338ad9",
       "spectral": {
         "c0": -12.411077499389648,
         "c1": 9.239184379577637,
@@ -42510,26 +42510,26 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/veggie-leaves-chard-b--d45a32ab3882--tier3--a0ee6b9c.impo",
+          "file": "impo/veggie-leaves-chard-b--79b6d9b5ab23--tier3--585e4475.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "a0ee6b9ccdd32efdae3840d1f857da4680c7abe190fe6082d0dc260e7457b41a",
+          "sha256": "585e4475d79c3b44eb56c4d12f1e9b1b20b99c7d7f20e4af7a34be6e9c614bef",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 13974,
-          "file": "10d/veggie-leaves-chard-b--d45a32ab3882--tier2--1d5c4946.10d",
-          "sha256": "1d5c494617265a153fcf36b053a8283805d466dd528b4369d6f448ff55b09dee",
-          "triangles": 960
+          "bytes": 1620,
+          "file": "10d/veggie-leaves-chard-b--79b6d9b5ab23--tier2--a70c5009.10d",
+          "sha256": "a70c5009e659f8a76622d760f847d8c20d252b993d8adc130ab3b851b0c52ec5",
+          "triangles": 132
         },
         "surfels": {
-          "count": 15,
+          "count": 3,
           "inHero": true
         }
       }
     },
     {
-      "bytes": 61392,
+      "bytes": 7376,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -42540,7 +42540,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:veggie-leaves-kale-a"
       },
-      "file": "10d/veggie-leaves-kale-a--03c65da9df30.10d",
+      "file": "10d/veggie-leaves-kale-a--23f5baa1b755.10d",
       "id": "rc:asset/veggie-leaves-kale-a",
       "materialFamily": "painted-metal",
       "renderRole": "opaque",
@@ -42550,7 +42550,7 @@
         0.25999999046325684,
         1
       ],
-      "sha256": "03c65da9df3035c16eaab48b70f4193b280c256cdec83618d265ec1254d4fe54",
+      "sha256": "23f5baa1b75529507fc3cd3c21180aa891900a35c60d8dd1a9d1048811b9654f",
       "spectral": {
         "c0": -14.353925704956056,
         "c1": 10.725789070129396,
@@ -42559,26 +42559,26 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/veggie-leaves-kale-a--03c65da9df30--tier3--3bc14e56.impo",
+          "file": "impo/veggie-leaves-kale-a--23f5baa1b755--tier3--b22667f1.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "3bc14e563b3793ae77455ca4b5ae843b5a4de2947953f9b6bd515a3edb41b4e1",
+          "sha256": "b22667f19afa74a6fcd7b4744ce78a63afbc17284a897dedd34bacebdfb009f0",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 13974,
-          "file": "10d/veggie-leaves-kale-a--03c65da9df30--tier2--909d2e36.10d",
-          "sha256": "909d2e3667ef83300f809ed47549f81750a27e474f96f404f9e84464ea485c0b",
-          "triangles": 960
+          "bytes": 1620,
+          "file": "10d/veggie-leaves-kale-a--23f5baa1b755--tier2--485df561.10d",
+          "sha256": "485df561301a4a53a8f22c9a495ceb7266dc71d9e219ee1f09028bae2425d375",
+          "triangles": 132
         },
         "surfels": {
-          "count": 15,
+          "count": 3,
           "inHero": true
         }
       }
     },
     {
-      "bytes": 61392,
+      "bytes": 7376,
       "entity": {
         "affordances": [
           "photosynthesize",
@@ -42589,7 +42589,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:taxon:veggie-leaves-kale-b"
       },
-      "file": "10d/veggie-leaves-kale-b--ae97c8b548aa.10d",
+      "file": "10d/veggie-leaves-kale-b--4be70cf1680c.10d",
       "id": "rc:asset/veggie-leaves-kale-b",
       "materialFamily": "painted-metal",
       "renderRole": "opaque",
@@ -42599,7 +42599,7 @@
         0.3199999928474426,
         1
       ],
-      "sha256": "ae97c8b548aa6759602682e1bce55b510e19c3542c810bda0c1eb8ea1ea77c1d",
+      "sha256": "4be70cf1680c6f3091ca724cb3e71095c078c67468b327c9596a92d612babf64",
       "spectral": {
         "c0": -14.480684280395508,
         "c1": 10.95499324798584,
@@ -42608,20 +42608,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/veggie-leaves-kale-b--ae97c8b548aa--tier3--ab305b8a.impo",
+          "file": "impo/veggie-leaves-kale-b--4be70cf1680c--tier3--5597ea54.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "ab305b8af7e96d385b8e39c15e78e6fb09ac52f46411c4ed7f212d9342083feb",
+          "sha256": "5597ea546df1e6501d5c6fe807b6167420220ad4b18543a972c1fd5b2d23a0be",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 13974,
-          "file": "10d/veggie-leaves-kale-b--ae97c8b548aa--tier2--fabeee31.10d",
-          "sha256": "fabeee31f6dcf1ae9ca6d853fad3768826a83f94df82f7563fd24ad785489ec1",
-          "triangles": 960
+          "bytes": 1620,
+          "file": "10d/veggie-leaves-kale-b--4be70cf1680c--tier2--455b332d.10d",
+          "sha256": "455b332dc4d8e848400e307ff600507865a30f877afa54aec81a4a60853ab607",
+          "triangles": 132
         },
         "surfels": {
-          "count": 15,
+          "count": 3,
           "inHero": true
         }
       }
@@ -71402,6 +71402,6 @@
   ],
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "62ca752a1df12257ab962a5cb448d099251c8c98a84469bb1d7bad0458759777"
+    "sha256": "9e32f5b7bd037e1ddf536d3e02d2d8e2e3bb3a35c71b274ef988af1b078e0995"
   }
 }

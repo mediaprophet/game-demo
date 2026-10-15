@@ -2240,75 +2240,31 @@ pub fn kestrel_flats(
         },
     ));
     if garden_active {
-        let mut seedlings = Vec::new();
-        for (plant, (x, z)) in [
-            (-5.2_f32, -4.2_f32),
-            (-4.7, -4.2),
-            (-4.2, -4.2),
-            (-3.4, -4.2),
-            (-2.9, -4.2),
-            (-2.4, -4.2),
-            (-5.0, -3.3),
-            (-4.55, -3.3),
-            (-4.1, -3.3),
-        ]
-        .into_iter()
-        .enumerate()
-        {
-            for leaf in 0..9 {
-                let angle = leaf as f32 * std::f32::consts::TAU / 9.0 + plant as f32 * 0.61;
-                let reach = 0.12 + ((leaf * 5 + plant * 3) % 7) as f32 * 0.018;
-                seedlings.push(EllipsoidInstance {
-                    center: [
-                        x + angle.cos() * reach,
-                        0.34 + (leaf % 3) as f32 * 0.018,
-                        z + angle.sin() * reach * 0.62,
-                    ],
-                    radii: [0.075, 0.035, 0.18 + (leaf % 4) as f32 * 0.018],
-                    pitch_deg: 18.0 + (leaf % 4) as f32 * 7.0,
-                    yaw_deg: angle.to_degrees(),
-                    roll_deg: (plant as f32 - leaf as f32 * 0.35) * 2.5,
-                });
-            }
-        }
         scene.push(parametric(
             "rc:asset/garden-shoots",
             [0.27, 0.69, 0.27, 1.0],
-            ParametricRecipe::EllipsoidCluster {
-                instances: seedlings,
-                latitude: 8,
-                longitude: 11,
+            ParametricRecipe::VegetationPatch {
+                center: [-3.70, 0.35, -3.75],
+                radius: 1.35,
+                density: 36,
+                blade_height: 0.18,
             },
         ));
-        // Three compact cultivated heads bring a softer silhouette to the
-        // trough. They are garden crops, not a claim about native wetland flora.
-        let hydroponic_leaves = [-3.43_f32, -3.0, -2.57]
-            .into_iter()
-            .flat_map(|x| {
-                [
-                    (0.0_f32, 0.54_f32, [0.16, 0.055, 0.10], 0.0_f32),
-                    (-0.11, 0.57, [0.15, 0.05, 0.085], -27.0),
-                    (0.11, 0.57, [0.15, 0.05, 0.085], 27.0),
-                    (-0.05, 0.64, [0.13, 0.05, 0.08], 58.0),
-                    (0.05, 0.64, [0.13, 0.05, 0.08], -58.0),
-                ]
-                .into_iter()
-                .map(move |(dx, y, radii, yaw_deg)| EllipsoidInstance {
-                    center: [x + dx, y, -3.30],
-                    radii,
-                    pitch_deg: 8.0,
-                    yaw_deg,
-                    roll_deg: 0.0,
-                })
-            })
-            .collect();
+        // Compact cultivated heads bring a clean organic silhouette to the
+        // trough using Qualia's asymmetric botanical hull envelopes.
         scene.push(parametric(
             "rc:asset/hydroponic-greens",
             [0.29, 0.68, 0.28, 1.0],
-            ParametricRecipe::EllipsoidCluster {
-                instances: hydroponic_leaves,
-                latitude: 7,
-                longitude: 10,
+            ParametricRecipe::BotanicalHull {
+                center: [-3.0, 0.54, -3.30],
+                radii: [0.55, 0.55, 0.25, 0.25],
+                heights: [0.0, 0.03, -0.01, 0.02],
+                bottom_elevation: -0.08,
+                top_elevation: 0.18,
+                bottom_shape: 1.9,
+                top_shape: 2.2,
+                slices: 12,
+                stacks: 6,
             },
         ));
         for (id, x, z, hue) in [
@@ -2337,29 +2293,19 @@ pub fn kestrel_flats(
                 [0.28, 0.55, 0.31, 1.0],
             ),
         ] {
-            let mut leaves = Vec::with_capacity(16);
-            for leaf in 0..16 {
-                let angle = leaf as f32 * std::f32::consts::TAU / 16.0;
-                let reach = 0.16 + ((leaf * 7 + 3) % 9) as f32 * 0.012;
-                leaves.push(EllipsoidInstance {
-                    center: [
-                        x + angle.cos() * reach,
-                        0.40 + (leaf % 4) as f32 * 0.025,
-                        z + angle.sin() * reach * 0.72,
-                    ],
-                    radii: [0.12, 0.043, 0.24 + (leaf % 5) as f32 * 0.014],
-                    pitch_deg: 16.0 + (leaf % 5) as f32 * 8.0,
-                    yaw_deg: angle.to_degrees() + (leaf % 3) as f32 * 7.0,
-                    roll_deg: angle.sin() * 13.0,
-                });
-            }
             scene.push(parametric(
                 id,
                 hue,
-                ParametricRecipe::EllipsoidCluster {
-                    instances: leaves,
-                    latitude: 7,
-                    longitude: 10,
+                ParametricRecipe::BotanicalHull {
+                    center: [x, 0.42, z],
+                    radii: [0.36, 0.44, 0.38, 0.42],
+                    heights: [0.0, 0.04, -0.02, 0.03],
+                    bottom_elevation: -0.10,
+                    top_elevation: 0.24,
+                    bottom_shape: 2.1,
+                    top_shape: 1.85,
+                    slices: 12,
+                    stacks: 6,
                 },
             ));
         }

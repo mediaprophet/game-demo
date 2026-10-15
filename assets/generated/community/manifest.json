@@ -39,7 +39,7 @@
   ],
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "b5f8ebc944ac989cea1cdda91d5573c39a706bfd7b5e425f33e85f7ffa06fd71"
+    "sha256": "9e32f5b7bd037e1ddf536d3e02d2d8e2e3bb3a35c71b274ef988af1b078e0995"
   },
   "taxonConvention": {
     "canonicalId": "gbifKey",
@@ -8860,9 +8860,9 @@
     },
     {
       "id": "rc:asset/flora/eucalypt-gum/blue-grey-leaves-0",
-      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-0--18b2b8e5fa25.10d",
-      "bytes": 131296,
-      "sha256": "18b2b8e5fa258c6ab1c3e103d5b8e3ad4906c0b189c2ea95166a5a42c89bc507",
+      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-0--3872ac025703.10d",
+      "bytes": 9200,
+      "sha256": "3872ac025703237bd8abd77c499469f45bc0c261678c81e84a15e98d5c3ec114",
       "rgba": [
         0.4266485571861267,
         0.5086805820465088,
@@ -8889,15 +8889,15 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 32
+          "count": 3
         }
       }
     },
     {
       "id": "rc:asset/flora/eucalypt-gum/blue-grey-leaves-1",
-      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-1--ee79dbff1771.10d",
-      "bytes": 131280,
-      "sha256": "ee79dbff1771710e76e2d3bb12e9ebd43059a5e74968be4df2ec6fb125243172",
+      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-1--d4bc5e974937.10d",
+      "bytes": 9184,
+      "sha256": "d4bc5e974937f37faa1ff3ba1d071c4edd9c3205df710b2658864c51853368fd",
       "rgba": [
         0.40016263723373413,
         0.4821946620941162,
@@ -8924,15 +8924,15 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 32
+          "count": 3
         }
       }
     },
     {
       "id": "rc:asset/flora/eucalypt-gum/blue-grey-leaves-2",
-      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-2--05dc7f943d7f.10d",
-      "bytes": 131312,
-      "sha256": "05dc7f943d7fa6bafaecbd2fc92d7461d5f3dc3bfafdd512d7f1e53847b1ca79",
+      "file": "10d/flora-eucalypt-gum-blue-grey-leaves-2--8ead7bc26461.10d",
+      "bytes": 9184,
+      "sha256": "8ead7bc2646109248bdc3554b3ab14a76d9d3d96c0d1c8aa0dc699a9b5fc79e5",
       "rgba": [
         0.4468575119972229,
         0.5250015258789062,
@@ -8959,7 +8959,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 32
+          "count": 3
         }
       }
     },
@@ -9175,9 +9175,9 @@
     },
     {
       "id": "rc:asset/flora/golden-wattle/blue-green-phyllodes-0",
-      "file": "10d/flora-golden-wattle-blue-green-phyllodes-0--0a9cd4213c14.10d",
-      "bytes": 71488,
-      "sha256": "0a9cd4213c149e391c44da220eeb2ba8b657b0881af3823c984492998379c1ed",
+      "file": "10d/flora-golden-wattle-blue-green-phyllodes-0--5e64950a26c2.10d",
+      "bytes": 9280,
+      "sha256": "5e64950a26c2af9e28365d0e69da1f4b2275c74c8a6f0702fedf73f9b0b28e31",
       "rgba": [
         0.44948840141296387,
         0.5392963886260986,
@@ -9204,15 +9204,15 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 17
+          "count": 3
         }
       }
     },
     {
       "id": "rc:asset/flora/golden-wattle/blue-green-phyllodes-1",
-      "file": "10d/flora-golden-wattle-blue-green-phyllodes-1--0eb624669a1a.10d",
-      "bytes": 71488,
-      "sha256": "0eb624669a1a8c583edcc9647bde651d5d7d6d043e5bf3a7c13f5941a3f6aff5",
+      "file": "10d/flora-golden-wattle-blue-green-phyllodes-1--9d284f982df6.10d",
+      "bytes": 9296,
+      "sha256": "9d284f982df6be5820238b33ffc889fe2d364b50f64583f2b235c7eda422d0cb",
       "rgba": [
         0.44948840141296387,
         0.5392963886260986,
@@ -9239,15 +9239,15 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 17
+          "count": 3
         }
       }
     },
     {
       "id": "rc:asset/flora/golden-wattle/blue-green-phyllodes-2",
-      "file": "10d/flora-golden-wattle-blue-green-phyllodes-2--4551cb6b5894.10d",
-      "bytes": 71456,
-      "sha256": "4551cb6b58947942fc7ffff597599e6e2c631574e775ae883d672ba8829e3354",
+      "file": "10d/flora-golden-wattle-blue-green-phyllodes-2--45c6a0ea8695.10d",
+      "bytes": 9280,
+      "sha256": "45c6a0ea86951e4014ccbbca7d378e948c9d4d340e4acb7b38e6ccf6c5b1fc5e",
       "rgba": [
         0.44948840141296387,
         0.5392963886260986,
@@ -9274,15 +9274,15 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 17
+          "count": 3
         }
       }
     },
     {
       "id": "rc:asset/flora/golden-wattle/blue-green-phyllodes-3",
-      "file": "10d/flora-golden-wattle-blue-green-phyllodes-3--1f26b10fb98f.10d",
-      "bytes": 71504,
-      "sha256": "1f26b10fb98f6f2eeddd6d496f5485be2d3449575734f858c2fc62af94d346f9",
+      "file": "10d/flora-golden-wattle-blue-green-phyllodes-3--8bbdf1946799.10d",
+      "bytes": 9296,
+      "sha256": "8bbdf1946799871a1cfe11efb5f3b37c1f1c9d103c13517945e53184e5d6eede",
       "rgba": [
         0.44948840141296387,
         0.5392963886260986,
@@ -9309,7 +9309,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 17
+          "count": 3
         }
       }
     },
@@ -11200,9 +11200,9 @@
     },
     {
       "id": "rc:asset/garden-shoots",
-      "file": "10d/garden-shoots--68195c361fd6.10d",
-      "bytes": 368960,
-      "sha256": "68195c361fd686eaabbbdfc975f136cc6b2e4287d6346511d39115f31046dde9",
+      "file": "10d/garden-shoots--d15f88876409.10d",
+      "bytes": 4304,
+      "sha256": "d15f88876409ced028f6828c828106a0f4edc7f9536bd7c8dc5b33874930328d",
       "rgba": [
         0.4126323163509369,
         0.6035283207893372,
@@ -11229,7 +11229,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 98
+          "count": 1
         }
       }
     },
@@ -12764,9 +12764,9 @@
     },
     {
       "id": "rc:asset/hydroponic-greens",
-      "file": "10d/hydroponic-greens--1c5bcf38c87c.10d",
-      "bytes": 59968,
-      "sha256": "1c5bcf38c87cd63d259308cc3d376288ed89037f789e5fb48bdbc61e20c92fdd",
+      "file": "10d/hydroponic-greens--41cfa3ec8118.10d",
+      "bytes": 7328,
+      "sha256": "41cfa3ec8118e7965eef542421114cf0e3da7eaf454604b81a2b17adf4258036",
       "rgba": [
         0.3899310231208801,
         0.6181110739707947,
@@ -12793,7 +12793,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 15
+          "count": 3
         }
       }
     },
@@ -12904,9 +12904,9 @@
     },
     {
       "id": "rc:asset/kestrel-earth-skirt",
-      "file": "10d/kestrel-earth-skirt--1191ed715b8b.10d",
-      "bytes": 58608,
-      "sha256": "1191ed715b8bafc02f58a7654611fd77db94967bf6671c05b16938352c4f58a4",
+      "file": "10d/kestrel-earth-skirt--e9706dd03db4.10d",
+      "bytes": 83248,
+      "sha256": "e9706dd03db4a01e45dc3926e815ba4130800fae809240c216424ed057940b68",
       "rgba": [
         0.5498336553573608,
         0.5221536159515381,
@@ -12933,7 +12933,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 25
+          "count": 36
         }
       }
     },
@@ -17201,9 +17201,9 @@
     },
     {
       "id": "rc:asset/ridge-east-earth",
-      "file": "10d/ridge-east-earth--20a96ff26ec7.10d",
-      "bytes": 59888,
-      "sha256": "20a96ff26ec709531b9e9c65efce160bc5ade551fae48d9ecfb213fcb5789ad1",
+      "file": "10d/ridge-east-earth--c7325a3ddc61.10d",
+      "bytes": 83248,
+      "sha256": "c7325a3ddc61ff100b9cc7e8b1d5b2fc998ab02b853e5db6b3daf726fab0d00d",
       "rgba": [
         0.5516648292541504,
         0.5283048152923584,
@@ -17230,7 +17230,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 25
+          "count": 36
         }
       }
     },
@@ -17376,9 +17376,9 @@
     },
     {
       "id": "rc:asset/ridge-west-earth",
-      "file": "10d/ridge-west-earth--152faf479210.10d",
-      "bytes": 59792,
-      "sha256": "152faf4792103ee1600adf38794af053213178892ec9db91fbf46315ce26984c",
+      "file": "10d/ridge-west-earth--76e4f7a8797a.10d",
+      "bytes": 83248,
+      "sha256": "76e4f7a8797a2608d9c573b30364bf65d840f31a757c2faf9018f09604647860",
       "rgba": [
         0.5516648292541504,
         0.5283048152923584,
@@ -17405,7 +17405,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 25
+          "count": 36
         }
       }
     },
@@ -27315,9 +27315,9 @@
     },
     {
       "id": "rc:asset/saltwind-earth-skirt",
-      "file": "10d/saltwind-earth-skirt--c39e038dbe2f.10d",
-      "bytes": 58624,
-      "sha256": "c39e038dbe2f1ed1f6fa4e4c10185581b61494e176c3b7ff9be7792b70ae85a3",
+      "file": "10d/saltwind-earth-skirt--8d11037b6fa1.10d",
+      "bytes": 83264,
+      "sha256": "8d11037b6fa1b218bc68f6c683ad8bb2d6207f6e4dccce31c559ad3325494267",
       "rgba": [
         0.5722880363464355,
         0.5402880311012268,
@@ -27344,7 +27344,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 25
+          "count": 36
         }
       }
     },
@@ -29852,9 +29852,9 @@
     },
     {
       "id": "rc:asset/veggie-leaves-chard-a",
-      "file": "10d/veggie-leaves-chard-a--5e253fbc7ce9.10d",
-      "bytes": 61392,
-      "sha256": "5e253fbc7ce96391c3e8293192a3c422280a14176b41f873ff7299e7781a1c34",
+      "file": "10d/veggie-leaves-chard-a--285f62cd60a1.10d",
+      "bytes": 7376,
+      "sha256": "285f62cd60a1b130d33283462c16fca8d5aa68dc0d0d9047843e0d80bbe20590",
       "rgba": [
         0.4663817584514618,
         0.591181755065918,
@@ -29881,15 +29881,15 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 15
+          "count": 3
         }
       }
     },
     {
       "id": "rc:asset/veggie-leaves-chard-b",
-      "file": "10d/veggie-leaves-chard-b--080bbec37899.10d",
-      "bytes": 61392,
-      "sha256": "080bbec37899066b0e48451ea7538f8db8c4fc80884f6b7e3a8a14d31f90c086",
+      "file": "10d/veggie-leaves-chard-b--d1d1b04659c1.10d",
+      "bytes": 7376,
+      "sha256": "d1d1b04659c1707dcb4999b45128d8da0f70ae459e3290c244ee9cfec66b30d2",
       "rgba": [
         0.4056490361690521,
         0.5382250547409058,
@@ -29916,15 +29916,15 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 15
+          "count": 3
         }
       }
     },
     {
       "id": "rc:asset/veggie-leaves-kale-a",
-      "file": "10d/veggie-leaves-kale-a--3624aa07434f.10d",
-      "bytes": 61392,
-      "sha256": "3624aa07434f8f51473d0a243a7411166228d61901d72eee33eea4b91533bf93",
+      "file": "10d/veggie-leaves-kale-a--428e4f09ce07.10d",
+      "bytes": 7376,
+      "sha256": "428e4f09ce075a9a1397805ef6234b61c46b7e18740e3b288d7bfd0bdafe2834",
       "rgba": [
         0.3761369585990906,
         0.5203769207000732,
@@ -29951,15 +29951,15 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 15
+          "count": 3
         }
       }
     },
     {
       "id": "rc:asset/veggie-leaves-kale-b",
-      "file": "10d/veggie-leaves-kale-b--5063bf5eabf1.10d",
-      "bytes": 61376,
-      "sha256": "5063bf5eabf13305e01f0a9ed53700142a68772e424589e69cdabc46e3c3c442",
+      "file": "10d/veggie-leaves-kale-b--df0a189d42c9.10d",
+      "bytes": 7376,
+      "sha256": "df0a189d42c95292d98f3146e8ad73fa922bb2983f122be6b95e6a8c4faadbc1",
       "rgba": [
         0.4248427748680115,
         0.5729708075523376,
@@ -29986,7 +29986,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 15
+          "count": 3
         }
       }
     },

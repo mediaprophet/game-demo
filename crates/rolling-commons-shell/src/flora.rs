@@ -58,6 +58,36 @@ fn ellipsoid(id: String, center: [f32; 3], radii: [f32; 3], color: [f32; 4]) -> 
     }
 }
 
+fn botanical_envelope(
+    id: String,
+    center: [f32; 3],
+    spread: f32,
+    height: f32,
+    color: [f32; 4],
+) -> AssetRecipe {
+    let material_family = material_family_for(&id);
+    let r = spread.max(0.18);
+    AssetRecipe {
+        id,
+        parts: Vec::new(),
+        parametric: Some(ParametricRecipe::BotanicalHull {
+            center,
+            radii: [r * 0.90, r * 1.10, r * 0.95, r * 1.05],
+            heights: [0.0, 0.04, -0.02, 0.03],
+            bottom_elevation: -height * 0.45,
+            top_elevation: height * 0.55,
+            bottom_shape: 1.85,
+            top_shape: 2.15,
+            slices: 14,
+            stacks: 7,
+        }),
+        color,
+        material_family,
+        vibe_source: None,
+        render_role: "opaque".into(),
+    }
+}
+
 fn radial_leaves(
     center: [f32; 3],
     count: usize,
@@ -162,9 +192,11 @@ fn eucalypt_gum() -> Vec<AssetRecipe> {
     .into_iter()
     .enumerate()
     {
-        assets.push(cluster(
+        assets.push(botanical_envelope(
             format!("rc:asset/flora/eucalypt-gum/blue-grey-leaves-{index}"),
-            crown_leaves(center, 34, spread, 0.48, 0.095, 17.0),
+            center,
+            spread * 1.18,
+            spread * 0.92,
             color,
         ));
     }
@@ -202,9 +234,11 @@ fn golden_wattle() -> Vec<AssetRecipe> {
     .into_iter()
     .enumerate()
     {
-        assets.push(cluster(
+        assets.push(botanical_envelope(
             format!("rc:asset/flora/golden-wattle/blue-green-phyllodes-{index}"),
-            crown_leaves(center, 18, spread, 0.34, 0.075, 5.0),
+            center,
+            spread * 0.95,
+            spread * 0.82,
             [0.38, 0.54, 0.39, 1.0],
         ));
         assets.push(cluster(

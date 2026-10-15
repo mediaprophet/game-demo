@@ -800,7 +800,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '62ca752a1df12257-community-overhaul';
+const WASM_BUILD = '9e32f5b7bd037e1d-community-overhaul';
 const wasmStart = performance.now();
 await window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
@@ -2281,6 +2281,9 @@ canvas.addEventListener('pointerup', e=>{
           workshopSelectedPart=target.workshopPart;
           workshopFeedback=`Selected ${target.label}. Choose the matching assembly operation from the workshop panel.`;
           hudPage='workshop';hudDockScroll=0;renderHud();
+        }else if(target.id==='touring-vehicle'||target.activityId==='vehicle-drive'||target.id==='touring-camp-rig'){
+          note(`Boarded ${target.label||'Touring Rig'}. Switching to Direct Drive.`);
+          selectGameView('drive');
         }else if(target.activityId)handleHudAction(`activity:open:${target.activityId}`);
         else inspect(PLACES[target.placeIndex]);
         if(target.label)note(`Selected ${target.label}`);
@@ -2296,7 +2299,7 @@ canvas.addEventListener('wheel', e=>{
   e.preventDefault();
   camGoal=null;zoomGoal=null;
   if(cameraMode==='walk')return;
-  camZoom=Math.max(0.55,Math.min(20,camZoom*Math.exp(e.deltaY*0.001)));applyCam();
+  camZoom=Math.max(0.25,Math.min(45,camZoom*Math.exp(e.deltaY*0.001)));applyCam();
 }, {passive:false});
 
 function inspect(s){
@@ -3047,8 +3050,22 @@ function handleHudAction(id){
     renderHud();return;
   }
   if(id.startsWith('activity:open:')){
-    const module=ACTIVITY_MODULES.find(item=>item.id===id.slice('activity:open:'.length));
-    if(!module||module.availability==='design_only'){note('This activity is not available in the current fixture.');return;}
+    const actKey=id.slice('activity:open:'.length);
+    if(actKey==='vehicle-drive'){
+      note('Boarded touring vehicle. Switching to Direct Drive.');
+      selectGameView('drive');
+      return;
+    }
+    const module=ACTIVITY_MODULES.find(item=>item.id===actKey);
+    if(!module||module.availability==='design_only'){
+      const siteIndex=actKey==='water-inspect'?5:actKey==='solar-inspect'?2:actKey==='pump-inspect'?8:actKey==='mast-inspect'?10:actKey==='garden-produce'?6:-1;
+      if(siteIndex>=0){
+        inspect(PLACES[siteIndex]);
+        return;
+      }
+      note('This activity is not available in the current fixture.');
+      return;
+    }
     activeActivityId=module.id;hudPage='activities';focusedPlace=null;activeWalkSite=null;
     const destination=PLACE_INDEX.get(module.place.localityId)?.territoryId||null;
     if(destination){
