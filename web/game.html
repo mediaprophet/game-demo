@@ -387,54 +387,117 @@
     padding:8px; box-shadow:0 12px 36px #0005; }
   @media(min-width:901px) { .territory-nav { max-width:calc(100vw - 380px); }
     header .brand { margin-right:8px; } }
-  .touch-controls { display:none; position:fixed; z-index:8; left:12px;
-    bottom:calc(70px + env(safe-area-inset-bottom)); gap:6px; grid-template-columns:repeat(4,44px); }
-  .touch-controls button { min-width:44px; min-height:44px; text-align:center; touch-action:none;
-    background:#12292bc9; border-color:#ffffff55; }
-  body.panels-open .touch-controls { display:none; }
-  body:not([data-hud-page="orders"]) .touch-controls { display:none; }
+  .touch-controls {
+    display: none;
+    position: fixed;
+    z-index: 25;
+    left: max(14px, env(safe-area-inset-left));
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    grid-template-areas:
+      ".  up  ."
+      "lt dn  rt";
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(2, 48px);
+    gap: 8px;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.55));
+  }
+  .touch-controls [data-touch-key="w"] { grid-area: up; }
+  .touch-controls [data-touch-key="a"] { grid-area: lt; }
+  .touch-controls [data-touch-key="s"] { grid-area: dn; }
+  .touch-controls [data-touch-key="d"] { grid-area: rt; }
+  .touch-controls button {
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 14px;
+    font-size: 19px;
+    line-height: 1;
+    text-align: center;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    background: rgba(18, 38, 41, 0.88);
+    border: 1.5px solid rgba(130, 168, 158, 0.45);
+    color: #f7efdc;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease, box-shadow 0.08s ease;
+  }
+  .touch-controls button:active,
+  .touch-controls button[data-held="true"] {
+    background: linear-gradient(145deg, #f7cb7d, #e59d4f);
+    color: #1a2829;
+    border-color: #ffe6a6;
+    transform: scale(0.92);
+    box-shadow: 0 0 16px rgba(247, 203, 125, 0.65), inset 0 1px 2px rgba(255,255,255,0.4);
+  }
+  body.panels-open .touch-controls { display: none !important; }
+  body:not([data-hud-page="orders"]) .touch-controls { display: none !important; }
   @media(max-width:900px) {
-    header { left:8px; right:8px; padding:6px 8px; gap:8px; }
-    .brand strong { font-size:14px; }
-    #toggle-game-panels { font-size:12px; padding:6px 10px; }
-    .brand { margin-right:auto; } .header-meta { margin-left:0; }
-    .header-meta select { display:none; }
-    body.panels-open .header-meta select { display:block; max-width:95px; }
-    .header-mode-nav { position:fixed; left:8px; right:8px; bottom:max(8px,env(safe-area-inset-bottom));
-      width:auto; padding:5px; justify-content:space-around; background:#102327ed;
-      border:1px solid #ffffff33; border-radius:12px; }
-    .header-mode-nav button { flex:1; min-width:0; min-height:44px; font-size:12px; padding:6px 3px; }
-    .territory-nav { top:68px; left:8px; max-width:calc(100vw - 16px); }
-    .side-column { top:auto; left:8px; right:8px; bottom:calc(68px + env(safe-area-inset-bottom));
-      width:auto; max-height:48dvh; padding:8px; border:1px solid #ffffff44;
-      border-radius:16px; background:#102327ed; overscroll-behavior:contain; }
-    .atlas-overlay { padding-top:112px; padding-bottom:74px; }
+    header { left: max(8px, env(safe-area-inset-left)); right: max(8px, env(safe-area-inset-right));
+      padding: 6px 10px; gap: 8px; }
+    .brand strong { font-size: 14px; }
+    #toggle-game-panels { font-size: 12px; padding: 6px 10px; min-height: 44px; }
+    .brand { margin-right: auto; } .header-meta { margin-left: 0; }
+    .header-meta select { display: none; }
+    body.panels-open .header-meta select { display: block; max-width: 95px; }
+    .header-mode-nav {
+      position: fixed; left: max(8px, env(safe-area-inset-left)); right: max(8px, env(safe-area-inset-right));
+      bottom: max(8px, env(safe-area-inset-bottom));
+      width: auto; padding: 5px; justify-content: space-around; background: #102327ed;
+      border: 1px solid #ffffff33; border-radius: 12px; backdrop-filter: blur(12px);
+    }
+    .header-mode-nav button { flex: 1; min-width: 0; min-height: 44px; font-size: 12px; padding: 6px 3px; touch-action: manipulation; }
+    .territory-nav { top: calc(56px + max(4px, env(safe-area-inset-top))); left: max(8px, env(safe-area-inset-left)); max-width: calc(100vw - 16px); }
+    .side-column {
+      top: auto; left: max(8px, env(safe-area-inset-left)); right: max(8px, env(safe-area-inset-right));
+      bottom: calc(68px + env(safe-area-inset-bottom));
+      width: auto; max-height: 48dvh; padding: 8px; border: 1px solid #ffffff44;
+      border-radius: 16px; background: #102327ed; overscroll-behavior: contain;
+    }
+    .atlas-overlay { padding-top: 112px; padding-bottom: 74px; }
   }
-  @media(max-width:420px) { .territory-nav button { font-size:10px; padding:6px; }
-    .territory-nav { max-width:calc(100vw - 16px); white-space:nowrap; }
-    .header-mode-nav button { font-size:11px; }
-    .brand strong { max-width:145px; display:block; overflow:hidden; text-overflow:ellipsis;
-      white-space:nowrap; } }
+  @media(max-width:420px) {
+    .territory-nav button { font-size: 10px; padding: 6px; min-height: 44px; }
+    .territory-nav { max-width: calc(100vw - 16px); white-space: nowrap; }
+    .header-mode-nav button { font-size: 11px; }
+    .brand strong { max-width: 145px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
   @media(max-width:600px) {
-    header { gap:5px; }
-    #fullscreen-game { min-width:44px; min-height:44px; }
-    #toggle-game-panels { min-height:44px; }
-    .territory-nav { flex-wrap:nowrap; scrollbar-width:none; }
-    .territory-nav button { min-height:44px; }
-    .panel-tabs button { min-width:0; }
+    header { gap: 5px; }
+    #fullscreen-game { min-width: 44px; min-height: 44px; }
+    #toggle-game-panels { min-height: 44px; }
+    .territory-nav { flex-wrap: nowrap; scrollbar-width: none; }
+    .territory-nav button { min-height: 44px; }
+    .panel-tabs button { min-width: 0; min-height: 44px; }
   }
-  @media(pointer:coarse) { body[data-camera-mode="walk"] .touch-controls,
-    body[data-camera-mode="drive"] .touch-controls { display:grid; }
-    body.panels-open .touch-controls { display:none; } }
-  @media(pointer:coarse) { body:not([data-hud-page="orders"]) .touch-controls { display:none; } }
+  @media(pointer:coarse), (hover:none) {
+    body[data-camera-mode="walk"] .touch-controls,
+    body[data-camera-mode="drive"] .touch-controls { display: grid; }
+  }
+  body.has-touch[data-camera-mode="walk"] .touch-controls,
+  body.has-touch[data-camera-mode="drive"] .touch-controls { display: grid; }
   @media(max-height:500px) and (max-width:900px) {
-    .brand strong { font-size:13px; } header { min-height:40px; }
-    .territory-nav { top:56px; }
-    .header-mode-nav { left:auto; width:100px; top:106px; bottom:auto; right:8px;
-      flex-direction:column; }
-    .header-mode-nav button { min-height:36px; }
-    .side-column { right:116px; bottom:8px; max-height:calc(100dvh - 100px); }
-    .touch-controls { bottom:calc(12px + env(safe-area-inset-bottom)); }
+    .brand strong { font-size: 13px; } header { min-height: 40px; }
+    .territory-nav { top: 52px; }
+    .header-mode-nav {
+      left: auto; width: 110px; top: 96px; bottom: auto; right: max(8px, env(safe-area-inset-right));
+      flex-direction: column;
+    }
+    .header-mode-nav button { min-height: 38px; }
+    .side-column { right: 124px; bottom: 8px; max-height: calc(100dvh - 90px); }
+    .touch-controls {
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      left: max(10px, env(safe-area-inset-left));
+      grid-template-columns: repeat(3, 44px);
+      grid-template-rows: repeat(2, 44px);
+      gap: 6px;
+    }
+    .touch-controls button { min-width: 44px; min-height: 44px; font-size: 17px; }
   }
   /* These elements never participate in a document-column game layout. */
   main { overflow:visible; }
@@ -732,8 +795,8 @@
   </div>
 </main>
 <nav class="touch-controls" aria-label="Movement controls">
-  <button data-touch-key="a" aria-label="Steer or move left">◀</button>
   <button data-touch-key="w" aria-label="Accelerate or move forward">▲</button>
+  <button data-touch-key="a" aria-label="Steer or move left">◀</button>
   <button data-touch-key="s" aria-label="Brake or move backward">▼</button>
   <button data-touch-key="d" aria-label="Steer or move right">▶</button>
 </nav>
@@ -2158,8 +2221,8 @@ let perfFrames=0, perfDrawAcc=0, perfLastFps=performance.now();
     const side=(walkKeys.has('d')?1:0)-(walkKeys.has('a')?1:0);
     if(forward||side){
       const step=dt*walkSpeed(playing(),walkKeys.has('shift'))/Math.max(1,Math.hypot(forward,side));
-      walk.x=Math.max(-6.6,Math.min(22.6,walk.x+step*(-Math.sin(camYaw)*forward+Math.cos(camYaw)*side)));
-      walk.z=Math.max(-20.6,Math.min(6.6,walk.z+step*(-Math.cos(camYaw)*forward-Math.sin(camYaw)*side)));
+      walk.x=Math.max(-135,Math.min(135,walk.x+step*(-Math.sin(camYaw)*forward+Math.cos(camYaw)*side)));
+      walk.z=Math.max(-135,Math.min(135,walk.z+step*(-Math.cos(camYaw)*forward-Math.sin(camYaw)*side)));
       const place=walk.z<-7?'highlands':walk.x>=8?'saltwind':'kestrel';
       moveCharacter(playing(),walk.x,walk.z,place);
       if(territory!==place){territory=place;renderHud();}
@@ -2221,86 +2284,205 @@ window.addEventListener('keydown',e=>{
   }
 });
 
-// orbit + pick
-let drag=null;
-canvas.addEventListener('pointerdown', e=>{
-  const r=canvas.getBoundingClientRect();
-  const id=hud.hit_test((e.clientX-r.left)*canvas.width/r.width,
-    (e.clientY-r.top)*canvas.height/r.height);
-  const px=(e.clientX-r.left)*canvas.width/r.width;
-  const py=(e.clientY-r.top)*canvas.height/r.height;
-  drag={x:e.clientX,y:e.clientY,moved:false,hudAction:id,
-    pan:e.shiftKey||e.button===1,
-    blockWorld:!!id||(hudDockBounds&&px>=hudDockBounds.x&&px<=hudDockBounds.x+hudDockBounds.w&&
-      py>=hudDockBounds.y&&py<=hudDockBounds.y+hudDockBounds.h),
-    lastX:e.clientX,lastY:e.clientY};
-  canvas.setPointerCapture(e.pointerId);
-});
-canvas.addEventListener('pointermove', e=>{ if(!drag) return;
-  if(showcaseTour)return;
-  if(drag.hudAction||drag.blockWorld)return;
-  if (Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>4) drag.moved=true;
-  if (drag.moved){
-    const movementX=e.clientX-drag.lastX,movementY=e.clientY-drag.lastY;
-    drag.lastX=e.clientX;drag.lastY=e.clientY;
-    camGoal=null;zoomGoal=null;
-    if(drag.pan&&cameraMode!=='walk'&&cameraMode!=='drive'){
-      camTarget.x-=movementX*0.0015;camTarget.z+=movementY*0.0015;
-    }
-    else if(cameraMode==='drive'&&driveView==='first-person'&&typeof session.drive_camera==='function'){
-      driveLook.yaw=Math.max(-1.4,Math.min(1.4,driveLook.yaw+movementX*0.008));
-      driveLook.pitch=Math.max(-0.7,Math.min(0.7,driveLook.pitch+movementY*0.006));
-    }
-    else{camYaw+=movementX*0.008;
-      camPitch=Math.max(cameraMode==='walk'?-0.9:-1.2,
-        Math.min(cameraMode==='walk'?0.9:1.4,camPitch+movementY*0.006));}
-    if(cameraMode==='walk')placeWalkCamera();
-    else if(cameraMode==='drive')placeDriveCamera();else applyCam(); }});
-canvas.addEventListener('pointerup', e=>{
-  if(drag?.hudAction){
-    if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)<18)
-      handleHudAction(drag.hudAction);
-    drag=null;return;
-  }
-  if(showcaseTour){drag=null;return;}
-  if(drag?.blockWorld){drag=null;return;}
-  if (drag && !drag.moved){
-    const r=canvas.getBoundingClientRect();
-    const px=(e.clientX-r.left)*canvas.width/r.width;
-    const py=(e.clientY-r.top)*canvas.height/r.height;
-    const hudAction=hud.hit_test(px,py);
-    if (hudAction) { handleHudAction(hudAction); drag=null; return; }
-    portal.queue_pick(
-      px, py,
-      canvas.width, canvas.height);
-    const readPick = (tries) => {
-      const i=portal.poll_pick();
-      if(i>=0 && i<scenePickTargets.length){
-        const target=scenePickTargets[i];
-        if(target.workshopPart){
-          workshopSelectedPart=target.workshopPart;
-          workshopFeedback=`Selected ${target.label}. Choose the matching assembly operation from the workshop panel.`;
-          hudPage='workshop';hudDockScroll=0;renderHud();
-        }else if(target.id==='touring-vehicle'||target.activityId==='vehicle-drive'||target.id==='touring-camp-rig'){
-          note(`Boarded ${target.label||'Touring Rig'}. Switching to Direct Drive.`);
-          selectGameView('drive');
-        }else if(target.activityId)handleHudAction(`activity:open:${target.activityId}`);
-        else inspect(PLACES[target.placeIndex]);
-        if(target.label)note(`Selected ${target.label}`);
-      }
-      else if(tries>0) setTimeout(()=>readPick(tries-1),50);
-      else $('why').style.display='none';
+// multi-touch orbit, pinch-to-zoom, two-finger pan, and pick
+const activePointers = new Map();
+let gestureState = null;
+
+function clearCanvasPointer(pointerId) {
+  activePointers.delete(pointerId);
+  if (activePointers.size === 1) {
+    const [, pos] = activePointers.entries().next().value;
+    gestureState = {
+      mode: 'drag',
+      startX: pos.x,
+      startY: pos.y,
+      lastX: pos.x,
+      lastY: pos.y,
+      moved: true,
+      hudAction: null,
+      blockWorld: false,
+      pan: false
     };
-    setTimeout(()=>readPick(20),50);
+  } else if (activePointers.size === 0) {
+    gestureState = null;
   }
-  drag=null;
+}
+
+canvas.addEventListener('pointerdown', e => {
+  try { canvas.setPointerCapture(e.pointerId); } catch {}
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if (activePointers.size === 1) {
+    const r = canvas.getBoundingClientRect();
+    const px = (e.clientX - r.left) * canvas.width / r.width;
+    const py = (e.clientY - r.top) * canvas.height / r.height;
+    const id = hud.hit_test(px, py);
+    const blockWorld = !!id || (hudDockBounds && px >= hudDockBounds.x && px <= hudDockBounds.x + hudDockBounds.w &&
+      py >= hudDockBounds.y && py <= hudDockBounds.y + hudDockBounds.h);
+
+    gestureState = {
+      mode: 'drag',
+      startX: e.clientX,
+      startY: e.clientY,
+      lastX: e.clientX,
+      lastY: e.clientY,
+      moved: false,
+      hudAction: id,
+      blockWorld: !!blockWorld,
+      pan: e.shiftKey || e.button === 1
+    };
+  } else if (activePointers.size === 2) {
+    const pts = Array.from(activePointers.values());
+    const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    const midX = (pts[0].x + pts[1].x) * 0.5;
+    const midY = (pts[0].y + pts[1].y) * 0.5;
+    gestureState = {
+      mode: 'pinch',
+      startDist: dist,
+      lastDist: dist,
+      lastMidX: midX,
+      lastMidY: midY,
+      moved: true
+    };
+  }
 });
-canvas.addEventListener('wheel', e=>{
+
+canvas.addEventListener('pointermove', e => {
+  if (!gestureState) return;
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (showcaseTour) return;
+
+  if (gestureState.mode === 'pinch' && activePointers.size >= 2) {
+    const pts = Array.from(activePointers.values());
+    const currentDist = Math.max(10, Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y));
+    const midX = (pts[0].x + pts[1].x) * 0.5;
+    const midY = (pts[0].y + pts[1].y) * 0.5;
+
+    if (gestureState.lastDist > 0) {
+      const pinchFactor = currentDist / gestureState.lastDist;
+      camGoal = null; zoomGoal = null;
+      if (cameraMode !== 'walk') {
+        camZoom = Math.max(0.25, Math.min(45, camZoom / pinchFactor));
+      }
+    }
+    const panX = midX - gestureState.lastMidX;
+    const panY = midY - gestureState.lastMidY;
+    if (cameraMode !== 'walk' && cameraMode !== 'drive') {
+      const panSpeed = 0.0018 * Math.min(3, Math.max(0.4, camZoom));
+      camTarget.x -= panX * panSpeed;
+      camTarget.z += panY * panSpeed;
+    }
+    gestureState.lastDist = currentDist;
+    gestureState.lastMidX = midX;
+    gestureState.lastMidY = midY;
+    applyCam();
+    return;
+  }
+
+  if (gestureState.mode === 'drag') {
+    if (gestureState.hudAction || gestureState.blockWorld) return;
+    if (Math.hypot(e.clientX - gestureState.startX, e.clientY - gestureState.startY) > 5) {
+      gestureState.moved = true;
+    }
+    if (gestureState.moved) {
+      const movementX = e.clientX - gestureState.lastX;
+      const movementY = e.clientY - gestureState.lastY;
+      gestureState.lastX = e.clientX;
+      gestureState.lastY = e.clientY;
+      camGoal = null; zoomGoal = null;
+      if (gestureState.pan && cameraMode !== 'walk' && cameraMode !== 'drive') {
+        camTarget.x -= movementX * 0.0015;
+        camTarget.z += movementY * 0.0015;
+      } else if (cameraMode === 'drive' && driveView === 'first-person' && typeof session.drive_camera === 'function') {
+        driveLook.yaw = Math.max(-1.4, Math.min(1.4, driveLook.yaw + movementX * 0.008));
+        driveLook.pitch = Math.max(-0.7, Math.min(0.7, driveLook.pitch + movementY * 0.006));
+      } else {
+        camYaw += movementX * 0.008;
+        camPitch = Math.max(cameraMode === 'walk' ? -0.9 : -1.2,
+          Math.min(cameraMode === 'walk' ? 0.9 : 1.4, camPitch + movementY * 0.006));
+      }
+      if (cameraMode === 'walk') placeWalkCamera();
+      else if (cameraMode === 'drive') placeDriveCamera();
+      else applyCam();
+    }
+  }
+});
+
+canvas.addEventListener('pointerup', e => {
+  const currentGesture = gestureState;
+  const wasPointersCount = activePointers.size;
+  activePointers.delete(e.pointerId);
+
+  if (currentGesture?.mode === 'drag' && wasPointersCount === 1) {
+    if (currentGesture.hudAction) {
+      if (Math.hypot(e.clientX - currentGesture.startX, e.clientY - currentGesture.startY) < 18) {
+        handleHudAction(currentGesture.hudAction);
+      }
+      gestureState = null;
+      return;
+    }
+    if (showcaseTour || currentGesture.blockWorld) {
+      gestureState = null;
+      return;
+    }
+    if (!currentGesture.moved) {
+      const r = canvas.getBoundingClientRect();
+      const px = (e.clientX - r.left) * canvas.width / r.width;
+      const py = (e.clientY - r.top) * canvas.height / r.height;
+      const hudAction = hud.hit_test(px, py);
+      if (hudAction) {
+        handleHudAction(hudAction);
+        gestureState = null;
+        return;
+      }
+      portal.queue_pick(px, py, canvas.width, canvas.height);
+      const readPick = (tries) => {
+        const i = portal.poll_pick();
+        if (i >= 0 && i < scenePickTargets.length) {
+          const target = scenePickTargets[i];
+          if (target.workshopPart) {
+            workshopSelectedPart = target.workshopPart;
+            workshopFeedback = `Selected ${target.label}. Choose the matching assembly operation from the workshop panel.`;
+            hudPage = 'workshop'; hudDockScroll = 0; renderHud();
+          } else if (target.id === 'touring-vehicle' || target.activityId === 'vehicle-drive' || target.id === 'touring-camp-rig') {
+            note(`Boarded ${target.label || 'Touring Rig'}. Switching to Direct Drive.`);
+            selectGameView('drive');
+          } else if (target.activityId) handleHudAction(`activity:open:${target.activityId}`);
+          else inspect(PLACES[target.placeIndex]);
+          if (target.label) note(`Selected ${target.label}`);
+        } else if (tries > 0) setTimeout(() => readPick(tries - 1), 50);
+        else $('why').style.display = 'none';
+      };
+      setTimeout(() => readPick(20), 50);
+    }
+  }
+
+  if (activePointers.size === 1) {
+    const [, pos] = activePointers.entries().next().value;
+    gestureState = {
+      mode: 'drag',
+      startX: pos.x,
+      startY: pos.y,
+      lastX: pos.x,
+      lastY: pos.y,
+      moved: true,
+      hudAction: null,
+      blockWorld: false,
+      pan: false
+    };
+  } else if (activePointers.size === 0) {
+    gestureState = null;
+  }
+});
+
+canvas.addEventListener('pointercancel', e => clearCanvasPointer(e.pointerId));
+canvas.addEventListener('lostpointercapture', e => clearCanvasPointer(e.pointerId));
+canvas.addEventListener('wheel', e => {
   e.preventDefault();
-  camGoal=null;zoomGoal=null;
-  if(cameraMode==='walk')return;
-  camZoom=Math.max(0.25,Math.min(45,camZoom*Math.exp(e.deltaY*0.001)));applyCam();
-}, {passive:false});
+  camGoal = null; zoomGoal = null;
+  if (cameraMode === 'walk') return;
+  camZoom = Math.max(0.25, Math.min(45, camZoom * Math.exp(e.deltaY * 0.001))); applyCam();
+}, { passive: false });
 
 function inspect(s){
   const siteIndex=PLACES.indexOf(s);
@@ -3609,17 +3791,30 @@ window.addEventListener('keydown',event=>{
     event.preventDefault();event.stopImmediatePropagation();
   }
 },true);
+if('ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)) {
+  document.body.classList.add('has-touch');
+}
 const heldTouchKeys=new Set();
 for(const control of document.querySelectorAll('[data-touch-key]')){
   const key=control.dataset.touchKey;
   control.addEventListener('pointerdown',event=>{
     if(cameraMode!=='walk'&&cameraMode!=='drive')return;
-    event.preventDefault();control.setPointerCapture(event.pointerId);
-    const input=cameraMode==='drive'&&key==='s'?' ':key;
-    control.dataset.heldInput=input;
-    heldTouchKeys.add(input);walkKeys.add(input);
+    event.preventDefault();
+    try{control.setPointerCapture(event.pointerId);}catch{}
+    control.dataset.held='true';
+    if(navigator.vibrate)try{navigator.vibrate(10);}catch{}
+    if(cameraMode==='drive'&&key==='s'){
+      heldTouchKeys.add('s');walkKeys.add('s');
+      if(Math.abs(drive.speed)>0.4){heldTouchKeys.add(' ');walkKeys.add(' ');}
+    }else{
+      heldTouchKeys.add(key);walkKeys.add(key);
+    }
   });
-  const release=()=>{const input=control.dataset.heldInput||key;heldTouchKeys.delete(input);walkKeys.delete(input);};
+  const release=()=>{
+    control.dataset.held='false';
+    if(key==='s'){heldTouchKeys.delete('s');walkKeys.delete('s');heldTouchKeys.delete(' ');walkKeys.delete(' ');}
+    else{heldTouchKeys.delete(key);walkKeys.delete(key);}
+  };
   control.addEventListener('pointerup',release);
   control.addEventListener('pointercancel',release);
   control.addEventListener('lostpointercapture',release);
