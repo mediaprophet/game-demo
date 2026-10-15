@@ -1567,9 +1567,9 @@ pub async fn init_webgpu(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
 impl GamePortal {
     #[wasm_bindgen(constructor)]
     pub fn new(canvas: HtmlCanvasElement) -> Result<GamePortal, JsValue> {
-        Ok(GamePortal {
-            inner: qualia_core_db::QualiaPortal::new(canvas)?,
-        })
+        let mut inner = qualia_core_db::QualiaPortal::new(canvas)?;
+        inner.set_preserve_authored_frame(false);
+        Ok(GamePortal { inner })
     }
 
     /// Load a sealed `.10d` container into the scene (CRC + provenance

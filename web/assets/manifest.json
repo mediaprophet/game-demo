@@ -18971,7 +18971,7 @@
       }
     },
     {
-      "bytes": 83248,
+      "bytes": 38384,
       "entity": {
         "affordances": [
           "traverse",
@@ -18982,7 +18982,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:feature:kestrel-earth-skirt"
       },
-      "file": "10d/kestrel-earth-skirt--a8bdab2b86bc.10d",
+      "file": "10d/kestrel-earth-skirt--f046e2416996.10d",
       "id": "rc:asset/kestrel-earth-skirt",
       "materialFamily": "soil-and-gravel",
       "renderRole": "opaque",
@@ -18992,7 +18992,7 @@
         0.33000001311302185,
         1
       ],
-      "sha256": "a8bdab2b86bc95015b3e9119ccdd9146703fe7c8c10538e1894d08e69625d9f2",
+      "sha256": "f046e24169964a602dab7128eb38b15107b81ef919a7c64c7e5fd0bd080700b6",
       "spectral": {
         "c0": -5.8060526847839355,
         "c1": 4.890224456787109,
@@ -19001,20 +19001,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/kestrel-earth-skirt--a8bdab2b86bc--tier3--80c08d2e.impo",
+          "file": "impo/kestrel-earth-skirt--f046e2416996--tier3--31e2a93a.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "80c08d2e86d0f1d8c6f21810eb6308c2e702ac7f560f1fdc9343706e27232fae",
+          "sha256": "31e2a93a924a439ada20683272863a447173c20b49055e2c5d55160a3cf33752",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 21000,
-          "file": "10d/kestrel-earth-skirt--a8bdab2b86bc--tier2--1a9a004f.10d",
-          "sha256": "1a9a004f15d04264168c436b1bc5f372ab40ab897c550815c325bff30ac63cd4",
-          "triangles": 2304
+          "bytes": 9666,
+          "file": "10d/kestrel-earth-skirt--f046e2416996--tier2--f5a3e355.10d",
+          "sha256": "f5a3e355996144005e2817602b873d1b064637ff977e651ca2006d66f72db8a2",
+          "triangles": 1024
         },
         "surfels": {
-          "count": 36,
+          "count": 16,
           "inHero": true
         }
       }
@@ -24982,7 +24982,7 @@
       }
     },
     {
-      "bytes": 83248,
+      "bytes": 40208,
       "entity": {
         "affordances": [
           "traverse",
@@ -24993,7 +24993,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:feature:ridge-east-earth"
       },
-      "file": "10d/ridge-east-earth--28c10750346a.10d",
+      "file": "10d/ridge-east-earth--d0e126d9868f.10d",
       "id": "rc:asset/ridge-east-earth",
       "materialFamily": "soil-and-gravel",
       "renderRole": "opaque",
@@ -25003,7 +25003,7 @@
         0.36000001430511475,
         1
       ],
-      "sha256": "28c10750346ab6a0fda70dbff0937d6520d79bc2cf9656eb6f490cf6a802c04a",
+      "sha256": "d0e126d9868feb746910f7679f6b41ff3dad9215615ef3e1afd04ba39de7bebb",
       "spectral": {
         "c0": -5.538572788238525,
         "c1": 4.530085563659668,
@@ -25012,20 +25012,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/ridge-east-earth--28c10750346a--tier3--c66451f7.impo",
+          "file": "impo/ridge-east-earth--d0e126d9868f--tier3--f0ae2360.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "c66451f7b1d4d268f8c1a108b43c240858f0147ed307b787245b1790d8bfe5b5",
+          "sha256": "f0ae236043f1d46a7856b7430014690cd397e74ed35510394ba235e88d35ecfb",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 21000,
-          "file": "10d/ridge-east-earth--28c10750346a--tier2--b9fae6c4.10d",
-          "sha256": "b9fae6c4bdcf79e077dbaacbf6735a2e2a37d8b5d795ffd959a51c50165db070",
-          "triangles": 2304
+          "bytes": 9834,
+          "file": "10d/ridge-east-earth--d0e126d9868f--tier2--4aacacf0.10d",
+          "sha256": "4aacacf02b2a166d23dbb8298898255e85a8fe69d319d61422f026b7738593ce",
+          "triangles": 1023
         },
         "surfels": {
-          "count": 36,
+          "count": 16,
           "inHero": true
         }
       }
@@ -25227,7 +25227,7 @@
       }
     },
     {
-      "bytes": 83248,
+      "bytes": 39136,
       "entity": {
         "affordances": [
           "traverse",
@@ -25238,7 +25238,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:feature:ridge-west-earth"
       },
-      "file": "10d/ridge-west-earth--76dc8ab20c7a.10d",
+      "file": "10d/ridge-west-earth--962c76ec3bba.10d",
       "id": "rc:asset/ridge-west-earth",
       "materialFamily": "soil-and-gravel",
       "renderRole": "opaque",
@@ -25248,7 +25248,7 @@
         0.36000001430511475,
         1
       ],
-      "sha256": "76dc8ab20c7af473a02baf0518d60ca5a07215727f2febeaf3e04aa1ae7d3318",
+      "sha256": "962c76ec3bbac0a34cb9133c92a6e3868c7a3e08b40bb477d55d0298a4ffc02d",
       "spectral": {
         "c0": -5.538572788238525,
         "c1": 4.530085563659668,
@@ -25257,20 +25257,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/ridge-west-earth--76dc8ab20c7a--tier3--c6c2f81b.impo",
+          "file": "impo/ridge-west-earth--962c76ec3bba--tier3--4670de81.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "c6c2f81b5d2352dea48dc7ac094d68e6c9d1464bdefea1d8d62fca446fe30a3f",
+          "sha256": "4670de81d05c6b4dddbd4f41a4ca532a9cde66a0872134451b9f39b2f1420209",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 20994,
-          "file": "10d/ridge-west-earth--76dc8ab20c7a--tier2--8a265054.10d",
-          "sha256": "8a265054268fcc7a1b90751d3080ee5151c80b941fd719e7f70119636b22e713",
-          "triangles": 2304
+          "bytes": 9708,
+          "file": "10d/ridge-west-earth--962c76ec3bba--tier2--d73c4c44.10d",
+          "sha256": "d73c4c44c9d264d63cf68fd90bbf8885746c162cb392d9d742137173fc0429a9",
+          "triangles": 1023
         },
         "surfels": {
-          "count": 36,
+          "count": 16,
           "inHero": true
         }
       }
@@ -38878,7 +38878,7 @@
       }
     },
     {
-      "bytes": 83264,
+      "bytes": 41360,
       "entity": {
         "affordances": [
           "traverse",
@@ -38889,7 +38889,7 @@
         "stage": "adult",
         "taxonIri": "urn:qualia:feature:saltwind-earth-skirt"
       },
-      "file": "10d/saltwind-earth-skirt--38606cf22bbd.10d",
+      "file": "10d/saltwind-earth-skirt--a9e39ff49063.10d",
       "id": "rc:asset/saltwind-earth-skirt",
       "materialFamily": "soil-and-gravel",
       "renderRole": "opaque",
@@ -38899,7 +38899,7 @@
         0.3499999940395355,
         1
       ],
-      "sha256": "38606cf22bbdcf2c6a69be363196fa392653b5b71f5ac0bec3667a2059f2f593",
+      "sha256": "a9e39ff49063c79b9593b3220dc31cceb42c3a855ec56c0e73603bf020e422f4",
       "spectral": {
         "c0": -5.865908622741699,
         "c1": 4.98165225982666,
@@ -38908,20 +38908,20 @@
       "tiers": {
         "impostor": {
           "bytes": 16428,
-          "file": "impo/saltwind-earth-skirt--38606cf22bbd--tier3--0addc051.impo",
+          "file": "impo/saltwind-earth-skirt--a9e39ff49063--tier3--deac3589.impo",
           "format": "impo-wire-v1",
           "grid": 8,
-          "sha256": "0addc05181f8da3e094a337223cff4cb92c43611d1900871b2f44709809af108",
+          "sha256": "deac35898f127872f3dfbc30af6b889e22541c10a1e1a6f4653e8f8bd82127b9",
           "viewResolution": 8
         },
         "lod2": {
-          "bytes": 20994,
-          "file": "10d/saltwind-earth-skirt--38606cf22bbd--tier2--70ae0005.10d",
-          "sha256": "70ae0005ca447d39acdbdc11e03f014b8918587fed15fd7cf7dd9724ca6ec208",
-          "triangles": 2303
+          "bytes": 10314,
+          "file": "10d/saltwind-earth-skirt--a9e39ff49063--tier2--88c1a5a7.10d",
+          "sha256": "88c1a5a73171c9195b959feb3532d7dcd3fca6546594307e74cc93f2810ea9cd",
+          "triangles": 1024
         },
         "surfels": {
-          "count": 36,
+          "count": 16,
           "inHero": true
         }
       }
@@ -71402,6 +71402,6 @@
   ],
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "9e32f5b7bd037e1ddf536d3e02d2d8e2e3bb3a35c71b274ef988af1b078e0995"
+    "sha256": "7fac6c51d202ce7a45bed879b56b49bb956db3f3679dff1c9bf01fde5e4f9e04"
   }
 }

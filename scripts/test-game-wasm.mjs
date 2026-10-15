@@ -61,7 +61,7 @@ assert.ok(scene.assets.length >= 20, `scene should include its local asset roste
 assert.ok(scene.assets.every(asset => asset.bytes instanceof Uint8Array), 'all compiled scene assets are sealed byte arrays');
 assert.ok(scene.assets.some(asset => asset.id === 'rc:asset/mast-signal'), 'communications mast resolves into the scene');
 assert.equal(scene.places.length, 11, 'campaign site marker order remains stable');
-assert.equal(scene.pickTargets.length, 16, 'five mesh-adjacent interactive targets join the eleven site targets');
+assert.equal(scene.pickTargets.length, 21, 'ten mesh-adjacent interactive targets join the eleven site targets');
 assert.ok(scene.pickTargets.some(target => target.activityId === 'workshop-repair'),
   'the workshop repair bench opens its playable activity');
 assert.ok(scene.pickTargets.some(target => target.activityId === 'fruit-harvest'),

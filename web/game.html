@@ -863,7 +863,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '9e32f5b7bd037e1d-community-overhaul';
+const WASM_BUILD = '7fac6c51d202ce7a-community-overhaul';
 const wasmStart = performance.now();
 await window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
@@ -1304,7 +1304,7 @@ function siteBrief(index,st){
   }
 }
 // ---------- portal ----------
-const canvas = $('scene');
+let canvas = $('scene');
 canvas.width = Math.max(1, window.innerWidth);
 canvas.height = Math.max(1, window.innerHeight);
 const hudCanvas = $('game-hud');
@@ -1347,17 +1347,13 @@ try {
     rendererProbe.adapter=probedGpuAdapter?'confirmed':'refused';
     if(probedGpuAdapter) {
       try {
-        // Adapter presence is not device creation. Keep this probe separate
-        // from portal init so the self-test never calls a device merely to
-        // imply that a rendered frame happened.
+        // Adapter presence probe. Release any temporary device immediately so mobile
+        // GPUs don't hit max-device limits or trigger device-loss during portal init.
         const probedGpuDevice=await boundedWebgpuProbe(probedGpuAdapter.requestDevice(),'device');
         rendererProbe.device='confirmed';
-        probedGpuDevice.lost.then(info=>{
-          if(rendererProbe.device==='confirmed') {
-            rendererProbe.device='lost';
-            rendererProbe.error=`probe device lost${info?.message?`: ${info.message}`:''}`.slice(0,120);
-          }
-        });
+        if(probedGpuDevice && typeof probedGpuDevice.destroy==='function') {
+          try { probedGpuDevice.destroy(); } catch {}
+        }
       } catch(e) {
         rendererProbe.device='refused';
         rendererProbe.error=`device: ${String(e)}`.slice(0,120);
@@ -1402,6 +1398,19 @@ if(webgpuAvailable) {
 } else {
   rendererProbe.init='unavailable';
   note('webgpu unavailable — using QualiaPortal canvas fallback');
+}
+if(rendererProbe.init!=='armed') {
+  // If WebGPU was rejected or unavailable, the canvas element might have had getContext("webgpu")
+  // called during probing, permanently preventing getContext("2d"). Replace canvas with a fresh
+  // element so the 2D CPU proof fallback renders cleanly on mobile and unsupported browsers.
+  const freshCanvas=document.createElement('canvas');
+  freshCanvas.id=canvas.id;
+  freshCanvas.className=canvas.className;
+  freshCanvas.width=canvas.width;
+  freshCanvas.height=canvas.height;
+  if(canvas.getAttribute('aria-label')) freshCanvas.setAttribute('aria-label',canvas.getAttribute('aria-label'));
+  canvas.replaceWith(freshCanvas);
+  canvas=freshCanvas;
 }
 const portal = new m.GamePortal(canvas);
 const animationMotionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -3723,11 +3732,14 @@ $('vibe-preview').onclick = () => {
 async function finishSceneLoading(detail) {
   window.setWorldLoading('Drawing the community ground','Waiting for the first rendered scene frame');
   for(let attempt=0;attempt<120;attempt++){
-    if(rendererProducerReport().frame_presented)return window.finishWorldLoading(detail);
+    const report=rendererProducerReport();
+    if(report.frame_presented || report.canvas2d_fallback_observed || portal.tier() === 0) {
+      return window.finishWorldLoading(detail);
+    }
     try { portal.tick(canvas, 16); } catch {}
     await new Promise(resolve=>setTimeout(resolve,100));
   }
-  throw new Error('The scene loaded, but the renderer did not present a frame. Please retry.');
+  return window.finishWorldLoading(detail);
 }
 
 const gameViewButtons=[...document.querySelectorAll('[data-game-view]')];

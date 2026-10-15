@@ -39,7 +39,7 @@
   ],
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "9e32f5b7bd037e1ddf536d3e02d2d8e2e3bb3a35c71b274ef988af1b078e0995"
+    "sha256": "7fac6c51d202ce7a45bed879b56b49bb956db3f3679dff1c9bf01fde5e4f9e04"
   },
   "taxonConvention": {
     "canonicalId": "gbifKey",
@@ -12904,9 +12904,9 @@
     },
     {
       "id": "rc:asset/kestrel-earth-skirt",
-      "file": "10d/kestrel-earth-skirt--e9706dd03db4.10d",
-      "bytes": 83248,
-      "sha256": "e9706dd03db4a01e45dc3926e815ba4130800fae809240c216424ed057940b68",
+      "file": "10d/kestrel-earth-skirt--7a89c7c1194e.10d",
+      "bytes": 38384,
+      "sha256": "7a89c7c1194e52aa942b9a0a5c772c663062e0527748f57847d8f38a4f3215b0",
       "rgba": [
         0.5498336553573608,
         0.5221536159515381,
@@ -12933,7 +12933,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 36
+          "count": 16
         }
       }
     },
@@ -17201,9 +17201,9 @@
     },
     {
       "id": "rc:asset/ridge-east-earth",
-      "file": "10d/ridge-east-earth--c7325a3ddc61.10d",
-      "bytes": 83248,
-      "sha256": "c7325a3ddc61ff100b9cc7e8b1d5b2fc998ab02b853e5db6b3daf726fab0d00d",
+      "file": "10d/ridge-east-earth--bc68ddeaa67d.10d",
+      "bytes": 40208,
+      "sha256": "bc68ddeaa67d9bc12dac05bff05ca4be63764435510cc8a11b8ca900fbcff8c6",
       "rgba": [
         0.5516648292541504,
         0.5283048152923584,
@@ -17230,7 +17230,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 36
+          "count": 16
         }
       }
     },
@@ -17376,9 +17376,9 @@
     },
     {
       "id": "rc:asset/ridge-west-earth",
-      "file": "10d/ridge-west-earth--76e4f7a8797a.10d",
-      "bytes": 83248,
-      "sha256": "76e4f7a8797a2608d9c573b30364bf65d840f31a757c2faf9018f09604647860",
+      "file": "10d/ridge-west-earth--6180f5124dc7.10d",
+      "bytes": 39136,
+      "sha256": "6180f5124dc7557af13fee036ea385a7e5e061f210f5f3724d466a4bdda11dc5",
       "rgba": [
         0.5516648292541504,
         0.5283048152923584,
@@ -17405,7 +17405,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 36
+          "count": 16
         }
       }
     },
@@ -27315,9 +27315,9 @@
     },
     {
       "id": "rc:asset/saltwind-earth-skirt",
-      "file": "10d/saltwind-earth-skirt--8d11037b6fa1.10d",
-      "bytes": 83264,
-      "sha256": "8d11037b6fa1b218bc68f6c683ad8bb2d6207f6e4dccce31c559ad3325494267",
+      "file": "10d/saltwind-earth-skirt--4d709dd220d3.10d",
+      "bytes": 41360,
+      "sha256": "4d709dd220d35ed0327d13ba1ae7eab08c777d1da3a66d9c0ae66f5bd1390594",
       "rgba": [
         0.5722880363464355,
         0.5402880311012268,
@@ -27344,7 +27344,7 @@
       "tiers": {
         "surfels": {
           "inHero": true,
-          "count": 36
+          "count": 16
         }
       }
     },
