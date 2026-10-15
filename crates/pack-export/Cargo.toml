@@ -2,6 +2,7 @@
 name = "pack-export"
 version = "0.0.1"
 edition = "2021"
+default-run = "pack-export"
 description = "Native pack exporter — repacks generated .10d assets, textures, and the vibe-authored semantic section into verified HMC bundles. Replaces the Node exporter for the pack/manifest path; scene_build (.10d regeneration) remains a WASM step."
 
 [dependencies]

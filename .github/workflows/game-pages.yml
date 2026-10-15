@@ -81,7 +81,7 @@ jobs:
           node scripts/export-game-assets.mjs
           # VibeScript-authored semantic section: pack-export emits
           # sem/taxonomy.q42 into each pack and restamps the manifests.
-          cargo run --locked -p pack-export -- --all
+          cargo run --locked -p pack-export --bin pack-export -- --all
           test -s web/pkg/rolling_commons_shell_bg.wasm
           test -s web/assets/maslows-challenge-scenes.hmc
           test -s assets/generated/manifest.json
