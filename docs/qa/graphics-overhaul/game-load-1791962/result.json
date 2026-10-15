@@ -1,0 +1,25 @@
+{
+  "url": "http://127.0.0.1:8091/",
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "pageErrors": [
+    "VibeScript character module: E001@352..354: expected expression"
+  ],
+  "requests_failed": [],
+  "ready": false,
+  "error": "page.waitForFunction: Error: loader failed: The game could not start — The game encountered an error while loading. Check your connection and retry.\n    at eval (eval at predicate (eval at evaluate (:303:30)), <anonymous>:4:15)\n    at predicate (eval at evaluate (:303:30), <anonymous>:7:27)\n    at next (eval at evaluate (:303:30), <anonymous>:29:33)\n    at C:\\github\\game-demo\\docs\\qa\\graphics-overhaul\\game-load-1791962\\load-check.mjs:19:16",
+  "loaderStage": "The game could not start",
+  "loaderMessage": "The game encountered an error while loading. Check your connection and retry.",
+  "canvas": {
+    "id": "scene",
+    "width": 960,
+    "height": 600,
+    "css": "1440x960",
+    "nonBlank": false
+  },
+  "url_final": "http://127.0.0.1:8091/"
+}

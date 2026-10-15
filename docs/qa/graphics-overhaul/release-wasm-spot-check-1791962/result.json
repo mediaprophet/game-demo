@@ -1,0 +1,74 @@
+{
+  "wasm_sha256": "ede890d0ba86f9d36cf1c5607c8b04188c4643be629f08295f9988459a339945",
+  "generated_at": "2026-10-14T07:11:30.029Z",
+  "checks": [
+    {
+      "name": "community ground hero",
+      "detail": "assets/generated/community/10d/ground--ea2522a51e5a.10d (38352 bytes) asset surfel_count=16, entity valid=true, crc32c=true, reverse_lod=true, sections=7",
+      "assertions": {
+        "asset_verify_10d surfel_count === 16": true,
+        "entity_verify_10d valid === true": true,
+        "crc32c_valid === true": true,
+        "manifest digest matches": true
+      },
+      "passed": true
+    },
+    {
+      "name": "community flora hero (banksia serrated-leaves)",
+      "detail": "assets/generated/community/10d/flora-banksia-serrated-leaves--34b236461b80.10d (78592 bytes) vertices=2675, triangles=2400, surfels=19; sections: Some(QuantizedMesh) (type 1) | Some(ProvenanceSidecar) (type 7) | Some(FieldSidecar) (type 8) | Some(SurfaceReading) (type 12) | Some(Materials) (type 13) | Some(TextureCoordinates) (type 14) | Some(ProceduralSynthesis) (type 18) | Some(HierarchicalSurfels) (type 20)",
+      "assertions": {
+        "entity_verify_10d valid === true": true,
+        "ProceduralSynthesis (PROC) section present": true,
+        "HierarchicalSurfels (SURF) section present": true,
+        "surfel_count === 19 (manifest declared)": true,
+        "manifest digest matches": true
+      },
+      "passed": true
+    },
+    {
+      "name": "natural-person representative (resident-ada-head)",
+      "detail": "assets/generated/community/10d/resident-ada-head--f25345307733.10d (75200 bytes) entity class=NaturalPerson, provenance sidecar=true, sections=8",
+      "assertions": {
+        "entity_verify_10d valid === true": true,
+        "ProvenanceSidecar marker present": true,
+        "manifest entity.class === NaturalPerson": true,
+        "manifest digest matches": true
+      },
+      "passed": true
+    },
+    {
+      "name": "ground tier2 decimated sidecar",
+      "detail": "assets/generated/community/10d/ground--ea2522a51e5a--tier2--ce129d10.10d (9510 bytes) valid=true, vertices=533, triangles=1024",
+      "assertions": {
+        "entity_verify_10d valid === true": true,
+        "manifest tier digest matches": true
+      },
+      "passed": true
+    },
+    {
+      "name": "HMC bundle maslows-challenge-scenes.hmc",
+      "detail": "web/assets/maslows-challenge-scenes.hmc (48873074 bytes) report: {\"valid\":true,\"bundle_crc32c_valid\":true,\"entry_count\":2689,\"entries\":[\"manifest.json\",\"10d/barn-door--438160250f8e.10d\",\"10d/barn-eaves--1d1124df9d1e.10d\",\"10d/barn-hay-bales--c69d2c57da4d.10d\",\"10d/barn-roof--3645b96afa9e.10d\",\"10d/barn-trim--1101d1ed1fed.10d\",\"10d/bridge--16d47e44a865.10d\",\"10d/b",
+      "assertions": {
+        "entity_verify_bundle valid === true": true
+      },
+      "passed": true
+    },
+    {
+      "name": "HMC bundle maslows-challenge-earthlight.hmc",
+      "detail": "web/assets/maslows-challenge-earthlight.hmc (48873267 bytes) report: {\"valid\":true,\"bundle_crc32c_valid\":true,\"entry_count\":2689,\"entries\":[\"manifest.json\",\"10d/barn-door--4e77c8d4434c.10d\",\"10d/barn-eaves--cd5a8ad8b044.10d\",\"10d/barn-hay-bales--00f359f4a80a.10d\",\"10d/barn-roof--035166e931e4.10d\",\"10d/barn-trim--4ab867433da9.10d\",\"10d/bridge--328e9733211f.10d\",\"10d/b",
+      "assertions": {
+        "entity_verify_bundle valid === true": true
+      },
+      "passed": true
+    },
+    {
+      "name": "HMC bundle maslows-challenge-community.hmc",
+      "detail": "web/assets/maslows-challenge-community.hmc (48872852 bytes) report: {\"valid\":true,\"bundle_crc32c_valid\":true,\"entry_count\":2689,\"entries\":[\"manifest.json\",\"10d/barn-door--f5923577f386.10d\",\"10d/barn-eaves--b306a524ccaa.10d\",\"10d/barn-hay-bales--041154077f92.10d\",\"10d/barn-roof--8024d55f2da3.10d\",\"10d/barn-trim--855af5374d07.10d\",\"10d/bridge--6fe98a065997.10d\",\"10d/b",
+      "assertions": {
+        "entity_verify_bundle valid === true": true
+      },
+      "passed": true
+    }
+  ],
+  "passed": true
+}

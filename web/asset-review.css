@@ -157,6 +157,12 @@ header {
   color: var(--success);
 }
 
+.badge-error {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
 /* Layout */
 main {
   display: grid;
@@ -582,6 +588,16 @@ select#asset option:hover {
 .gate-card.passed .gate-status-pill {
   background: rgba(16, 185, 129, 0.25);
   color: #34d399;
+}
+
+.gate-card.failed {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.gate-card.failed .gate-status-pill {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
 }
 
 .gate-card h4 {

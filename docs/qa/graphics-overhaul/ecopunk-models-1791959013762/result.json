@@ -1,0 +1,9 @@
+{
+  "origin": "http://127.0.0.1:8092",
+  "modelFolder": "C:\\github\\ecopunk\\assets\\models\\corymbia-aparrerinja",
+  "output": "C:\\github\\game-demo\\docs\\qa\\graphics-overhaul\\ecopunk-models-1791959013762",
+  "models": [],
+  "pageErrors": [],
+  "passed": false,
+  "error": "page.waitForFunction: Timeout 120000ms exceeded.\n    at C:\\github\\game-demo\\scripts\\check-ecopunk-model-review.mjs:40:16"
+}

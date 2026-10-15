@@ -7,6 +7,11 @@ pure fn review_field(record: Record, key: string) {
     return null;
 }
 
+pure fn review_text(condition: bool, yes: string, no: string) -> string {
+    if condition { return yes; }
+    return no;
+}
+
 pure fn review_config(input: Record) -> Record {
     return {
         title: "VibeScript single-asset review",
@@ -253,12 +258,18 @@ pure fn review_note(input: Record) -> Record {
     }
     if notes.len > 4000 { return {ok: false, detail: "Review notes exceed their bound."}; }
     let is_agent = assessment == "agent-automated-acceptance";
+    let mut schema = "single-asset-manual-uat-v1";
+    let mut record_kind = "Unsigned human note; no automated quality score or acceptance inference.";
+    if is_agent {
+        schema = "single-asset-agent-acceptance-v1";
+        record_kind = "Automated software agent acceptance record with cryptographic verification receipts.";
+    }
     return {
         ok: true,
         record: {
-            schema: if is_agent { "single-asset-agent-acceptance-v1" } else { "single-asset-manual-uat-v1" },
+            schema: schema,
             recorded_at: review_field(input, "recorded_at"),
-            record_kind: if is_agent { "Automated software agent acceptance record with cryptographic verification receipts." } else { "Unsigned human note; no automated quality score or acceptance inference." },
+            record_kind: record_kind,
             assessment: assessment,
             notes: notes,
             asset: review_field(input, "entry"),
@@ -270,37 +281,63 @@ pure fn review_note(input: Record) -> Record {
 
 pure fn review_ontology(input: Record) -> Record {
     let entry = review_field(input, "entry");
-    let taxon = review_field(entry, "taxon");
-    let mut ontology_class = "ManufacturedProperty";
-    let mut embodiment_term = "Construct";
-    let mut anti_commodification_passed = true;
-    let mut realm = "World of Man / Manufactured";
-
-    if taxon != null {
-        ontology_class = "DarwinianTaxon";
-        embodiment_term = "Specimen";
-        realm = "World of God / Inalienable Living Realm";
-    }
-
+    let entity = review_field(entry, "entity");
     let id = review_field(entry, "id");
-    if id != null && (id.contains("persona") || id.contains("human") || id.contains("character")) {
-        ontology_class = "NaturalPerson";
-        embodiment_term = "Persona";
-        realm = "World of God / Inalienable Sovereign Person";
-    } else if id != null && (id.contains("story") || id.contains("lore") || id.contains("song")) {
-        ontology_class = "LiberalArtsWork";
-        embodiment_term = "Expression";
-        realm = "World of Culture / Expression";
+
+    // The generated .10d seals an EntityOntology section; the manifest
+    // mirrors its class/embodiment/stage/affordance declaration. Only fall
+    // back to the legacy heuristic for manifests predating entity stamping.
+    let mut ontology_class = review_field(entity, "class");
+    let mut embodiment_term = review_field(entity, "embodiment");
+    let stage = review_field(entity, "stage");
+    let taxon_iri = review_field(entity, "taxonIri");
+    let declared_affordances = review_field(entity, "affordances");
+    let mut declared = true;
+
+    if ontology_class == null {
+        declared = false;
+        ontology_class = "ManufacturedProperty";
+        embodiment_term = "Construct";
+        let taxon = review_field(entry, "taxon");
+        if taxon != null {
+            ontology_class = "DarwinianTaxon";
+            embodiment_term = "Specimen";
+        }
+        if id != null && (id.contains("persona") || id.contains("human") || id.contains("character") || id.contains("resident")) {
+            ontology_class = "NaturalPerson";
+            embodiment_term = "Persona";
+        } else if id != null && (id.contains("story") || id.contains("lore") || id.contains("song")) {
+            ontology_class = "LiberalArtsWork";
+            embodiment_term = "Expression";
+        }
     }
+
+    let mut realm = "World of Man / Manufactured";
+    if ontology_class == "DarwinianTaxon" { realm = "World of God / Inalienable Living Realm"; }
+    if ontology_class == "NaturalPerson" { realm = "World of God / Inalienable Sovereign Person"; }
+    if ontology_class == "LiberalArtsWork" { realm = "World of Culture / Expression"; }
+    if ontology_class == "AbioticEnvironment" { realm = "World of God / Abiotic Commons"; }
+
+    // Gate 5: a sovereign persona can never be commodified as property.
+    let persona_like = id != null
+        && (id.contains("persona") || id.contains("human") || id.contains("resident"));
+    let anti_commodification_passed = !(persona_like && ontology_class == "ManufacturedProperty");
+    let mut gate_5_status = "FAILED: Persona-shaped asset commodified as ManufacturedProperty.";
+    if anti_commodification_passed { gate_5_status = "PASSED: Inalienable moral rights and bodily sovereignty upheld."; }
 
     return {
         ok: true,
         ontology_class: ontology_class,
         embodiment_term: embodiment_term,
+        lifecycle_stage: stage,
+        taxon_or_system_iri: taxon_iri,
+        affordances: declared_affordances,
+        declared_in_manifest: declared,
+        declared_in_container: null,
         realm: realm,
         human_anti_commodification_passed: anti_commodification_passed,
-        gate_5_status: "PASSED: Inalienable moral rights and bodily sovereignty upheld.",
-        scope: "Ontologically typed representation verified against QualiaDB Anti-Commodification Invariant."
+        gate_5_status: gate_5_status,
+        scope: "Manifest ontology declaration; generated assets store it in provenance semantic_metadata, not EONT. This view has not decoded or compared that sealed declaration."
     };
 }
 
@@ -310,30 +347,100 @@ pure fn review_spectral(input: Record) budget(steps: 20000) -> Record {
     let c2 = review_field(input, "c2");
     let mut valid = true;
     if c0 == null || c1 == null || c2 == null { valid = false; }
+    let mut gate_1_status = "NOT_RUN: No spectral coefficient declaration";
+    if valid { gate_1_status = "DECLARED: Coefficients supplied; no sealed-record comparison or spectral gate executed here"; }
     return {
         ok: true,
         basis: "Jakob & Hanika (2019) Bounded Spectral Basis",
         coefficients: { c0: c0, c1: c1, c2: c2 },
-        energy_conserved: valid,
-        gate_1_status: if valid { "PASSED: Reflectance bounded R(λ) in [0.0, 1.0]" } else { "NOT_APPLICABLE: Defaulting to physical reflectance model" },
+        coefficients_declared: valid,
+        energy_conserved: null,
+        gate_1_status: gate_1_status,
         gbuffer_format: "GBuffer0: rgba16float (c0, c1, c2, Roughness α); GBuffer1: rgba8unorm (Octahedral Normal, Metallic, Flags)"
     };
 }
 
-pure fn review_geometry_tiers(input: Record) -> Record {
+pure fn tier_status(declared: Record, reports: List) -> string {
+    if declared == null { return "OMITTED: within the minimum triangle budget"; }
+    if reports == null { return "DECLARED: not fetched"; }
+    for report in reports {
+        if review_field(report, "file") == review_field(declared, "file") {
+            if review_field(report, "digest_match") == true
+                && review_field(review_field(report, "report"), "valid") == true {
+                return "VERIFIED";
+            }
+            return "FAILED: sidecar digest or entity verification did not pass";
+        }
+    }
+    return "DECLARED: not fetched";
+}
+
+pure fn review_geometry_tiers(input: Record) budget(steps: 20000) -> Record {
     let entry = review_field(input, "entry");
-    let bytes = review_field(entry, "bytes");
+    let report = review_field(input, "entity_report");
+    let tier_reports = review_field(input, "tier_reports");
+    let tiers = review_field(entry, "tiers");
+    let lod2 = review_field(tiers, "lod2");
+    let impostor = review_field(tiers, "impostor");
+    let declared_surfels = review_field(review_field(tiers, "surfels"), "count");
+
+    // Engine-decoded evidence, populated once the hero bytes are ingested.
+    let hero_surfels = review_field(review_field(report, "surfels"), "surfel_count");
+    let hero_reverse_ok = review_field(report, "reverse_lod_valid");
+    let hero_valid = review_field(report, "valid");
+
+    let mut declared_sidecars = 0.0;
+    if lod2 != null { declared_sidecars = declared_sidecars + 1.0; }
+    if impostor != null { declared_sidecars = declared_sidecars + 1.0; }
+    let mut sidecars_verified = 0.0;
+    let mut sidecars_failed = 0.0;
+    if tier_reports != null {
+        for tier_report in tier_reports {
+            if review_field(tier_report, "digest_match") == true
+                && review_field(review_field(tier_report, "report"), "valid") == true {
+                sidecars_verified = sidecars_verified + 1.0;
+            } else {
+                sidecars_failed = sidecars_failed + 1.0;
+            }
+        }
+    }
+
+    let mut gate_2_status = "DECLARED: hero bytes not yet ingested; manifest tier list shown.";
+    if report != null {
+        if hero_valid != true {
+            gate_2_status = "FAILED: hero container did not verify.";
+        } else {
+            if hero_surfels != null && hero_surfels >= 1.0 && hero_reverse_ok == true
+                && sidecars_failed == 0.0 && sidecars_verified >= declared_sidecars {
+                gate_2_status = "PASSED: hero surfels plus decimated/impostor sidecars verified; reverse-LOD locality preserved across sibling pack entries.";
+            } else {
+                gate_2_status = "FAILED: surfel tier missing, reverse-LOD order invalid, or sidecar tiers unverified.";
+            }
+        }
+    }
+
+    let mut hero_status = "DECLARED";
+    if hero_valid == true { hero_status = "VERIFIED"; }
+    let mut surfel_status = "MISSING";
+    if declared_surfels != null { surfel_status = "DECLARED"; }
+    if hero_surfels != null && hero_surfels >= 1.0 { surfel_status = "VERIFIED"; }
+    let mut reverse_lod_ordered = null;
+    if report != null { reverse_lod_ordered = hero_reverse_ok; }
+
     return {
         ok: true,
         pipeline: "4-Tier Decoupled Virtual Geometry",
+        layout: "Surfels ride inside the hero container (type 20 sorts after the mesh); the decimated tier ships as a sibling sealed .10d and the impostor atlas as a raw .impo wire payload because the upstream IMPO codec panics (header size constant mismatches the struct).",
         tiers: [
-            { tier: "Tier 1: Hero", resolution: ">= 256 px radius", tech: "Cluster Meshlets (~128 tris)", section: "Section 1 (QuantizedMesh)" },
-            { tier: "Tier 2: Decimated", resolution: "64 to 256 px radius", tech: "QEM Decimated Mesh", section: "Section 1 (QuantizedMesh)" },
-            { tier: "Tier 3: Impostor", resolution: "8 to 64 px radius", tech: "Hemi-Octahedral Atlas (16x16)", section: "Section 19 (IMPO1)" },
-            { tier: "Tier 4: Surfel", resolution: "1 to 8 px radius", tech: "Hierarchical Gaussian Splats", section: "Section 20 (SURF1)" }
+            { tier: "Tier 1: Hero", resolution: ">= 256 px radius", tech: "Cluster Meshlets (~128 tris)", section: "Section 1 (QuantizedMesh)", status: hero_status },
+            { tier: "Tier 2: Decimated", resolution: "64 to 256 px radius", tech: "QEM Decimated Mesh", section: "sibling .10d (QuantizedMesh)", status: tier_status(lod2, tier_reports), detail: lod2 },
+            { tier: "Tier 3: Impostor", resolution: "8 to 64 px radius", tech: "Hemi-Octahedral Atlas (8x8 views, depth in alpha)", section: "sibling .impo (raw IMPO wire payload)", status: tier_status(impostor, tier_reports), detail: impostor },
+            { tier: "Tier 4: Surfel", resolution: "1 to 8 px radius", tech: "Hierarchical Surfel Splats", section: "Section 20 (SURF, in hero)", status: surfel_status, declared_count: declared_surfels, decoded_count: hero_surfels }
         ],
-        reverse_lod_ordered: true,
-        gate_2_status: "PASSED: Multi-tier bounding volumes aligned; reverse-LOD streaming locality active."
+        reverse_lod_ordered: reverse_lod_ordered,
+        sidecars_verified: sidecars_verified,
+        sidecars_failed: sidecars_failed,
+        gate_2_status: gate_2_status
     };
 }
 
@@ -341,12 +448,18 @@ pure fn review_acoustics(input: Record) -> Record {
     let low = review_field(input, "low_hz");
     let mid = review_field(input, "mid_hz");
     let high = review_field(input, "high_hz");
+    let mut low_hz = 200.0;
+    let mut mid_hz = 1000.0;
+    let mut high_hz = 8000.0;
+    if low != null { low_hz = low; }
+    if mid != null { mid_hz = mid; }
+    if high != null { high_hz = high; }
     return {
         ok: true,
         anchors: {
-            low_hz: if low != null { low } else { 200.0 },
-            mid_hz: if mid != null { mid } else { 1000.0 },
-            high_hz: if high != null { high } else { 8000.0 }
+            low_hz: low_hz,
+            mid_hz: mid_hz,
+            high_hz: high_hz
         },
         filter_type: "Direct Form II Transposed (DF2T) 3-Band Parametric Biquad",
         denormal_protection_dc_offset: "1e-24",
@@ -364,31 +477,110 @@ pure fn review_machine_audit(input: Record) budget(steps: 50000) -> Record {
     let verification = review_field(input, "verification");
     let entity_report = review_field(input, "entity_report");
 
-    let g1 = { gate: "Gate 1: Spectral Plausibility & Energy Conservation", status: "PASSED", detail: "Reflectance polynomial R(λ) in [0.0, 1.0], BSSRDF mean free paths positive non-zero." };
-    let g2 = { gate: "Gate 2: Virtualized Geometry Confinement", status: "PASSED", detail: "Tier 1-4 bounding spheres aligned within 5 cm decimation margin; Reverse-LOD layout verified." };
-    let g3 = { gate: "Gate 3: Ontological & Kinematic Integrity", status: "PASSED", detail: "Semantic edges resolved against graph dictionary; kinematic joint weights normalized sum(w_i) = 1.0." };
-    let g4 = { gate: "Gate 4: Wasm / VibeScript Determinism Limits", status: "PASSED", detail: "Zero unauthorized host calls; cycle budget <= 1,000,000 instructions." };
-    let g5 = { gate: "Gate 5: Anti-Commodification of Natural Persons", status: "PASSED", detail: "Inalienable moral rights invariant upheld; sovereign person representations governed by DID." };
+    let entity = review_field(entry, "entity");
+    let spectral = review_field(entry, "spectral");
+    let tiers = review_field(entry, "tiers");
+    let tier_reports = review_field(input, "tier_reports");
+    let report_valid = review_field(entity_report, "valid") == true;
+    let declared_affordances = review_field(entity, "affordances");
+    let digest_match = review_field(verification, "manifest_digest_match") == true;
+    let hero_surfels = review_field(review_field(entity_report, "surfels"), "surfel_count");
+    let reverse_ok = review_field(entity_report, "reverse_lod_valid") == true;
+
+    let mut declared_sidecars = 0.0;
+    if review_field(tiers, "lod2") != null { declared_sidecars = declared_sidecars + 1.0; }
+    if review_field(tiers, "impostor") != null { declared_sidecars = declared_sidecars + 1.0; }
+    let mut sidecars_verified = 0.0;
+    let mut sidecars_failed = 0.0;
+    if tier_reports != null {
+        for tier_report in tier_reports {
+            if review_field(tier_report, "digest_match") == true
+                && review_field(review_field(tier_report, "report"), "valid") == true {
+                sidecars_verified = sidecars_verified + 1.0;
+            } else {
+                sidecars_failed = sidecars_failed + 1.0;
+            }
+        }
+    }
+
+    // Gate 1: bounded Jakob–Hanika coefficients are inverted from the
+    // authored albedo at compile time and sealed into the surfel records;
+    // the manifest mirrors them for review.
+    let g1_ok = spectral != null && review_field(spectral, "c0") != null
+        && review_field(spectral, "c1") != null && review_field(spectral, "c2") != null;
+    let g1 = {
+        gate: "Gate 1: Spectral Plausibility & Energy Conservation",
+        status: review_text(g1_ok, "DECLARED", "NOT_RUN"),
+        detail: review_text(g1_ok, "Manifest coefficients are present; this audit has not compared them with sealed surfel records or executed the spectral plausibility gate.", "No spectral coefficient declaration on the manifest.")
+    };
+
+    // Gate 2: hero mesh + surfels verified inside the container; decimated
+    // and impostor tiers verified as sealed sibling .10d entries.
+    let g2_ok = digest_match && report_valid && hero_surfels != null && hero_surfels >= 1.0 && reverse_ok
+        && review_field(tiers, "impostor") != null
+        && sidecars_failed == 0.0 && sidecars_verified >= declared_sidecars;
+    let g2 = {
+        gate: "Gate 2: Virtualized Geometry Confinement",
+        status: review_text(g2_ok, "PASSED", "FAILED"),
+        detail: review_text(g2_ok, "Reverse-LOD tier set verified end to end: hero surfels, decimated sidecar, impostor sidecar.", "Hero verification, surfel tier, or sidecar tier evidence is missing or failing.")
+    };
+
+    // Gate 3: the EONT section decoded non-empty affordance records and the
+    // manifest declares a resolvable ontology class.
+    let g3_ok = entity != null && review_field(entity, "class") != null
+        && declared_affordances != null && declared_affordances.len >= 1.0;
+    let g3 = {
+        gate: "Gate 3: Ontological & Kinematic Integrity",
+        status: review_text(g3_ok, "DECLARED", "NOT_RUN"),
+        detail: review_text(g3_ok, "Class and affordances declared in the manifest; generated assets store ontology in provenance semantic_metadata because EONT is unavailable. Sealed declaration comparison and kinematics checks have not run.", "Manifest class or affordance declaration missing; ontology and kinematics checks have not run.")
+    };
+
+    // Gate 4: entity sections are bounded data records — the container
+    // carries no executable payload, so determinism reduces to container
+    // integrity, which the engine report checked.
+    let g4 = {
+        gate: "Gate 4: Wasm / VibeScript Determinism Limits",
+        status: "NOT_RUN",
+        detail: "Container integrity is not evidence of script determinism or execution limits. This audit has not executed the deterministic scripting gate."
+    };
+
+    // Gate 5: a sovereign persona can never be commodified as property.
+    let declared_class = review_field(entity, "class");
+    let persona_like = id != null
+        && (id.contains("persona") || id.contains("human") || id.contains("resident"));
+    let g5_ok = !(persona_like && declared_class == "ManufacturedProperty");
+    let g5 = {
+        gate: "Gate 5: Anti-Commodification of Natural Persons",
+        status: review_text(declared_class == null, "NOT_RUN", review_text(g5_ok, "DECLARED", "FAILED")),
+        detail: review_text(declared_class == null, "No ontology class declaration to check.", review_text(g5_ok, "Manifest identity/class heuristic is consistent; sealed ontology and anti-commodification gate verification have not run.", "Persona-shaped asset declared as ManufacturedProperty."))
+    };
+
+    let mut gates_passed = 0.0;
+    for gate in [g1, g2, g3, g4, g5] {
+        if review_field(gate, "status") == "PASSED" { gates_passed = gates_passed + 1.0; }
+    }
+    let all_gates_passed = gates_passed == 5.0;
 
     return {
         ok: true,
-        schema: "qualia-entity-machine-audit-receipt-v2",
+        schema: "qualia-entity-machine-audit-receipt-v3",
         evaluated_at: review_field(input, "recorded_at"),
         asset_id: id,
         asset_file: file,
         asset_digest: sha256,
         asset_bytes: bytes,
         gates: [g1, g2, g3, g4, g5],
-        gates_passed_count: 5.0,
+        gates_passed_count: gates_passed,
         gates_total_count: 5.0,
-        all_gates_passed: true,
+        all_gates_passed: all_gates_passed,
         cryptographic_attestation: {
             sha256_match: review_field(verification, "manifest_digest_match") == true,
-            container_sealed: true,
-            zero_heap_compliant: true,
-            sentinel_safe: true
+            container_sealed: review_field(entity_report, "crc32c_valid") == true,
+            reverse_lod_valid: reverse_ok,
+            sidecars_verified: sidecars_verified,
+            sidecars_failed: sidecars_failed
         },
-        recommendation: "ADMITTED_FOR_PRODUCTION_SYNTHESIS"
+        recommendation: review_text(all_gates_passed, "ADMITTED_FOR_PRODUCTION_SYNTHESIS", "HOLD_PENDING_VERIFICATION")
     };
 }
 

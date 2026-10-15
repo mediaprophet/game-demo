@@ -1,0 +1,159 @@
+{
+  "schema": "ecopunk-model-review-v1",
+  "model": "bark-study",
+  "taxon": "urn:qualia:taxon:corymbia_aparrerinja",
+  "styleTier": "T2 stylized prototype",
+  "epistemicStatus": "Procedural illustration derived from project traits; not a scan, occurrence record, or verified botanical specimen",
+  "sourceFiles": [
+    "entities/taxa/corymbia-aparrerinja/traits.json",
+    "entities/taxa/corymbia-aparrerinja/corymbia-aparrerinja-manifest.json"
+  ],
+  "checks": [
+    {
+      "file": "10d/bark-study-surface.10d",
+      "sha256": "91376cc886107b2b0fd0d60ed22cb2155dcb7f2acbd4c5755a43221b9face9a2",
+      "bytes": 1363,
+      "verification": {
+        "vertices": 42,
+        "triangles": 80,
+        "surfel_count": 0,
+        "surfel_sphere_radius": 0,
+        "impostor_grid_dimension": 0,
+        "impostor_view_resolution": 0,
+        "materials": 0,
+        "material_ranges": 0,
+        "normal_vertices": 0,
+        "uv_vertices": 0,
+        "rig_joints": 0,
+        "animation_clips": 0,
+        "digest": 810493721,
+        "min": [
+          -0.18000000715255737,
+          0,
+          -0.18000000715255737
+        ],
+        "max": [
+          0.18000000715255737,
+          1.399999976158142,
+          0.18000000715255737
+        ]
+      },
+      "entityVerification": {
+        "valid": true,
+        "header_version": 2,
+        "crc32c_valid": true,
+        "section_count": 2,
+        "sections_found": [
+          "Some(QuantizedMesh) (type 1)",
+          "Some(ProvenanceSidecar) (type 7)"
+        ],
+        "vertices": 42,
+        "triangles": 80,
+        "reverse_lod_valid": true,
+        "min_bounds": [
+          -0.18000000715255737,
+          0,
+          -0.18000000715255737
+        ],
+        "max_bounds": [
+          0.18000000715255737,
+          1.399999976158142,
+          0.18000000715255737
+        ],
+        "violations": []
+      }
+    },
+    {
+      "file": "10d/bark-study-weathering.10d",
+      "sha256": "30bde418a77edf2beafc859dba0fbe77cf733975eed43c1725857b78595422cb",
+      "bytes": 4282,
+      "verification": {
+        "vertices": 228,
+        "triangles": 380,
+        "surfel_count": 0,
+        "surfel_sphere_radius": 0,
+        "impostor_grid_dimension": 0,
+        "impostor_view_resolution": 0,
+        "materials": 0,
+        "material_ranges": 0,
+        "normal_vertices": 0,
+        "uv_vertices": 0,
+        "rig_joints": 0,
+        "animation_clips": 0,
+        "digest": 3467679221,
+        "min": [
+          -0.17544187605381012,
+          -0.00036304417881183326,
+          -0.17737479507923126
+        ],
+        "max": [
+          0.17782579362392426,
+          1.0866793394088745,
+          0.1768106073141098
+        ]
+      },
+      "entityVerification": {
+        "valid": true,
+        "header_version": 2,
+        "crc32c_valid": true,
+        "section_count": 2,
+        "sections_found": [
+          "Some(QuantizedMesh) (type 1)",
+          "Some(ProvenanceSidecar) (type 7)"
+        ],
+        "vertices": 228,
+        "triangles": 380,
+        "reverse_lod_valid": true,
+        "min_bounds": [
+          -0.17544187605381012,
+          -0.00036304417881183326,
+          -0.17737479507923126
+        ],
+        "max_bounds": [
+          0.17782579362392426,
+          1.0866793394088745,
+          0.1768106073141098
+        ],
+        "violations": []
+      }
+    }
+  ],
+  "load": {
+    "assets_loaded": 2,
+    "organs_loaded": 2,
+    "assets_refused": 0,
+    "organs_refused": 0,
+    "total_triangles": 460,
+    "vertex_count": 270,
+    "renderer": "webgpu",
+    "material_pipeline": true,
+    "materials_loaded": 1,
+    "material_ranges": 2,
+    "semantic_nodes": 0,
+    "uploaded": true,
+    "parts": [
+      {
+        "id": "eco:model/corymbia-aparrerinja/bark-study/surface",
+        "vertex_start": 0,
+        "vertex_count": 42
+      },
+      {
+        "id": "eco:model/corymbia-aparrerinja/bark-study/weathering",
+        "vertex_start": 42,
+        "vertex_count": 228
+      }
+    ]
+  },
+  "renderer": {
+    "renderer": "webgpu",
+    "vertex_count": 270,
+    "index_count": 1380,
+    "frames_presented": 1,
+    "uploaded": true,
+    "success": true
+  },
+  "scope": "local folder review; visual and cultural acceptance pending",
+  "assessment": "not-reviewed",
+  "notes": "",
+  "recorded_at": "2026-10-14T07:08:45.274Z"
+}

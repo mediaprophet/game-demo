@@ -37,13 +37,15 @@ const realpathSyncSafe = candidate => {
 };
 
 const webRootReal = realpathSyncSafe(webRoot);
+const ecopunkModelsRoot = realpathSyncSafe(path.resolve(__dirname, '..', '..', 'ecopunk', 'assets', 'models', 'corymbia-aparrerinja'));
 const assetRoots = {
   storybook: realpathSyncSafe(generatedRoot),
   earthlight: realpathSyncSafe(path.join(generatedRoot, 'earthlight')),
   community: realpathSyncSafe(path.join(generatedRoot, 'community')),
 };
 
-const assetFileRoute = /^\/asset-files\/(storybook|earthlight|community)\/(10d\/[A-Za-z0-9_-]+\.10d|textures\/sha256\/[a-f0-9]{64})$/;
+const assetFileRoute = /^\/asset-files\/(storybook|earthlight|community)\/(10d\/[A-Za-z0-9_-]+\.10d|impo\/[A-Za-z0-9_-]+\.impo|textures\/sha256\/[a-f0-9]{64})$/;
+const ecopunkModelRoute = /^\/ecopunk-models\/(model-set\.json|graph\/ecology(?:-graph)?\.(?:json|q42)|10d\/[a-z0-9-]+\.10d|corymbia-aparrerinja\.hmc)$/;
 
 const insideRoot = (root, filePath) => {
   const normalize = value => (process.platform === 'win32' ? value.toLowerCase() : value);
@@ -124,6 +126,13 @@ const server = http.createServer((req, res) => {
       ? () => 'image/png'
       : () => 'application/octet-stream';
     serveContained(req, res, assetRoots[style], relPath, contentType);
+    return;
+  }
+
+  const ecopunkMatch = ecopunkModelRoute.exec(pathname);
+  if (ecopunkMatch) {
+    serveContained(req, res, ecopunkModelsRoot, ecopunkMatch[1], filePath =>
+      mimeTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream');
     return;
   }
 

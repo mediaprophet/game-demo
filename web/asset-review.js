@@ -22,9 +22,249 @@ let selected = null, loadedFile = '', evidence = null, rdf = null;
 let generation = 0, controller = null, rendering = false;
 let turntableActive = false, turntableRaf = null;
 let lastAuditReceipt = null;
+let localModelSet = null, localModelFiles = null;
+let lastLocalReceipt = null;
+let localAnimationPlaying = false;
+let localModelRemoteBase = null;
 
 const run = (name, input) => invokeVibe(module, program, name, input);
 const report = error => text('status', error.message || String(error));
+
+const LOCAL_SET_LIMIT = 1024 * 1024;
+const LOCAL_PART_LIMIT = 8 * 1024 * 1024;
+const LOCAL_AGGREGATE_LIMIT = 32 * 1024 * 1024;
+const LOCAL_COMPONENT_LIMIT = 48;
+
+function resetAuditState() {
+  lastAuditReceipt = null;
+  $('btn-run-audit').disabled = true;
+  $('btn-download-audit').disabled = true;
+  $('btn-copy-audit').disabled = true;
+}
+
+function invalidateLocalReceipt() {
+  lastLocalReceipt = null;
+  $('local-model-download').disabled = true;
+  text('local-model-receipt', 'No local model loaded.');
+}
+
+function releaseLocalLoad() {
+  $('local-model-load').disabled = !localModelSet;
+}
+
+async function showLocalGraph(set, files) {
+  $('local-graph-claims').replaceChildren();
+  $('local-graph-gaps').replaceChildren();
+  if (!set.graph) { text('local-graph-status', 'No evidence graph declared.'); return; }
+  const source = files.get(set.graph.source), volume = files.get(set.graph.volume);
+  if (!source || !volume || source.size > LOCAL_SET_LIMIT || volume.size > 16 * LOCAL_SET_LIMIT) {
+    throw new Error('Declared graph files are missing or exceed review limits.');
+  }
+  const sourceBytes = new Uint8Array(await source.arrayBuffer());
+  const volumeBytes = new Uint8Array(await volume.arrayBuffer());
+  if (await sha256(sourceBytes) !== set.graph.sourceSha256 || await sha256(volumeBytes) !== set.graph.volumeSha256 ||
+      volumeBytes[0] !== 81 || volumeBytes[1] !== 52 || volumeBytes[2] !== 50 || volumeBytes[3] !== 0) {
+    throw new Error('Graph source digest, Q42 digest, or Q42 header differs from the manifest.');
+  }
+  const graph = JSON.parse(new TextDecoder().decode(sourceBytes));
+  if (!Array.isArray(graph.claims) || !Array.isArray(graph.gaps) || graph.claims.length !== set.graph.claims || graph.gaps.length !== set.graph.gaps) {
+    throw new Error('Graph claim or gap count differs from the manifest.');
+  }
+  for (const claim of graph.claims) {
+    const row = document.createElement('p');
+    row.textContent = `${claim.label} (${claim.scope}) `;
+    const link = document.createElement('a');
+    link.textContent = 'Source';
+    link.href = graph.sources[claim.source];
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    row.append(link);
+    $('local-graph-claims').append(row);
+  }
+  for (const gap of graph.gaps) {
+    const row = document.createElement('li');
+    row.textContent = `${gap.topic}: ${gap.reason}`;
+    $('local-graph-gaps').append(row);
+  }
+  text('local-graph-status', `${graph.claims.length} sourced claims, ${graph.gaps.length} open questions · Q42 digest verified`);
+}
+
+async function playLocalAnimation() {
+  const sequence = localModelSet?.animations?.find(row => row.id === $('local-animation').value);
+  if (!sequence || localAnimationPlaying) return;
+  localAnimationPlaying = true;
+  $('local-animation-play').disabled = true;
+  try {
+    for (const frame of sequence.frames) {
+      $('local-model').value = frame.model;
+      await loadLocalModel();
+      const status = $('local-model-status').textContent;
+      if (!status.includes('verified and rendered.')) throw new Error(status);
+      text('local-animation-status', `${sequence.label}: ${frame.model} · ${sequence.evidence}`);
+      await new Promise(resolve => setTimeout(resolve, 1100));
+    }
+  } catch (error) {
+    text('local-animation-status', error.message || String(error));
+  } finally {
+    localAnimationPlaying = false;
+    $('local-animation-play').disabled = !localModelSet?.animations?.length;
+  }
+}
+
+async function openLocalModelFolder() {
+  localModelRemoteBase = null;
+  const files = [...$('local-model-folder').files];
+  const byPath = new Map(files.map(file => [file.webkitRelativePath.split('/').slice(1).join('/') || file.name, file]));
+  await openLocalModelSet(byPath);
+}
+
+async function openEcopunkSample() {
+  const base = '/ecopunk-models/';
+  $('local-model-sample').disabled = true;
+  text('local-model-status', 'Loading local ecopunk model manifest and graph…');
+  try {
+    const byPath = new Map();
+    for (const name of ['model-set.json', 'graph/ecology-graph.json', 'graph/ecology.q42']) {
+      const response = await fetch(base + name);
+      if (!response.ok) throw new Error(`Local sample ${name}: HTTP ${response.status}`);
+      byPath.set(name, new File([await response.arrayBuffer()], name));
+    }
+    localModelRemoteBase = base;
+    await openLocalModelSet(byPath);
+  } catch (error) {
+    text('local-model-status', error.message || String(error));
+  } finally {
+    $('local-model-sample').disabled = false;
+  }
+}
+
+async function openLocalModelSet(byPath) {
+  const job = begin();
+  const source = byPath.get('model-set.json');
+  localModelSet = null;
+  localModelFiles = null;
+  invalidateLocalReceipt();
+  text('local-graph-status', 'No graph loaded.');
+  $('local-graph-claims').replaceChildren();
+  $('local-graph-gaps').replaceChildren();
+  options('local-animation', []);
+  $('local-animation').disabled = true;
+  $('local-animation-play').disabled = true;
+  options('local-model', []);
+  $('local-model-load').disabled = true;
+  $('local-model').disabled = true;
+  if (!source) { text('local-model-status', 'model-set.json is missing from the chosen folder.'); return; }
+  try {
+    if (source.size > LOCAL_SET_LIMIT) throw new Error('model-set.json exceeds the 1 MiB manifest bound.');
+    const set = JSON.parse(await source.text());
+    if (job.generation !== generation) return;
+    if (set.schema !== 'ecopunk-model-review-v1' || !Array.isArray(set.models) || !set.models.length) {
+      throw new Error('Unsupported model-set.json schema.');
+    }
+    const modelIds = new Set();
+    for (const model of set.models) {
+      if (typeof model.id !== 'string' || !model.id || modelIds.has(model.id)) {
+        throw new Error('Model ids must be unique nonempty strings.');
+      }
+      modelIds.add(model.id);
+      if (!Array.isArray(model.components) || !model.components.length || model.components.length > LOCAL_COMPONENT_LIMIT) throw new Error('Model has an invalid component count.');
+      const componentIds = new Set();
+      let declaredBytes = 0;
+      for (const component of model.components) {
+        if (typeof component.id !== 'string' || !component.id || componentIds.has(component.id) ||
+            !/^10d\/[a-z0-9-]+\.10d$/.test(component.file) || (!byPath.has(component.file) && !localModelRemoteBase) ||
+            !/^[a-f0-9]{64}$/.test(component.sha256) ||
+            !Number.isSafeInteger(component.bytes) || component.bytes < 1 || component.bytes > LOCAL_PART_LIMIT ||
+            !Array.isArray(component.rgba) || component.rgba.length !== 4 ||
+            !component.rgba.every(channel => Number.isFinite(channel) && channel >= 0 && channel <= 1)) {
+          throw new Error(`Missing or invalid component: ${component.file}`);
+        }
+        componentIds.add(component.id);
+        declaredBytes += component.bytes;
+      }
+      if (declaredBytes > LOCAL_AGGREGATE_LIMIT) throw new Error(`${model.id}: declared components exceed the 32 MiB aggregate bound.`);
+    }
+    localModelSet = set;
+    localModelFiles = byPath;
+    await showLocalGraph(set, byPath);
+    options('local-model', set.models.map(model => ({ value: model.id, label: `${model.label} (${model.components.length} parts)` })));
+    options('local-animation', (set.animations || []).map(sequence => ({ value: sequence.id, label: sequence.label })));
+    $('local-animation').disabled = !(set.animations || []).length;
+    $('local-animation-play').disabled = !(set.animations || []).length;
+    $('local-model').disabled = false;
+    $('local-model-load').disabled = false;
+    text('local-model-status', `${set.models.length} models ready for verification. ${set.status}`);
+  } catch (error) {
+    if (job.generation === generation) text('local-model-status', error.message);
+  }
+}
+
+async function loadLocalModel() {
+  const set = localModelSet, files = localModelFiles;
+  if (!set || !files || !portal) return;
+  const model = set.models.find(row => row.id === $('local-model').value);
+  if (!model) return;
+  const job = begin();
+  $('local-model-load').disabled = true;
+  invalidateLocalReceipt();
+  text('local-model-status', 'Checking .10d hashes and QualiaDB containers…');
+  try {
+    const assets = [], checks = [];
+    let aggregate = 0;
+    for (const part of model.components) {
+      let file = files.get(part.file);
+      if (!file && localModelRemoteBase) {
+        const response = await fetch(localModelRemoteBase + part.file);
+        if (!response.ok) throw new Error(`${part.file}: HTTP ${response.status}`);
+        file = new File([await response.arrayBuffer()], part.file);
+        files.set(part.file, file);
+      }
+      if (!file) throw new Error(`${part.file}: missing component`);
+      if (file.size > LOCAL_PART_LIMIT) throw new Error(`${part.file}: exceeds local review size limit`);
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      if (job.generation !== generation) return;
+      aggregate += bytes.byteLength;
+      if (aggregate > LOCAL_AGGREGATE_LIMIT) throw new Error(`${model.id}: components exceed the 32 MiB aggregate review bound`);
+      const digest = await sha256(bytes);
+      if (job.generation !== generation) return;
+      if (digest !== part.sha256 || bytes.length !== part.bytes) throw new Error(`${part.file}: manifest SHA-256 or size differs`);
+      const verification = plain(module.asset_verify_10d(bytes));
+      const entityVerification = plain(module.entity_verify_10d(bytes));
+      if (entityVerification?.valid !== true) throw new Error(`${part.file}: QualiaDB rejected container`);
+      assets.push({ bytes, id: part.id, r: part.rgba[0], g: part.rgba[1], b: part.rgba[2], a: part.rgba[3] });
+      checks.push({ file: part.file, sha256: digest, bytes: bytes.length, verification, entityVerification });
+    }
+    if (job.generation !== generation) return;
+    portal.set_preserve_authored_frame(false);
+    const load = plain(portal.load_assets_colored(assets));
+    portal.tick($('scene'), 0);
+    selected = null;
+    evidence = null;
+    rdf = null;
+    resetAuditState();
+    $('download').disabled = true;
+    text('audit-status-badge', 'audit: local container checks only');
+    for (let i = 1; i <= 5; i++) {
+      $(`gate-card-${i}`)?.classList.remove('passed', 'failed');
+      text(`gate-${i}-pill`, 'NOT RUN');
+    }
+    loadedFile = `ecopunk: ${model.label}`;
+    text('scene-label', loadedFile);
+    const receipt = { schema: set.schema, model: model.id, taxon: set.taxon,
+      styleTier: set.styleTier, epistemicStatus: set.epistemicStatus,
+      sourceFiles: set.sourceFiles, checks, load, renderer: plain(portal.scene_render_receipt()),
+      scope: 'local folder review; visual and cultural acceptance pending' };
+    text('local-model-receipt', receipt);
+    lastLocalReceipt = receipt;
+    $('local-model-download').disabled = false;
+    text('local-model-status', `${model.label}: ${checks.length} components verified and rendered.`);
+    if (!rendering) { rendering = true; requestAnimationFrame(tick); }
+  } catch (error) {
+    if (job.generation === generation) text('local-model-status', error.message || String(error));
+  } finally {
+    if (job.generation === generation) releaseLocalLoad();
+  }
+}
 
 const begin = () => {
   controller?.abort();
@@ -64,15 +304,20 @@ function catalog(invalidate = true) {
       offset
     });
     result.assets.push(...page.assets);
-    result.render_keys = page.render_keys;
+    if (page.render_keys?.length > result.render_keys.length) result.render_keys = page.render_keys;
     result.rejected += Number(page.rejected);
   }
   options('asset', result.assets);
-  options('render-key', result.render_keys);
+  options('render-key', [
+    { value: '', label: 'No authored taxon preview' },
+    ...Object.keys(manifest.taxonBindings || {}).map(key => ({ value: key, label: key }))
+  ]);
   $('asset').disabled = false;
   $('render-key').disabled = false;
   selected = null;
   evidence = null;
+  resetAuditState();
+  releaseLocalLoad();
   $('load').disabled = true;
   text('asset-count', `${result.assets.length} listed; ${result.rejected} rejected by VibeScript`);
   text('scene-label', loadedFile ? `Previous asset: ${loadedFile}` : config.scope);
@@ -83,6 +328,9 @@ async function styleChanged() {
   selected = null;
   evidence = null;
   manifest = null;
+  resetAuditState();
+  invalidateLocalReceipt();
+  releaseLocalLoad();
   $('search').disabled = true;
   $('load').disabled = true;
   $('asset').disabled = true;
@@ -108,6 +356,9 @@ async function styleChanged() {
 function selectChanged() {
   begin();
   evidence = null;
+  resetAuditState();
+  invalidateLocalReceipt();
+  releaseLocalLoad();
   const index = Number($('asset').selectedOptions[0]?.dataset.index);
   selected = run('review_select', {
     manifest: { taxonBindings: manifest.taxonBindings, sourceRecipes: manifest.sourceRecipes },
@@ -115,6 +366,7 @@ function selectChanged() {
     file: $('asset').value,
     style: $('style').value
   });
+  $('download').disabled = false;
   panels(selected.panels);
   $('load').disabled = false;
   text('scene-label', loadedFile ? `Previous asset: ${loadedFile}` : config.scope);
@@ -155,9 +407,60 @@ function evaluateOntology(entry) {
   }
 }
 
-function evaluateGeometryTiers(entry) {
+// Parse the IMPO wire header of a raw `.impo` impostor sidecar. The header
+// is the true ImpostorAtlasMiniHeader layout (44 bytes): magic, version,
+// flags, grid, view resolution, sphere center/radius, atlas length, channel
+// format, reserved. Upstream `IMPOSTOR_MINI_HEADER_SIZE` disagrees with the
+// struct size so the QualiaDB codec/verifier cannot be used.
+function verifyImpoWire(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  if (bytes.byteLength <= 44) {
+    return { valid: false, error: 'impostor payload too short' };
+  }
+  const magic = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
+  const version = view.getUint16(4, true);
+  const flags = view.getUint16(6, true);
+  const grid = view.getUint16(8, true);
+  const viewResolution = view.getUint16(10, true);
+  const sphereCenter = [view.getFloat32(12, true), view.getFloat32(16, true), view.getFloat32(20, true)];
+  const sphereRadius = view.getFloat32(24, true);
+  const atlasByteSize = view.getUint32(28, true);
+  const channelFormat = view.getUint8(32);
+  const reserved = bytes.subarray(33, 44);
+  const expectedAtlas = grid * grid * viewResolution * viewResolution * 4;
+  const valid = magic === 'IMPO' && version === 1
+    && (flags & ~0x3) === 0
+    && grid > 0 && grid <= 64
+    && viewResolution > 0 && viewResolution <= 128
+    && sphereCenter.every(Number.isFinite)
+    && Number.isFinite(sphereRadius) && sphereRadius > 0
+    && channelFormat === 0
+    && reserved.every(byte => byte === 0)
+    && atlasByteSize === expectedAtlas
+    && bytes.byteLength === 44 + atlasByteSize;
+  return {
+    valid,
+    format: 'impo-wire-v1',
+    magic,
+    version,
+    flags,
+    grid_dimension: grid,
+    view_resolution: viewResolution,
+    sphere_center: sphereCenter,
+    sphere_radius: sphereRadius,
+    atlas_byte_size: atlasByteSize,
+    channel_format: channelFormat,
+    ...(valid ? {} : { error: 'impostor wire header failed bounds/length checks' })
+  };
+}
+
+function evaluateGeometryTiers(entry, entityReport, tierReports) {
   try {
-    const res = run('review_geometry_tiers', { entry });
+    const res = run('review_geometry_tiers', {
+      entry,
+      entity_report: entityReport || null,
+      tier_reports: tierReports || null
+    });
     text('geometry-tiers-kv', res);
   } catch (err) {
     console.warn('Geometry tiers warning:', err);
@@ -166,11 +469,14 @@ function evaluateGeometryTiers(entry) {
 
 function evaluateSpectralProfile(entry) {
   try {
-    // Derive basis coefficients from material or manifest RGBA
+    // The manifest mirrors the bounded Jakob–Hanika coefficients inverted
+    // from the authored albedo at compile time and sealed into the surfel
+    // records; only fall back to a display heuristic for legacy manifests.
+    const spectral = entry?.spectral || {};
     const rgba = entry?.rgba || [0.5, 0.5, 0.5, 1.0];
-    const c0 = (rgba[0] - 0.5) * 0.1;
-    const c1 = (rgba[1] - rgba[2]) * 0.8;
-    const c2 = rgba[2] * 0.7;
+    const c0 = Number.isFinite(spectral.c0) ? spectral.c0 : (rgba[0] - 0.5) * 0.1;
+    const c1 = Number.isFinite(spectral.c1) ? spectral.c1 : (rgba[1] - rgba[2]) * 0.8;
+    const c2 = Number.isFinite(spectral.c2) ? spectral.c2 : rgba[2] * 0.7;
 
     const res = run('review_spectral', { c0, c1, c2 });
     text('spectral-kv', res);
@@ -306,6 +612,39 @@ async function loadSelected() {
     }
     if (entityReport) text('entity-report', entityReport);
 
+    // Reverse-LOD sidecars declared by the manifest: fetch each sibling,
+    // pin it to its manifest digest, and verify it. `.10d` tier files go
+    // through the entity verifier; `.impo` files are raw IMPO wire payloads
+    // (the upstream IMPO section codec panics, so they are checked here by
+    // parsing the 44-byte mini header directly).
+    const tierReports = [];
+    const declaredTiers = selection.entry?.tiers || {};
+    for (const [role, tier] of [['lod2', declaredTiers.lod2], ['impostor', declaredTiers.impostor]]) {
+      if (!tier || typeof tier.file !== 'string') continue;
+      const sidecarBytes = await fetchBounded(
+        `./asset-files/${$('style').value}/${tier.file}`,
+        Number(config.asset_limit), job.signal);
+      const sidecarDigest = await sha256(sidecarBytes);
+      if (job.generation !== generation) return;
+      if (sidecarDigest !== tier.sha256) {
+        throw new Error(`${tier.file}: reverse-LOD sidecar SHA-256 differs from the manifest`);
+      }
+      const report = tier.file.endsWith('.impo')
+        ? verifyImpoWire(sidecarBytes)
+        : (typeof module.entity_verify_10d === 'function'
+          ? plain(module.entity_verify_10d(sidecarBytes)) : null);
+      if (report?.valid !== true) {
+        throw new Error(`${tier.file}: reverse-LOD sidecar failed container verification`);
+      }
+      tierReports.push({
+        file: tier.file,
+        role,
+        digest_match: true,
+        report
+      });
+    }
+    evaluateGeometryTiers(selection.entry, entityReport, tierReports);
+
     const plan = run('review_textures', { manifest: { textures: manifest.textures }, style: $('style').value });
     let total = 0;
     const textures = [];
@@ -348,6 +687,7 @@ async function loadSelected() {
       verification: admission.verification,
       engine_report: engineReport,
       entity_report: entityReport,
+      tier_reports: tierReports,
       load_receipt: receipt,
       renderer: plain(portal.scene_render_receipt()),
       tier: portal.tier(),
@@ -365,6 +705,7 @@ async function loadSelected() {
     text('texture-kv', evidence.textures);
     text('scene-label', `${selection.entry.id} — ${admission.scope}`);
     text('status', 'Engine ingest and tick returned. Living .10d container loaded and active with zero heap overhead.');
+    $('btn-run-audit').disabled = false;
 
     if (!rendering) {
       rendering = true;
@@ -378,8 +719,8 @@ async function loadSelected() {
 }
 
 function runMachineAudit() {
-  if (!selected) {
-    alert('Please select and load an asset entry first.');
+  if (!selected || !evidence || loadedFile !== selected.entry.file) {
+    alert('Please select an asset entry and wait for its engine load to complete first.');
     return;
   }
 
@@ -387,26 +728,30 @@ function runMachineAudit() {
   try {
     const audit = run('review_machine_audit', {
       entry: selected.entry,
-      verification: evidence?.verification || { manifest_digest_match: true },
+      verification: evidence?.verification || { manifest_digest_match: false },
       entity_report: evidence?.entity_report || null,
+      tier_reports: evidence?.tier_reports || null,
       recorded_at: recordedAt
     });
 
     lastAuditReceipt = audit;
     text('audit-receipt-json', audit);
-    text('audit-status-badge', 'audit: verified (5/5)');
-    $('audit-status-badge').className = 'badge badge-success';
+    const passed = audit.gates.filter(gate => gate.status === 'PASSED').length;
+    text('audit-status-badge', `audit: ${audit.all_gates_passed ? 'verified' : 'incomplete'} (${passed}/${audit.gates.length})`);
+    $('audit-status-badge').className = audit.all_gates_passed ? 'badge badge-success' : 'badge badge-error';
 
-    // Update Gate Cards
+    // Update Gate Cards from the computed statuses, not a blanket pass.
     for (let i = 1; i <= 5; i++) {
       const card = $(`gate-card-${i}`);
-      const pill = $(`gate-1-pill`) ? $(`gate-${i}-pill`) : null;
+      const pill = $(`gate-${i}-pill`);
+      const status = audit.gates[i - 1]?.status || 'UNKNOWN';
       if (card) {
-        card.classList.add('passed');
+        card.classList.remove('passed', 'failed');
+        if (status === 'PASSED') card.classList.add('passed');
+        else if (status === 'FAILED') card.classList.add('failed');
       }
       if (pill) {
-        pill.textContent = 'PASSED';
-        pill.className = 'gate-status-pill';
+        pill.textContent = status;
       }
     }
 
@@ -589,6 +934,27 @@ async function start() {
   $('asset').onchange = () => { try { selectChanged(); } catch (error) { report(error); } };
   $('render-key').onchange = () => { try { previewRdf(); } catch (error) { report(error); } };
   $('load').onclick = loadSelected;
+  $('local-model-folder').onchange = openLocalModelFolder;
+  if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+    $('local-model-sample').hidden = false;
+    $('local-model-sample').onclick = openEcopunkSample;
+  }
+  $('local-model').onchange = () => {
+    begin();
+    invalidateLocalReceipt();
+    releaseLocalLoad();
+    text('local-model-status', 'Selection changed; click "Verify and load model" to check the new selection.');
+  };
+  $('local-model-load').onclick = loadLocalModel;
+  $('local-animation-play').onclick = playLocalAnimation;
+  $('local-model-download').onclick = () => {
+    if (lastLocalReceipt) downloadJsonNamed({
+      ...lastLocalReceipt,
+      assessment: $('disposition').value,
+      notes: $('notes').value,
+      recorded_at: new Date().toISOString()
+    }, `ecopunk-model-${lastLocalReceipt.model}.json`);
+  };
   $('download').onclick = () => { try { downloadReview(); } catch (error) { text('review-status', error.message); } };
   window.addEventListener('resize', resize);
 

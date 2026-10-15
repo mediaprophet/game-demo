@@ -3,7 +3,16 @@
 
 use qualia_core_db::render::assets::Mesh;
 use qualia_core_db::render::scene_primitives::Primitive;
-use qualia_core_db::specialized_libs::computational_geometry::{authoring, parametric_cad, Point3};
+use qualia_core_db::specialized_libs::computational_geometry::botanical_hulls::{
+    asymmetric_hull_capacity, asymmetric_hull_into, AsymmetricHullParams,
+};
+use qualia_core_db::specialized_libs::computational_geometry::math_geometry::AffineFrame3;
+use qualia_core_db::specialized_libs::computational_geometry::sweep_extrusion::{
+    extrude_profile_along_path, ExtrusionStation,
+};
+use qualia_core_db::specialized_libs::computational_geometry::{
+    authoring, parametric_cad, Point2, Point3,
+};
 
 /// Game-owned source parameters; Qualia's public computational geometry
 /// builds the mesh before the shared `.10d` compiler seals it.
@@ -199,6 +208,29 @@ pub enum ParametricRecipe {
         radius: f32,
         density: u32,
         blade_height: f32,
+    },
+    /// A 6-point asymmetric botanical tree crown envelope (Cescatti 1997).
+    /// Qualia's native computational geometry compiles the watertight canopy mesh.
+    BotanicalHull {
+        center: [f32; 3],
+        radii: [f32; 4],   // -X, +X, -Z, +Z in world space
+        heights: [f32; 4], // -X, +X, -Z, +Z in world space
+        bottom_elevation: f32,
+        top_elevation: f32,
+        bottom_shape: f32,
+        top_shape: f32,
+        slices: usize,
+        stacks: usize,
+    },
+    /// A continuous swept cross-section along an arbitrary 3D path using
+    /// Rotation-Minimizing Frames (Bishop double-reflection).
+    SweepExtrusion {
+        center: [f32; 3],
+        axis: Vec<[f32; 3]>,
+        profile: Vec<[f32; 2]>,
+        stations: Option<Vec<ExtrusionStation>>,
+        closed_section: bool,
+        cap_ends: bool,
     },
 }
 
@@ -1206,6 +1238,131 @@ impl ParametricRecipe {
                     Mesh {
                         positions,
                         triangles,
+                        min,
+                        max,
+                    },
+                )
+            }
+            Self::BotanicalHull {
+                center,
+                radii,
+                heights,
+                bottom_elevation,
+                top_elevation,
+                bottom_shape,
+                top_shape,
+                slices,
+                stacks,
+            } => {
+                let sl = (*slices).clamp(6, 48);
+                let st = (*stacks).clamp(3, 24);
+                let (req_v, req_t) = asymmetric_hull_capacity(sl, st);
+                let mut out_v = vec![Point3::new(0.0, 0.0, 0.0); req_v];
+                let mut out_t = vec![[0u32; 3]; req_t];
+                let bot = *bottom_elevation as f64;
+                let top = (*top_elevation as f64).max(bot + 0.05);
+                let params = AsymmetricHullParams {
+                    neg_x_radius: (radii[0] as f64).max(0.01),
+                    pos_x_radius: (radii[1] as f64).max(0.01),
+                    neg_y_radius: (radii[2] as f64).max(0.01),
+                    pos_y_radius: (radii[3] as f64).max(0.01),
+                    neg_x_height: (heights[0] as f64).clamp(bot, top),
+                    pos_x_height: (heights[1] as f64).clamp(bot, top),
+                    neg_y_height: (heights[2] as f64).clamp(bot, top),
+                    pos_y_height: (heights[3] as f64).clamp(bot, top),
+                    bottom: Point3::new(0.0, 0.0, bot),
+                    top: Point3::new(0.0, 0.0, top),
+                    bottom_shape: (*bottom_shape as f64).max(0.1),
+                    top_shape: (*top_shape as f64).max(0.1),
+                    slices: sl,
+                    stacks: st,
+                };
+                let (nv, nt) = asymmetric_hull_into(&params, &mut out_v, &mut out_t)
+                    .map_err(|e| format!("botanical hull: {e:?}"))?;
+                // Map Z (elevation in hull) -> Y (elevation in world), Y (horizontal) -> Z (horizontal).
+                // Reverse triangle winding [0, 2, 1] to compensate for the Y-Z axis swap reflection.
+                let positions: Vec<[f32; 3]> = out_v[..nv]
+                    .iter()
+                    .map(|p| [p.x as f32, p.z as f32, p.y as f32])
+                    .collect();
+                let triangles: Vec<[u32; 3]> = out_t[..nt]
+                    .iter()
+                    .map(|tri| [tri[0], tri[2], tri[1]])
+                    .collect();
+                let (min, max) = mesh_bounds(&positions);
+                (
+                    *center,
+                    Mesh {
+                        positions,
+                        triangles,
+                        min,
+                        max,
+                    },
+                )
+            }
+            Self::SweepExtrusion {
+                center,
+                axis,
+                profile,
+                stations,
+                closed_section,
+                cap_ends,
+            } => {
+                if axis.len() < 2 || profile.len() < 2 {
+                    return Err(
+                        "sweep extrusion requires at least 2 axis points and 2 profile points"
+                            .into(),
+                    );
+                }
+                let path: Vec<Point3> = axis
+                    .iter()
+                    .map(|p| Point3::new(p[0] as f64, p[1] as f64, p[2] as f64))
+                    .collect();
+                let cross_sec: Vec<Point2> = profile
+                    .iter()
+                    .map(|p| Point2::new(p[0] as f64, p[1] as f64))
+                    .collect();
+                let n_axis = path.len();
+                let m_sec = cross_sec.len();
+                let cap_verts = if *closed_section && *cap_ends { 2 } else { 0 };
+                let req_v = n_axis * m_sec + cap_verts;
+                let segs_per_ring = if *closed_section { m_sec } else { m_sec - 1 };
+                let cap_tris = if *closed_section && *cap_ends {
+                    2 * m_sec
+                } else {
+                    0
+                };
+                let req_t = (n_axis - 1) * segs_per_ring * 2 + cap_tris;
+                let identity_frame = AffineFrame3 {
+                    origin: Point3::new(0.0, 0.0, 0.0),
+                    e0: Point3::new(1.0, 0.0, 0.0),
+                    e1: Point3::new(0.0, 1.0, 0.0),
+                    e2: Point3::new(0.0, 0.0, 1.0),
+                };
+                let mut frames_scratch = vec![identity_frame; n_axis];
+                let mut out_v = vec![Point3::new(0.0, 0.0, 0.0); req_v];
+                let mut out_t = vec![[0u32; 3]; req_t];
+                let (nv, nt) = extrude_profile_along_path(
+                    &path,
+                    &cross_sec,
+                    stations.as_deref(),
+                    *closed_section,
+                    *cap_ends,
+                    &mut frames_scratch,
+                    &mut out_v,
+                    &mut out_t,
+                )
+                .map_err(|e| format!("sweep extrusion: {e:?}"))?;
+                let positions: Vec<[f32; 3]> = out_v[..nv]
+                    .iter()
+                    .map(|p| [p.x as f32, p.y as f32, p.z as f32])
+                    .collect();
+                let (min, max) = mesh_bounds(&positions);
+                (
+                    *center,
+                    Mesh {
+                        positions,
+                        triangles: out_t[..nt].to_vec(),
                         min,
                         max,
                     },

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -82,12 +83,25 @@ try {
   await select(second.file);
   await load();
   assert.ok((await page.locator('#manifest-row').innerText()).includes(second.file));
-  const geometry = result.requests.filter(request => new URL(request.url).pathname.endsWith('.10d'));
-  assert.deepEqual(new Set(geometry.map(request => new URL(request.url).pathname)), new Set([
-    `/asset-files/community/${first.file}`, `/asset-files/community/${second.file}`,
-  ]));
+  const geometry = result.requests.filter(request => {
+    const pathname = new URL(request.url).pathname;
+    return pathname.endsWith('.10d') || pathname.endsWith('.impo');
+  });
+  // Each selected asset fetches its hero .10d plus the manifest-declared
+  // reverse-LOD sidecars (tier2 decimated mesh .10d, tier3 impostor .impo).
+  const reviewManifest = JSON.parse(await readFile(path.join(root, 'web', 'assets', 'community-manifest.json'), 'utf8'));
+  const expectedFiles = new Set();
+  for (const heroFile of [first.file, second.file]) {
+    expectedFiles.add(heroFile);
+    const entry = reviewManifest.assets.find(asset => asset.file === heroFile);
+    for (const tier of [entry?.tiers?.lod2, entry?.tiers?.impostor]) {
+      if (tier?.file) expectedFiles.add(tier.file);
+    }
+  }
+  assert.deepEqual(new Set(geometry.map(request => new URL(request.url).pathname)),
+    new Set([...expectedFiles].map(file => `/asset-files/community/${file}`)));
   assert.equal(result.requests.some(request => request.url.includes('.hmc')), false);
-  step('switching fetches only the two explicitly selected model files and no whole pack');
+  step('switching fetches only the selected hero files and their declared sidecars, no whole pack');
 
   await page.fill('#notes', 'Browser transport and Vibe integration check only; not art-quality acceptance.');
   const downloadPromise = page.waitForEvent('download');
@@ -115,6 +129,79 @@ try {
   await load();
   await page.selectOption('#render-key', 'banksia');
   await page.screenshot({ path: path.join(output, 'final.png'), fullPage: true });
+
+  const groundEntry = reviewManifest.assets.find(asset => asset.id === 'rc:asset/ground');
+  assert.ok(groundEntry);
+  await select(groundEntry.file);
+  assert.equal(await page.locator('#btn-run-audit').isDisabled(), true);
+  step('selecting an entry disables the machine audit until its load completes');
+  await load();
+  const entityReport = JSON.parse(await page.locator('#entity-report').innerText());
+  assert.equal(entityReport.surfels.surfel_count, 16);
+  const tierReport = JSON.parse(await page.locator('#geometry-tiers-kv').innerText());
+  assert.equal(tierReport.tiers.find(tier => tier.tier === 'Tier 4: Surfel').decoded_count, 16);
+  assert.equal(tierReport.tiers.find(tier => tier.tier === 'Tier 2: Decimated').status, 'VERIFIED');
+  assert.equal(tierReport.tiers.find(tier => tier.tier === 'Tier 3: Impostor').status, 'VERIFIED');
+  assert.equal(tierReport.sidecars_failed, 0);
+  assert.ok(tierReport.gate_2_status.startsWith('PASSED'));
+  step('ground hero decodes 16 real surfels and both reverse-LOD sidecars verify');
+
+  assert.equal(await page.locator('#btn-run-audit').isDisabled(), false);
+  await page.click('#btn-run-audit');
+  const audit = JSON.parse(await page.locator('#audit-receipt-json').innerText());
+  assert.ok(Array.isArray(audit.gates) && audit.gates.length === 5);
+  for (let i = 1; i <= 5; i++) {
+    const classes = await page.locator(`#gate-card-${i}`).getAttribute('class');
+    const gateStatus = audit.gates[i - 1].status;
+    if (gateStatus === 'PASSED') assert.ok(classes.includes('passed'), `gate ${i} PASSED must render passed`);
+    else if (gateStatus === 'FAILED') assert.ok(classes.includes('failed'), `gate ${i} FAILED must render failed`);
+    else assert.ok(!classes.includes('failed') && !classes.includes('passed'), `gate ${i} ${gateStatus} must stay neutral`);
+  }
+  assert.equal(await page.locator('#btn-download-audit').isDisabled(), false);
+  step('machine audit runs on loaded evidence and DECLARED/NOT_RUN gates stay neutral');
+
+  await select(second.file);
+  assert.equal(await page.locator('#btn-run-audit').isDisabled(), true);
+  assert.equal(await page.locator('#btn-download-audit').isDisabled(), true);
+  assert.equal(await page.locator('#btn-copy-audit').isDisabled(), true);
+  step('reselecting an entry resets the stale audit receipt and gates the run button');
+  await load();
+  const secondId = second.label.split(' — ')[0];
+  const firstId = first.label.split(' — ')[0];
+  assert.ok((await page.locator('#scene-label').innerText()).includes(secondId));
+
+  const impoFile = groundEntry.tiers.impostor.file;
+  const impoBytes = await readFile(path.join(root, 'assets', 'generated', 'community', 'impo', path.basename(impoFile)));
+  impoBytes[32] = 1;
+  const patchedManifest = JSON.parse(await readFile(path.join(root, 'web', 'assets', 'community-manifest.json'), 'utf8'));
+  const patchedEntry = patchedManifest.assets.find(asset => asset.id === 'rc:asset/ground');
+  patchedEntry.tiers.impostor.sha256 = createHash('sha256').update(impoBytes).digest('hex');
+  patchedEntry.tiers.impostor.bytes = impoBytes.length;
+  await page.route('**/assets/community-manifest.json', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(patchedManifest) }));
+  await page.route(`**/asset-files/community/${impoFile}`, route => route.fulfill({ status: 200, body: impoBytes, contentType: 'application/octet-stream' }));
+  await page.selectOption('#style', 'earthlight');
+  await page.waitForFunction(() => document.getElementById('asset').options.length > 0 && !document.getElementById('asset').disabled, null, { timeout: 120000 });
+  await page.selectOption('#style', 'community');
+  await page.waitForFunction(() => document.getElementById('asset').options.length > 0 && !document.getElementById('asset').disabled, null, { timeout: 120000 });
+  await select(groundEntry.file);
+  await page.click('#load');
+  await page.waitForFunction(() => document.getElementById('status').textContent.includes('failed container verification'), null, { timeout: 90000 });
+  assert.ok((await page.locator('#scene-label').innerText()).includes(secondId));
+  assert.ok(!(await page.locator('#scene-label').innerText()).includes('rc:asset/ground'));
+  step('a digest-matching but wire-invalid impostor sidecar aborts the load before render');
+  await page.unrouteAll();
+  await page.selectOption('#style', 'earthlight');
+  await page.waitForFunction(() => !document.getElementById('asset').disabled, null, { timeout: 120000 });
+  await page.selectOption('#style', 'community');
+  await page.waitForFunction(() => document.getElementById('asset').options.length > 0 && !document.getElementById('asset').disabled, null, { timeout: 120000 });
+  await select(groundEntry.file);
+  const pendingLoad = page.click('#load');
+  await select(first.file);
+  await pendingLoad;
+  await load();
+  assert.ok((await page.locator('#scene-label').innerText()).includes(firstId));
+  step('reselecting while a load is in flight suppresses the stale render');
+
   result.renderer = JSON.parse(await page.locator('#renderer-kv').innerText());
   result.textureEvidence = JSON.parse(await page.locator('#texture-kv').innerText());
   result.package = JSON.parse(await page.locator('#wasm-kv').innerText());

@@ -231,7 +231,7 @@ pub fn hydrate(
     portal: &mut qualia_core_db::QualiaPortal,
     textures: &js_sys::Array,
 ) -> Result<u32, JsValue> {
-    if textures.length() > 96 {
+    if textures.length() > 512 {
         return Err(JsValue::from_str("texture dependency count exceeds bound"));
     }
     let mut loaded = 0;

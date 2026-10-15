@@ -221,6 +221,35 @@
       <p class="status" id="status" role="status">Initialising…</p>
     </section>
 
+    <section class="panel" id="panel-local-models">
+      <h2>Open an ecopunk model set</h2>
+      <p class="card-desc">Choose an ecopunk model folder containing <code>model-set.json</code> and its <code>10d/</code> subfolder. Files stay on your computer; the viewer checks each component hash before loading it.</p>
+      <div class="field">
+        <label for="local-model-folder">Model folder</label>
+        <input id="local-model-folder" type="file" webkitdirectory multiple accept=".json,.10d">
+      </div>
+      <div class="field">
+        <label for="local-model">Model study</label>
+        <select id="local-model" disabled></select>
+      </div>
+      <button type="button" id="local-model-load" class="btn-primary" disabled>Verify and load model</button>
+      <button type="button" id="local-model-sample" class="btn-secondary" hidden>Load ecopunk sample from local server</button>
+      <button type="button" id="local-model-download" class="btn-secondary" disabled>Download model receipt</button>
+      <div class="field">
+        <label for="local-animation">Illustrative sequence</label>
+        <select id="local-animation" disabled></select>
+      </div>
+      <button type="button" id="local-animation-play" class="btn-secondary" disabled>Play sequence</button>
+      <p class="status" id="local-animation-status">Sequence frames are authored states; their timing is illustrative.</p>
+      <p class="status" id="local-model-status" role="status">Choose a model folder to begin.</p>
+      <pre class="json tall" id="local-model-receipt">No local model loaded.</pre>
+      <h3>Species evidence graph</h3>
+      <p class="status" id="local-graph-status">No graph loaded.</p>
+      <div id="local-graph-claims"></div>
+      <h3>Open research questions</h3>
+      <ul id="local-graph-gaps"></ul>
+    </section>
+
     <!-- Ontological Classification & Anti-Commodification Panel -->
     <section class="panel" id="panel-ontology-spec">
       <h2>Ontological Classification &amp; Sovereignty</h2>

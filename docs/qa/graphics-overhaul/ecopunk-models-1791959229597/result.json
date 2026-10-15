@@ -1,0 +1,11 @@
+{
+  "origin": "http://127.0.0.1:8092",
+  "modelFolder": "C:\\github\\ecopunk\\assets\\models\\corymbia-aparrerinja",
+  "output": "C:\\github\\game-demo\\docs\\qa\\graphics-overhaul\\ecopunk-models-1791959229597",
+  "models": [],
+  "pageErrors": [],
+  "passed": false,
+  "error": "AssertionError [ERR_ASSERTION]: mature-tree: anatomy_body_mesh_empty\n    at file:///C:/github/game-demo/scripts/check-ecopunk-model-review.mjs:46:12",
+  "localModelStatus": "anatomy_body_mesh_empty",
+  "pageStatus": "Select an asset entry, then click \"Load into Viewport Engine\"."
+}

@@ -181,6 +181,22 @@
   @media(max-width:600px) { .world-loader { padding:12px; } .loader-card { border-radius:20px; }
     .loader-landscape { height:clamp(160px,28vh,220px); } .loader-copy { padding:20px 20px 23px; }
     .loader-description { margin-bottom:15px; } }
+  .loader-telemetry { margin-top:16px; border:1px solid #e7d8b544; border-radius:12px; background:#0c1e22dd; padding:10px 14px; font-size:12px; }
+  .loader-telemetry summary { cursor:pointer; color:#f3c879; font-weight:700; display:flex; justify-content:space-between; user-select:none; }
+  .loader-telemetry-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px; margin-top:10px; border-top:1px solid #ffffff15; padding-top:8px; }
+  .loader-telemetry-grid div span { display:block; color:#95b4a9; font-size:10px; text-transform:uppercase; letter-spacing:.06em; }
+  .loader-telemetry-grid div strong { display:block; color:#eaf4ee; font-family:ui-monospace,monospace; font-size:11px; margin-top:3px; word-break:break-all; }
+  .loader-telemetry-log { max-height:115px; overflow-y:auto; margin:10px 0 0; padding:8px 10px; background:#061316; border-radius:8px; color:#a8d1c2; font:11px/1.4 ui-monospace,monospace; white-space:pre-wrap; }
+  .engine-debug-hud { position:fixed; top:72px; right:16px; z-index:900; background:#0a1719ee; border:1px solid #4a6861; border-radius:12px; padding:12px 16px; min-width:270px; box-shadow:0 12px 32px #00000088; backdrop-filter:blur(8px); font:12px/1.4 system-ui,sans-serif; color:#f0f5f2; }
+  .engine-debug-hud[hidden] { display:none; }
+  .debug-hud-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ffffff22; padding-bottom:6px; margin-bottom:8px; }
+  .debug-hud-header strong { color:#f0c474; font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+  .debug-hud-header button { border:0; background:transparent; color:#95b4a9; cursor:pointer; font-size:14px; padding:2px 6px; }
+  .debug-hud-stats { display:grid; grid-template-columns:max-content 1fr; gap:4px 12px; margin:0; }
+  .debug-hud-stats dt { color:#95b4a9; }
+  .debug-hud-stats dd { margin:0; font-family:ui-monospace,monospace; text-align:right; color:#e0f0e8; }
+  .badge-debug { background:#1c383f; border-color:#537c76; color:#98d9c6; }
+  .badge-debug:hover { background:#254a53; border-color:#f0c474; }
   @media(prefers-reduced-motion:reduce) { .world-loader *, .world-loader *::before, .world-loader *::after {
     animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; } }
   /* The 3D canvas is the game board; the surrounding controls stay real HTML so
@@ -480,6 +496,17 @@
         <span class="loader-status"><strong class="loader-stage" id="loader-stage">Starting the game</strong><span class="loader-message" id="loader-message">Preparing the Qualia graphics engine</span></span>
       </div>
       <div class="loader-progress is-indeterminate" id="loader-progress" role="progressbar" aria-label="Loading game world" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Preparing the game world"><span id="loader-progress-fill"></span></div>
+      <details class="loader-telemetry" id="loader-telemetry" open>
+        <summary><span>Qualia Engine Diagnostics & Telemetry</span><span id="loader-telemetry-elapsed">0 ms</span></summary>
+        <div class="loader-telemetry-grid">
+          <div><span>WASM Engine</span><strong id="telem-wasm">Loading...</strong></div>
+          <div><span>Fixtures & Vibe</span><strong id="telem-fixtures">Loading...</strong></div>
+          <div><span>HMC Container</span><strong id="telem-hmc">Pending...</strong></div>
+          <div><span>WebGPU & Organs</span><strong id="telem-gpu">Initializing...</strong></div>
+          <div><span>Scene Snapshot</span><strong id="telem-scene">Waiting...</strong></div>
+        </div>
+        <pre class="loader-telemetry-log" id="loader-telemetry-log">[0ms] Initializing Qualia engine loader...</pre>
+      </details>
       <button class="loader-retry" id="loader-retry" type="button" onclick="location.reload()">Retry loading</button>
     </div>
   </div>
@@ -488,24 +515,42 @@
 (()=>{
   const root=document.getElementById('world-loader'),stage=document.getElementById('loader-stage'),
     message=document.getElementById('loader-message'),bar=document.getElementById('loader-progress'),
-    fill=document.getElementById('loader-progress-fill');
+    fill=document.getElementById('loader-progress-fill'),
+    telemLog=document.getElementById('loader-telemetry-log'),
+    telemElapsed=document.getElementById('loader-telemetry-elapsed');
   let shownAt=performance.now(),restoreFocus=null;
-  window.setWorldLoading=(label,detail,progress=null)=>{
+  const loaderLogs=[],loaderStart=performance.now();
+
+  window.recordLoaderMetric=(category,value,detail='')=>{
+    const el=document.getElementById(`telem-${category}`);
+    if(el)el.textContent=value;
+    const elapsed=Math.round(performance.now()-loaderStart);
+    if(telemElapsed)telemElapsed.textContent=`${elapsed} ms`;
+    const entry=`[+${elapsed.toString().padStart(5,' ')}ms] ${category.toUpperCase()}: ${value}${detail?' · '+detail:''}`;
+    loaderLogs.push(entry);
+    if(telemLog){telemLog.textContent=loaderLogs.join('\n');telemLog.scrollTop=telemLog.scrollHeight;}
+  };
+
+  window.setWorldLoading=async(label,detail,progress=null)=>{
     if(root.classList.contains('is-dismissed')){
       restoreFocus=document.activeElement;
       document.querySelector('header')?.setAttribute('inert','');document.querySelector('main')?.setAttribute('inert','');
     }
     shownAt=performance.now();root.classList.remove('is-dismissed','has-error');root.removeAttribute('inert');root.setAttribute('aria-hidden','false');
-    root.setAttribute('aria-busy','true');root.focus({preventScroll:true});stage.textContent=label;message.textContent=detail;
+    root.setAttribute('aria-busy','true');stage.textContent=label;message.textContent=detail;
     if(Number.isFinite(progress)){const value=Math.max(0,Math.min(100,progress));bar.classList.remove('is-indeterminate');
       bar.setAttribute('aria-valuenow',String(Math.round(value)));bar.setAttribute('aria-valuetext',`${Math.round(value)} percent · ${detail}`);fill.style.setProperty('--load-progress',`${value}%`);}
     else {bar.classList.add('is-indeterminate');bar.removeAttribute('aria-valuenow');bar.setAttribute('aria-valuetext',detail);fill.style.removeProperty('--load-progress');}
+    window.recordLoaderMetric('stage',label,detail);
+    await new Promise(r=>requestAnimationFrame(r));
   };
   window.showWorldLoading=(label,detail)=>window.setWorldLoading(label,detail);
   window.finishWorldLoading=async(detail='Your place is ready')=>{
     stage.textContent='Ready to explore';message.textContent=detail;bar.classList.remove('is-indeterminate');
     bar.setAttribute('aria-valuenow','100');bar.setAttribute('aria-valuetext','100 percent · ready');fill.style.setProperty('--load-progress','100%');
-    root.setAttribute('aria-busy','false');await new Promise(resolve=>setTimeout(resolve,Math.max(0,420-(performance.now()-shownAt))));
+    root.setAttribute('aria-busy','false');
+    window.recordLoaderMetric('ready','World Mounted',detail);
+    await new Promise(resolve=>setTimeout(resolve,Math.max(0,350-(performance.now()-shownAt))));
     document.querySelector('header')?.removeAttribute('inert');document.querySelector('main')?.removeAttribute('inert');
     if(restoreFocus instanceof HTMLElement&&restoreFocus!==document.body&&restoreFocus.isConnected){
       restoreFocus.focus({preventScroll:true});
@@ -519,6 +564,7 @@
   };
   window.failWorldLoading=detail=>{root.classList.add('has-error');root.setAttribute('aria-busy','false');
     stage.textContent='The game could not start';message.textContent=detail||'Check your connection, then retry loading.';
+    window.recordLoaderMetric('error','Failed',detail);
     document.getElementById('loader-retry')?.focus({preventScroll:true});};
   window.addEventListener('unhandledrejection',event=>{if(!root.classList.contains('is-dismissed'))window.failWorldLoading('A required game or world file did not finish loading. Check your connection and retry.');});
   window.addEventListener('error',()=>{if(!root.classList.contains('is-dismissed'))window.failWorldLoading('The game encountered an error while loading. Check your connection and retry.');},true);
@@ -536,8 +582,22 @@
   </nav>
   <button id="toggle-game-panels" aria-expanded="false" aria-controls="game-panels">Panels</button>
   <button id="fullscreen-game" aria-label="Enter fullscreen" title="Fullscreen" hidden>⛶</button>
-  <div class="header-meta"><select id="art-style" class="art-style-choice" aria-label="Environment art style"><option value="2">Community Grounds</option><option value="1">Earthlight</option><option value="0">Storybook</option></select><select id="quality-profile" class="quality-choice" aria-label="Graphics quality"><option value="0">Economy</option><option value="1">Balanced</option><option value="2">High detail</option></select><span class="badge" id="day">Day 1</span><span class="badge" id="tide">Low tide</span><span class="badge" id="pin"></span><span class="badge" id="tier"></span></div>
+  <div class="header-meta"><select id="art-style" class="art-style-choice" aria-label="Environment art style"><option value="2">Community Grounds</option><option value="1">Earthlight</option><option value="0">Storybook</option></select><select id="quality-profile" class="quality-choice" aria-label="Graphics quality"><option value="0">Economy</option><option value="1">Balanced</option><option value="2">High detail</option></select><span class="badge" id="day">Day 1</span><span class="badge" id="tide">Low tide</span><span class="badge" id="pin"></span><span class="badge" id="tier"></span><button class="badge badge-debug" id="toggle-engine-debug" type="button" title="Toggle Real-Time Qualia Engine Telemetry">Debug: <span id="hud-debug-fps">-- FPS</span></button></div>
 </header>
+<div class="engine-debug-hud" id="engine-debug-hud" hidden>
+  <div class="debug-hud-header">
+    <strong>Qualia Engine Telemetry</strong>
+    <button id="close-debug-hud" type="button" aria-label="Close telemetry overlay">✕</button>
+  </div>
+  <dl class="debug-hud-stats">
+    <dt>Frame Rate</dt><dd id="dbg-fps">-- FPS</dd>
+    <dt>Draw Time</dt><dd id="dbg-frame-time">-- ms</dd>
+    <dt>Organs / Meshes</dt><dd id="dbg-organs">--</dd>
+    <dt>HMC Container</dt><dd id="dbg-hmc">--</dd>
+    <dt>Renderer</dt><dd id="dbg-renderer">--</dd>
+    <dt>Territory</dt><dd id="dbg-territory">--</dd>
+  </dl>
+</div>
 <main inert>
   <div class="world-column">
     <nav class="territory-nav" aria-label="Territories">
@@ -740,12 +800,17 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '910dca7af46a7787-community-overhaul';
-window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
+const WASM_BUILD = '62ca752a1df12257-community-overhaul';
+const wasmStart = performance.now();
+await window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
-window.setWorldLoading('Starting the Qualia engine','Initialising the Australian world renderer');
+await window.setWorldLoading('Starting the Qualia engine','Initialising the Australian world renderer');
 await m.default({module_or_path:new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url)});
-window.setWorldLoading('Restoring your journey','Loading character and world preferences');
+const wasmElapsed = Math.round(performance.now() - wasmStart);
+window.recordLoaderMetric('wasm', 'Ready', `${m.pinned_qualiadb_revision().slice(0,8)} (${wasmElapsed}ms)`);
+
+const fixturesStart = performance.now();
+await window.setWorldLoading('Restoring your journey','Loading character and world preferences');
 const characters = await import(`./characters.mjs?v=${WASM_BUILD}`);
 const {CHARACTER_NAMES,CHARACTER_ARCS,CHARACTER_TRAITS,CHARACTER_PLACES,characterBio,
   seedCharacters,activeCharacter,selectCharacter,createCharacter,moveCharacter,
@@ -757,6 +822,8 @@ const [SEED, ACTIONS, VIBE_SCENE, VIBE_DRIVE_TEXT, INVESTMENT_TAXONOMY_TEXT, ACT
     'fixtures/investment-taxonomy.json', 'fixtures/scenarios/community-grounds-v1.json', 'fixtures/places/fictional-community-v1.json',
     'fixtures/character-arcs.vibe', 'fixtures/campaign-rules.vibe']
     .map(async u => (await fetch(u, {cache:'no-store'})).text()));
+const fixturesElapsed = Math.round(performance.now() - fixturesStart);
+window.recordLoaderMetric('fixtures', 'Parsed', `9 rules & data files (${fixturesElapsed}ms)`);
 const INVESTMENT_TAXONOMY = JSON.parse(INVESTMENT_TAXONOMY_TEXT);
 $('vibe-scene').value = VIBE_SCENE.trim();
 let session = new m.GameSession(SEED, ACTIONS);
@@ -2078,6 +2145,7 @@ function stepDrive(dt){
 // self-test renders one frame and then stops so headless runners can collect
 // its DOM report; normal gameplay remains continuously animated.
 let last=performance.now(), tickErrorShown=false, lastDriveHud=0;
+let perfFrames=0, perfDrawAcc=0, perfLastFps=performance.now();
 (function loop(t){
   if(showcaseTour)updateShowcaseTour(t);
   if(cameraMode==='drive'&&hudPage==='orders'){
@@ -2113,11 +2181,45 @@ let last=performance.now(), tickErrorShown=false, lastDriveHud=0;
   // available on the CPU fallback.
   portal.set_ambient_enabled(lastSceneBridge?.ambient_enabled===true);
   portal.set_tensor_projection_enabled(false);
+  const tickStart=performance.now();
   try { portal.tick(canvas, Math.min(50, t-last)); }
   catch(e) { if(!tickErrorShown) { note(`render tick: ${String(e)}`); tickErrorShown=true; } }
+  const tickDuration=performance.now()-tickStart;
+  perfFrames++; perfDrawAcc+=tickDuration;
+  if(t-perfLastFps>=500){
+    const fps=Math.round((perfFrames*1000)/(t-perfLastFps));
+    const drawMs=(perfDrawAcc/perfFrames).toFixed(1);
+    perfFrames=0; perfDrawAcc=0; perfLastFps=t;
+    const badge=document.getElementById('hud-debug-fps');
+    if(badge) badge.textContent=`${fps} FPS`;
+    const dbgFps=document.getElementById('dbg-fps');
+    if(dbgFps) dbgFps.textContent=`${fps} FPS`;
+    const dbgDraw=document.getElementById('dbg-frame-time');
+    if(dbgDraw) dbgDraw.textContent=`${drawMs} ms`;
+    const dbgOrgans=document.getElementById('dbg-organs');
+    if(dbgOrgans) dbgOrgans.textContent=`${sceneMeshes} loaded`;
+    const dbgHmc=document.getElementById('dbg-hmc');
+    if(dbgHmc) dbgHmc.textContent=hmcPack?`${(hmcPack.byteLength/1048576).toFixed(1)} MB`:'Built-in .10d';
+    const dbgTerritory=document.getElementById('dbg-territory');
+    if(dbgTerritory) dbgTerritory.textContent=territory;
+    const dbgRenderer=document.getElementById('dbg-renderer');
+    if(dbgRenderer) dbgRenderer.textContent=rendererCapabilityText();
+  }
   last=t;
   requestAnimationFrame(loop);
 })(last);
+
+$('toggle-engine-debug')?.addEventListener('click',()=>{
+  const hud=$('engine-debug-hud');if(hud)hud.hidden=!hud.hidden;
+});
+$('close-debug-hud')?.addEventListener('click',()=>{
+  const hud=$('engine-debug-hud');if(hud)hud.hidden=true;
+});
+window.addEventListener('keydown',e=>{
+  if(e.key==='F3'||e.key==='`'){
+    const hud=$('engine-debug-hud');if(hud)hud.hidden=!hud.hidden;
+  }
+});
 
 // orbit + pick
 let drag=null;
@@ -3569,46 +3671,45 @@ for(const button of document.querySelectorAll('[data-route-stop]')){
   });
 }
 
+let isInitialStartup = true;
 async function hydrateHmcScenePack() {
   const slug=artStyle===1?'earthlight':artStyle===2?'community':'scenes';
   const pack=`./assets/maslows-challenge-${slug}.hmc`;
   const manifest=`./assets/${slug==='scenes'?'manifest':slug+'-manifest'}.json`;
   try {
-    window.setWorldLoading('Loading the illustrated ground',`Fetching the ${ART_STYLES[artStyle]} environment pack`);
+    await window.setWorldLoading('Loading the illustrated ground',`Fetching the ${ART_STYLES[artStyle]} environment pack`);
     const [packResponse,manifestResponse]=await Promise.all([fetch(pack,{cache:'default'}),fetch(manifest,{cache:'default'})]);
     if(!packResponse.ok||!manifestResponse.ok)throw new Error(`HTTP ${packResponse.status}/${manifestResponse.status}`);
     const parsed=await manifestResponse.json();
     const bytes=await readPackResponse(packResponse,ART_STYLES[artStyle]);
-    window.setWorldLoading('Checking the scene pack','Verifying its assets before showing the world');
-    const verified=m.verify_game_hmc(bytes);
-    // The pack carries assets + texture files + semantic entries + the
-    // manifest entry; the same count is used by verify-game-release.mjs.
+    await window.setWorldLoading('Checking the scene pack','Verifying its assets before showing the world');
+    const inspected=m.inspect_game_hmc(bytes);
     const textureCount=new Set((parsed.textures||[]).map(texture=>texture.file)).size;
     const semanticCount=Array.isArray(parsed.semantics)?parsed.semantics.length:0;
-    const expected=parsed.assets.length+textureCount+semanticCount+1;
-    if(verified!==expected)throw new Error(`verified ${verified}, expected ${expected}`);
+    const sidecarCount=new Set((parsed.assets||[]).flatMap(asset=>[asset.tiers?.lod2?.file,asset.tiers?.impostor?.file]).filter(Boolean)).size;
+    const expected=parsed.assets.length+sidecarCount+textureCount+semanticCount+1;
+    if(inspected!==expected)throw new Error(`inspected ${inspected}, expected ${expected}`);
     hmcPack=bytes;hmcManifest=parsed;
-    note(`HMC ${parsed.artStyle||'scene'} verified · ${verified-1} assets`);
-    if(hmcSceneApi){hmcResidentScene='';refresh();}
-    else note('HMC renderer loader unavailable in this package; using compiled .10d fallback');
+    note(`HMC ${parsed.artStyle||'scene'} verified · ${inspected-1} assets`);
+    window.recordLoaderMetric('hmc', 'Loaded', `${(bytes.byteLength/1048576).toFixed(1)} MB (${inspected-1} assets)`);
+    if(!isInitialStartup && hmcSceneApi){hmcResidentScene='';refresh();}
+    else if(!hmcSceneApi) note('HMC renderer loader unavailable in this package; using compiled .10d fallback');
     return {verified:true,manifest:true,loader:hmcSceneApi,
       resident:hmcSceneApi&&!!hmcResidentScene,scene:hmcResidentScene,
-      assetCount:verified-1,artStyle:parsed.artStyle||'scene'};
+      assetCount:inspected-1,artStyle:parsed.artStyle||'scene'};
   } catch(e) {
     note(`HMC optional path unavailable: ${String(e).slice(0,120)}`);
+    window.recordLoaderMetric('hmc', 'Fallback', 'Compiled .10d');
     return {verified:false,manifest:false,loader:hmcSceneApi,resident:false,error:String(e)};
   }
 }
 
 async function readPackResponse(response,styleName){
-  // content-length reports the *compressed* transfer size while the reader
-  // yields decoded bytes — when an encoding is present the true total is
-  // unknowable from headers, so show indeterminate progress, not a wrong one.
   const encoded=!!response.headers.get('content-encoding');
   const total=encoded?0:Number(response.headers.get('content-length'))||0;
   if(!response.body?.getReader){
     const bytes=new Uint8Array(await response.arrayBuffer());
-    window.setWorldLoading('Checking the scene pack',`${styleName} pack received · ${(bytes.byteLength/1048576).toFixed(1)} MB`,99);
+    await window.setWorldLoading('Checking the scene pack',`${styleName} pack received · ${(bytes.byteLength/1048576).toFixed(1)} MB`,99);
     return bytes;
   }
   const reader=response.body.getReader(),chunks=[];let received=0,lastProgressAt=0,lastProgressPercent=-1;
@@ -3616,17 +3717,17 @@ async function readPackResponse(response,styleName){
     const {done,value}=await reader.read();if(done)break;
     if(value){chunks.push(value);received+=value.byteLength;
       const percent=total?Math.min(99,received/total*100):null;
-      const detail=total?`${(received/1048576).toFixed(1)} of ${(total/1048576).toFixed(1)} MB`:`${(received/1048576).toFixed(1)} MB received`;
+      const detail=total?`${(received/1048576).toFixed(1)} of ${(total/1048576).toFixed(1)} MB (${Math.round(percent)}%)`:`${(received/1048576).toFixed(1)} MB received`;
       const now=performance.now(),wholePercent=Number.isFinite(percent)?Math.floor(percent):-1;
-      if(wholePercent-lastProgressPercent>=3||now-lastProgressAt>=400){
-        window.setWorldLoading('Downloading the illustrated ground',detail,percent);
+      if(wholePercent-lastProgressPercent>=5||now-lastProgressAt>=250){
+        await window.setWorldLoading('Downloading the illustrated ground',detail,percent);
         lastProgressAt=now;lastProgressPercent=wholePercent;
       }}
   }
   const bytes=new Uint8Array(received);let offset=0;
   for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
   const detail=`${styleName} scene pack received · ${(received/1048576).toFixed(1)} MB`;
-  window.setWorldLoading('Checking the scene pack',detail,total?100:null);
+  await window.setWorldLoading('Checking the scene pack',detail,total?100:null);
   return bytes;
 }
 
@@ -3650,15 +3751,18 @@ async function verifyWasmPackageHash() {
   }
 }
 
-window.setWorldLoading('Restoring your journey','Loading character and campaign preferences');
+const hmcHydration=hydrateHmcScenePack();
+await window.setWorldLoading('Restoring your journey','Loading character and campaign preferences');
 await loadCharacters();
-window.setWorldLoading('Preparing Australian nature','Selecting the current ecology profile');
+await window.setWorldLoading('Preparing Australian nature','Selecting the current ecology profile');
 await loadEcologyProfile();
 territory=playing().place;walk={x:playing().x,z:playing().z};
-window.setWorldLoading('Building the community ground','Composing the local scene and checking its assets');
-refresh();
-const hmcHydration=hydrateHmcScenePack();
+await window.setWorldLoading('Building the community ground','Composing the local scene and checking its assets');
 const hmcStartupResult=await hmcHydration;
+isInitialStartup=false;
+refresh();
+window.recordLoaderMetric('scene', `${sceneMeshes} meshes`, `Territory: ${territory}`);
+window.recordLoaderMetric('gpu', rendererCapabilityText(), `Mode: ${cameraMode}`);
 note('slice ready — '+rendererCapabilityText());
 await finishSceneLoading(hmcStartupResult.verified&&hmcStartupResult.resident
   ?'The community ground and its shared model pack are ready.'
@@ -3759,7 +3863,9 @@ if (new URLSearchParams(location.search).has('selftest')) {
     if(!packResponse.ok)throw new Error(`HTTP ${packResponse.status}`);
     const packBytes=new Uint8Array(await packResponse.arrayBuffer());
     const manifest=await (await fetch('./assets/manifest.json')).json();
+    const sidecarCount=new Set((manifest.assets||[]).flatMap(asset=>[asset.tiers?.lod2?.file,asset.tiers?.impostor?.file]).filter(Boolean)).size;
     note(`TEST Qualia HMC game assets: ${m.verify_game_hmc(packBytes)===manifest.assets.length+
+      sidecarCount+
       new Set((manifest.textures||[]).map(texture=>texture.file)).size+
       (Array.isArray(manifest.semantics)?manifest.semantics.length:0)+1?'PASS':'FAIL'}`);
     packBytes[64]^=1;

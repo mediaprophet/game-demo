@@ -120,6 +120,100 @@ fn build_patch_sized(
     }
 }
 
+/// Continuous multi-frequency landscape heightfield covering extended travel corridors (280m+).
+/// Blends continental rolling swales, winding drainage creeks, and mountain foothills.
+pub fn continuous_landscape_height(x: f32, z: f32) -> f32 {
+    let macro_swale = 1.8 * (x * 0.015).sin() * (z * 0.012).cos();
+    let rolling_hills = 0.85 * ((x * 0.045 + 0.3).sin() * (z * 0.038 - 0.4).cos());
+    let micro_roughness = 0.08 * ((x * 0.25).sin() * (z * 0.22).cos());
+    // Winding drainage depression / creek bed
+    let creek_center_x = 8.0 + 4.0 * (z * 0.03).sin();
+    let dist_to_creek = (x - creek_center_x).abs();
+    let creek_bed = if dist_to_creek < 3.5 {
+        let t = dist_to_creek / 3.5;
+        -0.45 * (1.0 - t * t)
+    } else {
+        0.0
+    };
+    macro_swale + rolling_hills + micro_roughness + creek_bed
+}
+
+/// Organic radial distance feathering: eases elevation and density smoothly to horizon base
+/// using a perturbed boundary rather than a hard square box edge.
+pub fn organic_radial_feather(x: f32, z: f32, center_x: f32, center_z: f32, radius: f32) -> f32 {
+    let dx = x - center_x;
+    let dz = z - center_z;
+    let dist = (dx * dx + dz * dz).sqrt();
+    let angle = dz.atan2(dx);
+    let perturbed_radius = radius * (1.0 + 0.12 * (angle * 5.0).sin() + 0.08 * (angle * 9.0).cos());
+    if dist >= perturbed_radius {
+        0.0
+    } else if dist <= perturbed_radius * 0.75 {
+        1.0
+    } else {
+        let t = (perturbed_radius - dist) / (perturbed_radius * 0.25);
+        t * t * (3.0 - 2.0 * t) // C2 smoothstep
+    }
+}
+
+/// Dynamic multi-resolution corridor patch generator.
+/// - `tier 0`: High-density focal activity site (33x33 vertices)
+/// - `tier 1`: Mid-range transit corridor (17x17 vertices)
+/// - `tier 2`: Expansive macro corridor landscape (9x9 vertices)
+pub fn build_adaptive_corridor_patch(
+    center_x: f32,
+    center_z: f32,
+    width: f32,
+    length: f32,
+    resolution_tier: u8,
+) -> Mesh {
+    let side: usize = match resolution_tier {
+        0 => 33,
+        1 => 17,
+        _ => 9,
+    };
+    let step_x = width / (side - 1) as f32;
+    let step_z = length / (side - 1) as f32;
+
+    let heights: Vec<f32> = (0..side)
+        .flat_map(|row| {
+            (0..side).map(move |col| {
+                let x = center_x - width * 0.5 + col as f32 * step_x;
+                let z = center_z - length * 0.5 + row as f32 * step_z;
+                let base_h = continuous_landscape_height(x, z);
+                let feather = organic_radial_feather(x, z, center_x, center_z, (width.max(length)) * 0.5);
+                base_h * feather - 0.28 * (1.0 - feather)
+            })
+        })
+        .collect();
+
+    let terrain = generate_terrain_mesh(&heights, side, side, step_x.max(step_z) as f64);
+    let positions: Vec<[f32; 3]> = terrain
+        .vertices
+        .iter()
+        .map(|p| [p[0] + center_x, p[2] - 0.02, p[1] + center_z])
+        .collect();
+    let triangles: Vec<[u32; 3]> = terrain
+        .indices
+        .chunks_exact(3)
+        .map(|tri| [tri[0], tri[2], tri[1]])
+        .collect();
+    let mut min = [f32::INFINITY; 3];
+    let mut max = [f32::NEG_INFINITY; 3];
+    for p in &positions {
+        for axis in 0..3 {
+            min[axis] = min[axis].min(p[axis]);
+            max[axis] = max[axis].max(p[axis]);
+        }
+    }
+    Mesh {
+        positions,
+        triangles,
+        min,
+        max,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

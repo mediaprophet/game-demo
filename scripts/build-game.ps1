@@ -18,7 +18,7 @@ if (-not (Test-Path -LiteralPath $wasmBindgenExe)) {
 $env:PATH = "$wasmBindgenBin;$env:PATH"
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
     $nodeCandidates = @(
-        'C:\Users\tim_h\AppData\Local\nvm\v22.12.0',
+        'C:\Users\tim_h\AppData\Local\nvm\v24.22.0',
         'C:\nvm4w\nodejs',
         'C:\Program Files\nodejs'
     )
@@ -41,7 +41,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'asset export failed' }
     # Semantic section is authored by taxon-bindings.vibe; pack-export
     # evaluates it natively, embeds sem/taxonomy.q42, and repacks the HMCs.
-    cargo run --locked -p pack-export -- --all
+    cargo run --locked -p pack-export --bin pack-export -- --all
     if ($LASTEXITCODE -ne 0) { throw 'pack-export failed' }
 } finally {
     Pop-Location

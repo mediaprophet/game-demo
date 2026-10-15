@@ -85,9 +85,29 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
     const key = `${asset.id}:${sha256}`;
     if (!assets.has(key)) {
       await writeFile(join(out, file), bytes);
-      assets.set(key, { id: asset.id, file: `10d/${file}`, bytes: bytes.length, sha256,
+      const record = { id: asset.id, file: `10d/${file}`, bytes: bytes.length, sha256,
         rgba: [asset.r, asset.g, asset.b, asset.a], renderRole: asset.renderRole || 'opaque',
-        materialFamily: asset.materialFamily });
+        materialFamily: asset.materialFamily };
+      // Entity-format receipt fields sealed into the .10d by scene_build:
+      // ontology class + embodiment + lifecycle, affordance names, inverted
+      // spectral coefficients, and the Tier 4 surfel count baked into the
+      // container. Tier 2/3 sidecars are stamped by pack-export.
+      if (typeof asset.entityClass === 'string' && asset.entityClass) {
+        record.entity = {
+          class: asset.entityClass,
+          embodiment: asset.embodiment || null,
+          stage: asset.entityStage || null,
+          taxonIri: asset.taxonIri || null,
+          affordances: Array.isArray(asset.affordances) ? asset.affordances : [],
+        };
+      }
+      if (Number.isFinite(asset.c0) && Number.isFinite(asset.c1) && Number.isFinite(asset.c2)) {
+        record.spectral = { c0: asset.c0, c1: asset.c1, c2: asset.c2 };
+      }
+      if (Number.isFinite(asset.surfelCount) && asset.surfelCount > 0) {
+        record.tiers = { surfels: { inHero: true, count: asset.surfelCount } };
+      }
+      assets.set(key, record);
     }
     entries.push(key);
   }

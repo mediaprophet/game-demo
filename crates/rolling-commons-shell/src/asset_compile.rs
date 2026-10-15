@@ -85,8 +85,15 @@ pub(crate) fn compile_asset(
     let mesh = prepared.mesh;
     // The scene is original authored data with no external reuse grant.
     // This records that status; it does not alter the QualiaDB licence.
-    let provenance =
+    let mut provenance =
         ProvenanceSidecar::new(source, mime, "All rights reserved (licence not assigned)");
+    // Entity plan: ontology declaration (class/embodiment/stage/affordances/
+    // spectral) seals inside the provenance sidecar's semantic_metadata —
+    // the EONT section type is unusable on this QualiaDB revision (its wire
+    // size constant disagrees with the header struct and panics all codecs).
+    let entity_plan = crate::entity_sections::plan(recipe)
+        .map_err(|e| JsValue::from_str(&e))?;
+    provenance.semantic_metadata = entity_plan.semantic_metadata.clone();
     // The current Qualia .10d SRD1 section preserves authored colour on
     // each vertex. A deterministic palette reading gives broad surfaces
     // gentle height/position variation without a game-specific format.
@@ -170,6 +177,15 @@ pub(crate) fn compile_asset(
     } else {
         bytes
     };
+    // Living-entity upgrade: procedural-synthesis receipt + hierarchical
+    // surfel tier are sealed inside the hero container (the ontology
+    // declaration is already sealed in the provenance sidecar). The
+    // decimated (Tier 2) payload travels as a sibling `.10d` pack entry
+    // emitted by pack-export, and the impostor (Tier 3) atlas as a raw
+    // `.impo` wire payload — the upstream IMPO section codec panics.
+    let entity = crate::entity_sections::attach(recipe, &bytes, &mesh, &entity_plan)
+        .map_err(|e| JsValue::from_str(&e))?;
+    let bytes = entity.container;
     js_sys::Reflect::set(&obj, &"id".into(), &JsValue::from_str(&recipe.id))?;
     js_sys::Reflect::set(
         &obj,
@@ -189,5 +205,45 @@ pub(crate) fn compile_asset(
     for (key, value) in ["r", "g", "b", "a"].iter().zip(recipe.color) {
         js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
     }
+    js_sys::Reflect::set(
+        &obj,
+        &"entityClass".into(),
+        &JsValue::from_str(entity.profile_class),
+    )?;
+    js_sys::Reflect::set(
+        &obj,
+        &"embodiment".into(),
+        &JsValue::from_str(entity.embodiment),
+    )?;
+    js_sys::Reflect::set(
+        &obj,
+        &"entityStage".into(),
+        &JsValue::from_str(entity.stage),
+    )?;
+    js_sys::Reflect::set(
+        &obj,
+        &"taxonIri".into(),
+        &JsValue::from_str(&entity.taxon_iri),
+    )?;
+    js_sys::Reflect::set(
+        &obj,
+        &"affordances".into(),
+        &entity
+            .affordance_names
+            .iter()
+            .map(|name| JsValue::from_str(name))
+            .collect::<js_sys::Array>(),
+    )?;
+    for (key, value) in ["c0", "c1", "c2"]
+        .iter()
+        .zip([entity.spectral.c0, entity.spectral.c1, entity.spectral.c2])
+    {
+        js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
+    }
+    js_sys::Reflect::set(
+        &obj,
+        &"surfelCount".into(),
+        &JsValue::from_f64(entity.surfel_count as f64),
+    )?;
     Ok((mesh, obj.into()))
 }

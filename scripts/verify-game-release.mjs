@@ -37,12 +37,44 @@ for (const [manifestPath, packPath] of styles) {
     manifest.textures.some(texture=>texture.file!==`textures/sha256/${texture.sha256}`||
       texture.mime!=='image/png'||![0,1,2,3].includes(texture.role)))
     throw new Error(`${manifestPath}: missing or invalid surface dependencies`);
+  // Entity-format contract: every hero asset must declare its ontology
+  // (class/embodiment/stage/affordances), spectral coefficients, and the
+  // full reverse-LOD tier set (in-hero surfels + Tier 2/3 sidecars).
+  const generatedDir = manifest.artStyle && manifest.artStyle !== 'storybook'
+    ? `assets/generated/${manifest.artStyle}` : 'assets/generated';
+  const sidecarFiles = new Set();
+  for (const asset of manifest.assets) {
+    const entity = asset.entity || {};
+    if (typeof entity.class !== 'string' || !entity.class ||
+        typeof entity.embodiment !== 'string' || !entity.embodiment ||
+        typeof entity.taxonIri !== 'string' || !entity.taxonIri ||
+        !Array.isArray(entity.affordances) || !entity.affordances.length)
+      throw new Error(`${manifestPath}: ${asset.id} is missing its entity ontology declaration`);
+    const spectral = asset.spectral || {};
+    if (![spectral.c0, spectral.c1, spectral.c2].every(Number.isFinite))
+      throw new Error(`${manifestPath}: ${asset.id} is missing spectral coefficients`);
+    const tiers = asset.tiers || {};
+    if (!tiers.surfels || tiers.surfels.inHero !== true ||
+        !Number.isInteger(tiers.surfels.count) || tiers.surfels.count < 1)
+      throw new Error(`${manifestPath}: ${asset.id} is missing its Tier 4 surfel tier`);
+    if (!tiers.impostor || typeof tiers.impostor.file !== 'string' ||
+        !tiers.impostor.file.includes('--tier3--'))
+      throw new Error(`${manifestPath}: ${asset.id} is missing its Tier 3 impostor tier`);
+    for (const tier of [tiers.lod2, tiers.impostor]) {
+      if (!tier) continue;
+      sidecarFiles.add(tier.file);
+      const bytes = await read(`${generatedDir}/${tier.file}`);
+      if (createHash('sha256').update(bytes).digest('hex') !== tier.sha256 ||
+          bytes.length !== tier.bytes)
+        throw new Error(`${manifestPath}: ${asset.id} sidecar ${tier.file} digest mismatch`);
+    }
+  }
   const packInfo = await stat(resolve(root, packPath));
   if (packInfo.size < 100_000) throw new Error(`${packPath} is missing or unexpectedly small`);
   const pack=await read(packPath),textureCount=new Set(manifest.textures.map(texture=>texture.file)).size;
   const semanticCount=Array.isArray(manifest.semantics)?manifest.semantics.length:0;
-  if(validate_game_hmc(pack)!==manifest.assets.length+textureCount+semanticCount+1)
-    throw new Error(`${packPath}: native material/UV/texture/semantic dependency verification failed`);
+  if(validate_game_hmc(pack)!==manifest.assets.length+textureCount+semanticCount+sidecarFiles.size+1)
+    throw new Error(`${packPath}: native material/UV/texture/semantic/tier dependency verification failed`);
 }
 
 await stat(resolve(root, 'web/assets/ecology/profiles/se-corridor-reference.json'));

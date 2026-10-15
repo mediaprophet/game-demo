@@ -246,6 +246,192 @@ export class CompiledCell {
 if (Symbol.dispose) CompiledCell.prototype[Symbol.dispose] = CompiledCell.prototype.free;
 
 /**
+ * Browser-resident Entity Family Manifest wrapping QualiaDB's `TwinFamilyManifest`.
+ */
+export class EntityFamilyManifestWrapper {
+    static __wrap(ptr) {
+        const obj = Object.create(EntityFamilyManifestWrapper.prototype);
+        obj.__wbg_ptr = ptr;
+        EntityFamilyManifestWrapperFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        EntityFamilyManifestWrapperFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_entityfamilymanifestwrapper_free(ptr, 0);
+    }
+    /**
+     * Classification (`"fauna"`, `"flora"`, `"funga"`, `"machinery"`, `"vehicle"`).
+     * @returns {string}
+     */
+    classification() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.entityfamilymanifestwrapper_classification(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * Common display name (e.g. `"Koala"`).
+     * @returns {string}
+     */
+    common_name() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.entityfamilymanifestwrapper_common_name(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * Default variant ID.
+     * @returns {string}
+     */
+    default_variant() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.entityfamilymanifestwrapper_default_variant(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * Family identifier URN or IRI (e.g. `"urn:taxon:phascolarctos_cinereus"`).
+     * @returns {string}
+     */
+    family_id() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.entityfamilymanifestwrapper_family_id(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * Parse a family manifest directly from raw CBOR bytes.
+     * @param {Uint8Array} bytes
+     */
+    constructor(bytes) {
+        const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.entityfamilymanifestwrapper_from_cbor(ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        this.__wbg_ptr = ret[0];
+        EntityFamilyManifestWrapperFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * Extract and parse a family manifest from a verified HMC bundle pack.
+     * @param {Uint8Array} pack
+     * @returns {EntityFamilyManifestWrapper | undefined}
+     */
+    static from_hmc_pack(pack) {
+        const ptr0 = passArray8ToWasm0(pack, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.entityfamilymanifestwrapper_from_hmc_pack(ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] === 0 ? undefined : EntityFamilyManifestWrapper.__wrap(ret[0]);
+    }
+    /**
+     * List all variant descriptors in the manifest as a JS array of objects.
+     * @returns {Array<any>}
+     */
+    list_variants() {
+        const ret = wasm.entityfamilymanifestwrapper_list_variants(this.__wbg_ptr);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * Resolve a model variant using QualiaDB's principled 4-tier fallback:
+     * 1. Exact match on `(phenotype, stage, lod, state)`
+     * 2. Match on `(phenotype, stage, state)` with closest LOD
+     * 3. Fallback to `Monomorphic` if sex-specific variant missing
+     * 4. Fallback to default variant
+     * @param {string} phenotype_str
+     * @param {string} stage_str
+     * @param {number} lod_tier
+     * @param {string} state_str
+     * @returns {any}
+     */
+    resolve_variant(phenotype_str, stage_str, lod_tier, state_str) {
+        const ptr0 = passStringToWasm0(phenotype_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(stage_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passStringToWasm0(state_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ret = wasm.entityfamilymanifestwrapper_resolve_variant(this.__wbg_ptr, ptr0, len0, ptr1, len1, lod_tier, ptr2, len2);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * Resolve variant with distance-based LOD selection:
+     * - `< 15m`: Lod0
+     * - `15m .. 45m`: Lod1
+     * - `45m .. 90m`: Lod2
+     * - `90m .. 180m`: Lod3
+     * - `>= 180m`: Impostor
+     * @param {string} phenotype_str
+     * @param {string} stage_str
+     * @param {number} distance_meters
+     * @param {string} state_str
+     * @returns {any}
+     */
+    resolve_variant_for_distance(phenotype_str, stage_str, distance_meters, state_str) {
+        const ptr0 = passStringToWasm0(phenotype_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(stage_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passStringToWasm0(state_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ret = wasm.entityfamilymanifestwrapper_resolve_variant_for_distance(this.__wbg_ptr, ptr0, len0, ptr1, len1, distance_meters, ptr2, len2);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * Number of declared model variants.
+     * @returns {number}
+     */
+    variant_count() {
+        const ret = wasm.entityfamilymanifestwrapper_variant_count(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+}
+if (Symbol.dispose) EntityFamilyManifestWrapper.prototype[Symbol.dispose] = EntityFamilyManifestWrapper.prototype.free;
+
+/**
  * The Federated Node Manager handles discovery and WebRTC offloading
  */
 export class FederatedNodeManager {
@@ -2787,6 +2973,105 @@ export class QualiaPortal {
 if (Symbol.dispose) QualiaPortal.prototype[Symbol.dispose] = QualiaPortal.prototype.free;
 
 /**
+ * A verified, browser-resident semantic slice from an HMC pack.
+ */
+export class SemanticSlice {
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        SemanticSliceFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_semanticslice_free(ptr, 0);
+    }
+    /**
+     * Number of verified quins in the slice.
+     * @returns {number}
+     */
+    get count() {
+        const ret = wasm.semanticslice_count(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * Parse a verified HMC pack and decode its `sem/*.q42` volume. Every pack
+     * entry digest is verified first; quin parity is re-checked on load. The
+     * pack must carry exactly one Q42 semantic volume — loose `.quins`/`.lex`
+     * entries are retired.
+     * @param {Uint8Array} pack
+     */
+    constructor(pack) {
+        const ptr0 = passArray8ToWasm0(pack, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.semanticslice_from_pack(ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        this.__wbg_ptr = ret[0];
+        SemanticSliceFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * Emit the slice as `{quin hex fields, s, p, o}` JSON — `s`/`p`/`o` are
+     * the lexicon-resolved terms ("" when the hash is not in the lexicon).
+     * @returns {string}
+     */
+    quins_json() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.semanticslice_quins_json(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * Resolve a hash (hex string, `0x` optional) to its lexicon term.
+     * @param {string} hash_hex
+     * @returns {string | undefined}
+     */
+    resolve(hash_hex) {
+        const ptr0 = passStringToWasm0(hash_hex, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.semanticslice_resolve(this.__wbg_ptr, ptr0, len0);
+        let v2;
+        if (ret[0] !== 0) {
+            v2 = getStringFromWasm0(ret[0], ret[1]).slice();
+            wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        }
+        return v2;
+    }
+    /**
+     * SHACL-validate a subject's property against JSON constraints —
+     * `[{"kind":"minCount","value":1}, {"kind":"in","values":["<iri>",..]}]`.
+     * Subset of `poet_host` SHACL.validate kinds: minCount, maxCount,
+     * minLength, maxLength, datatype (xsd:* short names), in.
+     * @param {string} subject_iri
+     * @param {string} path_iri
+     * @param {string} constraints_json
+     * @returns {boolean}
+     */
+    validate_shacl(subject_iri, path_iri, constraints_json) {
+        const ptr0 = passStringToWasm0(subject_iri, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(path_iri, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passStringToWasm0(constraints_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ret = wasm.semanticslice_validate_shacl(this.__wbg_ptr, ptr0, len0, ptr1, len1, ptr2, len2);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0] !== 0;
+    }
+}
+if (Symbol.dispose) SemanticSlice.prototype[Symbol.dispose] = SemanticSlice.prototype.free;
+
+/**
  * WASM edge offload descriptor — distinct from governance [`crate::llm_agent::AgentIntent`].
  */
 export class WasmOffloadIntent {
@@ -3345,6 +3630,30 @@ export function asset_compile_10d(positions, triangles, nodes_flat) {
     const ptr2 = passArrayF32ToWasm0(nodes_flat, wasm.__wbindgen_malloc);
     const len2 = WASM_VECTOR_LEN;
     const ret = wasm.asset_compile_10d(ptr0, len0, ptr1, len1, ptr2, len2);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v4;
+}
+
+/**
+ * Compile authored review geometry with an explicit source attestation so
+ * QualiaPortal can admit it through its normal governance check.
+ * @param {Float32Array} positions
+ * @param {Uint32Array} triangles
+ * @param {string} source
+ * @returns {Uint8Array}
+ */
+export function asset_compile_10d_with_provenance(positions, triangles, source) {
+    const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray32ToWasm0(triangles, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(source, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ret = wasm.asset_compile_10d_with_provenance(ptr0, len0, ptr1, len1, ptr2, len2);
     if (ret[3]) {
         throw takeFromExternrefTable0(ret[2]);
     }
@@ -4126,6 +4435,58 @@ export function enforce_rights_ontology(subject_did) {
 }
 
 /**
+ * Comprehensive ontological entity verification for `.10d` living containers.
+ * @param {Uint8Array} bytes
+ * @returns {any}
+ */
+export function entity_verify_10d(bytes) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.entity_verify_10d(ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {any}
+ */
+export function entity_verify_10d_wasm(bytes) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.entity_verify_10d_wasm(ptr0, len0);
+    return ret;
+}
+
+/**
+ * Comprehensive ontological entity verification for `.hmc` bundles.
+ * @param {Uint8Array} bytes
+ * @returns {any}
+ */
+export function entity_verify_bundle(bytes) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.entity_verify_bundle(ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {any}
+ */
+export function entity_verify_bundle_wasm(bytes) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.entity_verify_bundle_wasm(ptr0, len0);
+    return ret;
+}
+
+/**
  * Enumerate ASP stable-model world contexts (`enumerate_stable_models`).
  * @param {any} val
  * @returns {any}
@@ -4861,6 +5222,46 @@ export function graph_spreading_activation(val) {
 }
 
 /**
+ * Inspect whether an HMC pack carries an Entity Family Manifest.
+ * @param {Uint8Array} pack
+ * @returns {boolean}
+ */
+export function hmc_has_family_manifest(pack) {
+    const ptr0 = passArray8ToWasm0(pack, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.hmc_has_family_manifest(ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Read and resolve a variant directly from an HMC pack in one zero-overhead call.
+ * @param {Uint8Array} pack
+ * @param {string} phenotype
+ * @param {string} stage
+ * @param {number} distance_meters
+ * @param {string} state
+ * @returns {any}
+ */
+export function hmc_resolve_variant_for_distance(pack, phenotype, stage, distance_meters, state) {
+    const ptr0 = passArray8ToWasm0(pack, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(phenotype, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(stage, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ptr3 = passStringToWasm0(state, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len3 = WASM_VECTOR_LEN;
+    const ret = wasm.hmc_resolve_variant_for_distance(ptr0, len0, ptr1, len1, ptr2, len2, distance_meters, ptr3, len3);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
  * Frozen host ABI stamp (`vibe-host-0.1`).
  * @returns {string}
  */
@@ -5061,6 +5462,25 @@ export function initializeCpuWasmEngineWithContext(model_data, max_context) {
 export function initialize_webgpu_engine(model_data) {
     const ret = wasm.initialize_webgpu_engine(model_data);
     return ret;
+}
+
+/**
+ * Hot-path pack inspection for scene hydration: structural validation
+ * (magic, version, whole-file CRC, entry bounds) plus the entry count.
+ * Per-entry SHA-256 is left to `load_hmc_scene`, which digests each asset
+ * and texture it actually resolves; the cold-path `verify_game_hmc` /
+ * `validate_game_hmc` gates still hash every entry.
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
+export function inspect_game_hmc(bytes) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.inspect_game_hmc(ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] >>> 0;
 }
 
 /**
@@ -7026,6 +7446,66 @@ export function stit_brought_about_wasm(val) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Resolve a render key to its canonical taxon record as JSON; `null` when
+ * the key is unbound. Used by the runtime and by export tooling so the
+ * .vibe fixture is the only authored copy of the mapping.
+ * @param {string} render_key
+ * @returns {string}
+ */
+export function taxon_binding_json(render_key) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passStringToWasm0(render_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.taxon_binding_json(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
+/**
+ * Emit the Darwin Core statements for a render key as JSON — quin fields
+ * are hex strings so u64 values survive JS's f64 losslessness boundary,
+ * and each entry carries its source terms so exporters can write the
+ * pack's hash→IRI lexicon from the same authored emission.
+ * @param {string} render_key
+ * @param {string} asset_iri
+ * @returns {string}
+ */
+export function taxon_dwc_json(render_key, asset_iri) {
+    let deferred4_0;
+    let deferred4_1;
+    try {
+        const ptr0 = passStringToWasm0(render_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(asset_iri, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.taxon_dwc_json(ptr0, len0, ptr1, len1);
+        var ptr3 = ret[0];
+        var len3 = ret[1];
+        if (ret[3]) {
+            ptr3 = 0; len3 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred4_0 = ptr3;
+        deferred4_1 = len3;
+        return getStringFromWasm0(ptr3, len3);
+    } finally {
+        wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
+    }
 }
 
 /**
@@ -9575,32 +10055,32 @@ function __wbg_get_imports() {
             return ret;
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2642, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2718, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1918, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1977, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1919, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1978, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuDeviceLostInfo__GpuDeviceLostInfo______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000004: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1918, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1977, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__3);
             return ret;
         },
         __wbindgen_cast_0000000000000005: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1918, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1977, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__4);
             return ret;
         },
         __wbindgen_cast_0000000000000006: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 1137, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 1190, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke_______true_);
             return ret;
         },
@@ -9797,6 +10277,9 @@ const CharacterSimulationFinalization = (typeof FinalizationRegistry === 'undefi
 const CompiledCellFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_compiledcell_free(ptr, 1));
+const EntityFamilyManifestWrapperFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_entityfamilymanifestwrapper_free(ptr, 1));
 const FederatedNodeManagerFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_federatednodemanager_free(ptr, 1));
@@ -9818,6 +10301,9 @@ const QualiaHudFinalization = (typeof FinalizationRegistry === 'undefined')
 const QualiaPortalFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_qualiaportal_free(ptr, 1));
+const SemanticSliceFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_semanticslice_free(ptr, 1));
 const WasmOffloadIntentFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_wasmoffloadintent_free(ptr, 1));

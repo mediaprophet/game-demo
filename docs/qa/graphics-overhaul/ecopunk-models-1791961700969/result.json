@@ -1,0 +1,510 @@
+{
+  "origin": "http://127.0.0.1:8092",
+  "modelFolder": "C:\\github\\ecopunk\\assets\\models\\corymbia-aparrerinja",
+  "output": "C:\\github\\game-demo\\docs\\qa\\graphics-overhaul\\ecopunk-models-1791961700969",
+  "models": [
+    {
+      "id": "mature-tree",
+      "components": 4,
+      "load": {
+        "assets_loaded": 4,
+        "organs_loaded": 4,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 18812,
+        "vertex_count": 16186,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 4,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/mature-tree/chalk-bark",
+            "vertex_start": 0,
+            "vertex_count": 610
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/mature-tree/branchwork",
+            "vertex_start": 610,
+            "vertex_count": 968
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/mature-tree/falcate-foliage",
+            "vertex_start": 1578,
+            "vertex_count": 11440
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/mature-tree/cream-buds",
+            "vertex_start": 13018,
+            "vertex_count": 3168
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 16186,
+        "index_count": 56436,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "juvenile-tree",
+      "components": 4,
+      "load": {
+        "assets_loaded": 4,
+        "organs_loaded": 4,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 18812,
+        "vertex_count": 16186,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 4,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/juvenile-tree/chalk-bark",
+            "vertex_start": 0,
+            "vertex_count": 610
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/juvenile-tree/branchwork",
+            "vertex_start": 610,
+            "vertex_count": 968
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/juvenile-tree/falcate-foliage",
+            "vertex_start": 1578,
+            "vertex_count": 11440
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/juvenile-tree/cream-buds",
+            "vertex_start": 13018,
+            "vertex_count": 3168
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 16186,
+        "index_count": 56436,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "multi-stem-tree",
+      "components": 4,
+      "load": {
+        "assets_loaded": 4,
+        "organs_loaded": 4,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 18996,
+        "vertex_count": 16286,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 4,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/multi-stem-tree/chalk-bark",
+            "vertex_start": 0,
+            "vertex_count": 710
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/multi-stem-tree/branchwork",
+            "vertex_start": 710,
+            "vertex_count": 968
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/multi-stem-tree/falcate-foliage",
+            "vertex_start": 1678,
+            "vertex_count": 11440
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/multi-stem-tree/cream-buds",
+            "vertex_start": 13118,
+            "vertex_count": 3168
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 16286,
+        "index_count": 56988,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "rocky-open-tree",
+      "components": 4,
+      "load": {
+        "assets_loaded": 4,
+        "organs_loaded": 4,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 11992,
+        "vertex_count": 10026,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 4,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/rocky-open-tree/chalk-bark",
+            "vertex_start": 0,
+            "vertex_count": 610
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/rocky-open-tree/branchwork",
+            "vertex_start": 610,
+            "vertex_count": 704
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/rocky-open-tree/falcate-foliage",
+            "vertex_start": 1314,
+            "vertex_count": 6600
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/rocky-open-tree/cream-buds",
+            "vertex_start": 7914,
+            "vertex_count": 2112
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 10026,
+        "index_count": 35976,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "ground-scorched-tree",
+      "components": 4,
+      "load": {
+        "assets_loaded": 4,
+        "organs_loaded": 4,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 14256,
+        "vertex_count": 13052,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 4,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/ground-scorched-tree/chalk-bark",
+            "vertex_start": 0,
+            "vertex_count": 610
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/ground-scorched-tree/branchwork",
+            "vertex_start": 610,
+            "vertex_count": 968
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/ground-scorched-tree/falcate-foliage",
+            "vertex_start": 1578,
+            "vertex_count": 11440
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/ground-scorched-tree/lower-trunk-scorch",
+            "vertex_start": 13018,
+            "vertex_count": 34
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 13052,
+        "index_count": 42768,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "canopy-scorched-tree",
+      "components": 3,
+      "load": {
+        "assets_loaded": 3,
+        "organs_loaded": 3,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 3060,
+        "vertex_count": 2326,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 3,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/canopy-scorched-tree/chalk-bark",
+            "vertex_start": 0,
+            "vertex_count": 610
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/canopy-scorched-tree/branchwork",
+            "vertex_start": 610,
+            "vertex_count": 308
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/canopy-scorched-tree/falcate-foliage",
+            "vertex_start": 918,
+            "vertex_count": 1408
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 2326,
+        "index_count": 9180,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "epicormic-regrowth-tree",
+      "components": 5,
+      "load": {
+        "assets_loaded": 5,
+        "organs_loaded": 5,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 6512,
+        "vertex_count": 5572,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 5,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/epicormic-regrowth-tree/chalk-bark",
+            "vertex_start": 0,
+            "vertex_count": 610
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/epicormic-regrowth-tree/branchwork",
+            "vertex_start": 610,
+            "vertex_count": 572
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/epicormic-regrowth-tree/falcate-foliage",
+            "vertex_start": 1182,
+            "vertex_count": 4180
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/epicormic-regrowth-tree/lower-trunk-scorch",
+            "vertex_start": 5362,
+            "vertex_count": 34
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/epicormic-regrowth-tree/epicormic-shoots",
+            "vertex_start": 5396,
+            "vertex_count": 176
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 5572,
+        "index_count": 19536,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "leaf-study",
+      "components": 2,
+      "load": {
+        "assets_loaded": 2,
+        "organs_loaded": 2,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 28,
+        "vertex_count": 18,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 2,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/leaf-study/blade",
+            "vertex_start": 0,
+            "vertex_count": 4
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/leaf-study/midrib",
+            "vertex_start": 4,
+            "vertex_count": 14
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 18,
+        "index_count": 84,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "flower-study",
+      "components": 3,
+      "load": {
+        "assets_loaded": 3,
+        "organs_loaded": 3,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 1032,
+        "vertex_count": 615,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 3,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/flower-study/receptacle",
+            "vertex_start": 0,
+            "vertex_count": 165
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/flower-study/stamens",
+            "vertex_start": 165,
+            "vertex_count": 432
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/flower-study/pedicel",
+            "vertex_start": 597,
+            "vertex_count": 18
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 615,
+        "index_count": 3096,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "gumnut-study",
+      "components": 3,
+      "load": {
+        "assets_loaded": 3,
+        "organs_loaded": 3,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 548,
+        "vertex_count": 325,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 3,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/gumnut-study/capsule",
+            "vertex_start": 0,
+            "vertex_count": 165
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/gumnut-study/rim",
+            "vertex_start": 165,
+            "vertex_count": 144
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/gumnut-study/pedicel",
+            "vertex_start": 309,
+            "vertex_count": 16
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 325,
+        "index_count": 1644,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    },
+    {
+      "id": "bark-study",
+      "components": 2,
+      "load": {
+        "assets_loaded": 2,
+        "organs_loaded": 2,
+        "assets_refused": 0,
+        "organs_refused": 0,
+        "total_triangles": 460,
+        "vertex_count": 270,
+        "renderer": "webgpu",
+        "material_pipeline": true,
+        "materials_loaded": 1,
+        "material_ranges": 2,
+        "semantic_nodes": 0,
+        "uploaded": true,
+        "parts": [
+          {
+            "id": "eco:model/corymbia-aparrerinja/bark-study/surface",
+            "vertex_start": 0,
+            "vertex_count": 42
+          },
+          {
+            "id": "eco:model/corymbia-aparrerinja/bark-study/weathering",
+            "vertex_start": 42,
+            "vertex_count": 228
+          }
+        ]
+      },
+      "renderer": {
+        "renderer": "webgpu",
+        "vertex_count": 270,
+        "index_count": 1380,
+        "frames_presented": 1,
+        "uploaded": true,
+        "success": true
+      }
+    }
+  ],
+  "pageErrors": [],
+  "passed": false,
+  "error": "page.waitForFunction: Timeout 30000ms exceeded.\n    at C:\\github\\game-demo\\scripts\\check-ecopunk-model-review.mjs:115:14",
+  "localModelStatus": "Declared graph files are missing or exceed review limits.",
+  "pageStatus": "Select an asset entry, then click \"Load into Viewport Engine\"."
+}

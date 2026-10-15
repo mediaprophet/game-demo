@@ -1,0 +1,11 @@
+{
+  "origin": "http://127.0.0.1:8092",
+  "modelFolder": "C:\\github\\ecopunk\\assets\\models\\corymbia-aparrerinja",
+  "output": "C:\\github\\game-demo\\docs\\qa\\graphics-overhaul\\ecopunk-models-1791961335591",
+  "models": [],
+  "pageErrors": [],
+  "passed": false,
+  "error": "page.goto: net::ERR_NETWORK_ACCESS_DENIED at http://127.0.0.1:8092/asset-review.html\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:8092/asset-review.html\", waiting until \"domcontentloaded\"\u001b[22m\n\n    at C:\\github\\game-demo\\scripts\\check-ecopunk-model-review.mjs:24:14",
+  "localModelStatus": null,
+  "pageStatus": null
+}

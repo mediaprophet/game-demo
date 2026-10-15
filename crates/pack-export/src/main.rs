@@ -16,6 +16,9 @@
 fn main() {}
 
 #[cfg(not(target_arch = "wasm32"))]
+mod tiers;
+
+#[cfg(not(target_arch = "wasm32"))]
 mod imp {
 use qualia_core_db::bundle::{BundleReader, BundleWriter};
 use qualia_core_db::lexicon::generate_60bit_token;
@@ -270,6 +273,13 @@ fn valid_entry_key(key: &str) -> bool {
     if key.starts_with("10d/") && key.ends_with(".10d") {
         return true;
     }
+    if let Some(name) = key.strip_prefix("impo/") {
+        return !name.is_empty()
+            && name.ends_with(".impo")
+            && name
+                .bytes()
+                .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-' || b == b'.');
+    }
     if let Some(hex_part) = key.strip_prefix("textures/sha256/") {
         return hex_part.len() == 64
             && hex_part
@@ -353,6 +363,69 @@ fn run_style(
     }
     if stmt_map.len() > MAX_STATEMENTS {
         return Err("semantic statement count exceeds bound".into());
+    }
+
+    // Reverse-LOD tiers: decimated mesh (Tier 2) and hemi-octahedral
+    // impostor atlas (Tier 3) are emitted as sibling sealed `.10d` entries
+    // and linked from each asset's `tiers` block. They cannot live inside
+    // the hero container — the ascending section encoder would place IMPO
+    // after the mesh, breaking the verifier's reverse-LOD layout rule.
+    let mut tier_files: Vec<(String, Vec<u8>)> = Vec::new();
+    for asset in &mut stamped_assets {
+        let hero_file = asset
+            .get("file")
+            .and_then(Json::as_str)
+            .ok_or("asset missing file")?
+            .to_owned();
+        let rgba = asset
+            .get("rgba")
+            .and_then(Json::as_array)
+            .ok_or_else(|| format!("asset {hero_file} missing rgba"))?;
+        let base_rgb = [
+            rgba.first().and_then(Json::as_f64).unwrap_or(0.5) as f32,
+            rgba.get(1).and_then(Json::as_f64).unwrap_or(0.5) as f32,
+            rgba.get(2).and_then(Json::as_f64).unwrap_or(0.5) as f32,
+        ];
+        let hero_bytes = std::fs::read(style_root.join(&hero_file))?;
+        let sidecars = crate::tiers::emit_sidecars(&hero_file, &hero_bytes, base_rgb)
+            .map_err(|e| format!("{hero_file}: {e}"))?;
+        let tiers = asset
+            .as_object_mut()
+            .ok_or("asset is not an object")?
+            .entry("tiers")
+            .or_insert_with(|| json!({}));
+        if let Some((key, bytes, tris)) = sidecars.tier2 {
+            let sha = sha256_hex(&bytes);
+            tiers["lod2"] = json!({
+                "file": key,
+                "sha256": sha,
+                "bytes": bytes.len(),
+                "triangles": tris,
+            });
+            let out_path = style_root.join(&key);
+            if let Some(parent) = out_path.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+            std::fs::write(&out_path, &bytes)?;
+            tier_files.push((key, bytes));
+        }
+        let (key, bytes) = sidecars.tier3;
+        tiers["impostor"] = json!({
+            "file": key,
+            "sha256": sha256_hex(&bytes),
+            "bytes": bytes.len(),
+            "grid": crate::tiers::IMPOSTOR_GRID,
+            "viewResolution": crate::tiers::IMPOSTOR_VIEW_RES,
+            // Raw IMPO wire payload (44-byte mini header + atlas), not a
+            // .10d container — the upstream IMPO section codec panics.
+            "format": "impo-wire-v1",
+        });
+        let out_path = style_root.join(&key);
+        if let Some(parent) = out_path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        std::fs::write(&out_path, &bytes)?;
+        tier_files.push((key, bytes));
     }
     let stmts: Vec<&Statement> = stmt_map.values().collect();
     validate_semantic_shape(&stmts, &bound_asset_ids, bindings)?;
@@ -461,6 +534,19 @@ fn run_style(
         }
         writer
             .add_file(file, "10d", bytes, None)
+            .map_err(|e| format!("{e:?}"))?;
+        entry_count += 1;
+    }
+    // Reverse-LOD sidecars: `--tier2--` decimated meshes ride the `10d`
+    // pack type; `--tier3--` impostor atlases are raw IMPO wire payloads
+    // (`.impo`) because the upstream IMPO section codec is unusable.
+    for (key, bytes) in &tier_files {
+        if !valid_entry_key(key) {
+            return Err(format!("invalid tier entry key {key}").into());
+        }
+        let kind = if key.ends_with(".impo") { "impo" } else { "10d" };
+        writer
+            .add_file(key, kind, bytes.clone(), None)
             .map_err(|e| format!("{e:?}"))?;
         entry_count += 1;
     }

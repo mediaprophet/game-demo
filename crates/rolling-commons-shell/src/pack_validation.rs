@@ -73,8 +73,17 @@ pub fn verify_game_pack(bytes: &[u8]) -> Result<u32, String> {
                 let asset = reader
                     .get(&entry.key)
                     .ok_or_else(|| format!("HMC asset is missing: {}", entry.key))?;
-                let materials =
-                    verify_10d_asset(asset).map_err(|error| format!("{}: {error}", entry.key))?;
+                // Tier 2 reverse-LOD siblings travel as their own sealed .10d
+                // containers (`--tier2--` decimated mesh). They intentionally
+                // carry no material/UV payload, so they take the sidecar path
+                // instead of the hero-asset check.
+                let materials = if entry.key.contains("--tier2--") {
+                    verify_tier2_asset(asset)
+                        .map_err(|error| format!("{}: {error}", entry.key))?;
+                    Vec::new()
+                } else {
+                    verify_10d_asset(asset).map_err(|error| format!("{}: {error}", entry.key))?
+                };
                 for material in materials {
                     for digest in [
                         material.base_color_texture,
@@ -103,6 +112,21 @@ pub fn verify_game_pack(bytes: &[u8]) -> Result<u32, String> {
                         .map_err(|error| format!("{} image: {error:?}", entry.key))?;
                     }
                 }
+            }
+            "impo" if entry.key.starts_with("impo/") && entry.key.ends_with(".impo") => {
+                let asset = reader
+                    .get(&entry.key)
+                    .ok_or_else(|| format!("HMC impostor is missing: {}", entry.key))?;
+                verify_impo_asset(asset).map_err(|error| format!("{}: {error}", entry.key))?;
+            }
+            "q42" if entry.key.starts_with("sem/") && entry.key.ends_with(".q42") => {
+                let bytes = reader
+                    .get(&entry.key)
+                    .ok_or_else(|| format!("HMC semantic volume is missing: {}", entry.key))?;
+                qualia_core_db::q42::q42_volume::Q42RangeVolume::open(
+                    qualia_core_db::q42::q42_volume::OpfsSliceRangeSource::new(bytes),
+                )
+                .map_err(|error| format!("{}: q42 volume: {error}", entry.key))?;
             }
             "image/png" if entry.key.starts_with("textures/sha256/") => {
                 let digest: [u8; 32] = entry
@@ -239,4 +263,104 @@ fn verify_10d_asset(bytes: &[u8]) -> Result<Vec<MaterialRecord>, String> {
         Err(error) => return Err(format!("textured asset UV01: {error:?}")),
     }
     Ok(materials)
+}
+
+/// Verify a Tier 2 reverse-LOD sidecar: a sealed container holding exactly
+/// one decimated QuantizedMesh payload and no material bindings.
+fn verify_tier2_asset(bytes: &[u8]) -> Result<(), String> {
+    let header = Container10dHeader::parse(bytes).map_err(|error| format!("header: {error:?}"))?;
+    let actual_crc = compute_whole_file_crc32c(bytes);
+    if actual_crc != header.header_crc32c {
+        return Err(format!(
+            "whole-file CRC mismatch: expected {:#010x}, got {actual_crc:#010x}",
+            header.header_crc32c
+        ));
+    }
+    let sections =
+        parse_section_table(bytes, &header).map_err(|error| format!("section table: {error:?}"))?;
+    let mesh_section = sections
+        .iter()
+        .find(|section| section.typ() == Some(SectionType::QuantizedMesh))
+        .ok_or_else(|| "tier2 mesh section is missing".to_owned())?;
+    let start = mesh_section.byte_offset as usize;
+    let end = start
+        .checked_add(mesh_section.byte_length as usize)
+        .filter(|end| *end <= bytes.len())
+        .ok_or_else(|| "tier2 mesh section is out of bounds".to_owned())?;
+    let mesh = decode_mesh_section(&bytes[start..end])
+        .map_err(|error| format!("tier2 mesh decode: {error:?}"))?;
+    if mesh.positions.is_empty()
+        || mesh.triangles.is_empty()
+        || mesh
+            .positions
+            .iter()
+            .flatten()
+            .any(|value| !value.is_finite())
+        || mesh
+            .triangles
+            .iter()
+            .flatten()
+            .any(|&index| index as usize >= mesh.positions.len())
+    {
+        return Err("tier2 mesh has non-finite vertices or invalid indices".into());
+    }
+    Ok(())
+}
+
+/// Byte length of the IMPO wire header — the true
+/// `ImpostorAtlasMiniHeader` layout. Upstream `IMPOSTOR_MINI_HEADER_SIZE`
+/// says 64 while the struct is 44 bytes, so every upstream IMPO
+/// encode/decode/verify path panics; game packs ship the raw wire payload
+/// as `impo/…​.impo` entries and check it here without the broken codec.
+const IMPOSTOR_WIRE_HEADER_SIZE: usize = 44;
+
+fn read_u16_le(bytes: &[u8], offset: usize) -> u16 {
+    u16::from_le_bytes([bytes[offset], bytes[offset + 1]])
+}
+fn read_u32_le(bytes: &[u8], offset: usize) -> u32 {
+    u32::from_le_bytes([
+        bytes[offset],
+        bytes[offset + 1],
+        bytes[offset + 2],
+        bytes[offset + 3],
+    ])
+}
+fn read_f32_le(bytes: &[u8], offset: usize) -> f32 {
+    f32::from_le_bytes([
+        bytes[offset],
+        bytes[offset + 1],
+        bytes[offset + 2],
+        bytes[offset + 3],
+    ])
+}
+
+/// Verify a Tier 3 impostor sidecar: the raw IMPO wire payload
+/// (44-byte mini header + RGBA8 atlas), not a `.10d` container.
+fn verify_impo_asset(bytes: &[u8]) -> Result<(), String> {
+    if bytes.len() <= IMPOSTOR_WIRE_HEADER_SIZE {
+        return Err("tier3 impostor payload is too short".into());
+    }
+    if bytes[..4] != *b"IMPO" {
+        return Err("tier3 impostor has bad magic".into());
+    }
+    if read_u16_le(bytes, 4) != 1 {
+        return Err("tier3 impostor version is unsupported".into());
+    }
+    let grid = read_u16_le(bytes, 8) as usize;
+    let view_res = read_u16_le(bytes, 10) as usize;
+    let sphere_center = [read_f32_le(bytes, 12), read_f32_le(bytes, 16), read_f32_le(bytes, 20)];
+    let sphere_radius = read_f32_le(bytes, 24);
+    let atlas_byte_size = read_u32_le(bytes, 28) as usize;
+    if atlas_byte_size == 0
+        || bytes.len() != IMPOSTOR_WIRE_HEADER_SIZE + atlas_byte_size
+        || grid == 0
+        || view_res == 0
+        || atlas_byte_size != grid * grid * view_res * view_res * 4
+        || sphere_center.iter().any(|v| !v.is_finite())
+        || !sphere_radius.is_finite()
+        || sphere_radius <= 0.0
+    {
+        return Err("tier3 impostor has invalid bounds, grid, or payload length".into());
+    }
+    Ok(())
 }

@@ -22,6 +22,7 @@ mod character_simulation;
 mod drive_contact_integration;
 mod drive_contacts;
 mod drive_session;
+mod entity_sections;
 mod fauna;
 mod fauna_animation;
 mod flora;
@@ -36,7 +37,9 @@ mod resident_animation;
 mod resident_props;
 mod rig_workshop;
 mod taxon_bindings;
+mod session_journal;
 mod terrain;
+mod variant_resolver;
 mod vehicle_animation;
 mod vehicle_cabins;
 mod vehicle_camera;
@@ -49,6 +52,8 @@ mod workshop_structure;
 
 pub use campaign_simulation::CampaignSimulation;
 pub use character_simulation::CharacterSimulation;
+pub use session_journal::GameSessionJournal;
+pub use variant_resolver::EntityFamilyManifestWrapper;
 
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
@@ -301,7 +306,7 @@ pub fn pinned_qualiadb_revision() -> String {
 pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec<u8>, JsValue> {
     use qualia_core_db::bundle::{BundleReader, BundleWriter};
 
-    if entries.length() > 4096 || manifest_json.len() > 2_097_152 {
+    if entries.length() > 16384 || manifest_json.len() > 16_777_216 {
         return Err(JsValue::from_str(
             "game pack exceeds bounded entry or manifest limit",
         ));
@@ -382,7 +387,7 @@ pub fn verify_game_hmc(bytes: &[u8]) -> Result<u32, JsValue> {
     use qualia_core_db::bundle::BundleReader;
     let reader =
         BundleReader::parse(bytes).map_err(|error| JsValue::from_str(&error.to_string()))?;
-    if reader.entries().len() > 4097
+    if reader.entries().len() > 16385
         || reader
             .entries()
             .iter()
@@ -391,6 +396,22 @@ pub fn verify_game_hmc(bytes: &[u8]) -> Result<u32, JsValue> {
         return Err(JsValue::from_str(
             "HMC entry count or digest verification failed",
         ));
+    }
+    Ok(reader.entries().len() as u32)
+}
+
+/// Hot-path pack inspection for scene hydration: structural validation
+/// (magic, version, whole-file CRC, entry bounds) plus the entry count.
+/// Per-entry SHA-256 is left to `load_hmc_scene`, which digests each asset
+/// and texture it actually resolves; the cold-path `verify_game_hmc` /
+/// `validate_game_hmc` gates still hash every entry.
+#[wasm_bindgen]
+pub fn inspect_game_hmc(bytes: &[u8]) -> Result<u32, JsValue> {
+    use qualia_core_db::bundle::BundleReader;
+    let reader =
+        BundleReader::parse(bytes).map_err(|error| JsValue::from_str(&error.to_string()))?;
+    if reader.entries().len() > 16385 {
+        return Err(JsValue::from_str("HMC entry count exceeds bound"));
     }
     Ok(reader.entries().len() as u32)
 }
@@ -515,6 +536,41 @@ pub fn asset_compile_10d(
         })
         .collect();
     compile_mesh_to_10d_with_nodes(&mesh, &nodes).map_err(|e| JsValue::from_str(&format!("{e:?}")))
+}
+
+/// Compile authored review geometry with an explicit source attestation so
+/// QualiaPortal can admit it through its normal governance check.
+#[wasm_bindgen]
+pub fn asset_compile_10d_with_provenance(
+    positions: &[f32],
+    triangles: &[u32],
+    source: &str,
+) -> Result<Vec<u8>, JsValue> {
+    use qualia_core_db::container_10d::provenance_section::ProvenanceSidecar;
+    use qualia_core_db::render::compile_10d::{
+        compile_mesh_to_10d_with_extras_and_frames, decode_10d_mesh, Compile10dExtras,
+    };
+
+    if source.trim().is_empty() || source.len() > 64 * 1024 {
+        return Err(JsValue::from_str("source attestation must be non-empty and at most 64 KiB"));
+    }
+    let bare = asset_compile_10d(positions, triangles, &[])?;
+    let mesh = decode_10d_mesh(&bare).map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
+    let provenance = ProvenanceSidecar::new(
+        source.as_bytes().to_vec(),
+        "application/vnd.ecopunk.model-source+json;version=1",
+        "All rights reserved (licence not assigned)",
+    );
+    compile_mesh_to_10d_with_extras_and_frames(
+        &mesh,
+        &[],
+        Some(&provenance),
+        Compile10dExtras::default(),
+        None,
+        None,
+        None,
+    )
+    .map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Compile one feature from a caller-supplied OSM Overpass JSON snapshot into
@@ -884,16 +940,28 @@ pub fn asset_verify_10d(bytes: &[u8]) -> Result<JsValue, JsValue> {
             Err(qualia_core_db::container_10d::MaterialContainerError::Missing) => (0, 0),
             Err(error) => return Err(JsValue::from_str(&format!("material section: {error:?}"))),
         };
-    let (surfel_count, surfel_sphere_radius) =
-        match qualia_core_db::container_10d::surfel_section::decode_surfel_section(bytes) {
-            Ok((h, _)) => (h.surfel_count as usize, h.sphere_radius),
-            Err(_) => (0, 0.0),
-        };
-    let (impostor_dim, impostor_res) =
-        match qualia_core_db::container_10d::impostor_section::decode_impostor_section(bytes) {
-            Ok((h, _)) => (h.grid_dimension as usize, h.view_resolution as usize),
-            Err(_) => (0, 0),
-        };
+    // `decode_surfel_section` takes the *section payload*, not the whole
+    // container — slice it out of the section table first.
+    let (surfel_count, surfel_sphere_radius) = match section_payload(
+        bytes,
+        qualia_core_db::container_10d::SectionType::HierarchicalSurfels,
+    ) {
+        Some(payload) => {
+            match qualia_core_db::container_10d::surfel_section::decode_surfel_section(payload) {
+                Ok((h, _)) => (h.surfel_count as usize, h.sphere_radius),
+                Err(_) => (0, 0.0),
+            }
+        }
+        None => (0, 0.0),
+    };
+    // Upstream `decode_impostor_section` panics on any input: the declared
+    // IMPOSTOR_MINI_HEADER_SIZE (64) disagrees with the actual 44-byte
+    // `ImpostorAtlasMiniHeader`. Locate the section through the section
+    // table and read the wire fields at fixed offsets instead.
+    let (impostor_dim, impostor_res) = match impostor_wire_view(bytes) {
+        Some((grid, res)) => (grid, res),
+        None => (0, 0),
+    };
     #[derive(serde::Serialize)]
     struct Verified {
         vertices: usize,
@@ -930,6 +998,41 @@ pub fn asset_verify_10d(bytes: &[u8]) -> Result<JsValue, JsValue> {
         max: mesh.max,
     })
     .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Slice one section's payload out of a `.10d` container by type.
+fn section_payload<'a>(
+    bytes: &'a [u8],
+    section_type: qualia_core_db::container_10d::SectionType,
+) -> Option<&'a [u8]> {
+    let header = qualia_core_db::container_10d::Container10dHeader::parse(bytes).ok()?;
+    let sections = qualia_core_db::container_10d::parse_section_table(bytes, &header).ok()?;
+    let section = sections.iter().find(|s| s.typ() == Some(section_type))?;
+    let start = section.byte_offset as usize;
+    let end = start.checked_add(section.byte_length as usize)?;
+    bytes.get(start..end)
+}
+
+/// Read `(grid_dimension, view_resolution)` from an in-container IMPO
+/// section's 44-byte wire header without touching the broken upstream
+/// codec. Returns `None` when the container carries no impostor section.
+fn impostor_wire_view(bytes: &[u8]) -> Option<(usize, usize)> {
+    let payload = section_payload(
+        bytes,
+        qualia_core_db::container_10d::SectionType::ImpostorAtlas,
+    )?;
+    if payload.len() < 44
+        || payload[..4] != *b"IMPO"
+        || u16::from_le_bytes([payload[4], payload[5]]) != 1
+    {
+        return None;
+    }
+    let grid = u16::from_le_bytes([payload[8], payload[9]]) as usize;
+    let res = u16::from_le_bytes([payload[10], payload[11]]) as usize;
+    if grid == 0 || res == 0 {
+        return None;
+    }
+    Some((grid, res))
 }
 
 /// Comprehensive ontological entity verification for `.10d` living containers.
@@ -1491,7 +1594,7 @@ impl GamePortal {
             render_role: String,
         }
 
-        if manifest_json.len() > 2_000_000 {
+        if manifest_json.len() > 16_777_216 {
             return Err(JsValue::from_str("HMC scene manifest exceeds bound"));
         }
         let manifest: Manifest = serde_json::from_str(manifest_json)
@@ -1506,7 +1609,7 @@ impl GamePortal {
         }
         let scene_assets =
             if scene.assets.is_empty() {
-                if scene.asset_indices.len() > 512 {
+                if scene.asset_indices.len() > 4096 {
                     return Err(JsValue::from_str("HMC scene asset count is outside bounds"));
                 }
                 scene
@@ -1521,14 +1624,14 @@ impl GamePortal {
             } else {
                 scene.assets
             };
-        if scene_assets.is_empty() || scene_assets.len() > 512 {
+        if scene_assets.is_empty() || scene_assets.len() > 4096 {
             return Err(JsValue::from_str("HMC scene asset count is outside bounds"));
         }
 
         use qualia_core_db::bundle::BundleReader;
         let reader = BundleReader::parse(hmc_bytes)
             .map_err(|e| JsValue::from_str(&format!("HMC scene bundle: {e}")))?;
-        if manifest.textures.len() > 96 {
+        if manifest.textures.len() > 512 {
             return Err(JsValue::from_str("HMC texture count exceeds bound"));
         }
         let mut resident_textures = 0u32;

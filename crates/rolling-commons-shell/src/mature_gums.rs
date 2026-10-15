@@ -1,26 +1,11 @@
 //! Authored mature eucalypt framing family for the Community Grounds.
-//! Qualia's revolve/transform primitives compile the woody skeleton and leaf
-//! assemblies. These are genus-level fictional plantings, not occurrence data.
+//! Qualia's botanical hull (Cescatti 1997) and sweep extrusion (Bishop frame)
+//! primitives compile the organic woody skeleton and continuous foliage canopies.
 
 use crate::asset_catalog::{
-    AssetRecipe, EllipsoidInstance, LimbSegment, ParametricRecipe, LIVING_FOLIAGE, WEATHERED_TIMBER,
+    AssetRecipe, LimbSegment, ParametricRecipe, LIVING_FOLIAGE, WEATHERED_TIMBER,
 };
-
-fn wood(id: &str, center: [f32; 3], limbs: Vec<LimbSegment>, color: [f32; 4]) -> AssetRecipe {
-    AssetRecipe {
-        id: format!("rc:asset/{id}"),
-        parts: Vec::new(),
-        parametric: Some(ParametricRecipe::LimbCluster {
-            center,
-            limbs,
-            radial_segments: 14,
-        }),
-        color,
-        material_family: WEATHERED_TIMBER,
-        vibe_source: None,
-        render_role: "opaque".into(),
-    }
-}
+use qualia_core_db::specialized_libs::computational_geometry::sweep_extrusion::ExtrusionStation;
 
 fn limb(start: [f32; 3], end: [f32; 3], a: f32, b: f32) -> LimbSegment {
     LimbSegment {
@@ -31,41 +16,122 @@ fn limb(start: [f32; 3], end: [f32; 3], a: f32, b: f32) -> LimbSegment {
     }
 }
 
-/// Narrow, pendulous leaflets grouped into branch-end sprays, with open sky
-/// between sprays. There is deliberately no solid crown hiding the branches.
-fn leaves(id: &str, tips: &[[f32; 3]], phase: f32, tone: usize) -> AssetRecipe {
-    let mut instances = Vec::with_capacity(tips.len() * 24);
-    for (spray, tip) in tips.iter().enumerate() {
-        for leaf in 0..24 {
-            let angle = phase + leaf as f32 * 2.399_963;
-            let variation = ((leaf * 13 + spray * 7 + tone * 11) % 23) as f32 / 23.0;
-            let reach = 0.18 + variation * 0.48;
-            instances.push(EllipsoidInstance {
-                center: [
-                    tip[0] + angle.cos() * reach,
-                    tip[1] + (variation - 0.5) * 0.40 - (leaf % 4) as f32 * 0.065,
-                    tip[2] + angle.sin() * reach * 0.76,
-                ],
-                radii: [0.035 + variation * 0.016, 0.19 + variation * 0.13, 0.013],
-                pitch_deg: 10.0 + angle.sin() * 32.0,
-                yaw_deg: angle.to_degrees(),
-                roll_deg: angle.cos() * 24.0,
-            });
-        }
+fn wood_limbs(id: &str, center: [f32; 3], limbs: Vec<LimbSegment>, color: [f32; 4]) -> AssetRecipe {
+    AssetRecipe {
+        id: format!("rc:asset/{id}"),
+        parts: Vec::new(),
+        parametric: Some(ParametricRecipe::LimbCluster {
+            center,
+            limbs,
+            radial_segments: 12,
+        }),
+        color,
+        material_family: WEATHERED_TIMBER,
+        vibe_source: None,
+        render_role: "opaque".into(),
     }
+}
+
+fn swept_trunk(id: &str, root: [f32; 3], h: f32, lean: f32, color: [f32; 4]) -> AssetRecipe {
+    let axis = vec![
+        [0.0, 0.0, 0.0],
+        [lean * 0.28, h * 0.23, 0.04],
+        [lean * 0.65, h * 0.45, -0.10],
+        [lean, h * 0.73, 0.08],
+    ];
+    let sides = 12;
+    let r = 0.32;
+    let profile: Vec<[f32; 2]> = (0..sides)
+        .map(|i| {
+            let a = i as f32 * std::f32::consts::TAU / sides as f32;
+            [a.cos() * r, a.sin() * r]
+        })
+        .collect();
+    let stations = vec![
+        ExtrusionStation {
+            scale_x: 1.0,
+            scale_y: 1.0,
+            twist_rad: 0.0,
+        },
+        ExtrusionStation {
+            scale_x: 0.82,
+            scale_y: 0.82,
+            twist_rad: 0.05,
+        },
+        ExtrusionStation {
+            scale_x: 0.58,
+            scale_y: 0.58,
+            twist_rad: 0.12,
+        },
+        ExtrusionStation {
+            scale_x: 0.32,
+            scale_y: 0.32,
+            twist_rad: 0.18,
+        },
+    ];
+    AssetRecipe {
+        id: format!("rc:asset/{id}"),
+        parts: Vec::new(),
+        parametric: Some(ParametricRecipe::SweepExtrusion {
+            center: root,
+            axis,
+            profile,
+            stations: Some(stations),
+            closed_section: true,
+            cap_ends: true,
+        }),
+        color,
+        material_family: WEATHERED_TIMBER,
+        vibe_source: None,
+        render_role: "opaque".into(),
+    }
+}
+
+/// Continuous, watertight botanical canopy envelopes (Cescatti 1997)
+/// replace hundreds of disjoint micro-spheres with smooth eucalypt foliage pads.
+fn canopy_envelope(id: &str, tips: &[[f32; 3]], phase: f32, tone: usize) -> AssetRecipe {
+    let mut center = [0.0; 3];
+    for tip in tips {
+        center[0] += tip[0];
+        center[1] += tip[1];
+        center[2] += tip[2];
+    }
+    let n = tips.len().max(1) as f32;
+    center[0] /= n;
+    center[1] /= n;
+    center[2] /= n;
+
     let palette = [
         [0.34, 0.42, 0.24, 1.0],
         [0.42, 0.49, 0.29, 1.0],
         [0.30, 0.39, 0.28, 1.0],
         [0.49, 0.53, 0.33, 1.0],
     ];
+    let variation = (phase * 3.7 + tone as f32 * 0.8).sin() * 0.18;
+    let base_r = (0.95 + variation).max(0.45);
+    let rx_neg = (base_r * 0.88).max(0.35);
+    let rx_pos = (base_r * 1.18).max(0.35);
+    let rz_neg = (base_r * 0.92).max(0.35);
+    let rz_pos = (base_r * 1.12).max(0.35);
+
+    let h_span = 0.85 + (phase * 2.1).cos().abs() * 0.3;
+    let bot_elev = -h_span * 0.42;
+    let top_elev = h_span * 0.58;
+    let mid_h = (bot_elev + top_elev) * 0.5;
+
     AssetRecipe {
         id: format!("rc:asset/{id}"),
         parts: Vec::new(),
-        parametric: Some(ParametricRecipe::EllipsoidCluster {
-            instances,
-            latitude: 4,
-            longitude: 6,
+        parametric: Some(ParametricRecipe::BotanicalHull {
+            center,
+            radii: [rx_neg, rx_pos, rz_neg, rz_pos],
+            heights: [mid_h - 0.05, mid_h + 0.08, mid_h + 0.02, mid_h - 0.04],
+            bottom_elevation: bot_elev,
+            top_elevation: top_elev,
+            bottom_shape: 1.8,
+            top_shape: 2.1,
+            slices: 14,
+            stacks: 7,
         }),
         color: palette[tone % palette.len()],
         material_family: LIVING_FOLIAGE,
@@ -89,18 +155,16 @@ pub fn assets() -> Vec<AssetRecipe> {
     {
         let root = [x, crate::terrain::settlement_height(0.0, x, z) - 0.01, z];
         let h = height;
-        let joint = [lean * 0.65, h * 0.45, -0.10];
-        let top = [lean, h * 0.73, 0.08];
-        result.push(wood(
+
+        // Smooth swept trunk with continuous taper
+        result.push(swept_trunk(
             &format!("tree-trunk-{key}"),
             root,
-            vec![
-                limb([0.0, 0.0, 0.0], [lean * 0.28, h * 0.23, 0.04], 0.31, 0.24),
-                limb([lean * 0.28, h * 0.23, 0.04], joint, 0.24, 0.17),
-                limb(joint, top, 0.17, 0.07),
-            ],
+            h,
+            lean,
             [0.76, 0.74, 0.63, 1.0],
         ));
+
         let mut branches = Vec::with_capacity(18);
         let mut tips = Vec::with_capacity(9);
         for branch in 0..9 {
@@ -121,13 +185,13 @@ pub fn assets() -> Vec<AssetRecipe> {
             branches.push(limb(elbow, tip, 0.046, 0.012));
             tips.push([root[0] + tip[0], root[1] + tip[1], root[2] + tip[2]]);
         }
-        result.push(wood(
+        result.push(wood_limbs(
             &format!("gum-fork-{key}"),
             root,
             branches,
             [0.64, 0.62, 0.51, 1.0],
         ));
-        result.push(wood(
+        result.push(wood_limbs(
             &format!("gum-bark-{key}"),
             root,
             vec![
@@ -146,8 +210,8 @@ pub fn assets() -> Vec<AssetRecipe> {
             ],
             [0.45, 0.41, 0.32, 1.0],
         ));
-        // Stable groups occupy different branch ends instead of layering solid
-        // ellipsoids and fine leaves at the same position.
+
+        // Stable canopy envelope groups occupy branch ends with continuous watertight meshes
         for (id, range, tone) in [
             (format!("tree-crown-{key}"), 0..2, index),
             (format!("canopy-{key}-a"), 2..4, index + 1),
@@ -156,7 +220,7 @@ pub fn assets() -> Vec<AssetRecipe> {
             (format!("gum-spray-{key}-east"), 7..8, index + 1),
             (format!("gum-foliage-{key}"), 8..9, index + 3),
         ] {
-            result.push(leaves(&id, &tips[range], phase, tone));
+            result.push(canopy_envelope(&id, &tips[range], phase, tone));
         }
     }
     result
