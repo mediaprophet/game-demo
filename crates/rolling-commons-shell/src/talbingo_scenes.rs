@@ -192,43 +192,139 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     // Fully rigged Australian touring vehicle with parametric coachwork, glazing, and wheels
     out.extend(crate::vehicles::rig_assets(0));
 
-    // Smooth parametric camper/explorer avatar draped on terrain
+    // Articulated Australian high-country bushwalker/explorer avatar draped on terrain
     let walk_y = crate::talbingo_terrain::elevation(site, 18.0, 3.5);
+    // Akubra felt hat brim
+    push_mesh(
+        &mut out,
+        "rc:asset/talbingo/walker-hat-brim",
+        [0.46, 0.38, 0.28, 1.0],
+        crate::asset_catalog::ParametricRecipe::Cylinder {
+            center: [18.0, walk_y + 1.45, 3.5],
+            radius: 0.26,
+            height: 0.022,
+            segments: 16,
+        },
+    );
+    // Akubra hat crown
+    push_mesh(
+        &mut out,
+        "rc:asset/talbingo/walker-hat-crown",
+        [0.44, 0.36, 0.26, 1.0],
+        crate::asset_catalog::ParametricRecipe::Cylinder {
+            center: [18.0, walk_y + 1.51, 3.5],
+            radius: 0.13,
+            height: 0.10,
+            segments: 14,
+        },
+    );
+    // Head & neck in warm tanned skin tone
     push_mesh(
         &mut out,
         "rc:asset/talbingo/walker-head",
-        [0.85, 0.72, 0.55, 1.0],
+        [0.82, 0.68, 0.54, 1.0],
         crate::asset_catalog::ParametricRecipe::Sphere {
-            center: [18.0, walk_y + 1.32, 3.5],
-            radius: 0.13,
+            center: [18.0, walk_y + 1.34, 3.5],
+            radius: 0.12,
             latitude: 12,
             longitude: 16,
         },
     );
+    // Outdoor expedition jacket / canvas vest
     push_mesh(
         &mut out,
         "rc:asset/talbingo/walker-coat",
-        [0.18, 0.34, 0.22, 1.0],
+        [0.26, 0.38, 0.24, 1.0],
         crate::asset_catalog::ParametricRecipe::Cylinder {
-            center: [18.0, walk_y + 0.82, 3.5],
-            radius: 0.18,
-            height: 0.62,
+            center: [18.0, walk_y + 0.88, 3.5],
+            radius: 0.19,
+            height: 0.56,
             segments: 14,
         },
     );
+    // Expedition backpack with strapped sleeping bedroll
+    push(
+        &mut out,
+        "rc:asset/talbingo/walker-pack",
+        [0.24, 0.26, 0.22, 1.0],
+        vec![
+            block([18.0, walk_y + 0.90, 3.5 - 0.21], [0.28, 0.44, 0.18]),
+            block([18.0, walk_y + 1.16, 3.5 - 0.21], [0.32, 0.12, 0.14]),
+        ],
+    );
+    // Articulated arms with rolled sleeves
+    push(
+        &mut out,
+        "rc:asset/talbingo/walker-arms",
+        [0.24, 0.35, 0.22, 1.0],
+        vec![
+            block([18.0 - 0.23, walk_y + 0.84, 3.5 + 0.02], [0.08, 0.44, 0.08]),
+            block([18.0 + 0.23, walk_y + 0.84, 3.5 + 0.02], [0.08, 0.44, 0.08]),
+        ],
+    );
+    // Trekking trousers and sturdy bushwalking boots
     push_mesh(
         &mut out,
         "rc:asset/talbingo/walker-legs",
-        [0.44, 0.40, 0.34, 1.0],
+        [0.34, 0.36, 0.32, 1.0],
         crate::asset_catalog::ParametricRecipe::Cylinder {
-            center: [18.0, walk_y + 0.26, 3.5],
-            radius: 0.14,
-            height: 0.52,
+            center: [18.0, walk_y + 0.30, 3.5],
+            radius: 0.13,
+            height: 0.48,
             segments: 12,
         },
     );
+    push(
+        &mut out,
+        "rc:asset/talbingo/walker-boots",
+        [0.22, 0.18, 0.14, 1.0],
+        vec![
+            block([18.0 - 0.08, walk_y + 0.06, 3.5 + 0.04], [0.10, 0.10, 0.18]),
+            block([18.0 + 0.08, walk_y + 0.06, 3.5 + 0.04], [0.10, 0.10, 0.18]),
+        ],
+    );
 
     out.extend(crate::talbingo_vegetation::assets(site));
+
+    // Natural stone campfire circle with glowing charcoal embers
+    let mut fire_stones = Vec::with_capacity(8);
+    for k in 0..8 {
+        let a = k as f32 * std::f32::consts::PI / 4.0;
+        let sx = 20.6 + 0.46 * a.cos();
+        let sz = 3.9 + camp_shift + 0.46 * a.sin();
+        let sy = crate::talbingo_terrain::elevation(site, sx, sz);
+        fire_stones.push(block([sx, sy + 0.07, sz], [0.16, 0.14, 0.16]));
+    }
+    push(
+        &mut out,
+        "talbingo-campfire-stones",
+        [0.50, 0.48, 0.46, 1.0],
+        fire_stones,
+    );
+    let ember_y = crate::talbingo_terrain::elevation(site, 20.6, 3.9 + camp_shift);
+    push(
+        &mut out,
+        "talbingo-campfire-embers",
+        [0.98, 0.42, 0.08, 1.0],
+        vec![block([20.6, ember_y + 0.035, 3.9 + camp_shift], [0.52, 0.05, 0.52])],
+    );
+
+    // Weathered ironbark campsite picnic table with bench seats
+    let table_x = 18.8;
+    let table_z = 4.8 + camp_shift;
+    let table_y = crate::talbingo_terrain::elevation(site, table_x, table_z);
+    push(
+        &mut out,
+        "talbingo-picnic-table",
+        [0.46, 0.35, 0.24, 1.0],
+        vec![
+            block([table_x, table_y + 0.46, table_z], [1.70, 0.08, 0.85]),
+            block([table_x, table_y + 0.26, table_z - 0.55], [1.70, 0.06, 0.30]),
+            block([table_x, table_y + 0.26, table_z + 0.55], [1.70, 0.06, 0.30]),
+            block([table_x - 0.65, table_y + 0.23, table_z], [0.08, 0.46, 1.25]),
+            block([table_x + 0.65, table_y + 0.23, table_z], [0.08, 0.46, 1.25]),
+        ],
+    );
 
     let mut tent_roofs = Vec::new();
     let mut tent_floors = Vec::new();
@@ -254,13 +350,13 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     push(
         &mut out,
         "talbingo-tent-canvas",
-        [0.76, 0.68, 0.52, 1.0],
+        [0.88, 0.42, 0.12, 1.0], // High-visibility alpine expedition orange
         tent_roofs,
     );
     push(
         &mut out,
         "talbingo-tent-doors",
-        [0.32, 0.28, 0.22, 1.0],
+        [0.22, 0.42, 0.25, 1.0], // Forest green vestibule
         tent_doors,
     );
     push(
@@ -272,7 +368,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     push(
         &mut out,
         "talbingo-tent-poles",
-        [0.55, 0.55, 0.52, 1.0],
+        [0.65, 0.65, 0.68, 1.0], // Anodized aluminium poles
         tent_poles,
     );
 

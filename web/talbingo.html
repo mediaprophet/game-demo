@@ -39,6 +39,10 @@ canvas{display:block;width:100%;height:calc(100vh - 87px);min-height:450px}
 .touch{flex-wrap:wrap}.choices{display:grid;gap:6px}
 @media(min-width:761px){main{height:calc(100vh - 84px);min-height:640px}aside{height:100%;overflow-y:auto}.play{height:100%;overflow:hidden}canvas{height:100%;min-height:0}}
 @media(max-width:760px){main{display:flex;flex-direction:column}.play{order:0}.play-touch{display:flex!important;position:absolute;left:10px;right:10px;bottom:60px;z-index:5;justify-content:center;flex-wrap:wrap}.play-touch button{background:#0e293de8;padding:8px;min-width:42px}aside{order:1}.touch:not(.play-touch){display:none}}
+.cam-ctrl{display:flex;gap:6px;align-items:center}
+.hud-card{background:#071c2dc0;padding:6px 10px;border-radius:6px;border:1px solid #00f0ff33;display:flex;flex-direction:column;gap:2px}
+.hud-val{color:#00f0ff;font-weight:700}
+.badge-alert{background:#ff3d0022;border:1px solid #ff3d00aa;color:#ff5252;padding:2px 8px;border-radius:4px;font-size:.74rem;display:none}
 </style></head><body>
 <header><div><h1>Talbingo Camping Drive</h1><p class="sub">Snowy Mountains alpine camping exploration & Kosciuszko wildlife survey · six campsite sectors</p></div><div class="pills"><span class="pill">CORE: ZERO-HEAP</span><span class="pill pill-gold">GEOLOGY: GSNSW WFS</span><span class="pill pill-green">GEODATA: WGS84 / OSM</span></div></header>
 <main><aside>
@@ -66,12 +70,12 @@ canvas{display:block;width:100%;height:calc(100vh - 87px);min-height:450px}
 <div class="stack"><label for="site">Choose a campsite sector</label><select id="site"></select></div>
 <p id="site-note" class="small"></p>
 <div class="stack"><button id="start">Drive to campsite</button><button id="return" disabled>Drive back to Talbingo</button><button id="restart">Reset this site</button></div>
-<div><strong>Sector objective</strong><p id="mission"></p><p id="objective" class="small"></p><button id="inspect" disabled>Inspect landmark</button><div id="choices" class="choices"></div><p class="small">At camp, use W A S D or touch arrows to walk. Drag to look around; scroll or use + / − to zoom.</p></div>
-<div><strong>Drive telemetry controls</strong><p class="small">W / ↑ accelerate · S / ↓ reverse · A D steer · Space brake. Release the keys to coast. The camera follows your position.</p><div class="touch"><button data-key="w">▲</button><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button><button data-key=" ">Brake</button></div></div>
+<div><strong>Sector objective</strong><p id="mission"></p><p id="objective" class="small"></p><button id="inspect" disabled>Inspect landmark</button><div id="choices" class="choices"></div><p class="small">At camp: W A S D to walk. Mouse/touch drag to look around. Scroll or + / − to zoom.</p></div>
+<div><strong>Drive telemetry controls</strong><p class="small">W / ↑ throttle · S / ↓ brake/reverse · A D steer · Space handbrake. Gamepad supported. Press C to cycle chase/drone camera.</p><div class="touch"><button data-key="w">▲</button><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button><button data-key=" ">Brake</button><button id="cam-toggle-btn">Cam</button></div></div>
 <div><strong>Telemetry progress</strong><p id="status" role="status">Loading QualiaDB scene…</p><div class="meter"><span id="progress"></span></div></div>
 <div><strong>Holosonic acoustic wavefield</strong><p class="small">Spatial wavefield synthesis: vector corridor propulsion hum, hydrodynamic fluid resonance, and landmark acoustic focal points.</p><button id="holosonic-toggle" style="display:flex;justify-content:space-between;align-items:center;width:100%"><span>Holosonic wavefield</span><span id="holosonic-badge" style="color:#ffd740;font-weight:700">STANDBY</span></button></div>
 <p class="small"><a href="game.html" style="color:#00e5ff">Main game</a> · Site shapes are original authored approximations. Check official park information before a real trip.</p>
-</aside><section class="play"><canvas id="scene" width="1280" height="760" aria-label="Three dimensional campsite game scene"></canvas><div class="reticle top-left"></div><div class="reticle top-right"></div><div class="reticle bottom-left"></div><div class="reticle bottom-right"></div><div class="overlay" id="place-label">Talbingo</div><div class="overlay telemetry-badge" id="telemetry-coord">LAT: -35.58536° S | LON: 148.32403° E</div><div class="touch play-touch" style="display:none"><button data-key="w" aria-label="Forward">▲</button><button data-key="a" aria-label="Left">◀</button><button data-key="s" aria-label="Back">▼</button><button data-key="d" aria-label="Right">▶</button><button data-key=" " aria-label="Brake">Brake</button><button data-zoom="in" aria-label="Zoom in">+</button><button data-zoom="out" aria-label="Zoom out">−</button></div><div class="drivehud"><span id="leg">Select a campsite</span><span id="distance">0 game units</span><span id="speed">0 units/s</span></div></section></main>
+</aside><section class="play"><canvas id="scene" width="1280" height="760" aria-label="Three dimensional campsite game scene"></canvas><div class="reticle top-left"></div><div class="reticle top-right"></div><div class="reticle bottom-left"></div><div class="reticle bottom-right"></div><div class="overlay" id="place-label">Talbingo</div><div class="overlay telemetry-badge" id="telemetry-coord">LAT: -35.58536° S | LON: 148.32403° E</div><div class="touch play-touch" style="display:none"><button data-key="w" aria-label="Forward">▲</button><button data-key="a" aria-label="Left">◀</button><button data-key="s" aria-label="Back">▼</button><button data-key="d" aria-label="Right">▶</button><button data-key=" " aria-label="Brake">Brake</button><button data-zoom="in" aria-label="Zoom in">+</button><button data-zoom="out" aria-label="Zoom out">−</button></div><div class="drivehud"><span id="leg">Select a campsite</span><span id="distance">0 game units</span><span id="speed">0 units/s</span><span id="hazard-pill" class="badge-alert">WILDLIFE ALERT</span><span id="cam-mode-pill" style="color:#80d8ff;cursor:pointer">CHASE CAM</span></div></section></main>
 <script type="module">
 const TALBINGO_BASE = { lat: -35.58536, lon: 148.32403, elev: 390, geology: 'Talbingo Basalt & Young Granodiorite (393–425 Ma)' };
 const SITES=[
@@ -85,17 +89,18 @@ const SITES=[
 const $=id=>document.getElementById(id), toObj=v=>v instanceof Map?Object.fromEntries([...v].map(([k,x])=>[k,toObj(x)])):Array.isArray(v)?v.map(toObj):v;
 const select=$('site');SITES.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s.name;select.append(o)});
 let m,portal,sim,scene,site=0,phase='loading',drive=null,walk={x:18,z:3.5},last=performance.now(),acted=false,inspected=false,eventCleared=false;
-const keys=new Set();
+const keys=new Set(), keyHeld={};
+let camMode='chase', gpPrevA=false, gpPrevX=false, gpPrevY=false;
 
 class HolosonicEngine{
- constructor(){this.ctx=null;this.active=false;this.vectorOsc=null;this.vectorSub=null;this.vectorGain=null;this.waterGain=null;this.floraGain=null;this.noise=null;}
+ constructor(){this.ctx=null;this.active=false;this.vectorOsc=null;this.vectorSub=null;this.vectorGain=null;this.waterGain=null;this.floraGain=null;this.gravelGain=null;this.noise=null;}
  async init(){
   try{
    if(this.ctx){if(this.ctx.state==='suspended')await this.ctx.resume();this.active=!this.active;this.updateBadge();return;}
    const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return;
    this.ctx=new AudioCtx();if(this.ctx.state==='suspended')await this.ctx.resume();
-   this.vectorOsc=this.ctx.createOscillator();this.vectorOsc.type='sawtooth';this.vectorOsc.frequency.setValueAtTime(80,this.ctx.currentTime);
-   this.vectorSub=this.ctx.createOscillator();this.vectorSub.type='sine';this.vectorSub.frequency.setValueAtTime(40,this.ctx.currentTime);
+   this.vectorOsc=this.ctx.createOscillator();this.vectorOsc.type='sawtooth';this.vectorOsc.frequency.setValueAtTime(75,this.ctx.currentTime);
+   this.vectorSub=this.ctx.createOscillator();this.vectorSub.type='sine';this.vectorSub.frequency.setValueAtTime(37.5,this.ctx.currentTime);
    const vFilter=this.ctx.createBiquadFilter();vFilter.type='lowpass';vFilter.frequency.setValueAtTime(260,this.ctx.currentTime);
    this.vectorGain=this.ctx.createGain();this.vectorGain.gain.setValueAtTime(0,this.ctx.currentTime);
    this.vectorOsc.connect(vFilter);this.vectorSub.connect(vFilter);vFilter.connect(this.vectorGain);this.vectorGain.connect(this.ctx.destination);
@@ -107,8 +112,12 @@ class HolosonicEngine{
    this.waterGain=this.ctx.createGain();this.waterGain.gain.setValueAtTime(0,this.ctx.currentTime);
    const fFilter=this.ctx.createBiquadFilter();fFilter.type='highpass';fFilter.frequency.setValueAtTime(1600,this.ctx.currentTime);
    this.floraGain=this.ctx.createGain();this.floraGain.gain.setValueAtTime(0.015,this.ctx.currentTime);
-   this.noise.connect(wFilter);this.noise.connect(fFilter);wFilter.connect(this.waterGain);fFilter.connect(this.floraGain);
-   this.waterGain.connect(this.ctx.destination);this.floraGain.connect(this.ctx.destination);this.noise.start();
+   const gFilter=this.ctx.createBiquadFilter();gFilter.type='bandpass';gFilter.frequency.setValueAtTime(2400,this.ctx.currentTime);gFilter.Q.setValueAtTime(3.2,this.ctx.currentTime);
+   this.gravelGain=this.ctx.createGain();this.gravelGain.gain.setValueAtTime(0,this.ctx.currentTime);
+   this.noise.connect(wFilter);this.noise.connect(fFilter);this.noise.connect(gFilter);
+   wFilter.connect(this.waterGain);fFilter.connect(this.floraGain);gFilter.connect(this.gravelGain);
+   this.waterGain.connect(this.ctx.destination);this.floraGain.connect(this.ctx.destination);this.gravelGain.connect(this.ctx.destination);
+   this.noise.start();
    this.active=true;this.updateBadge();
   }catch(e){}
  }
@@ -116,14 +125,21 @@ class HolosonicEngine{
   try{
    const b=$('holosonic-badge');if(!b)return;
    if(this.active){b.textContent='ONLINE';b.style.color='#00f0ff';b.style.textShadow='0 0 8px #00f0ff';}
-   else{b.textContent='MUTED';b.style.color='#ffd740';b.style.textShadow='none';if(this.vectorGain&&this.ctx)this.vectorGain.gain.setValueAtTime(0,this.ctx.currentTime);if(this.waterGain&&this.ctx)this.waterGain.gain.setValueAtTime(0,this.ctx.currentTime);}
+   else{b.textContent='MUTED';b.style.color='#ffd740';b.style.textShadow='none';if(this.vectorGain&&this.ctx)this.vectorGain.gain.setValueAtTime(0,this.ctx.currentTime);if(this.waterGain&&this.ctx)this.waterGain.gain.setValueAtTime(0,this.ctx.currentTime);if(this.gravelGain&&this.ctx)this.gravelGain.gain.setValueAtTime(0,this.ctx.currentTime);}
   }catch(e){}
  }
  update(state){
   try{
    if(!this.active||!this.ctx)return;const now=this.ctx.currentTime,sp=Math.abs(state.speed||0),driving=state.phase==='outbound'||state.phase==='inbound';
-   if(driving){const f=75+sp*18;this.vectorOsc.frequency.setTargetAtTime(f,now,.08);this.vectorSub.frequency.setTargetAtTime(f*.5,now,.08);this.vectorGain.gain.setTargetAtTime(Math.min(.12,.02+sp*.025),now,.08);}
-   else if(this.vectorGain)this.vectorGain.gain.setTargetAtTime(0,now,.15);
+   if(driving){
+    const f=68+sp*24;this.vectorOsc.frequency.setTargetAtTime(f,now,.08);this.vectorSub.frequency.setTargetAtTime(f*.5,now,.08);
+    this.vectorGain.gain.setTargetAtTime(Math.min(.14,.02+sp*.03),now,.08);
+    const onShoulder=state.warning==='loose-shoulder'||Boolean(state.offRoad&&sp>.1);
+    if(this.gravelGain)this.gravelGain.gain.setTargetAtTime(onShoulder?Math.min(.08,.02+sp*.04):0,now,.06);
+   }else if(this.vectorGain){
+    this.vectorGain.gain.setTargetAtTime(0,now,.15);
+    if(this.gravelGain)this.gravelGain.gain.setTargetAtTime(0,now,.15);
+   }
    const water=[0,1,2,3,5].includes(state.site);
    if(this.waterGain)this.waterGain.gain.setTargetAtTime(water?.035+.015*Math.sin(now*1.5):.004,now,.2);
   }catch(e){}
@@ -140,36 +156,258 @@ class HolosonicEngine{
 const holosonic=new HolosonicEngine();
 $('holosonic-toggle').onclick=()=>holosonic.init();
 
+// Auto-unlock Web Audio on first user interaction:
+const unlockAudio=()=>{if(!holosonic.ctx)holosonic.init().catch(()=>{});window.removeEventListener('pointerdown',unlockAudio);window.removeEventListener('keydown',unlockAudio);};
+window.addEventListener('pointerdown',unlockAudio);window.addEventListener('keydown',unlockAudio);
+
 function distanceToLandmark(){const p=SITES[site].point;return Math.hypot(walk.x-p[0],walk.z-p[1]);}
-function updateInspect(){const near=phase==='camp'&&distanceToLandmark()<2.2;$('inspect').disabled=!near;$('objective').textContent=phase==='camp'?(near?'Landmark reached · inspect it.':distanceToLandmark().toFixed(1)+' game units to '+SITES[site].landmark):'';}
-function display(){const s=SITES[site];$('site-note').textContent=s.detail;$('mission').textContent=s.task;$('place-label').textContent=s.name;$('site-elevation').textContent=s.elev+'m (Δ '+(s.elev-TALBINGO_BASE.elev>=0?'+':'')+(s.elev-TALBINGO_BASE.elev)+'m)';$('site-distance').textContent=s.distKm+' km';$('site-coords').textContent='GPS: '+s.coords[0].toFixed(5)+'° S, '+s.coords[1].toFixed(5)+'° E';if(s.geology){$('site-geology-unit').textContent=s.geology.unit;$('site-geology-lith').textContent=s.geology.lith+' · '+s.geology.age;}$('osm-link').href=s.osm;$('gmaps-link').href=s.gmaps;$('start').disabled=phase==='loading'||phase==='outbound'||phase==='inbound';$('return').disabled=phase!=='camp'||!acted;$('inspect').textContent='Inspect '+s.landmark;$('leg').textContent=phase==='outbound'?'Driving to '+s.name:phase==='inbound'?'Returning to Talbingo':phase==='camp'?'At '+s.name:phase==='done'?'Round trip complete':'Choose a campsite';const choices=$('choices');choices.replaceChildren();s.choices.forEach((choice,i)=>{const b=document.createElement('button');b.textContent=choice;b.disabled=phase!=='camp'||!inspected||acted;b.dataset.correct=String(i===s.correct);b.onclick=()=>{if(i===s.correct){acted=true;try{holosonic.chime(659.25,1.2)}catch(e){}message('Good choice. Drive back to Talbingo.');display()}else message('Try another spot. Read the scene landmarks.');};choices.append(b)});updateInspect();}
-function message(text){$('status').textContent=text;}
-const camera={x:8,z:0,yaw:.6,pitch:.72,zoom:1.45};
-function applyCamera(){if(!portal)return;const scale=1.7/31;portal.set_camera_target(camera.yaw,camera.pitch,camera.zoom,(camera.x-8.2)*scale,(0.4-0.7)*scale,camera.z*scale);}
-function focus(x,z,wide=false){camera.x=x;camera.z=z;camera.yaw=wide?.12:.6;camera.pitch=wide?.78:.72;camera.zoom=wide?1.48:.58;applyCamera();}
-function attachCampCamera(canvas){let drag=null;canvas.addEventListener('pointerdown',e=>{if(phase!=='camp')return;drag=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!drag||phase!=='camp')return;camera.yaw+=(e.clientX-drag[0])*.009;camera.pitch=Math.max(.22,Math.min(1.35,camera.pitch+(e.clientY-drag[1])*.007));drag=[e.clientX,e.clientY];applyCamera()});canvas.addEventListener('pointerup',()=>drag=null);canvas.addEventListener('pointercancel',()=>drag=null);canvas.addEventListener('wheel',e=>{if(phase!=='camp')return;e.preventDefault();camera.zoom=Math.max(.32,Math.min(2.1,camera.zoom*Math.exp(e.deltaY*.001)));applyCamera()},{passive:false});}
-function reset(){const s=SITES[site];phase='ready';drive=null;walk={x:18,z:3.5};acted=false;inspected=false;eventCleared=false;keys.clear();$('progress').style.width='0%';$('distance').textContent='0 game units';$('speed').textContent='0 units/s';$('telemetry-coord').textContent='TALBINGO HUB ['+TALBINGO_BASE.lat+'°, '+TALBINGO_BASE.lon+'°] ➔ '+s.name.toUpperCase();m.talbingo_vehicle_pose(portal,-5.45,m.talbingo_road_z(site,-5.45),-Math.PI/2);m.talbingo_walker_pose(portal,walk.x,walk.z);focus(8,0,true);message('Ready. Drive in, walk to the landmark, choose a campsite, then drive back.');display();}
-async function loadSite(){site=Number(select.value);phase='loading';display();message('Building '+SITES[site].name+'…');scene=toObj(m.talbingo_scene(site));window.__sceneReceipt=portal.load_scene_textured(scene.assets,scene.textures);reset();}
-function begin(outbound){if(!holosonic.ctx)holosonic.init().catch(()=>{});const initial=toObj(sim.setup(0));if(initial.error)throw Error(initial.error);drive={...initial,z:m.talbingo_road_z(site,-5.45)};if(!outbound){drive.x=21.65;drive.z=m.talbingo_road_z(site,21.65);drive.heading=Math.PI/2;drive.trailer_heading=drive.heading;drive.speed=0;}eventCleared=false;m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);phase=outbound?'outbound':'inbound';message(outbound?'Drive toward the campsite gate. Watch for the roadside sign.':'Drive back toward Talbingo. Watch for the roadside sign.');display();if(innerWidth<=760)document.querySelector('.play').scrollIntoView({behavior:'smooth'});}
-function step(dt){const s=SITES[site];holosonic.update({speed:drive?drive.speed:0,phase,site});if(phase==='camp'){
- const east=Number(keys.has('d'))-Number(keys.has('a')),south=Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));
- if(!east&&!south)return;
- const next=toObj(sim.camp_step(JSON.stringify({dt,x:walk.x,z:walk.z,east,south,site_id:site})));
- if(next.error)throw Error(next.error);
- walk={x:next.x,z:next.z};m.talbingo_walker_pose(portal,walk.x,walk.z);camera.x=walk.x;camera.z=walk.z;camera.zoom=.82;applyCamera();updateInspect();const curLat=s.coords[0]+(walk.z-s.point[1])*0.00004,curLon=s.coords[1]+(walk.x-s.point[0])*0.00004;$('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+s.elev+'m // Q: 0.98';
- if(next.blocked)message('Water or marsh edge · choose another path.');
- return;
- }if(!drive||!(phase==='outbound'||phase==='inbound'))return;
- const hazard={id:'talbingo-'+site,label:s.event,taxon:'illustrative game event',x:8,z:m.talbingo_road_z(site,8),radius:.35,selected:!eventCleared};
- const input={...drive,dt,site_id:site,rig_id:0,rig_roadworthy:true,cooling_efficiency:1,throttle:keys.has('w')||keys.has('arrowup'),reverse:keys.has('s')||keys.has('arrowdown'),brake:keys.has(' '),steer:Number(keys.has('d'))-Number(keys.has('a')),terrain_height:0,terrain_height_ahead:0,terrain_height_behind:0,terrain_sample_distance:.55,crossing_open:true,hazards:[hazard],period:'day',oil_temp:drive.oil_temp,coolant_temp:drive.coolant_temp};
- const next=toObj(sim.step(JSON.stringify(input)));if(next.error||next.ok===false)throw Error(next.error||next.detail||'drive step failed');drive={...drive,...next,distance:(drive.distance||0)+(next.distance_delta||0)};
- const progress=phase==='outbound'?Math.max(0,Math.min(1,(drive.x+5.45)/22.35)):Math.max(0,Math.min(1,(21.65-drive.x)/27.1));$('progress').style.width=(progress*100).toFixed(1)+'%';$('distance').textContent=drive.distance.toFixed(1)+' game units';$('speed').textContent=Math.abs(drive.speed).toFixed(1)+' units/s';
- const t=phase==='outbound'?progress:(1-progress);const curLat=TALBINGO_BASE.lat+(s.coords[0]-TALBINGO_BASE.lat)*t,curLon=TALBINGO_BASE.lon+(s.coords[1]-TALBINGO_BASE.lon)*t,curElev=Math.round(TALBINGO_BASE.elev+(s.elev-TALBINGO_BASE.elev)*t);$('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+curElev+'m // HDG: '+(drive.heading*180/Math.PI).toFixed(0)+'°';
- m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);focus(drive.x,drive.z);if(next.hazard_event){eventCleared=true;message((next.warning==='safe-stop'?'Safe stop':'Emergency stop')+' at '+s.event+'. Continue when ready.')}else if(next.warning==='hazard-near')message(s.event+' ahead · slow down.');else if(next.warning==='loose-shoulder')message('Loose shoulder · steer back toward the road.');
- if(phase==='outbound'&&drive.x>=16.9){phase='camp';drive.speed=0;keys.clear();$('speed').textContent='0 units/s';focus(walk.x,walk.z);camera.zoom=.82;applyCamera();message('Arrived. Walk to '+s.landmark+' with W A S D.');display();}
- if(phase==='inbound'&&(drive.x<=-5.4||next.warning==='route-end')){phase='done';drive.speed=0;keys.clear();$('speed').textContent='0 units/s';focus(8,0,true);message('Round trip complete at '+s.name+'. Choose another campsite to play a different map.');display();}
+function updateInspect(){const near=phase==='camp'&&distanceToLandmark()<2.2;$('inspect').disabled=!near;$('objective').textContent=phase==='camp'?(near?'Landmark reached · inspect it (or press E).':distanceToLandmark().toFixed(1)+' game units to '+SITES[site].landmark):'';}
+function display(){
+ const s=SITES[site];$('site-note').textContent=s.detail;$('mission').textContent=s.task;$('place-label').textContent=s.name;
+ $('site-elevation').textContent=s.elev+'m (Δ '+(s.elev-TALBINGO_BASE.elev>=0?'+':'')+(s.elev-TALBINGO_BASE.elev)+'m)';
+ $('site-distance').textContent=s.distKm+' km';$('site-coords').textContent='GPS: '+s.coords[0].toFixed(5)+'° S, '+s.coords[1].toFixed(5)+'° E';
+ if(s.geology){$('site-geology-unit').textContent=s.geology.unit;$('site-geology-lith').textContent=s.geology.lith+' · '+s.geology.age;}
+ $('osm-link').href=s.osm;$('gmaps-link').href=s.gmaps;
+ $('start').disabled=phase==='loading'||phase==='outbound'||phase==='inbound';
+ $('return').disabled=phase!=='camp'||!acted;
+ $('inspect').textContent='Inspect '+s.landmark;
+ $('leg').textContent=phase==='outbound'?'Driving to '+s.name:phase==='inbound'?'Returning to Talbingo':phase==='camp'?'At '+s.name:phase==='done'?'Round trip complete':'Choose a campsite';
+ const choices=$('choices');choices.replaceChildren();
+ s.choices.forEach((choice,i)=>{
+  const b=document.createElement('button');b.textContent=choice;b.disabled=phase!=='camp'||!inspected||acted;b.dataset.correct=String(i===s.correct);
+  b.onclick=()=>{if(i===s.correct){acted=true;try{holosonic.chime(659.25,1.2)}catch(e){}message('Good choice. Drive back to Talbingo.');display()}else message('Try another spot. Read the scene landmarks.');};
+  choices.append(b);
+ });
+ updateInspect();
 }
-select.addEventListener('change',()=>{if(m&&portal)loadSite().catch(e=>message('Scene load failed: '+String(e)))});$('start').onclick=()=>{try{begin(true)}catch(e){message(String(e))}};$('return').onclick=()=>{try{begin(false)}catch(e){message(String(e))}};$('restart').onclick=()=>{if(m&&portal)reset()};$('inspect').onclick=()=>{if(phase!=='camp'||distanceToLandmark()>=2.2)return;const s=SITES[site];inspected=true;holosonic.chime(528,.9);focus(s.point[0],s.point[1]);message('Inspect '+s.landmark+'. Look around, then choose a site response.');display()};
-window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown',' '].includes(k)&&document.activeElement!==select){keys.add(k);e.preventDefault()}});window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));window.addEventListener('blur',()=>keys.clear());document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);keys.add(k)});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(k))});document.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{if(phase!=='camp')return;camera.zoom=Math.max(.32,Math.min(2.1,camera.zoom*(b.dataset.zoom==='in'?.82:1.22)));applyCamera()});
-try{m=await import('./pkg/rolling_commons_shell.js');await m.default({module_or_path:new URL('./pkg/rolling_commons_shell_bg.wasm',import.meta.url)});let canvas=$('scene');const resize=()=>{const ratio=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(canvas.clientWidth*ratio);canvas.height=Math.round(canvas.clientHeight*ratio)};resize();if(navigator.gpu){try{await m.init_webgpu(canvas)}catch{const fresh=canvas.cloneNode();canvas.replaceWith(fresh);canvas=fresh}}portal=new m.GamePortal(canvas);window.__talbingoTier=portal.tier();window.addEventListener('resize',resize);portal.set_sky_preset(1);portal.set_lighting(0.45,0.85,0.35,1.25,0.38);portal.set_exposure_compensation(0.25);portal.set_shadows_enabled(false);portal.set_screen_space_ao_enabled(true);attachCampCamera(canvas);const source=await(await fetch('./fixtures/talbingo-drive.vibe')).text();sim=new m.GameDriveSimulation(source);await loadSite();let accum=0;function frame(now){const elapsed=Math.min(0.25,Math.max(0,(now-last)/1000));last=now;accum+=elapsed;try{while(accum>=0.05){step(0.05);accum-=0.05;}portal.tick(canvas,Math.min(50,elapsed*1000))}catch(e){message('Game error: '+String(e));phase='error';display();return}requestAnimationFrame(frame)}requestAnimationFrame(frame)}catch(e){phase='error';message('Could not load the game: '+String(e));display()}
+function message(text){$('status').textContent=text;}
+
+const camera={x:8,z:0,yaw:.6,pitch:.72,zoom:1.45,targetX:8,targetZ:0};
+function applyCamera(){if(!portal)return;const scale=1.7/31;portal.set_camera_target(camera.yaw,camera.pitch,camera.zoom,(camera.x-8.2)*scale,(0.4-0.7)*scale,camera.z*scale);}
+function focus(x,z,wide=false){camera.targetX=x;camera.targetZ=z;camera.x=x;camera.z=z;camera.yaw=wide?.12:.6;camera.pitch=wide?.78:.72;camera.zoom=wide?1.48:.58;applyCamera();}
+
+function cycleCamera(){
+ if(camMode==='chase')camMode='drone';
+ else if(camMode==='drone')camMode='orbit';
+ else camMode='chase';
+ $('cam-mode-pill').textContent=camMode.toUpperCase()+' CAM';
+ if(camMode==='drone'){camera.yaw=0.12;camera.pitch=1.12;camera.zoom=1.45;}
+ else if(camMode==='chase'){camera.pitch=0.70;camera.zoom=0.58;}
+ applyCamera();
+}
+$('cam-mode-pill').onclick=()=>cycleCamera();
+const camToggleBtn=$('cam-toggle-btn');if(camToggleBtn)camToggleBtn.onclick=()=>cycleCamera();
+
+function attachCampCamera(canvas){
+ let drag=null;
+ canvas.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId)});
+ canvas.addEventListener('pointermove',e=>{if(!drag)return;camera.yaw+=(e.clientX-drag[0])*.009;camera.pitch=Math.max(.22,Math.min(1.35,camera.pitch+(e.clientY-drag[1])*.007));drag=[e.clientX,e.clientY];applyCamera()});
+ canvas.addEventListener('pointerup',()=>drag=null);canvas.addEventListener('pointercancel',()=>drag=null);
+ canvas.addEventListener('wheel',e=>{e.preventDefault();camera.zoom=Math.max(.32,Math.min(2.1,camera.zoom*Math.exp(e.deltaY*.001)));applyCamera()},{passive:false});
+}
+
+function reset(){
+ const s=SITES[site];phase='ready';drive=null;walk={x:18,z:3.5};acted=false;inspected=false;eventCleared=false;keys.clear();
+ $('progress').style.width='0%';$('distance').textContent='0 game units';$('speed').textContent='0 units/s (0 km/h)';
+ $('telemetry-coord').textContent='TALBINGO HUB ['+TALBINGO_BASE.lat+'°, '+TALBINGO_BASE.lon+'°] ➔ '+s.name.toUpperCase();
+ const hz=$('hazard-pill');if(hz)hz.style.display='none';
+ m.talbingo_vehicle_pose(portal,-5.45,m.talbingo_road_z(site,-5.45),-Math.PI/2);
+ m.talbingo_walker_pose(portal,walk.x,walk.z);
+ focus(8,0,true);message('Ready. Drive in, walk to the landmark, choose a campsite, then drive back.');display();
+}
+
+async function loadSite(){
+ site=Number(select.value);phase='loading';display();message('Building '+SITES[site].name+'…');
+ scene=toObj(m.talbingo_scene(site));window.__sceneReceipt=portal.load_scene_textured(scene.assets,scene.textures);reset();
+}
+
+function begin(outbound){
+ if(!holosonic.ctx)holosonic.init().catch(()=>{});
+ const initial=toObj(sim.setup(0));if(initial.error)throw Error(initial.error);
+ drive={...initial,z:m.talbingo_road_z(site,-5.45)};
+ if(!outbound){drive.x=21.65;drive.z=m.talbingo_road_z(site,21.65);drive.heading=Math.PI/2;drive.trailer_heading=drive.heading;drive.speed=0;}
+ eventCleared=false;m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);
+ phase=outbound?'outbound':'inbound';
+ message(outbound?'Drive toward the campsite gate. Watch for the roadside sign.':'Drive back toward Talbingo. Watch for the roadside sign.');
+ display();if(innerWidth<=760)document.querySelector('.play').scrollIntoView({behavior:'smooth'});
+}
+
+function pollGamepad(){
+ const gps=navigator.getGamepads?navigator.getGamepads():[];const gp=gps[0]||gps[1];if(!gp)return;
+ const lx=gp.axes[0]||0, ly=gp.axes[1]||0;
+ const rt=gp.buttons[7]?gp.buttons[7].value:0, lt=gp.buttons[6]?gp.buttons[6].value:0;
+ if(rt>.15||ly<-.4)keys.add('w');else if(!keyHeld['w'])keys.delete('w');
+ if(lt>.15||ly>.4)keys.add('s');else if(!keyHeld['s'])keys.delete('s');
+ if(lx<-.3)keys.add('a');else if(!keyHeld['a'])keys.delete('a');
+ if(lx>.3)keys.add('d');else if(!keyHeld['d'])keys.delete('d');
+ if(gp.buttons[1]&&gp.buttons[1].pressed)keys.add(' ');else if(!keyHeld[' '])keys.delete(' ');
+ if(gp.buttons[0]&&gp.buttons[0].pressed&&!gpPrevA){
+  if(phase==='camp'){
+   if(distanceToLandmark()<2.2&&!inspected)$('inspect').click();
+   else{const b=document.querySelector('#choices button[data-correct="true"]');if(b&&!b.disabled)b.click();}
+  }
+ }
+ gpPrevA=Boolean(gp.buttons[0]&&gp.buttons[0].pressed);
+ if(gp.buttons[2]&&gp.buttons[2].pressed&&!gpPrevX)cycleCamera();
+ gpPrevX=Boolean(gp.buttons[2]&&gp.buttons[2].pressed);
+ if(gp.buttons[3]&&gp.buttons[3].pressed&&!gpPrevY)holosonic.init().catch(()=>{});
+ gpPrevY=Boolean(gp.buttons[3]&&gp.buttons[3].pressed);
+}
+
+function step(dt){
+ const s=SITES[site];pollGamepad();
+ const hzEl=$('hazard-pill');
+ if(phase==='camp'){
+  holosonic.update({speed:0,phase,site});
+  const east=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));
+  const south=Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));
+  if(east||south){
+   const next=toObj(sim.camp_step(JSON.stringify({dt,x:walk.x,z:walk.z,east,south,site_id:site})));
+   if(next.error)throw Error(next.error);
+   walk={x:next.x,z:next.z};m.talbingo_walker_pose(portal,walk.x,walk.z);
+   const curLat=s.coords[0]+(walk.z-s.point[1])*0.00004,curLon=s.coords[1]+(walk.x-s.point[0])*0.00004;
+   $('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+s.elev+'m // CAMP EXPLORE';
+   if(next.blocked)message('Water or marsh edge · choose another path.');
+  }
+  // Smoothly follow explorer avatar
+  const lerp=Math.min(1.0,dt*8.0);
+  camera.x+=(walk.x-camera.x)*lerp;camera.z+=(walk.z-camera.z)*lerp;
+  applyCamera();updateInspect();
+  return;
+ }
+ if(!drive||!(phase==='outbound'||phase==='inbound'))return;
+ const roadZ=m.talbingo_road_z(site,drive.x);
+ const offRoad=Math.abs(drive.z-roadZ)>0.85;
+ const hazard={id:'talbingo-'+site,label:s.event,taxon:'illustrative game event',x:8,z:roadZ,radius:.35,selected:!eventCleared};
+ const input={...drive,dt,site_id:site,rig_id:0,rig_roadworthy:true,cooling_efficiency:1,throttle:keys.has('w')||keys.has('arrowup'),reverse:keys.has('s')||keys.has('arrowdown'),brake:keys.has(' '),steer:Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft')),terrain_height:0,terrain_height_ahead:0,terrain_height_behind:0,terrain_sample_distance:.55,crossing_open:true,hazards:[hazard],period:'day',oil_temp:drive.oil_temp,coolant_temp:drive.coolant_temp};
+ const next=toObj(sim.step(JSON.stringify(input)));
+ if(next.error||next.ok===false)throw Error(next.error||next.detail||'drive step failed');
+ drive={...drive,...next,distance:(drive.distance||0)+(next.distance_delta||0)};
+ holosonic.update({speed:drive.speed,phase,site,warning:next.warning,offRoad});
+
+ const progress=phase==='outbound'?Math.max(0,Math.min(1,(drive.x+5.45)/22.35)):Math.max(0,Math.min(1,(21.65-drive.x)/27.1));
+ $('progress').style.width=(progress*100).toFixed(1)+'%';
+ $('distance').textContent=drive.distance.toFixed(1)+' game units';
+ const kmh=Math.round(Math.abs(drive.speed)*18);
+ $('speed').textContent=Math.abs(drive.speed).toFixed(1)+' units/s ('+kmh+' km/h)';
+
+ const t=phase==='outbound'?progress:(1-progress);
+ const curLat=TALBINGO_BASE.lat+(s.coords[0]-TALBINGO_BASE.lat)*t,curLon=TALBINGO_BASE.lon+(s.coords[1]-TALBINGO_BASE.lon)*t,curElev=Math.round(TALBINGO_BASE.elev+(s.elev-TALBINGO_BASE.elev)*t);
+ const deg=Math.round(((drive.heading*180/Math.PI)%360+360)%360);
+ const card=['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];
+ $('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+curElev+'m // HDG: '+deg+'° '+card;
+
+ m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);
+
+ // Dynamic Chase Camera Spring-Damper:
+ const camLerp=Math.min(1.0,dt*6.5);
+ camera.x+=(drive.x-camera.x)*camLerp;
+ camera.z+=(drive.z-camera.z)*camLerp;
+ if(camMode==='chase'){
+  const targetYaw=(phase==='outbound'?0.35:3.45)+(drive.heading+Math.PI/2)*0.45;
+  let diff=(targetYaw-camera.yaw)%(Math.PI*2);
+  if(diff>Math.PI)diff-=Math.PI*2;if(diff<-Math.PI)diff+=Math.PI*2;
+  camera.yaw+=diff*Math.min(1.0,dt*4.0);
+  const spNorm=Math.min(1.0,Math.abs(drive.speed)/2.5);
+  camera.pitch+=(0.70+spNorm*0.05-camera.pitch)*camLerp;
+  const targetZoom=Math.max(0.48,0.62-spNorm*0.08);
+  camera.zoom+=(targetZoom-camera.zoom)*camLerp;
+ }
+ applyCamera();
+
+ if(next.hazard_event){
+  eventCleared=true;if(hzEl)hzEl.style.display='inline-block';
+  message((next.warning==='safe-stop'?'Safe stop':'Emergency stop')+' at '+s.event+'. Continue when ready.');
+ }else if(next.warning==='hazard-near'){
+  if(hzEl)hzEl.style.display='inline-block';
+  message(s.event+' ahead · slow down.');
+ }else if(next.warning==='loose-shoulder'){
+  if(hzEl)hzEl.style.display='none';
+  message('Loose shoulder · steer back toward the road.');
+ }else if(hzEl){
+  hzEl.style.display='none';
+ }
+
+ if(phase==='outbound'&&drive.x>=16.9){
+  phase='camp';drive.speed=0;keys.clear();
+  $('speed').textContent='0 units/s (0 km/h)';
+  focus(walk.x,walk.z);camera.zoom=.82;applyCamera();
+  message('Arrived. Walk to '+s.landmark+' with W A S D.');display();
+ }
+ if(phase==='inbound'&&(drive.x<=-5.4||next.warning==='route-end')){
+  phase='done';drive.speed=0;keys.clear();
+  $('speed').textContent='0 units/s (0 km/h)';
+  focus(8,0,true);
+  message('Round trip complete at '+s.name+'. Choose another campsite to play a different map.');display();
+ }
+}
+
+select.addEventListener('change',()=>{if(m&&portal)loadSite().catch(e=>message('Scene load failed: '+String(e)))});
+$('start').onclick=()=>{try{begin(true)}catch(e){message(String(e))}};
+$('return').onclick=()=>{try{begin(false)}catch(e){message(String(e))}};
+$('restart').onclick=()=>{if(m&&portal)reset()};
+$('inspect').onclick=()=>{
+ if(phase!=='camp'||distanceToLandmark()>=2.2)return;
+ const s=SITES[site];inspected=true;holosonic.chime(528,.9);
+ focus(s.point[0],s.point[1]);
+ message('Inspect '+s.landmark+'. Look around, then choose a site response.');display();
+};
+
+window.addEventListener('keydown',e=>{
+ const k=e.key.toLowerCase();
+ if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&document.activeElement!==select){
+  keys.add(k);keyHeld[k]=true;e.preventDefault();
+ }
+ if(k==='e'||k==='enter'){
+  if(phase==='camp'&&distanceToLandmark()<2.2&&!inspected)$('inspect').click();
+  else if(phase==='camp'&&inspected&&!acted){
+   const b=document.querySelector('#choices button[data-correct="true"]');if(b&&!b.disabled)b.click();
+  }
+ }
+ if(k==='c')cycleCamera();
+ if(k==='m')holosonic.init().catch(()=>{});
+ if(k==='r')$('restart').click();
+});
+window.addEventListener('keyup',e=>{const k=e.key.toLowerCase();keys.delete(k);keyHeld[k]=false;});
+window.addEventListener('blur',()=>keys.clear());
+
+document.querySelectorAll('[data-key]').forEach(b=>{
+ const k=b.dataset.key;
+ b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);keys.add(k)});
+ for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(k));
+});
+document.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{
+ if(phase!=='camp')return;
+ camera.zoom=Math.max(.32,Math.min(2.1,camera.zoom*(b.dataset.zoom==='in'?.82:1.22)));applyCamera();
+});
+
+try{
+ m=await import('./pkg/rolling_commons_shell.js');
+ await m.default({module_or_path:new URL('./pkg/rolling_commons_shell_bg.wasm',import.meta.url)});
+ let canvas=$('scene');
+ const resize=()=>{
+  const ratio=Math.min(2,window.devicePixelRatio||1);
+  canvas.width=Math.round(canvas.clientWidth*ratio);
+  canvas.height=Math.round(canvas.clientHeight*ratio);
+ };
+ resize();
+ if(navigator.gpu){try{await m.init_webgpu(canvas)}catch{const fresh=canvas.cloneNode();canvas.replaceWith(fresh);canvas=fresh}}
+ portal=new m.GamePortal(canvas);window.__talbingoTier=portal.tier();window.addEventListener('resize',resize);
+ portal.set_sky_preset(1);portal.set_lighting(0.45,0.85,0.35,1.25,0.38);portal.set_exposure_compensation(0.25);
+ portal.set_shadows_enabled(false);portal.set_screen_space_ao_enabled(true);
+ attachCampCamera(canvas);
+ const source=await(await fetch('./fixtures/talbingo-drive.vibe')).text();
+ sim=new m.GameDriveSimulation(source);
+ await loadSite();
+ let accum=0;
+ function frame(now){
+  const elapsed=Math.min(0.25,Math.max(0,(now-last)/1000));last=now;accum+=elapsed;
+  try{
+   while(accum>=0.05){step(0.05);accum-=0.05;}
+   portal.tick(canvas,Math.min(50,elapsed*1000));
+  }catch(e){message('Game error: '+String(e));phase='error';display();return}
+  requestAnimationFrame(frame);
+ }
+ requestAnimationFrame(frame);
+}catch(e){phase='error';message('Could not load the game: '+String(e));display();}
 </script></body></html>
