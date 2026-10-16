@@ -40,23 +40,38 @@ fn push(
 
 fn scene(site: u8) -> Vec<AssetRecipe> {
     let mut out = Vec::new();
-    let soil = match site {
-        3 | 5 => [0.09, 0.15, 0.075, 1.0],
-        4 => [0.085, 0.14, 0.065, 1.0],
-        _ => [0.075, 0.18, 0.06, 1.0],
-    };
+    // Deep obsidian holographic pedestal
     push(
         &mut out,
         "talbingo-ground",
-        soil,
+        [0.015, 0.024, 0.038, 1.0],
         vec![block([8.2, -0.16, 0.0], [31.0, 0.28, 17.0])],
+    );
+    // Holographic coordinate scan grid across the survey bounds
+    let mut grid_lines = Vec::new();
+    for xi in 0..16 {
+        let gx = -5.0 + xi as f32 * 2.0;
+        grid_lines.push(block([gx, 0.005, 0.0], [0.035, 0.01, 16.5]));
+    }
+    for zi in 0..9 {
+        let gz = -6.5 + zi as f32 * 1.6;
+        grid_lines.push(block([8.2, 0.005, gz], [30.5, 0.01, 0.035]));
+    }
+    push(
+        &mut out,
+        "talbingo-holo-grid",
+        [0.05, 0.65, 0.85, 0.85],
+        grid_lines,
     );
     let mut roadway = Vec::new();
     let mut verge = Vec::new();
+    let mut road_rails = Vec::new();
     for i in 0..58 {
         let x = -5.7 + i as f32 * 0.49;
         let z = road_z(site, x);
         roadway.push(block([x, 0.01, z], [0.51, 0.045, 1.55]));
+        road_rails.push(block([x, 0.025, z - 0.76], [0.51, 0.02, 0.04]));
+        road_rails.push(block([x, 0.025, z + 0.76], [0.51, 0.02, 0.04]));
         if i % 4 == 0 {
             verge.push(block([x, 0.037, z], [0.22, 0.014, 0.035]));
         }
@@ -64,26 +79,32 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     push(
         &mut out,
         "talbingo-road",
-        [0.035, 0.042, 0.045, 1.0],
+        [0.020, 0.045, 0.075, 1.0],
         roadway,
     );
     push(
         &mut out,
+        "talbingo-road-rails",
+        [0.0, 0.95, 1.0, 1.0],
+        road_rails,
+    );
+    push(
+        &mut out,
         "talbingo-road-markers",
-        [0.96, 0.74, 0.29, 1.0],
+        [1.0, 0.82, 0.15, 1.0],
         verge,
     );
     let event_z = road_z(site, 8.0);
     push(
         &mut out,
         "talbingo-road-event-post",
-        [0.18, 0.14, 0.10, 1.0],
-        vec![block([8.0, 0.55, event_z + 1.2], [0.12, 1.1, 0.12])],
+        [0.05, 0.75, 0.88, 1.0],
+        vec![block([8.0, 0.55, event_z + 1.2], [0.08, 1.1, 0.08])],
     );
     push(
         &mut out,
         "talbingo-road-event-sign",
-        [0.92, 0.26, 0.10, 1.0],
+        [1.0, 0.28, 0.18, 1.0],
         vec![block([8.0, 1.16, event_z + 1.2], [0.74, 0.62, 0.08])],
     );
     // Roadside native wildlife encounter matching the site journey:
@@ -122,7 +143,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     push(
         &mut out,
         "talbingo-camp-spur",
-        [0.42, 0.32, 0.20, 1.0],
+        [0.035, 0.12, 0.18, 1.0],
         vec![
             block([18.7, 0.015, 2.0 + camp_shift], [2.9, 0.04, 3.3]),
             block([19.8, 0.02, 3.8 + camp_shift], [5.3, 0.05, 2.3]),
@@ -131,19 +152,18 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     push(
         &mut out,
         "talbingo-arrival-gate",
-        [0.82, 0.30, 0.09, 1.0],
+        [0.10, 0.95, 0.85, 1.0],
         vec![
-            block([16.9, 0.8, 2.0 + camp_shift], [0.16, 1.6, 0.16]),
-            block([16.9, 0.8, 4.5 + camp_shift], [0.16, 1.6, 0.16]),
-            block([16.9, 1.56, 3.25 + camp_shift], [0.2, 0.14, 2.6]),
+            block([16.9, 0.8, 2.0 + camp_shift], [0.12, 1.6, 0.12]),
+            block([16.9, 0.8, 4.5 + camp_shift], [0.12, 1.6, 0.12]),
+            block([16.9, 1.56, 3.25 + camp_shift], [0.16, 0.14, 2.6]),
         ],
     );
-    // Compact player vehicle. Qualia's skeletal actor root moves these parts
-    // together; the browser never redraws or recompiles meshes per frame.
+    // Compact player vehicle in tactical holographic livery
     push(
         &mut out,
         "rc:asset/rig/campervan/talbingo-chassis",
-        [0.94, 0.36, 0.08, 1.0],
+        [0.92, 0.96, 1.0, 1.0],
         vec![
             block([2.35, 0.37, 4.65], [0.92, 0.35, 1.55]),
             block([2.35, 0.68, 4.85], [0.78, 0.30, 0.77]),
@@ -152,7 +172,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     push(
         &mut out,
         "rc:asset/rig/campervan/talbingo-windows",
-        [0.035, 0.11, 0.18, 1.0],
+        [0.05, 0.88, 0.98, 1.0],
         vec![
             block([2.35, 0.70, 4.43], [0.65, 0.20, 0.08]),
             block([1.94, 0.70, 4.88], [0.06, 0.20, 0.44]),
@@ -168,13 +188,13 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     push(
         &mut out,
         "rc:asset/rig/campervan/talbingo-wheels",
-        [0.13, 0.16, 0.16, 1.0],
+        [0.08, 0.65, 0.75, 1.0],
         wheels,
     );
     push(
         &mut out,
         "rc:asset/talbingo/walker-coat",
-        [0.79, 0.14, 0.08, 1.0],
+        [0.10, 0.95, 0.85, 1.0],
         vec![
             block([18.0, 0.76, 3.5], [0.35, 0.72, 0.25]),
             block([17.88, 0.26, 3.5], [0.12, 0.52, 0.16]),
@@ -184,7 +204,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     push(
         &mut out,
         "rc:asset/talbingo/walker-head",
-        [0.69, 0.43, 0.26, 1.0],
+        [1.0, 0.80, 0.20, 1.0],
         vec![block([18.0, 1.25, 3.5], [0.25, 0.28, 0.23])],
     );
     out.extend(crate::talbingo_vegetation::assets(site));
@@ -211,25 +231,25 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     push(
         &mut out,
         "talbingo-tent-canvas",
-        [0.77, 0.32, 0.14, 1.0],
+        [0.08, 0.85, 0.95, 0.9],
         tent_roofs,
     );
     push(
         &mut out,
         "talbingo-tent-doors",
-        [0.38, 0.15, 0.10, 1.0],
+        [0.03, 0.45, 0.65, 0.9],
         tent_doors,
     );
     push(
         &mut out,
         "talbingo-tent-groundsheet",
-        [0.12, 0.17, 0.13, 1.0],
+        [0.02, 0.15, 0.25, 1.0],
         tent_floors,
     );
     push(
         &mut out,
         "talbingo-tent-poles",
-        [0.64, 0.67, 0.62, 1.0],
+        [1.0, 0.85, 0.25, 1.0],
         tent_poles,
     );
     match site {
@@ -238,13 +258,13 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "pines-reservoir",
-                [0.025, 0.19, 0.38, 1.0],
+                [0.05, 0.82, 0.98, 0.95],
                 vec![block([7.0, -0.015, -6.4], [26.0, 0.025, 3.7])],
             );
             push(
                 &mut out,
                 "pines-picnic-tables",
-                [0.38, 0.19, 0.07, 1.0],
+                [0.20, 0.80, 0.90, 0.95],
                 vec![
                     block([20.0, 0.46, -2.4], [1.5, 0.1, 0.8]),
                     block([22.5, 0.46, -2.8], [1.5, 0.1, 0.8]),
@@ -261,7 +281,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "humes-inlet",
-                [0.025, 0.22, 0.42, 1.0],
+                [0.05, 0.82, 0.98, 0.95],
                 vec![
                     block([10.8, -0.01, -5.9], [8.0, 0.03, 3.3]),
                     block([14.7, -0.01, -4.0], [2.4, 0.03, 7.2]),
@@ -270,7 +290,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "humes-crossing-deck",
-                [0.32, 0.17, 0.08, 1.0],
+                [0.20, 0.80, 0.90, 0.95],
                 vec![
                     block([14.7, 0.15, -3.9], [3.5, 0.13, 1.15]),
                     block([14.7, 0.42, -4.55], [3.5, 0.1, 0.12]),
@@ -287,7 +307,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "jounama-creek",
-                [0.04, 0.26, 0.40, 1.0],
+                [0.06, 0.85, 0.98, 0.95],
                 vec![
                     block([15.5, -0.01, -5.6], [13.0, 0.025, 1.5]),
                     block([22.0, -0.01, -3.8], [2.0, 0.025, 5.0]),
@@ -296,7 +316,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "jounama-boulders",
-                [0.52, 0.52, 0.46, 1.0],
+                [0.35, 0.70, 0.85, 0.95],
                 vec![
                     block([18.1, 0.35, -3.1], [1.1, 0.7, 1.0]),
                     block([20.1, 0.24, -3.8], [0.8, 0.48, 0.9]),
@@ -313,13 +333,13 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "yarrangobilly-river",
-                [0.04, 0.22, 0.40, 1.0],
+                [0.05, 0.82, 0.98, 0.95],
                 vec![block([10.5, -0.01, -6.4], [25.0, 0.025, 2.7])],
             );
             push(
                 &mut out,
                 "yarrangobilly-hut",
-                [0.68, 0.58, 0.42, 1.0],
+                [0.25, 0.80, 0.95, 0.95],
                 vec![
                     block([20.3, 0.85, -2.7], [2.5, 1.7, 2.0]),
                     block([20.3, 1.83, -2.7], [2.9, 0.3, 2.4]),
@@ -340,7 +360,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "ohares-ridge",
-                [0.19, 0.27, 0.11, 1.0],
+                [0.08, 0.35, 0.45, 0.95],
                 vec![
                     block([6.0, 0.47, -5.9], [17.0, 0.95, 4.3]),
                     block([18.8, 0.80, -6.1], [9.2, 1.6, 4.0]),
@@ -349,13 +369,13 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "ohares-reservoir",
-                [0.02, 0.16, 0.38, 1.0],
+                [0.05, 0.82, 0.98, 0.95],
                 vec![block([9.0, -0.01, 7.0], [25.0, 0.025, 2.4])],
             );
             push(
                 &mut out,
                 "ohares-lookout",
-                [0.60, 0.38, 0.20, 1.0],
+                [0.25, 0.80, 0.95, 0.95],
                 vec![block([21.5, 1.72, -5.1], [2.9, 0.1, 1.7])],
             );
             out.extend(crate::fauna::goanna(
@@ -368,13 +388,13 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "three-mile-dam",
-                [0.04, 0.21, 0.40, 1.0],
+                [0.06, 0.85, 0.98, 0.95],
                 vec![block([7.5, -0.01, -6.5], [18.0, 0.025, 2.9])],
             );
             push(
                 &mut out,
                 "three-mile-marsh",
-                [0.68, 0.70, 0.44, 1.0],
+                [0.15, 0.90, 0.75, 0.95],
                 vec![
                     block([18.0, 0.04, -3.1], [6.0, 0.03, 1.6]),
                     block([21.5, 0.04, -4.6], [3.0, 0.03, 1.5]),
@@ -383,7 +403,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "three-mile-boulders",
-                [0.65, 0.66, 0.62, 1.0],
+                [0.35, 0.70, 0.85, 0.95],
                 vec![
                     block([19.0, 0.31, -2.6], [1.0, 0.62, 0.8]),
                     block([23.0, 0.38, -3.7], [1.1, 0.76, 0.9]),

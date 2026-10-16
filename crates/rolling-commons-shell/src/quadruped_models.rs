@@ -13,14 +13,30 @@ pub(crate) struct Profile {
     pub wombat: bool,
 }
 pub(crate) fn profile(id: &str) -> Option<Profile> {
+    let is_talbingo = id.contains("talbingo/");
     let (height, width, length, head_y, coat, wombat) = if id.contains("goat") {
         (0.78, 0.26, 0.62, 1.18, [0.72, 0.65, 0.49, 1.0], false)
     } else if id.contains("horse") || id.contains("brumby") {
-        (1.30, 0.39, 0.78, 1.98, [0.45, 0.25, 0.14, 1.0], false)
+        let c = if is_talbingo {
+            [0.78, 0.94, 1.0, 0.98]
+        } else {
+            [0.45, 0.25, 0.14, 1.0]
+        };
+        (1.30, 0.39, 0.78, 1.98, c, false)
     } else if id.contains("deer") {
-        (1.05, 0.27, 0.62, 1.63, [0.51, 0.34, 0.22, 1.0], false)
+        let c = if is_talbingo {
+            [0.95, 0.60, 0.28, 0.95]
+        } else {
+            [0.51, 0.34, 0.22, 1.0]
+        };
+        (1.05, 0.27, 0.62, 1.63, c, false)
     } else if id.contains("wombat") {
-        (0.36, 0.30, 0.43, 0.39, [0.43, 0.40, 0.34, 1.0], true)
+        let c = if is_talbingo {
+            [0.90, 0.62, 0.22, 0.95]
+        } else {
+            [0.43, 0.40, 0.34, 1.0]
+        };
+        (0.36, 0.30, 0.43, 0.39, c, true)
     } else {
         return None;
     };
@@ -208,9 +224,14 @@ pub(crate) fn models(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
         );
     }
     if prefix.contains("horse") || prefix.contains("brumby") {
+        let mane_color = if prefix.contains("talbingo/") {
+            [0.15, 0.85, 1.0, 1.0]
+        } else {
+            [0.14, 0.105, 0.08, 1.0]
+        };
         add(
             "mane",
-            [0.14, 0.105, 0.08, 1.0],
+            mane_color,
             limbs(&[(
                 [0.0, p.height * 1.12, -p.length * 0.44],
                 [0.0, p.head_y + 0.12, j[3][2] + 0.15],

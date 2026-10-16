@@ -43,9 +43,9 @@ fn trunk(site: u8, index: usize, x: f32, z: f32, h: f32, lean: f32) -> AssetReci
     // Ribbon gums: warm grey with pale upper branches.
     // River gums / black sallee: olive-bronze bark.
     let (bark_color, axis) = if site == 5 {
-        // Gnarled, twisting subalpine snow gum axis
+        // Gnarled subalpine snow gum: ethereal ice-cyan and silver fiber trunk
         (
-            [0.70, 0.67, 0.56, 1.0],
+            [0.35, 0.90, 0.88, 0.95],
             vec![
                 [0.0, 0.0, 0.0],
                 [lean * 0.40, h * 0.28, 0.14],
@@ -54,9 +54,9 @@ fn trunk(site: u8, index: usize, x: f32, z: f32, h: f32, lean: f32) -> AssetReci
             ],
         )
     } else if site == 4 {
-        // Tall, straight alpine ash
+        // Towering alpine ash: electric cobalt and cyan trunk
         (
-            [0.22, 0.20, 0.16, 1.0],
+            [0.20, 0.75, 0.95, 0.95],
             vec![
                 [0.0, 0.0, 0.0],
                 [lean * 0.15, h * 0.30, 0.01],
@@ -65,9 +65,9 @@ fn trunk(site: u8, index: usize, x: f32, z: f32, h: f32, lean: f32) -> AssetReci
             ],
         )
     } else if site == 2 || site == 3 {
-        // Montane river gums and black sallee
+        // Montane river gums and black sallee: phosphorescent jade
         (
-            [0.28, 0.26, 0.19, 1.0],
+            [0.10, 0.92, 0.70, 0.95],
             vec![
                 [0.0, 0.0, 0.0],
                 [lean * 0.25, h * 0.26, 0.02],
@@ -76,9 +76,9 @@ fn trunk(site: u8, index: usize, x: f32, z: f32, h: f32, lean: f32) -> AssetReci
             ],
         )
     } else {
-        // Ribbon gums (Blowering lake foreshore)
+        // Ribbon gums: radiant mint & teal fiber
         (
-            [0.34, 0.30, 0.22, 1.0],
+            [0.15, 0.88, 0.62, 0.95],
             vec![
                 [0.0, 0.0, 0.0],
                 [lean * 0.22, h * 0.26, 0.02],
@@ -207,9 +207,9 @@ fn gum(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32, h: f32) {
     out.push(plant(
         format!("rc:asset/talbingo/{site}/tree-{i}-forks"),
         if site == 5 {
-            [0.55, 0.52, 0.44, 1.0]
+            [0.30, 0.85, 0.85, 0.90]
         } else {
-            [0.18, 0.16, 0.12, 1.0]
+            [0.15, 0.80, 0.70, 0.90]
         },
         WEATHERED_TIMBER,
         ParametricRecipe::LimbCluster {
@@ -219,27 +219,27 @@ fn gum(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32, h: f32) {
         },
     ));
 
-    // Foliage palettes matched to alpine vs montane vs foothills eucalypts
+    // Luminous volumetric foliage palettes
     let palette = if site == 5 {
-        // Snow gum leathery olive-glaucous canopy
+        // Snow gum glowing ice-cyan & mint canopy
         [
-            [0.15, 0.25, 0.15, 1.0],
-            [0.18, 0.28, 0.17, 1.0],
-            [0.12, 0.21, 0.13, 1.0],
+            [0.20, 0.95, 0.75, 0.85],
+            [0.30, 0.98, 0.85, 0.85],
+            [0.15, 0.85, 0.70, 0.85],
         ]
     } else if site == 4 {
-        // Alpine ash deep mountain canopy
+        // Alpine ash radiant electric cyan & azure
         [
-            [0.06, 0.18, 0.09, 1.0],
-            [0.09, 0.22, 0.11, 1.0],
-            [0.05, 0.15, 0.08, 1.0],
+            [0.10, 0.75, 0.95, 0.85],
+            [0.15, 0.85, 0.98, 0.85],
+            [0.08, 0.65, 0.90, 0.85],
         ]
     } else {
-        // Valley & foreshore gums
+        // Valley & foreshore gums: vibrant phosphor emerald
         [
-            [0.07, 0.17, 0.11, 1.0],
-            [0.10, 0.21, 0.13, 1.0],
-            [0.045, 0.14, 0.10, 1.0],
+            [0.12, 0.92, 0.58, 0.85],
+            [0.22, 0.96, 0.68, 0.85],
+            [0.08, 0.82, 0.50, 0.85],
         ]
     };
 
@@ -263,9 +263,9 @@ fn gum(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32, h: f32) {
     out.push(plant(
         format!("rc:asset/talbingo/{site}/tree-{i}-leaf-detail"),
         if site == 5 {
-            [0.20, 0.30, 0.18, 1.0]
+            [0.35, 0.98, 0.80, 0.90]
         } else {
-            [0.13, 0.24, 0.14, 1.0]
+            [0.25, 0.95, 0.65, 0.90]
         },
         LIVING_FOLIAGE,
         ParametricRecipe::EllipsoidCluster {
@@ -306,7 +306,7 @@ fn wattle(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
     }
     out.push(plant(
         format!("rc:asset/talbingo/{site}/wattle-{i}-stems"),
-        [0.32, 0.26, 0.18, 1.0],
+        [0.12, 0.85, 0.55, 0.90],
         WEATHERED_TIMBER,
         ParametricRecipe::LimbCluster {
             center: [x, 0.0, z],
@@ -316,7 +316,7 @@ fn wattle(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
     ));
     out.push(plant(
         format!("rc:asset/talbingo/{site}/wattle-{i}-canopy"),
-        [0.16, 0.32, 0.14, 1.0],
+        [0.20, 0.95, 0.60, 0.85],
         LIVING_FOLIAGE,
         ParametricRecipe::BotanicalHull {
             center: [x, 0.75, z],
@@ -332,7 +332,7 @@ fn wattle(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
     ));
     out.push(plant(
         format!("rc:asset/talbingo/{site}/wattle-{i}-blooms"),
-        [0.94, 0.82, 0.16, 1.0],
+        [1.0, 0.88, 0.18, 1.0],
         LIVING_FOLIAGE,
         ParametricRecipe::EllipsoidCluster {
             instances: blossoms,
@@ -365,7 +365,7 @@ fn bottlebrush(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
     }
     out.push(plant(
         format!("rc:asset/talbingo/{site}/bottlebrush-{i}-stems"),
-        [0.28, 0.22, 0.16, 1.0],
+        [0.15, 0.80, 0.65, 0.90],
         WEATHERED_TIMBER,
         ParametricRecipe::LimbCluster {
             center: [x, 0.0, z],
@@ -375,7 +375,7 @@ fn bottlebrush(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
     ));
     out.push(plant(
         format!("rc:asset/talbingo/{site}/bottlebrush-{i}-foliage"),
-        [0.14, 0.28, 0.12, 1.0],
+        [0.10, 0.90, 0.55, 0.85],
         LIVING_FOLIAGE,
         ParametricRecipe::BotanicalHull {
             center: [x, 0.62, z],
@@ -391,7 +391,7 @@ fn bottlebrush(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
     ));
     out.push(plant(
         format!("rc:asset/talbingo/{site}/bottlebrush-{i}-spikes"),
-        [0.85, 0.16, 0.12, 1.0],
+        [1.0, 0.18, 0.35, 1.0],
         LIVING_FOLIAGE,
         ParametricRecipe::EllipsoidCluster {
             instances: brushes,
@@ -481,25 +481,25 @@ pub(crate) fn assets(site: u8) -> Vec<AssetRecipe> {
     }
     for (i, (x, z)) in tufts.into_iter().enumerate() {
         let (patch_color, density, blade_h) = if site == 5 {
-            // Three Mile Dam: dense alpine tussock grass (Poa costiniana) & sphagnum hummocks
+            // Three Mile Dam: glowing alpine snowgrass (Poa costiniana) & sphagnum hummocks
             if i % 3 == 0 {
-                ([0.55, 0.52, 0.28, 1.0], 42, 0.32) // Golden-straw alpine snowgrass
+                ([0.98, 0.85, 0.25, 0.90], 42, 0.32) // Laser-straw alpine snowgrass
             } else {
-                ([0.34, 0.44, 0.19, 1.0], 36, 0.24) // Olive alpine tussock
+                ([0.25, 0.95, 0.65, 0.90], 36, 0.24) // Phosphor mint alpine tussock
             }
         } else if site == 2 || site == 3 {
             // Creek and river riparian grasses
             if i % 3 == 0 {
-                ([0.16, 0.26, 0.12, 1.0], 32, 0.26)
+                ([0.15, 0.92, 0.70, 0.90], 32, 0.26)
             } else {
-                ([0.07, 0.18, 0.07, 1.0], 28, 0.20)
+                ([0.10, 0.85, 0.55, 0.90], 28, 0.20)
             }
         } else {
             // Valley and lake foreshore grasses
             if i % 3 == 0 {
-                ([0.22, 0.24, 0.08, 1.0], 30, 0.22)
+                ([0.20, 0.90, 0.55, 0.90], 30, 0.22)
             } else {
-                ([0.06, 0.16, 0.06, 1.0], 28, 0.18)
+                ([0.10, 0.80, 0.50, 0.90], 28, 0.18)
             }
         };
 
