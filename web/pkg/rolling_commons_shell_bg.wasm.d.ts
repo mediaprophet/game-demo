@@ -59,6 +59,7 @@ export const gamesession_vibe_propose: (a: number, b: number, c: number) => any;
 export const gamesession_vibe_query: (a: number, b: number, c: number) => any;
 export const gamesession_world: (a: number) => [number, number];
 export const init_panic_hook_shell: () => void;
+export const init_webgl2: (a: any) => [number, number, number];
 export const init_webgpu: (a: any) => any;
 export const inspect_game_hmc: (a: number, b: number) => [number, number, number];
 export const pack_game_hmc: (a: any, b: number, c: number) => [number, number, number, number];

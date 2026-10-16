@@ -864,7 +864,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = 'a0980869c4ebb3e6-community-overhaul';
+const WASM_BUILD = '53330764b572ec4d-community-overhaul';
 const wasmStart = performance.now();
 await window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);

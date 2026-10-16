@@ -702,11 +702,25 @@ try{
  let canvas=$('scene');
  const resize=()=>{
   const ratio=Math.min(2,window.devicePixelRatio||1);
-  canvas.width=Math.round(canvas.clientWidth*ratio);
-  canvas.height=Math.round(canvas.clientHeight*ratio);
+  const c=$('scene')||canvas;
+  c.width=Math.round(c.clientWidth*ratio);
+  c.height=Math.round(c.clientHeight*ratio);
  };
  resize();
- if(navigator.gpu){try{await m.init_webgpu(canvas)}catch{const fresh=canvas.cloneNode();canvas.replaceWith(fresh);canvas=fresh}}
+ let webgpuArmed=false;
+ if(navigator.gpu&&m&&m.init_webgpu){
+  try{webgpuArmed=(await m.init_webgpu(canvas))===true;}catch(e){}
+ }
+ if(!webgpuArmed){
+  const fresh=document.createElement('canvas');
+  fresh.id=canvas.id;fresh.className=canvas.className;
+  fresh.width=canvas.width;fresh.height=canvas.height;
+  if(canvas.getAttribute('aria-label'))fresh.setAttribute('aria-label',canvas.getAttribute('aria-label'));
+  canvas.replaceWith(fresh);
+  canvas=fresh;
+  resize();
+  if(m&&m.init_webgl2){try{m.init_webgl2(canvas);}catch(e){}}
+ }
  portal=new m.GamePortal(canvas);window.__talbingoTier=portal.tier();window.addEventListener('resize',resize);
  portal.set_sky_preset(1);portal.set_lighting(0.45,0.85,0.35,1.25,0.38);portal.set_exposure_compensation(0.25);
  portal.set_shadows_enabled(false);portal.set_screen_space_ao_enabled(true);

@@ -1656,6 +1656,12 @@ pub async fn init_webgpu(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
     qualia_core_db::render::portal::portal_init_webgpu(canvas).await
 }
 
+/// Arm the WebGL2 path when WebGPU is unavailable.
+#[wasm_bindgen]
+pub fn init_webgl2(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
+    qualia_core_db::render::portal::portal_init_webgl2(canvas)
+}
+
 #[wasm_bindgen]
 impl GamePortal {
     #[wasm_bindgen(constructor)]

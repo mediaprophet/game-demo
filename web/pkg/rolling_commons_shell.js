@@ -5515,6 +5515,19 @@ export function init_shared_webgpu() {
 }
 
 /**
+ * Arm the WebGL2 path when WebGPU is unavailable.
+ * @param {HTMLCanvasElement} canvas
+ * @returns {boolean}
+ */
+export function init_webgl2(canvas) {
+    const ret = wasm.init_webgl2(canvas);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
  * Arm the WebGPU path. Await once before constructing the portal; on
  * `false`/throw the portal keeps its CPU/canvas fallback.
  * @param {HTMLCanvasElement} canvas

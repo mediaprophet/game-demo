@@ -1703,6 +1703,11 @@ export function init_panic_hook_shell(): void;
 export function init_shared_webgpu(): Promise<void>;
 
 /**
+ * Arm the WebGL2 path when WebGPU is unavailable.
+ */
+export function init_webgl2(canvas: HTMLCanvasElement): boolean;
+
+/**
  * Arm the WebGPU path. Await once before constructing the portal; on
  * `false`/throw the portal keeps its CPU/canvas fallback.
  */
@@ -2884,6 +2889,7 @@ export interface InitOutput {
     readonly gamesession_vibe_query: (a: number, b: number, c: number) => any;
     readonly gamesession_world: (a: number) => [number, number];
     readonly init_panic_hook_shell: () => void;
+    readonly init_webgl2: (a: any) => [number, number, number];
     readonly init_webgpu: (a: any) => any;
     readonly inspect_game_hmc: (a: number, b: number) => [number, number, number];
     readonly pack_game_hmc: (a: any, b: number, c: number) => [number, number, number, number];
