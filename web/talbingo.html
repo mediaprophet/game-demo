@@ -3,24 +3,34 @@
 <title>Talbingo camping drive · playable prototype</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}*{box-sizing:border-box}
-body{margin:0;background:#060b10;color:#e3f2fd}
-header{padding:14px 20px;background:#08131d;border-bottom:1px solid #00e5ff33;box-shadow:0 2px 16px #00e5ff10}
+body{margin:0;background:#03070d;color:#e3f2fd}
+header{padding:14px 22px;background:linear-gradient(90deg,#061320,#081c2e);border-bottom:1px solid #00f0ff44;box-shadow:0 4px 24px #00f0ff18;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 h1{font-size:1.35rem;margin:0 0 5px;letter-spacing:0.02em}p{margin:4px 0}
 .sub{color:#76a9c4;font-size:.86rem;letter-spacing:0.03em}
-main{display:grid;grid-template-columns:minmax(230px,290px) 1fr;min-height:calc(100vh - 87px)}
-aside{padding:16px;background:#091520;border-right:1px solid #00e5ff22;display:flex;flex-direction:column;gap:13px}
-label{font-weight:700;font-size:.9rem;letter-spacing:0.04em;text-transform:uppercase;color:#80d8ff}
+.pills{display:flex;gap:8px;align-items:center;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.74rem}
+.pill{background:#00f0ff14;border:1px solid #00f0ff55;padding:3px 9px;border-radius:4px;color:#00f0ff;text-transform:uppercase;letter-spacing:.05em}
+.pill-gold{background:#ffd74014;border-color:#ffd74055;color:#ffd740}
+.pill-green{background:#00e67614;border-color:#00e67655;color:#69f0ae}
+main{display:grid;grid-template-columns:minmax(250px,310px) 1fr;min-height:calc(100vh - 87px)}
+aside{padding:16px;background:#050e18f2;backdrop-filter:blur(14px);border-right:1px solid #00f0ff33;box-shadow:inset -1px 0 24px #00f0ff08;display:flex;flex-direction:column;gap:13px}
+label{font-weight:700;font-size:.85rem;letter-spacing:.05em;text-transform:uppercase;color:#80d8ff}
 select,button{font:inherit;color:inherit;border:1px solid #00b0ff55;border-radius:8px;background:linear-gradient(180deg,#0e2636,#0a1b26);padding:10px 12px;transition:all .15s ease}
-button{cursor:pointer}button:hover,button:focus-visible{background:linear-gradient(180deg,#153850,#0f2b3c);border-color:#00e5ff;box-shadow:0 0 10px #00e5ff44}
-button:disabled{opacity:.35;cursor:default;box-shadow:none;border-color:#1c3746}
+button{cursor:pointer}button:hover,button:focus-visible{background:linear-gradient(180deg,#153850,#0f2b3c);border-color:#00f0ff;box-shadow:0 0 12px #00f0ff44}
+button:disabled{opacity:.32;cursor:default;box-shadow:none;border-color:#1c3746}
 .stack{display:grid;gap:8px}
 .small{font-size:.85rem;color:#90b4cb}
 #site-note,#mission,#status{line-height:1.45}
-#status{min-height:3em;font-weight:700;color:#00f0ff;text-shadow:0 0 8px #00f0ff66}
-.play{position:relative;min-width:0;background:#05090e}
+#status{min-height:3em;font-weight:700;color:#00f0ff;text-shadow:0 0 10px #00f0ff77}
+.play{position:relative;min-width:0;background:#020509;overflow:hidden}
 canvas{display:block;width:100%;height:calc(100vh - 87px);min-height:450px}
-.overlay{position:absolute;top:12px;left:12px;background:#071420d9;border:1px solid #00e5ff66;box-shadow:0 0 14px #00e5ff26;padding:9px 14px;border-radius:8px;font-weight:700;color:#00f0ff;letter-spacing:0.05em;text-transform:uppercase}
-.drivehud{position:absolute;bottom:14px;left:14px;right:14px;background:#071420eb;border:1px solid #00e5ff44;box-shadow:0 0 18px #00e5ff20;border-radius:10px;padding:10px 16px;display:flex;gap:20px;justify-content:space-between;flex-wrap:wrap;color:#b2ebf2;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.reticle{position:absolute;width:22px;height:22px;border-color:#00f0ffaa;border-style:solid;pointer-events:none;z-index:3}
+.top-left{top:12px;left:12px;border-width:2px 0 0 2px}
+.top-right{top:12px;right:12px;border-width:2px 2px 0 0}
+.bottom-left{bottom:72px;left:12px;border-width:0 0 2px 2px}
+.bottom-right{bottom:72px;right:12px;border-width:0 2px 2px 0}
+.overlay{position:absolute;top:16px;left:20px;background:#05121fe6;backdrop-filter:blur(10px);border:1px solid #00f0ff88;box-shadow:0 0 18px #00f0ff33;padding:8px 16px;border-radius:6px;font-weight:700;color:#00f0ff;letter-spacing:0.06em;text-transform:uppercase;z-index:4}
+.telemetry-badge{right:20px;left:auto;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.78rem;font-weight:400;color:#b2ebf2;border-color:#00f0ff44}
+.drivehud{position:absolute;bottom:14px;left:14px;right:14px;background:#05121ff0;backdrop-filter:blur(12px);border:1px solid #00f0ff55;box-shadow:0 0 22px #00f0ff28;border-radius:10px;padding:10px 18px;display:flex;gap:20px;justify-content:space-between;flex-wrap:wrap;color:#b2ebf2;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;z-index:4}
 .meter{height:8px;background:#0b1e2c;border:1px solid #00e5ff33;border-radius:10px;overflow:hidden}
 .meter>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#00e5ff,#ffd740);box-shadow:0 0 8px #00e5ff88}
 .touch{display:flex;gap:8px}
@@ -28,9 +38,9 @@ canvas{display:block;width:100%;height:calc(100vh - 87px);min-height:450px}
 @media(max-width:760px){main{display:block}aside{gap:9px}canvas{height:55vh;min-height:350px}.drivehud{font-size:.8rem}}
 .touch{flex-wrap:wrap}.choices{display:grid;gap:6px}
 @media(min-width:761px){main{height:calc(100vh - 84px);min-height:640px}aside{height:100%;overflow-y:auto}.play{height:100%;overflow:hidden}canvas{height:100%;min-height:0}}
-@media(max-width:760px){main{display:flex;flex-direction:column}.play{order:0}.play-touch{display:flex!important;position:absolute;left:10px;right:10px;bottom:60px;z-index:2;justify-content:center;flex-wrap:wrap}.play-touch button{background:#0e293de8;padding:8px;min-width:42px}aside{order:1}.touch:not(.play-touch){display:none}}
+@media(max-width:760px){main{display:flex;flex-direction:column}.play{order:0}.play-touch{display:flex!important;position:absolute;left:10px;right:10px;bottom:60px;z-index:5;justify-content:center;flex-wrap:wrap}.play-touch button{background:#0e293de8;padding:8px;min-width:42px}aside{order:1}.touch:not(.play-touch){display:none}}
 </style></head><body>
-<header><h1>Talbingo camping drive · <span style="color:#00e5ff;font-size:1.05rem;font-weight:400;letter-spacing:0.03em">Holographic Field Survey</span></h1><p class="sub">Tactical LiDAR telemetry & holographic cartography deck · six alpine campsite sectors · illustrative road and layouts</p></header>
+<header><div><h1>Talbingo camping drive · <span style="color:#00e5ff;font-size:1.05rem;font-weight:400;letter-spacing:0.03em">Holographic Field Survey</span></h1><p class="sub">Tactical LiDAR telemetry & holographic cartography deck · six alpine campsite sectors</p></div><div class="pills"><span class="pill">SIM TIER: 10D HOLOGRAPHIC</span><span class="pill pill-gold">ACOUSTICS: HOLOSONIC</span><span class="pill pill-green">CORE: ZERO-HEAP</span></div></header>
 <main><aside>
 <div class="stack"><label for="site">Choose a campsite sector</label><select id="site"></select></div>
 <p id="site-note" class="small"></p>
@@ -38,8 +48,9 @@ canvas{display:block;width:100%;height:calc(100vh - 87px);min-height:450px}
 <div><strong>Sector objective</strong><p id="mission"></p><p id="objective" class="small"></p><button id="inspect" disabled>Inspect landmark</button><div id="choices" class="choices"></div><p class="small">At camp, use W A S D or touch arrows to walk. Drag to look around; scroll or use + / − to zoom.</p></div>
 <div><strong>Drive telemetry controls</strong><p class="small">W / ↑ accelerate · S / ↓ reverse · A D steer · Space brake. Release the keys to coast. The camera follows your position.</p><div class="touch"><button data-key="w">▲</button><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button><button data-key=" ">Brake</button></div></div>
 <div><strong>Telemetry progress</strong><p id="status" role="status">Loading QualiaDB scene…</p><div class="meter"><span id="progress"></span></div></div>
+<div><strong>Holosonic acoustic wavefield</strong><p class="small">Spatial wavefield synthesis: vector corridor propulsion hum, hydrodynamic fluid resonance, and landmark acoustic focal points.</p><button id="holosonic-toggle" style="display:flex;justify-content:space-between;align-items:center;width:100%"><span>Holosonic wavefield</span><span id="holosonic-badge" style="color:#ffd740;font-weight:700">STANDBY</span></button></div>
 <p class="small"><a href="game.html" style="color:#00e5ff">Main game</a> · Site shapes are original authored approximations. Check official park information before a real trip.</p>
-</aside><section class="play"><canvas id="scene" width="1280" height="760" aria-label="Three dimensional campsite game scene"></canvas><div class="overlay" id="place-label">Talbingo</div><div class="touch play-touch" style="display:none"><button data-key="w" aria-label="Forward">▲</button><button data-key="a" aria-label="Left">◀</button><button data-key="s" aria-label="Back">▼</button><button data-key="d" aria-label="Right">▶</button><button data-key=" " aria-label="Brake">Brake</button><button data-zoom="in" aria-label="Zoom in">+</button><button data-zoom="out" aria-label="Zoom out">−</button></div><div class="drivehud"><span id="leg">Select a campsite</span><span id="distance">0 game units</span><span id="speed">0 units/s</span></div></section></main>
+</aside><section class="play"><canvas id="scene" width="1280" height="760" aria-label="Three dimensional campsite game scene"></canvas><div class="reticle top-left"></div><div class="reticle top-right"></div><div class="reticle bottom-left"></div><div class="reticle bottom-right"></div><div class="overlay" id="place-label">Talbingo</div><div class="overlay telemetry-badge" id="telemetry-coord">LAT: -35.584° S | LON: 148.298° E</div><div class="touch play-touch" style="display:none"><button data-key="w" aria-label="Forward">▲</button><button data-key="a" aria-label="Left">◀</button><button data-key="s" aria-label="Back">▼</button><button data-key="d" aria-label="Right">▶</button><button data-key=" " aria-label="Brake">Brake</button><button data-zoom="in" aria-label="Zoom in">+</button><button data-zoom="out" aria-label="Zoom out">−</button></div><div class="drivehud"><span id="leg">Select a campsite</span><span id="distance">0 game units</span><span id="speed">0 units/s</span></div></section></main>
 <script type="module">
 const SITES=[
  {name:'The Pines',detail:'Blowering Reservoir shore, ribbon gums, golden wattle, and Eastern grey kangaroos.',task:'Where will you set camp?',choices:['On the reservoir edge','In the picnic clearing'],correct:1,event:'Kangaroo roadside crossing',landmark:'reservoir and picnic clearing',point:[20,-3.5]},
@@ -53,35 +64,89 @@ const $=id=>document.getElementById(id), toObj=v=>v instanceof Map?Object.fromEn
 const select=$('site');SITES.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s.name;select.append(o)});
 let m,portal,sim,scene,site=0,phase='loading',drive=null,walk={x:18,z:3.5},last=performance.now(),acted=false,inspected=false,eventCleared=false;
 const keys=new Set();
+
+class HolosonicEngine{
+ constructor(){this.ctx=null;this.active=false;this.vectorOsc=null;this.vectorSub=null;this.vectorGain=null;this.waterGain=null;this.floraGain=null;this.noise=null;}
+ async init(){
+  try{
+   if(this.ctx){if(this.ctx.state==='suspended')await this.ctx.resume();this.active=!this.active;this.updateBadge();return;}
+   const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return;
+   this.ctx=new AudioCtx();if(this.ctx.state==='suspended')await this.ctx.resume();
+   this.vectorOsc=this.ctx.createOscillator();this.vectorOsc.type='sawtooth';this.vectorOsc.frequency.setValueAtTime(80,this.ctx.currentTime);
+   this.vectorSub=this.ctx.createOscillator();this.vectorSub.type='sine';this.vectorSub.frequency.setValueAtTime(40,this.ctx.currentTime);
+   const vFilter=this.ctx.createBiquadFilter();vFilter.type='lowpass';vFilter.frequency.setValueAtTime(260,this.ctx.currentTime);
+   this.vectorGain=this.ctx.createGain();this.vectorGain.gain.setValueAtTime(0,this.ctx.currentTime);
+   this.vectorOsc.connect(vFilter);this.vectorSub.connect(vFilter);vFilter.connect(this.vectorGain);this.vectorGain.connect(this.ctx.destination);
+   this.vectorOsc.start();this.vectorSub.start();
+   const len=this.ctx.sampleRate*2,buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate),d=buf.getChannelData(0);
+   for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+   this.noise=this.ctx.createBufferSource();this.noise.buffer=buf;this.noise.loop=true;
+   const wFilter=this.ctx.createBiquadFilter();wFilter.type='bandpass';wFilter.frequency.setValueAtTime(360,this.ctx.currentTime);wFilter.Q.setValueAtTime(2.5,this.ctx.currentTime);
+   this.waterGain=this.ctx.createGain();this.waterGain.gain.setValueAtTime(0,this.ctx.currentTime);
+   const fFilter=this.ctx.createBiquadFilter();fFilter.type='highpass';fFilter.frequency.setValueAtTime(1600,this.ctx.currentTime);
+   this.floraGain=this.ctx.createGain();this.floraGain.gain.setValueAtTime(0.015,this.ctx.currentTime);
+   this.noise.connect(wFilter);this.noise.connect(fFilter);wFilter.connect(this.waterGain);fFilter.connect(this.floraGain);
+   this.waterGain.connect(this.ctx.destination);this.floraGain.connect(this.ctx.destination);this.noise.start();
+   this.active=true;this.updateBadge();
+  }catch(e){}
+ }
+ updateBadge(){
+  try{
+   const b=$('holosonic-badge');if(!b)return;
+   if(this.active){b.textContent='ONLINE';b.style.color='#00f0ff';b.style.textShadow='0 0 8px #00f0ff';}
+   else{b.textContent='MUTED';b.style.color='#ffd740';b.style.textShadow='none';if(this.vectorGain&&this.ctx)this.vectorGain.gain.setValueAtTime(0,this.ctx.currentTime);if(this.waterGain&&this.ctx)this.waterGain.gain.setValueAtTime(0,this.ctx.currentTime);}
+  }catch(e){}
+ }
+ update(state){
+  try{
+   if(!this.active||!this.ctx)return;const now=this.ctx.currentTime,sp=Math.abs(state.speed||0),driving=state.phase==='outbound'||state.phase==='inbound';
+   if(driving){const f=75+sp*18;this.vectorOsc.frequency.setTargetAtTime(f,now,.08);this.vectorSub.frequency.setTargetAtTime(f*.5,now,.08);this.vectorGain.gain.setTargetAtTime(Math.min(.12,.02+sp*.025),now,.08);}
+   else if(this.vectorGain)this.vectorGain.gain.setTargetAtTime(0,now,.15);
+   const water=[0,1,2,3,5].includes(state.site);
+   if(this.waterGain)this.waterGain.gain.setTargetAtTime(water?.035+.015*Math.sin(now*1.5):.004,now,.2);
+  }catch(e){}
+ }
+ chime(freq=528,dur=.8){
+  try{
+   if(!this.active||!this.ctx)return;const osc=this.ctx.createOscillator(),g=this.ctx.createGain();
+   osc.type='sine';osc.frequency.setValueAtTime(freq,this.ctx.currentTime);g.gain.setValueAtTime(.15,this.ctx.currentTime);
+   g.gain.exponentialRampToValueAtTime(.0001,this.ctx.currentTime+dur);osc.connect(g);g.connect(this.ctx.destination);
+   osc.start();osc.stop(this.ctx.currentTime+dur);
+  }catch(e){}
+ }
+}
+const holosonic=new HolosonicEngine();
+$('holosonic-toggle').onclick=()=>holosonic.init();
+
 function distanceToLandmark(){const p=SITES[site].point;return Math.hypot(walk.x-p[0],walk.z-p[1]);}
 function updateInspect(){const near=phase==='camp'&&distanceToLandmark()<2.2;$('inspect').disabled=!near;$('objective').textContent=phase==='camp'?(near?'Landmark reached · inspect it.':distanceToLandmark().toFixed(1)+' game units to '+SITES[site].landmark):'';}
-function display(){const s=SITES[site];$('site-note').textContent=s.detail;$('mission').textContent=s.task;$('place-label').textContent=s.name;$('start').disabled=phase==='loading'||phase==='outbound'||phase==='inbound';$('return').disabled=phase!=='camp'||!acted;$('inspect').textContent='Inspect '+s.landmark;$('leg').textContent=phase==='outbound'?'Driving to '+s.name:phase==='inbound'?'Returning to Talbingo':phase==='camp'?'At '+s.name:phase==='done'?'Round trip complete':'Choose a campsite';const choices=$('choices');choices.replaceChildren();s.choices.forEach((choice,i)=>{const b=document.createElement('button');b.textContent=choice;b.disabled=phase!=='camp'||!inspected||acted;b.dataset.correct=String(i===s.correct);b.onclick=()=>{if(i===s.correct){acted=true;message('Good choice. Drive back to Talbingo.');display()}else message('Try another spot. Read the scene landmarks.');};choices.append(b)});updateInspect();}
+function display(){const s=SITES[site];$('site-note').textContent=s.detail;$('mission').textContent=s.task;$('place-label').textContent=s.name;$('start').disabled=phase==='loading'||phase==='outbound'||phase==='inbound';$('return').disabled=phase!=='camp'||!acted;$('inspect').textContent='Inspect '+s.landmark;$('leg').textContent=phase==='outbound'?'Driving to '+s.name:phase==='inbound'?'Returning to Talbingo':phase==='camp'?'At '+s.name:phase==='done'?'Round trip complete':'Choose a campsite';const choices=$('choices');choices.replaceChildren();s.choices.forEach((choice,i)=>{const b=document.createElement('button');b.textContent=choice;b.disabled=phase!=='camp'||!inspected||acted;b.dataset.correct=String(i===s.correct);b.onclick=()=>{if(i===s.correct){acted=true;try{holosonic.chime(659.25,1.2)}catch(e){}message('Good choice. Drive back to Talbingo.');display()}else message('Try another spot. Read the scene landmarks.');};choices.append(b)});updateInspect();}
 function message(text){$('status').textContent=text;}
 const camera={x:8,z:0,yaw:.6,pitch:.72,zoom:1.45};
 function applyCamera(){if(!portal)return;const scale=1.7/31;portal.set_camera_target(camera.yaw,camera.pitch,camera.zoom,(camera.x-8.2)*scale,(0.4-0.7)*scale,camera.z*scale);}
 function focus(x,z,wide=false){camera.x=x;camera.z=z;camera.yaw=wide?.12:.6;camera.pitch=wide?.78:.72;camera.zoom=wide?1.48:.58;applyCamera();}
 function attachCampCamera(canvas){let drag=null;canvas.addEventListener('pointerdown',e=>{if(phase!=='camp')return;drag=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!drag||phase!=='camp')return;camera.yaw+=(e.clientX-drag[0])*.009;camera.pitch=Math.max(.22,Math.min(1.35,camera.pitch+(e.clientY-drag[1])*.007));drag=[e.clientX,e.clientY];applyCamera()});canvas.addEventListener('pointerup',()=>drag=null);canvas.addEventListener('pointercancel',()=>drag=null);canvas.addEventListener('wheel',e=>{if(phase!=='camp')return;e.preventDefault();camera.zoom=Math.max(.32,Math.min(2.1,camera.zoom*Math.exp(e.deltaY*.001)));applyCamera()},{passive:false});}
-function reset(){phase='ready';drive=null;walk={x:18,z:3.5};acted=false;inspected=false;eventCleared=false;keys.clear();$('progress').style.width='0%';$('distance').textContent='0 game units';$('speed').textContent='0 units/s';m.talbingo_vehicle_pose(portal,-5.45,m.talbingo_road_z(site,-5.45),-Math.PI/2);m.talbingo_walker_pose(portal,walk.x,walk.z);focus(8,0,true);message('Ready. Drive in, walk to the landmark, choose a campsite, then drive back.');display();}
+function reset(){phase='ready';drive=null;walk={x:18,z:3.5};acted=false;inspected=false;eventCleared=false;keys.clear();$('progress').style.width='0%';$('distance').textContent='0 game units';$('speed').textContent='0 units/s';$('telemetry-coord').textContent='SECTOR: '+SITES[site].name.toUpperCase()+' // STANDBY';m.talbingo_vehicle_pose(portal,-5.45,m.talbingo_road_z(site,-5.45),-Math.PI/2);m.talbingo_walker_pose(portal,walk.x,walk.z);focus(8,0,true);message('Ready. Drive in, walk to the landmark, choose a campsite, then drive back.');display();}
 async function loadSite(){site=Number(select.value);phase='loading';display();message('Building '+SITES[site].name+'…');scene=toObj(m.talbingo_scene(site));window.__sceneReceipt=portal.load_scene_textured(scene.assets,scene.textures);reset();}
-function begin(outbound){const initial=toObj(sim.setup(0));if(initial.error)throw Error(initial.error);drive={...initial,z:m.talbingo_road_z(site,-5.45)};if(!outbound){drive.x=21.65;drive.z=m.talbingo_road_z(site,21.65);drive.heading=Math.PI/2;drive.trailer_heading=drive.heading;drive.speed=0;}eventCleared=false;m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);phase=outbound?'outbound':'inbound';message(outbound?'Drive toward the campsite gate. Watch for the roadside sign.':'Drive back toward Talbingo. Watch for the roadside sign.');display();if(innerWidth<=760)document.querySelector('.play').scrollIntoView({behavior:'smooth'});}
-function step(dt){if(phase==='camp'){
+function begin(outbound){if(!holosonic.ctx)holosonic.init().catch(()=>{});const initial=toObj(sim.setup(0));if(initial.error)throw Error(initial.error);drive={...initial,z:m.talbingo_road_z(site,-5.45)};if(!outbound){drive.x=21.65;drive.z=m.talbingo_road_z(site,21.65);drive.heading=Math.PI/2;drive.trailer_heading=drive.heading;drive.speed=0;}eventCleared=false;m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);phase=outbound?'outbound':'inbound';message(outbound?'Drive toward the campsite gate. Watch for the roadside sign.':'Drive back toward Talbingo. Watch for the roadside sign.');display();if(innerWidth<=760)document.querySelector('.play').scrollIntoView({behavior:'smooth'});}
+function step(dt){holosonic.update({speed:drive?drive.speed:0,phase,site});if(phase==='camp'){
  const east=Number(keys.has('d'))-Number(keys.has('a')),south=Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));
  if(!east&&!south)return;
  const next=toObj(sim.camp_step(JSON.stringify({dt,x:walk.x,z:walk.z,east,south,site_id:site})));
  if(next.error)throw Error(next.error);
- walk={x:next.x,z:next.z};m.talbingo_walker_pose(portal,walk.x,walk.z);camera.x=walk.x;camera.z=walk.z;camera.zoom=.82;applyCamera();updateInspect();
+ walk={x:next.x,z:next.z};m.talbingo_walker_pose(portal,walk.x,walk.z);camera.x=walk.x;camera.z=walk.z;camera.zoom=.82;applyCamera();updateInspect();$('telemetry-coord').textContent='WALK ['+walk.x.toFixed(1)+'m, '+walk.z.toFixed(1)+'m] // Q: 0.98';
  if(next.blocked)message('Water or marsh edge · choose another path.');
  return;
  }if(!drive||!(phase==='outbound'||phase==='inbound'))return;
  const hazard={id:'talbingo-'+site,label:SITES[site].event,taxon:'illustrative game event',x:8,z:m.talbingo_road_z(site,8),radius:.35,selected:!eventCleared};
  const input={...drive,dt,site_id:site,rig_id:0,rig_roadworthy:true,cooling_efficiency:1,throttle:keys.has('w')||keys.has('arrowup'),reverse:keys.has('s')||keys.has('arrowdown'),brake:keys.has(' '),steer:Number(keys.has('d'))-Number(keys.has('a')),terrain_height:0,terrain_height_ahead:0,terrain_height_behind:0,terrain_sample_distance:.55,crossing_open:true,hazards:[hazard],period:'day',oil_temp:drive.oil_temp,coolant_temp:drive.coolant_temp};
  const next=toObj(sim.step(JSON.stringify(input)));if(next.error||next.ok===false)throw Error(next.error||next.detail||'drive step failed');drive={...drive,...next,distance:(drive.distance||0)+(next.distance_delta||0)};
- const progress=phase==='outbound'?Math.max(0,Math.min(1,(drive.x+5.45)/22.35)):Math.max(0,Math.min(1,(21.65-drive.x)/27.1));$('progress').style.width=(progress*100).toFixed(1)+'%';$('distance').textContent=drive.distance.toFixed(1)+' game units';$('speed').textContent=Math.abs(drive.speed).toFixed(1)+' units/s';
+ const progress=phase==='outbound'?Math.max(0,Math.min(1,(drive.x+5.45)/22.35)):Math.max(0,Math.min(1,(21.65-drive.x)/27.1));$('progress').style.width=(progress*100).toFixed(1)+'%';$('distance').textContent=drive.distance.toFixed(1)+' game units';$('speed').textContent=Math.abs(drive.speed).toFixed(1)+' units/s';$('telemetry-coord').textContent='VECTOR ['+drive.x.toFixed(1)+'m, '+drive.z.toFixed(1)+'m] // HDG: '+(drive.heading*180/Math.PI).toFixed(0)+'°';
  m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);focus(drive.x,drive.z);if(next.hazard_event){eventCleared=true;message((next.warning==='safe-stop'?'Safe stop':'Emergency stop')+' at '+SITES[site].event+'. Continue when ready.')}else if(next.warning==='hazard-near')message(SITES[site].event+' ahead · slow down.');else if(next.warning==='loose-shoulder')message('Loose shoulder · steer back toward the road.');
  if(phase==='outbound'&&drive.x>=16.9){phase='camp';drive.speed=0;keys.clear();$('speed').textContent='0 units/s';focus(walk.x,walk.z);camera.zoom=.82;applyCamera();message('Arrived. Walk to '+SITES[site].landmark+' with W A S D.');display();}
  if(phase==='inbound'&&(drive.x<=-5.4||next.warning==='route-end')){phase='done';drive.speed=0;keys.clear();$('speed').textContent='0 units/s';focus(8,0,true);message('Round trip complete at '+SITES[site].name+'. Choose another campsite to play a different map.');display();}
 }
-select.addEventListener('change',()=>{if(m&&portal)loadSite().catch(e=>message('Scene load failed: '+String(e)))});$('start').onclick=()=>{try{begin(true)}catch(e){message(String(e))}};$('return').onclick=()=>{try{begin(false)}catch(e){message(String(e))}};$('restart').onclick=()=>{if(m&&portal)reset()};$('inspect').onclick=()=>{if(phase!=='camp'||distanceToLandmark()>=2.2)return;const s=SITES[site];inspected=true;focus(s.point[0],s.point[1]);message('Inspect '+s.landmark+'. Look around, then choose a site response.');display()};
+select.addEventListener('change',()=>{if(m&&portal)loadSite().catch(e=>message('Scene load failed: '+String(e)))});$('start').onclick=()=>{try{begin(true)}catch(e){message(String(e))}};$('return').onclick=()=>{try{begin(false)}catch(e){message(String(e))}};$('restart').onclick=()=>{if(m&&portal)reset()};$('inspect').onclick=()=>{if(phase!=='camp'||distanceToLandmark()>=2.2)return;const s=SITES[site];inspected=true;holosonic.chime(528,.9);focus(s.point[0],s.point[1]);message('Inspect '+s.landmark+'. Look around, then choose a site response.');display()};
 window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown',' '].includes(k)&&document.activeElement!==select){keys.add(k);e.preventDefault()}});window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));window.addEventListener('blur',()=>keys.clear());document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);keys.add(k)});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(k))});document.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{if(phase!=='camp')return;camera.zoom=Math.max(.32,Math.min(2.1,camera.zoom*(b.dataset.zoom==='in'?.82:1.22)));applyCamera()});
-try{m=await import('./pkg/rolling_commons_shell.js');await m.default({module_or_path:new URL('./pkg/rolling_commons_shell_bg.wasm',import.meta.url)});let canvas=$('scene');const resize=()=>{const ratio=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(canvas.clientWidth*ratio);canvas.height=Math.round(canvas.clientHeight*ratio)};resize();if(navigator.gpu){try{await m.init_webgpu(canvas)}catch{const fresh=canvas.cloneNode();canvas.replaceWith(fresh);canvas=fresh}}portal=new m.GamePortal(canvas);window.__talbingoTier=portal.tier();window.addEventListener('resize',resize);portal.set_sky_preset(0);portal.set_lighting(-.35,.85,.25,1.5,.55);portal.set_exposure_compensation(0.15);portal.set_shadows_enabled(false);portal.set_screen_space_ao_enabled(true);attachCampCamera(canvas);const source=await(await fetch('./fixtures/talbingo-drive.vibe')).text();sim=new m.GameDriveSimulation(source);await loadSite();function frame(now){const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{step(dt);portal.tick(canvas,Math.min(50,dt*1000))}catch(e){message('Game error: '+String(e));phase='error';display();return}requestAnimationFrame(frame)}requestAnimationFrame(frame)}catch(e){phase='error';message('Could not load the game: '+String(e));display()}
+try{m=await import('./pkg/rolling_commons_shell.js');await m.default({module_or_path:new URL('./pkg/rolling_commons_shell_bg.wasm',import.meta.url)});let canvas=$('scene');const resize=()=>{const ratio=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(canvas.clientWidth*ratio);canvas.height=Math.round(canvas.clientHeight*ratio)};resize();if(navigator.gpu){try{await m.init_webgpu(canvas)}catch{const fresh=canvas.cloneNode();canvas.replaceWith(fresh);canvas=fresh}}portal=new m.GamePortal(canvas);window.__talbingoTier=portal.tier();window.addEventListener('resize',resize);portal.set_sky_preset(0);portal.set_lighting(0.35,0.85,0.35,1.25,0.04);portal.set_exposure_compensation(0.22);portal.set_shadows_enabled(false);portal.set_screen_space_ao_enabled(true);attachCampCamera(canvas);const source=await(await fetch('./fixtures/talbingo-drive.vibe')).text();sim=new m.GameDriveSimulation(source);await loadSite();function frame(now){const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{step(dt);portal.tick(canvas,Math.min(50,dt*1000))}catch(e){message('Game error: '+String(e));phase='error';display();return}requestAnimationFrame(frame)}requestAnimationFrame(frame)}catch(e){phase='error';message('Could not load the game: '+String(e));display()}
 </script></body></html>
