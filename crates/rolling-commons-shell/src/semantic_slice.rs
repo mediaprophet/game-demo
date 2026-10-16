@@ -31,9 +31,8 @@ pub struct SemanticSlice {
 }
 
 fn quin_from_bytes(bytes: &[u8]) -> NQuin {
-    let read = |i: usize| {
-        u64::from_le_bytes(bytes[i * 8..i * 8 + 8].try_into().unwrap_or_default())
-    };
+    let read =
+        |i: usize| u64::from_le_bytes(bytes[i * 8..i * 8 + 8].try_into().unwrap_or_default());
     NQuin {
         subject: read(0),
         predicate: read(1),
@@ -53,8 +52,7 @@ impl SemanticSlice {
     #[wasm_bindgen(constructor)]
     pub fn from_pack(pack: &[u8]) -> Result<SemanticSlice, JsValue> {
         use qualia_core_db::bundle::BundleReader;
-        let reader =
-            BundleReader::parse(pack).map_err(|e| JsValue::from_str(&e.to_string()))?;
+        let reader = BundleReader::parse(pack).map_err(|e| JsValue::from_str(&e.to_string()))?;
         if reader
             .entries()
             .iter()

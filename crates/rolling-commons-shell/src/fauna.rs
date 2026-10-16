@@ -57,7 +57,7 @@ fn goat(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
     crate::quadruped_models::models(prefix, origin)
 }
 
-fn horse(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
+pub(crate) fn horse(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
     crate::quadruped_models::models(prefix, origin)
 }
 
@@ -119,14 +119,14 @@ fn rabbit(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
     result
 }
 
-fn macropod(prefix: &str, origin: [f32; 3], wallaby: bool) -> Vec<AssetRecipe> {
+pub(crate) fn macropod(prefix: &str, origin: [f32; 3], wallaby: bool) -> Vec<AssetRecipe> {
     crate::macropod_models::models(prefix, origin, wallaby)
 }
-fn wombat(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
+pub(crate) fn wombat(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
     crate::quadruped_models::models(prefix, origin)
 }
 
-fn deer(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
+pub(crate) fn deer(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
     crate::quadruped_models::models(prefix, origin)
 }
 
@@ -158,7 +158,7 @@ fn snake(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
     result
 }
 
-fn goanna(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
+pub(crate) fn goanna(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
     let [x, y, z] = origin;
     let mut result = vec![
         mesh(
@@ -197,7 +197,7 @@ fn goanna(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
     result
 }
 
-fn bird(prefix: &str, origin: [f32; 3], kookaburra: bool) -> Vec<AssetRecipe> {
+pub(crate) fn bird(prefix: &str, origin: [f32; 3], kookaburra: bool) -> Vec<AssetRecipe> {
     let [x, y, z] = origin;
     let (feathers, breast, size) = if kookaburra {
         ([0.38, 0.39, 0.33, 1.0], [0.78, 0.71, 0.56, 1.0], 1.0)

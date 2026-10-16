@@ -30,14 +30,16 @@ mod macropod_models;
 mod material_library;
 mod mature_gums;
 mod pack_validation;
-mod semantic_slice;
 mod quadruped_animation;
 mod quadruped_models;
 mod resident_animation;
 mod resident_props;
 mod rig_workshop;
-mod taxon_bindings;
+mod semantic_slice;
 mod session_journal;
+mod talbingo_scenes;
+mod talbingo_vegetation;
+mod taxon_bindings;
 mod terrain;
 mod variant_resolver;
 mod vehicle_animation;
@@ -54,6 +56,63 @@ pub use campaign_simulation::CampaignSimulation;
 pub use character_simulation::CharacterSimulation;
 pub use session_journal::GameSessionJournal;
 pub use variant_resolver::EntityFamilyManifestWrapper;
+
+/// Six authored, illustrative campsite scenes compiled by QualiaDB.
+#[wasm_bindgen]
+pub fn talbingo_scene(site: u8) -> Result<JsValue, JsValue> {
+    talbingo_scenes::build(site)
+}
+
+/// Present a VibeScript accepted Talbingo vehicle pose through Qualia's
+/// skeletal scene actor. This does not implement movement or rendering.
+#[wasm_bindgen]
+pub fn talbingo_vehicle_pose(
+    portal: &mut GamePortal,
+    x: f64,
+    z: f64,
+    heading: f64,
+) -> Result<u32, JsValue> {
+    use qualia_core_db::render::skeletal::Motor;
+    if !x.is_finite()
+        || !z.is_finite()
+        || !heading.is_finite()
+        || x < -6.0
+        || x > 23.0
+        || z.abs() > 8.5
+    {
+        return Err(JsValue::from_str("Talbingo vehicle pose outside scene"));
+    }
+    let yaw = heading * 0.5;
+    let root = Motor::from_translation(x, 0.0, z)
+        .mul(&Motor::from_rotation_translation(
+            [yaw.cos(), 0.0, yaw.sin(), 0.0],
+            [0.0; 3],
+        ))
+        .mul(&Motor::from_translation(-2.35, 0.0, -4.65));
+    portal
+        .inner
+        .set_scene_actor_root(crate::vehicle_animation::root_id(0), root)
+        .map_err(|e| JsValue::from_str(&format!("Talbingo actor pose: {e:?}")))
+}
+
+#[wasm_bindgen]
+pub fn talbingo_road_z(site: u8, x: f32) -> f32 {
+    talbingo_scenes::road_z(site.min(5), x)
+}
+
+#[wasm_bindgen]
+pub fn talbingo_walker_pose(portal: &mut GamePortal, x: f64, z: f64) -> Result<u32, JsValue> {
+    use qualia_core_db::render::skeletal::Motor;
+    if !x.is_finite() || !z.is_finite() || !(13.0..=24.0).contains(&x) || !(-7.0..=7.0).contains(&z)
+    {
+        return Err(JsValue::from_str("Talbingo walker pose outside site"));
+    }
+    let root = Motor::from_translation(x, 0.0, z).mul(&Motor::from_translation(-18.0, 0.0, -3.5));
+    portal
+        .inner
+        .set_scene_actor_root(talbingo_scenes::walker_root(), root)
+        .map_err(|e| JsValue::from_str(&format!("Talbingo walker pose: {e:?}")))
+}
 
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
@@ -337,9 +396,9 @@ pub fn pack_game_hmc(entries: &js_sys::Array, manifest_json: &str) -> Result<Vec
         // so packs are the delivery path (G50). Loose .quins/.lex entries
         // are retired.
         let semantic = key.strip_prefix("sem/").map_or(false, |name| {
-            name.bytes().all(|b| {
-                b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-' || b == b'.'
-            }) && name.ends_with(".q42")
+            name.bytes()
+                .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-' || b == b'.')
+                && name.ends_with(".q42")
         });
         if ((!key.starts_with("10d/") || !key.ends_with(".10d")) && !texture && !semantic)
             || key.contains("..")
@@ -552,7 +611,9 @@ pub fn asset_compile_10d_with_provenance(
     };
 
     if source.trim().is_empty() || source.len() > 64 * 1024 {
-        return Err(JsValue::from_str("source attestation must be non-empty and at most 64 KiB"));
+        return Err(JsValue::from_str(
+            "source attestation must be non-empty and at most 64 KiB",
+        ));
     }
     let bare = asset_compile_10d(positions, triangles, &[])?;
     let mesh = decode_10d_mesh(&bare).map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
@@ -1806,6 +1867,10 @@ impl GamePortal {
         self.inner.tier()
     }
 
+    pub fn set_exposure_compensation(&mut self, ev: f32) -> bool {
+        self.inner.set_exposure_compensation(ev)
+    }
+
     pub fn set_auto_temporal_enabled(&mut self, enabled: bool) {
         self.inner.set_auto_temporal_enabled(enabled);
     }
@@ -2256,6 +2321,29 @@ impl GameDriveSimulation {
         ) {
             Ok(value) => vibe_value_to_js(&value),
             Err(error) => err_obj("VibeScript drive setup", &error.to_string()),
+        }
+    }
+
+    /// Evaluate authored on-foot movement for a Talbingo campsite preview.
+    pub fn camp_step(&self, input_json: &str) -> JsValue {
+        if input_json.len() > 1024 {
+            return err_obj("VibeScript camp input", "record exceeds bound");
+        }
+        let input: serde_json::Value = match serde_json::from_str(input_json) {
+            Ok(value) => value,
+            Err(error) => return err_obj("VibeScript camp input", &error.to_string()),
+        };
+        let mut host = qualia_core_db::poet_host::PoetSnapshot::default();
+        let mut env = vibe::Env::default();
+        match vibe::eval_function(
+            &self.program,
+            "camp_step",
+            vec![json_to_vibe(&input)],
+            &mut host,
+            &mut env,
+        ) {
+            Ok(value) => vibe_value_to_js(&value),
+            Err(error) => err_obj("VibeScript camp step", &error.to_string()),
         }
     }
 

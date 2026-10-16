@@ -15,7 +15,7 @@ pub(crate) struct Profile {
 pub(crate) fn profile(id: &str) -> Option<Profile> {
     let (height, width, length, head_y, coat, wombat) = if id.contains("goat") {
         (0.78, 0.26, 0.62, 1.18, [0.72, 0.65, 0.49, 1.0], false)
-    } else if id.contains("horse") {
+    } else if id.contains("horse") || id.contains("brumby") {
         (1.30, 0.39, 0.78, 1.98, [0.45, 0.25, 0.14, 1.0], false)
     } else if id.contains("deer") {
         (1.05, 0.27, 0.62, 1.63, [0.51, 0.34, 0.22, 1.0], false)
@@ -207,7 +207,7 @@ pub(crate) fn models(prefix: &str, origin: [f32; 3]) -> Vec<AssetRecipe> {
             limbs(&[(j[6], [0.03, p.height * 0.63, p.length * 1.35], 0.065, 0.025)]),
         );
     }
-    if prefix.contains("horse") {
+    if prefix.contains("horse") || prefix.contains("brumby") {
         add(
             "mane",
             [0.14, 0.105, 0.08, 1.0],

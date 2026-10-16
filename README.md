@@ -23,6 +23,15 @@ not introduce a separate engine or substitute technical stack. See the
 The browser shell builds `qualia-core-db` with `wasm-full` and uses `QualiaPortal` for
 volumetric 3D rendering. WebCivics is a separate profile; it is not the engine or its licence.
 
+The [Talbingo camping drive prototype](web/talbingo.html) contains six distinct,
+stylized campsite scenes, a visible camper, site-specific road bends and events,
+an outbound drive, on-foot landmark exploration and camp choice, and a return drive.
+Serve `web/` locally and open `talbingo.html` to play it. Its road and camp layouts
+are illustrative and must not be used for navigation. The
+[Talbingo campground gameplay plan](docs/planning/31-talbingo-campgrounds-and-drivable-site-maps.md)
+covers the later source-accurate place pack. The main campaign remains the fictional
+Kestrel/Saltwind fixture.
+
 ## The game now
 
 The **Walk** view includes an in-game character roster and creator. Protagonists

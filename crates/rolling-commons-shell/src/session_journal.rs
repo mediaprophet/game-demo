@@ -1,9 +1,9 @@
-use std::io::Cursor;
 use qualia_core_db::lexicon::generate_60bit_token;
 use qualia_core_db::q42::journal::{
     JournalApplicationProfile, JournalHeader, MutableQ42Session, Q42Journal,
 };
 use qualia_core_db::{NQuin, PermissiveRoutingLane};
+use std::io::Cursor;
 use wasm_bindgen::prelude::*;
 
 /// Browser-resident offline-first `.q42j` session journal.
@@ -105,9 +105,8 @@ impl GameSessionJournal {
         let taxon_hash = generate_60bit_token(taxon_iri.as_bytes());
 
         let lane = PermissiveRoutingLane::EnforcePermissiveCommons as u64;
-        let meta = (lane << 61)
-            | ((confidence_permill as u64) << 32)
-            | (self.lamport_clock & 0x1FFF_FFFF);
+        let meta =
+            (lane << 61) | ((confidence_permill as u64) << 32) | (self.lamport_clock & 0x1FFF_FFFF);
 
         let mut quin = NQuin {
             subject: self.author_did_hash,

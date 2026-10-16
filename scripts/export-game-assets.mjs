@@ -1,7 +1,7 @@
 // Export game-owned .10d assets from the exact Qualia WASM build used by the page.
 // Run after scripts/build-game.ps1. The manifest is deterministic and lives with the game.
 import { createHash } from 'node:crypto';
-import { readFile, writeFile, mkdir, readdir, unlink } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir, unlink, stat } from 'node:fs/promises';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import init, { pack_game_hmc, scene_build, set_art_style, set_vehicle_rig, set_fauna_selection, set_flora_selection,
@@ -84,7 +84,11 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
     const file = `${slug}--${sha256.slice(0, 12)}.10d`;
     const key = `${asset.id}:${sha256}`;
     if (!assets.has(key)) {
-      await writeFile(join(out, file), bytes);
+      const filePath = join(out, file);
+      const existing = await stat(filePath).catch(() => null);
+      if (!existing || existing.size !== bytes.length) {
+        await writeFile(filePath, bytes);
+      }
       const record = { id: asset.id, file: `10d/${file}`, bytes: bytes.length, sha256,
         rgba: [asset.r, asset.g, asset.b, asset.a], renderRole: asset.renderRole || 'opaque',
         materialFamily: asset.materialFamily };
@@ -192,10 +196,14 @@ for (const [style, styleSlug] of [[0, 'storybook'], [1, 'earthlight'], [2, 'comm
   const assetRoot = resolve(out);
   const currentFiles = new Set(manifest.assets.map(asset => basename(asset.file)));
   for (const entry of await readdir(assetRoot, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith('.10d') || currentFiles.has(entry.name)) continue;
+    if (!entry.isFile() || !entry.name.endsWith('.10d') || currentFiles.has(entry.name) || entry.name.includes('--tier2--')) continue;
     const stalePath = resolve(assetRoot, entry.name);
     if (dirname(stalePath) !== assetRoot) throw new Error(`Asset outside export directory: ${stalePath}`);
-    await unlink(stalePath);
+    try {
+      await unlink(stalePath);
+    } catch (err) {
+      if (err.code !== 'ENOENT' && err.code !== 'EBUSY') throw err;
+    }
   }
   console.log(`Exported ${styleSlug}: ${manifest.assets.length} distinct .10d assets across ${scenes.length} scene states and Qualia HMC ${relative(root, packPath)}`);
 }

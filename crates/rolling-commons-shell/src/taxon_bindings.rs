@@ -72,7 +72,9 @@ fn binding_for(render_key: &str) -> Result<Option<TaxonBinding>, JsValue> {
         let Some(vibe::Value::F64(gbif_key)) = record.get("gbifKey") else {
             return Err(JsValue::from_str("taxon gbifKey missing"));
         };
-        if !gbif_key.is_finite() || *gbif_key <= 0.0 || *gbif_key > 9_007_199_254_740_991.0
+        if !gbif_key.is_finite()
+            || *gbif_key <= 0.0
+            || *gbif_key > 9_007_199_254_740_991.0
             || gbif_key.fract() != 0.0
         {
             return Err(JsValue::from_str("taxon gbifKey exceeds bounds"));
@@ -177,7 +179,11 @@ pub fn dwc_statements(
         let cached = cached.borrow();
         let program = match cached.as_ref() {
             Some(program) => program,
-            None => return Err(JsValue::from_str("taxon VibeScript bindings could not load")),
+            None => {
+                return Err(JsValue::from_str(
+                    "taxon VibeScript bindings could not load",
+                ))
+            }
         };
         let mut host = qualia_core_db::poet_host::PoetSnapshot::default();
         let mut env = vibe::Env::default();
@@ -201,7 +207,9 @@ pub fn dwc_statements(
         let mut n = 0usize;
         for item in &items {
             let vibe::Value::Record(record) = item else {
-                return Err(JsValue::from_str("dwc emission returned a non-record value"));
+                return Err(JsValue::from_str(
+                    "dwc emission returned a non-record value",
+                ));
             };
             let vibe::Value::QuinRef(quin) = record
                 .get("quin")
@@ -281,8 +289,7 @@ pub fn taxon_dwc_json(render_key: &str, asset_iri: &str) -> Result<String, JsVal
             })
         })
         .collect();
-    serde_json::to_string(&quins)
-        .map_err(|_| JsValue::from_str("dwc quin serialisation failed"))
+    serde_json::to_string(&quins).map_err(|_| JsValue::from_str("dwc quin serialisation failed"))
 }
 
 #[cfg(test)]
@@ -319,8 +326,7 @@ mod tests {
             object_is_integer: false,
         };
         let mut buf: [DwcStatement; MAX_DWC_QUINS] = std::array::from_fn(|_| blank.clone());
-        let n =
-            dwc_statements("kangaroo", "rc:asset/fauna/inland-kangaroo-01", &mut buf).unwrap();
+        let n = dwc_statements("kangaroo", "rc:asset/fauna/inland-kangaroo-01", &mut buf).unwrap();
         assert_eq!(n, 7);
         assert!(buf[..n].iter().all(|s| s.quin.verify_ecc_parity()));
         // Host-packed integer quin is last: INLINE_TAG_INTEGER | gbifKey.

@@ -183,7 +183,8 @@ pub fn build_adaptive_corridor_patch(
                 let x = center_x - width * 0.5 + col as f32 * step_x;
                 let z = center_z - length * 0.5 + row as f32 * step_z;
                 let base_h = continuous_landscape_height(x, z);
-                let feather = organic_radial_feather(x, z, center_x, center_z, (width.max(length)) * 0.5);
+                let feather =
+                    organic_radial_feather(x, z, center_x, center_z, (width.max(length)) * 0.5);
                 base_h * feather - 0.28 * (1.0 - feather)
             })
         })

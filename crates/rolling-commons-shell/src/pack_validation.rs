@@ -78,8 +78,7 @@ pub fn verify_game_pack(bytes: &[u8]) -> Result<u32, String> {
                 // carry no material/UV payload, so they take the sidecar path
                 // instead of the hero-asset check.
                 let materials = if entry.key.contains("--tier2--") {
-                    verify_tier2_asset(asset)
-                        .map_err(|error| format!("{}: {error}", entry.key))?;
+                    verify_tier2_asset(asset).map_err(|error| format!("{}: {error}", entry.key))?;
                     Vec::new()
                 } else {
                     verify_10d_asset(asset).map_err(|error| format!("{}: {error}", entry.key))?
@@ -348,7 +347,11 @@ fn verify_impo_asset(bytes: &[u8]) -> Result<(), String> {
     }
     let grid = read_u16_le(bytes, 8) as usize;
     let view_res = read_u16_le(bytes, 10) as usize;
-    let sphere_center = [read_f32_le(bytes, 12), read_f32_le(bytes, 16), read_f32_le(bytes, 20)];
+    let sphere_center = [
+        read_f32_le(bytes, 12),
+        read_f32_le(bytes, 16),
+        read_f32_le(bytes, 20),
+    ];
     let sphere_radius = read_f32_le(bytes, 24);
     let atlas_byte_size = read_u32_le(bytes, 28) as usize;
     if atlas_byte_size == 0

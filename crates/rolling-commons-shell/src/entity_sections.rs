@@ -40,9 +40,9 @@ use qualia_core_db::container_10d::section::{
     SectionType,
 };
 use qualia_core_db::container_10d::surfel_section::{
-    encode_surfel_section, generate_surfel_from_cluster,
-    SurfelSectionMiniHeader, FLAG_SURFEL_HIERARCHICAL, MAGIC_SURF, SURFEL_MINI_HEADER_SIZE,
-    SURFEL_RECORD_SIZE, SURFEL_SECTION_VERSION,
+    encode_surfel_section, generate_surfel_from_cluster, SurfelSectionMiniHeader,
+    FLAG_SURFEL_HIERARCHICAL, MAGIC_SURF, SURFEL_MINI_HEADER_SIZE, SURFEL_RECORD_SIZE,
+    SURFEL_SECTION_VERSION,
 };
 use qualia_core_db::entity_view::entity_ontologies::{AffordanceCategory, LifecycleStage};
 use qualia_core_db::q_hash;
@@ -172,10 +172,37 @@ pub(crate) fn classify(recipe: &AssetRecipe) -> EntityProfile {
         || has_token(
             component,
             &[
-                "flora", "flower", "flowers", "blossom", "blossoms", "herb", "rosemary", "sage",
-                "thyme", "lavender", "shrub", "reeds", "canopy", "crown", "leaves", "phyllodes",
-                "cones", "trunk", "stalk", "greens", "shoots", "foliage", "gum", "wattle",
-                "grass", "crop", "cone", "bottlebrush", "saltbush", "kangaroo-paw", "produce",
+                "flora",
+                "flower",
+                "flowers",
+                "blossom",
+                "blossoms",
+                "herb",
+                "rosemary",
+                "sage",
+                "thyme",
+                "lavender",
+                "shrub",
+                "reeds",
+                "canopy",
+                "crown",
+                "leaves",
+                "phyllodes",
+                "cones",
+                "trunk",
+                "stalk",
+                "greens",
+                "shoots",
+                "foliage",
+                "gum",
+                "wattle",
+                "grass",
+                "crop",
+                "cone",
+                "bottlebrush",
+                "saltbush",
+                "kangaroo-paw",
+                "produce",
                 "fruit",
             ],
         )
@@ -189,10 +216,7 @@ pub(crate) fn classify(recipe: &AssetRecipe) -> EntityProfile {
             ontology_class: "DarwinianTaxon",
             embodiment: "Specimen",
             stage: LifecycleStage::Adult,
-            taxon_iri: format!(
-                "urn:qualia:taxon:{}",
-                id.trim_start_matches("rc:asset/")
-            ),
+            taxon_iri: format!("urn:qualia:taxon:{}", id.trim_start_matches("rc:asset/")),
             affordances: if fauna {
                 FAUNA_AFFORDANCES
             } else {
@@ -248,8 +272,21 @@ pub(crate) fn classify(recipe: &AssetRecipe) -> EntityProfile {
     let machine = has_token(
         component,
         &[
-            "solar", "battery", "mast", "pump", "tank", "purification", "turbine", "generator",
-            "vehicle", "rig", "van", "boat", "winch", "motor", "signal",
+            "solar",
+            "battery",
+            "mast",
+            "pump",
+            "tank",
+            "purification",
+            "turbine",
+            "generator",
+            "vehicle",
+            "rig",
+            "van",
+            "boat",
+            "winch",
+            "motor",
+            "signal",
         ],
     ) || id.contains("/rig/");
 
@@ -361,8 +398,7 @@ fn stage_name(stage: LifecycleStage) -> &'static str {
 /// surfaces get the PGA motor dynamics flag. Everything else omits the
 /// section rather than claiming a technique that was not used.
 fn procedural_synthesis_payload(recipe: &AssetRecipe, profile: &EntityProfile) -> Option<Vec<u8>> {
-    let is_flora = profile.ontology_class == "DarwinianTaxon"
-        && recipe.id.contains("/flora/");
+    let is_flora = profile.ontology_class == "DarwinianTaxon" && recipe.id.contains("/flora/");
     let wind_animated = recipe.material_family.id == "living-foliage";
     let water = recipe.render_role == "water";
     let mut flags = 0u32;
@@ -471,15 +507,12 @@ fn surfel_payload(
 /// existing section verbatim and resealing the whole-file CRC. This is the
 /// generic form of QualiaDB's per-section attach helpers, which cover only
 /// material/UV/skeletal payloads.
-fn attach_sections(
-    container: &[u8],
-    extras: &[(SectionType, Vec<u8>)],
-) -> Result<Vec<u8>, String> {
+fn attach_sections(container: &[u8], extras: &[(SectionType, Vec<u8>)]) -> Result<Vec<u8>, String> {
     if extras.is_empty() {
         return Ok(container.to_vec());
     }
-    let header = Container10dHeader::parse(container)
-        .map_err(|e| format!("entity attach header: {e:?}"))?;
+    let header =
+        Container10dHeader::parse(container).map_err(|e| format!("entity attach header: {e:?}"))?;
     check_whole_file_crc32c(container).map_err(|e| format!("entity attach crc: {e:?}"))?;
     let descriptors = parse_section_table(container, &header)
         .map_err(|e| format!("entity attach table: {e:?}"))?;

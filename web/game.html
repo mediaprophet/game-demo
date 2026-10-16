@@ -642,6 +642,7 @@
     <button data-game-view="workshop">Workshop</button>
     <button data-game-view="walk">Explore</button>
     <button data-game-view="activities">Activities</button>
+    <a href="talbingo.html" style="color:#f5d879;align-self:center;padding:0 .5rem">Talbingo camps</a>
   </nav>
   <button id="toggle-game-panels" aria-expanded="false" aria-controls="game-panels">Panels</button>
   <button id="fullscreen-game" aria-label="Enter fullscreen" title="Fullscreen" hidden>⛶</button>
@@ -863,7 +864,7 @@ const toObj = (v) => {
   return v;
 };
 
-const WASM_BUILD = '7fac6c51d202ce7a-community-overhaul';
+const WASM_BUILD = '8c5246c1f0665a13-community-overhaul';
 const wasmStart = performance.now();
 await window.setWorldLoading('Starting the Qualia engine','Loading the game runtime and graphics capabilities');
 const m = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);

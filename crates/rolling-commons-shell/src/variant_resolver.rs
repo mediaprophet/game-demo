@@ -200,15 +200,31 @@ fn lod_for_distance(distance_meters: f64) -> LodTier {
 
 fn variant_descriptor_to_js(desc: &ModelVariantDescriptor) -> Result<JsValue, JsValue> {
     let obj = js_sys::Object::new();
-    js_sys::Reflect::set(&obj, &"variant_id".into(), &JsValue::from_str(&desc.variant_id))?;
-    js_sys::Reflect::set(&obj, &"asset_key".into(), &JsValue::from_str(&desc.asset_key))?;
+    js_sys::Reflect::set(
+        &obj,
+        &"variant_id".into(),
+        &JsValue::from_str(&desc.variant_id),
+    )?;
+    js_sys::Reflect::set(
+        &obj,
+        &"asset_key".into(),
+        &JsValue::from_str(&desc.asset_key),
+    )?;
     if let Some(ref ont_key) = desc.entity_ontology_key {
-        js_sys::Reflect::set(&obj, &"entity_ontology_key".into(), &JsValue::from_str(ont_key))?;
+        js_sys::Reflect::set(
+            &obj,
+            &"entity_ontology_key".into(),
+            &JsValue::from_str(ont_key),
+        )?;
     } else {
         js_sys::Reflect::set(&obj, &"entity_ontology_key".into(), &JsValue::NULL)?;
     }
     if let Some(seed) = desc.procedural_seed {
-        js_sys::Reflect::set(&obj, &"procedural_seed".into(), &JsValue::from_f64(seed as f64))?;
+        js_sys::Reflect::set(
+            &obj,
+            &"procedural_seed".into(),
+            &JsValue::from_f64(seed as f64),
+        )?;
     } else {
         js_sys::Reflect::set(&obj, &"procedural_seed".into(), &JsValue::NULL)?;
     }
@@ -222,7 +238,11 @@ fn variant_descriptor_to_js(desc: &ModelVariantDescriptor) -> Result<JsValue, Js
         &"stage".into(),
         &JsValue::from_str(&format!("{:?}", desc.stage).to_lowercase()),
     )?;
-    js_sys::Reflect::set(&obj, &"lod".into(), &JsValue::from_f64(desc.lod as u32 as f64))?;
+    js_sys::Reflect::set(
+        &obj,
+        &"lod".into(),
+        &JsValue::from_f64(desc.lod as u32 as f64),
+    )?;
     js_sys::Reflect::set(
         &obj,
         &"state".into(),
@@ -239,12 +259,18 @@ mod tests {
     fn test_parse_helpers() {
         assert_eq!(parse_phenotype("male"), BiologicalPhenotype::Male);
         assert_eq!(parse_phenotype("FEMALE"), BiologicalPhenotype::Female);
-        assert_eq!(parse_phenotype("anything_else"), BiologicalPhenotype::Monomorphic);
+        assert_eq!(
+            parse_phenotype("anything_else"),
+            BiologicalPhenotype::Monomorphic
+        );
 
         assert_eq!(parse_lifecycle_stage("seed"), LifecycleStage::SeedOrSpore);
         assert_eq!(parse_lifecycle_stage("juvenile"), LifecycleStage::Juvenile);
         assert_eq!(parse_lifecycle_stage("adult"), LifecycleStage::Adult);
-        assert_eq!(parse_lifecycle_stage("senescent"), LifecycleStage::Senescent);
+        assert_eq!(
+            parse_lifecycle_stage("senescent"),
+            LifecycleStage::Senescent
+        );
         assert_eq!(parse_lifecycle_stage("deceased"), LifecycleStage::Deceased);
 
         assert_eq!(parse_lod_tier(0), LodTier::Lod0);
@@ -253,8 +279,14 @@ mod tests {
         assert_eq!(parse_lod_tier(3), LodTier::Lod3);
         assert_eq!(parse_lod_tier(4), LodTier::Impostor);
 
-        assert_eq!(parse_structural_state("pristine"), StructuralState::Pristine);
-        assert_eq!(parse_structural_state("weathered"), StructuralState::Weathered);
+        assert_eq!(
+            parse_structural_state("pristine"),
+            StructuralState::Pristine
+        );
+        assert_eq!(
+            parse_structural_state("weathered"),
+            StructuralState::Weathered
+        );
         assert_eq!(parse_structural_state("damaged"), StructuralState::Damaged);
     }
 
@@ -343,7 +375,10 @@ mod tests {
         );
         assert!(lod1_req.is_some());
         // Distances: Lod0 distance is 1, Lod2 distance is 1. One of them will be returned.
-        assert!(lod1_req.unwrap().variant_id == "mono_adult_lod0" || lod1_req.unwrap().variant_id == "mono_adult_lod2");
+        assert!(
+            lod1_req.unwrap().variant_id == "mono_adult_lod0"
+                || lod1_req.unwrap().variant_id == "mono_adult_lod2"
+        );
 
         // 4. CBOR roundtrip
         let bytes = manifest.encode_to_cbor().unwrap();

@@ -60,8 +60,13 @@ pub(crate) fn compile_asset(
             "application/vnd.qualia.scene-primitives;version=1",
         )
     };
-    let resident_binding = crate::resident_animation::author(recipe, &mesh.positions)
-        .map_err(|e| JsValue::from_str(&e))?;
+    let resident_binding =
+        if let Some(binding) = crate::talbingo_scenes::author_walker(recipe, &mesh.positions) {
+            Some(binding)
+        } else {
+            crate::resident_animation::author(recipe, &mesh.positions)
+                .map_err(|e| JsValue::from_str(&e))?
+        };
     let resident_binding = if resident_binding.is_some() {
         resident_binding
     } else {
@@ -91,8 +96,7 @@ pub(crate) fn compile_asset(
     // spectral) seals inside the provenance sidecar's semantic_metadata —
     // the EONT section type is unusable on this QualiaDB revision (its wire
     // size constant disagrees with the header struct and panics all codecs).
-    let entity_plan = crate::entity_sections::plan(recipe)
-        .map_err(|e| JsValue::from_str(&e))?;
+    let entity_plan = crate::entity_sections::plan(recipe).map_err(|e| JsValue::from_str(&e))?;
     provenance.semantic_metadata = entity_plan.semantic_metadata.clone();
     // The current Qualia .10d SRD1 section preserves authored colour on
     // each vertex. A deterministic palette reading gives broad surfaces
@@ -234,9 +238,10 @@ pub(crate) fn compile_asset(
             .map(|name| JsValue::from_str(name))
             .collect::<js_sys::Array>(),
     )?;
-    for (key, value) in ["c0", "c1", "c2"]
-        .iter()
-        .zip([entity.spectral.c0, entity.spectral.c1, entity.spectral.c2])
+    for (key, value) in
+        ["c0", "c1", "c2"]
+            .iter()
+            .zip([entity.spectral.c0, entity.spectral.c1, entity.spectral.c2])
     {
         js_sys::Reflect::set(&obj, &(*key).into(), &JsValue::from_f64(value as f64))?;
     }
