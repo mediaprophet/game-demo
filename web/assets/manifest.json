@@ -71402,6 +71402,6 @@
   ],
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "de0348a101f237c18fff3c17c74961e37afc4b358092ef3afcebe38892afc234"
+    "sha256": "a0980869c4ebb3e67fb7457fd0952f9451bf9d6ffcb27aa0b9c2d9dd3250f186"
   }
 }

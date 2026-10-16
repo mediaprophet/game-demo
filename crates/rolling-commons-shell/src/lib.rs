@@ -73,8 +73,20 @@ pub fn talbingo_vehicle_pose(
     z: f64,
     heading: f64,
 ) -> Result<u32, JsValue> {
+    talbingo_vehicle_pose_y(portal, x, 0.0, z, heading)
+}
+
+#[wasm_bindgen]
+pub fn talbingo_vehicle_pose_y(
+    portal: &mut GamePortal,
+    x: f64,
+    y: f64,
+    z: f64,
+    heading: f64,
+) -> Result<u32, JsValue> {
     use qualia_core_db::render::skeletal::Motor;
     if !x.is_finite()
+        || !y.is_finite()
         || !z.is_finite()
         || !heading.is_finite()
         || x < -6.0
@@ -84,7 +96,7 @@ pub fn talbingo_vehicle_pose(
         return Err(JsValue::from_str("Talbingo vehicle pose outside scene"));
     }
     let yaw = heading * 0.5;
-    let root = Motor::from_translation(x, 0.0, z)
+    let root = Motor::from_translation(x, y, z)
         .mul(&Motor::from_rotation_translation(
             [yaw.cos(), 0.0, yaw.sin(), 0.0],
             [0.0; 3],
@@ -102,13 +114,32 @@ pub fn talbingo_road_z(site: u8, x: f32) -> f32 {
 }
 
 #[wasm_bindgen]
+pub fn talbingo_terrain_elevation(site: u8, x: f32, z: f32) -> f32 {
+    crate::talbingo_terrain::elevation(site.min(5), x, z)
+}
+
+#[wasm_bindgen]
 pub fn talbingo_walker_pose(portal: &mut GamePortal, x: f64, z: f64) -> Result<u32, JsValue> {
+    talbingo_walker_pose_y(portal, x, 0.0, z)
+}
+
+#[wasm_bindgen]
+pub fn talbingo_walker_pose_y(
+    portal: &mut GamePortal,
+    x: f64,
+    y: f64,
+    z: f64,
+) -> Result<u32, JsValue> {
     use qualia_core_db::render::skeletal::Motor;
-    if !x.is_finite() || !z.is_finite() || !(13.0..=24.0).contains(&x) || !(-7.0..=7.0).contains(&z)
+    if !x.is_finite()
+        || !y.is_finite()
+        || !z.is_finite()
+        || !(13.0..=24.0).contains(&x)
+        || !(-7.0..=7.0).contains(&z)
     {
         return Err(JsValue::from_str("Talbingo walker pose outside site"));
     }
-    let root = Motor::from_translation(x, 0.0, z).mul(&Motor::from_translation(-18.0, 0.0, -3.5));
+    let root = Motor::from_translation(x, y, z).mul(&Motor::from_translation(-18.0, 0.0, -3.5));
     portal
         .inner
         .set_scene_actor_root(talbingo_scenes::walker_root(), root)

@@ -2522,13 +2522,19 @@ export function talbingo_road_z(site: number, x: number): number;
  */
 export function talbingo_scene(site: number): any;
 
+export function talbingo_terrain_elevation(site: number, x: number, z: number): number;
+
 /**
  * Present a VibeScript accepted Talbingo vehicle pose through Qualia's
  * skeletal scene actor. This does not implement movement or rendering.
  */
 export function talbingo_vehicle_pose(portal: GamePortal, x: number, z: number, heading: number): number;
 
+export function talbingo_vehicle_pose_y(portal: GamePortal, x: number, y: number, z: number, heading: number): number;
+
 export function talbingo_walker_pose(portal: GamePortal, x: number, z: number): number;
+
+export function talbingo_walker_pose_y(portal: GamePortal, x: number, y: number, z: number): number;
 
 /**
  * Resolve a render key to its canonical taxon record as JSON; `null` when
@@ -2892,8 +2898,11 @@ export interface InitOutput {
     readonly set_vehicle_rig: (a: number) => void;
     readonly talbingo_road_z: (a: number, b: number) => number;
     readonly talbingo_scene: (a: number) => [number, number, number];
+    readonly talbingo_terrain_elevation: (a: number, b: number, c: number) => number;
     readonly talbingo_vehicle_pose: (a: number, b: number, c: number, d: number) => [number, number, number];
+    readonly talbingo_vehicle_pose_y: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
     readonly talbingo_walker_pose: (a: number, b: number, c: number) => [number, number, number];
+    readonly talbingo_walker_pose_y: (a: number, b: number, c: number, d: number) => [number, number, number];
     readonly tensor_buffer_build: (a: number, b: number) => [number, number, number, number];
     readonly terrain_height_world: (a: number, b: number) => number;
     readonly validate_game_hmc: (a: number, b: number) => [number, number, number];
@@ -2912,29 +2921,7 @@ export interface InitOutput {
     readonly charactersimulation_walk_speed: (a: number, b: number, c: number, d: number) => number;
     readonly gamehud_set_camera_near_metres: (a: number, b: number, c: number) => [number, number];
     readonly gameportal_set_camera_near_metres: (a: number, b: number, c: number) => [number, number];
-    readonly gameportal_set_water_surface_metres: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number];
     readonly gamesession_present_accepted_activity: (a: number, b: number, c: number) => [number, number, number];
-    readonly gameportal_animation_save_for_world: (a: number, b: number, c: number) => [number, number, number, number];
-    readonly gameportal_animation_snapshot_json: (a: number) => [number, number, number, number];
-    readonly gameportal_clear_activity_presentation: (a: number) => [number, number];
-    readonly gameportal_play_character_animation: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number];
-    readonly gameportal_restore_animation_for_world: (a: number, b: number, c: number, d: number, e: number) => [number, number];
-    readonly gameportal_restore_animation_snapshot_json: (a: number, b: number, c: number) => [number, number];
-    readonly gameportal_scene_animation_receipt: (a: number) => [number, number, number];
-    readonly gameportal_seek_scene_animation: (a: number, b: number) => [number, number];
-    readonly gameportal_set_animation_reduced_motion: (a: number, b: number) => void;
-    readonly gamesession_drive_camera: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => [number, number, number, number];
-    readonly gamesession_drive_park: (a: number, b: number, c: number) => [number, number];
-    readonly gamesession_drive_resume: (a: number, b: number, c: number) => [number, number, number, number];
-    readonly gamesession_drive_tick: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
-    readonly gamesession_present_drive_rig: (a: number, b: number, c: number, d: number) => [number, number, number];
-    readonly gamesession_verify_connected_replay: (a: number, b: number, c: number, d: number) => [number, number, number];
-    readonly gamesession_workshop_drive_conditions: (a: number, b: number) => [number, number, number, number];
-    readonly gamesession_workshop_operate: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
-    readonly gamesession_workshop_scene: (a: number, b: number) => [number, number, number];
-    readonly gamesession_workshop_view: (a: number, b: number) => [number, number, number, number];
-    readonly taxon_binding_json: (a: number, b: number) => [number, number, number, number];
-    readonly taxon_dwc_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly __wbg_campaignsimulation_free: (a: number, b: number) => void;
     readonly __wbg_entityfamilymanifestwrapper_free: (a: number, b: number) => void;
     readonly __wbg_gamesessionjournal_free: (a: number, b: number) => void;
@@ -2964,6 +2951,28 @@ export interface InitOutput {
     readonly semanticslice_quins_json: (a: number) => [number, number];
     readonly semanticslice_resolve: (a: number, b: number, c: number) => [number, number];
     readonly semanticslice_validate_shacl: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number];
+    readonly gamesession_verify_connected_replay: (a: number, b: number, c: number, d: number) => [number, number, number];
+    readonly gamesession_workshop_drive_conditions: (a: number, b: number) => [number, number, number, number];
+    readonly gamesession_workshop_operate: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
+    readonly gamesession_workshop_scene: (a: number, b: number) => [number, number, number];
+    readonly gamesession_workshop_view: (a: number, b: number) => [number, number, number, number];
+    readonly taxon_binding_json: (a: number, b: number) => [number, number, number, number];
+    readonly taxon_dwc_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly gameportal_animation_save_for_world: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly gameportal_animation_snapshot_json: (a: number) => [number, number, number, number];
+    readonly gameportal_clear_activity_presentation: (a: number) => [number, number];
+    readonly gameportal_play_character_animation: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number];
+    readonly gameportal_restore_animation_for_world: (a: number, b: number, c: number, d: number, e: number) => [number, number];
+    readonly gameportal_restore_animation_snapshot_json: (a: number, b: number, c: number) => [number, number];
+    readonly gameportal_scene_animation_receipt: (a: number) => [number, number, number];
+    readonly gameportal_seek_scene_animation: (a: number, b: number) => [number, number];
+    readonly gameportal_set_animation_reduced_motion: (a: number, b: number) => void;
+    readonly gameportal_set_water_surface_metres: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number];
+    readonly gamesession_drive_camera: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => [number, number, number, number];
+    readonly gamesession_drive_park: (a: number, b: number, c: number) => [number, number];
+    readonly gamesession_drive_resume: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly gamesession_drive_tick: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
+    readonly gamesession_present_drive_rig: (a: number, b: number, c: number, d: number) => [number, number, number];
     readonly __wbg_compiledcell_free: (a: number, b: number) => void;
     readonly apply_structural_edit: (a: number, b: number, c: number, d: number) => any;
     readonly apply_structural_edits: (a: number, b: number, c: number, d: number) => any;

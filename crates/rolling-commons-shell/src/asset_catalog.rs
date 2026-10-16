@@ -1396,9 +1396,15 @@ impl ParametricRecipe {
                     let (dx, dz) = if i == 0 {
                         (points[1][0] - points[0][0], points[1][2] - points[0][2])
                     } else if i == n - 1 {
-                        (points[n - 1][0] - points[n - 2][0], points[n - 1][2] - points[n - 2][2])
+                        (
+                            points[n - 1][0] - points[n - 2][0],
+                            points[n - 1][2] - points[n - 2][2],
+                        )
                     } else {
-                        (points[i + 1][0] - points[i - 1][0], points[i + 1][2] - points[i - 1][2])
+                        (
+                            points[i + 1][0] - points[i - 1][0],
+                            points[i + 1][2] - points[i - 1][2],
+                        )
                     };
                     let len = (dx * dx + dz * dz).sqrt().max(1e-6);
                     let nx = -dz / len;

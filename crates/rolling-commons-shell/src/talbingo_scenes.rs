@@ -38,6 +38,17 @@ fn push(
     out.push(asset(name, color, parts));
 }
 
+fn push_water(
+    out: &mut Vec<AssetRecipe>,
+    name: &str,
+    color: [f32; 4],
+    parts: Vec<qualia_core_db::render::scene_primitives::Primitive>,
+) {
+    let mut rec = asset(name, color, parts);
+    rec.render_role = "water".to_string();
+    out.push(rec);
+}
+
 fn push_mesh(
     out: &mut Vec<AssetRecipe>,
     name: &str,
@@ -123,13 +134,19 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
         &mut out,
         "talbingo-road-event-post",
         [0.48, 0.38, 0.28, 1.0],
-        vec![block([8.0, event_y + 0.55, event_z + 1.2], [0.08, 1.1, 0.08])],
+        vec![block(
+            [8.0, event_y + 0.55, event_z + 1.2],
+            [0.08, 1.1, 0.08],
+        )],
     );
     push(
         &mut out,
         "talbingo-road-event-sign",
         [0.96, 0.78, 0.12, 1.0],
-        vec![block([8.0, event_y + 1.16, event_z + 1.2], [0.74, 0.62, 0.08])],
+        vec![block(
+            [8.0, event_y + 1.16, event_z + 1.2],
+            [0.74, 0.62, 0.08],
+        )],
     );
 
     // Roadside native wildlife encounter draped on terrain:
@@ -306,7 +323,10 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
         &mut out,
         "talbingo-campfire-embers",
         [0.98, 0.42, 0.08, 1.0],
-        vec![block([20.6, ember_y + 0.035, 3.9 + camp_shift], [0.52, 0.05, 0.52])],
+        vec![block(
+            [20.6, ember_y + 0.035, 3.9 + camp_shift],
+            [0.52, 0.05, 0.52],
+        )],
     );
 
     // Weathered ironbark campsite picnic table with bench seats
@@ -319,10 +339,22 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
         [0.46, 0.35, 0.24, 1.0],
         vec![
             block([table_x, table_y + 0.46, table_z], [1.70, 0.08, 0.85]),
-            block([table_x, table_y + 0.26, table_z - 0.55], [1.70, 0.06, 0.30]),
-            block([table_x, table_y + 0.26, table_z + 0.55], [1.70, 0.06, 0.30]),
-            block([table_x - 0.65, table_y + 0.23, table_z], [0.08, 0.46, 1.25]),
-            block([table_x + 0.65, table_y + 0.23, table_z], [0.08, 0.46, 1.25]),
+            block(
+                [table_x, table_y + 0.26, table_z - 0.55],
+                [1.70, 0.06, 0.30],
+            ),
+            block(
+                [table_x, table_y + 0.26, table_z + 0.55],
+                [1.70, 0.06, 0.30],
+            ),
+            block(
+                [table_x - 0.65, table_y + 0.23, table_z],
+                [0.08, 0.46, 1.25],
+            ),
+            block(
+                [table_x + 0.65, table_y + 0.23, table_z],
+                [0.08, 0.46, 1.25],
+            ),
         ],
     );
 
@@ -378,7 +410,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             let t1_y = crate::talbingo_terrain::elevation(0, 20.0, -2.4);
             let t2_y = crate::talbingo_terrain::elevation(0, 22.5, -2.8);
             let k_y = crate::talbingo_terrain::elevation(0, 19.2, -1.8);
-            push(
+            push_water(
                 &mut out,
                 "pines-reservoir",
                 [0.10, 0.32, 0.44, 0.95],
@@ -403,7 +435,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
         1 => {
             let c_deck_y = crate::talbingo_terrain::elevation(1, 14.7, -3.9);
             let w_y = crate::talbingo_terrain::elevation(1, 13.2, -2.6);
-            push(
+            push_water(
                 &mut out,
                 "humes-inlet",
                 [0.10, 0.30, 0.42, 0.95],
@@ -433,7 +465,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             let b2_y = crate::talbingo_terrain::elevation(2, 20.1, -3.8);
             let b3_y = crate::talbingo_terrain::elevation(2, 23.4, -2.0);
             let w_y = crate::talbingo_terrain::elevation(2, 21.5, -2.4);
-            push(
+            push_water(
                 &mut out,
                 "jounama-creek",
                 [0.12, 0.35, 0.45, 0.92],
@@ -484,7 +516,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
         3 => {
             let hut_y = crate::talbingo_terrain::elevation(3, 20.3, -2.7);
             let deer_y = crate::talbingo_terrain::elevation(3, 15.0, -4.5);
-            push(
+            push_water(
                 &mut out,
                 "yarrangobilly-river",
                 [0.10, 0.32, 0.44, 0.95],
@@ -521,7 +553,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
                     block([18.8, 0.80, -6.1], [9.2, 1.6, 4.0]),
                 ],
             );
-            push(
+            push_water(
                 &mut out,
                 "ohares-reservoir",
                 [0.10, 0.32, 0.44, 0.95],
@@ -543,7 +575,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             let b1_y = crate::talbingo_terrain::elevation(5, 19.0, -2.6);
             let b2_y = crate::talbingo_terrain::elevation(5, 23.0, -3.7);
             let brumby_y = crate::talbingo_terrain::elevation(5, 20.5, -1.8);
-            push(
+            push_water(
                 &mut out,
                 "three-mile-dam",
                 [0.10, 0.32, 0.44, 0.95],

@@ -1,136 +1,384 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Talbingo camping drive · playable prototype</title>
+<title>Talbingo Camping Expedition · Snowy Mountains</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}*{box-sizing:border-box}
-body{margin:0;background:#03070d;color:#e3f2fd}
-header{padding:14px 22px;background:linear-gradient(90deg,#061320,#081c2e);border-bottom:1px solid #00f0ff44;box-shadow:0 4px 24px #00f0ff18;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-h1{font-size:1.35rem;margin:0 0 5px;letter-spacing:0.02em}p{margin:4px 0}
-.sub{color:#76a9c4;font-size:.86rem;letter-spacing:0.03em}
+body{margin:0;background:#03070d;color:#e3f2fd;overflow-x:hidden}
+header{padding:12px 20px;background:linear-gradient(90deg,#061320,#081c2e);border-bottom:1px solid #00f0ff44;box-shadow:0 4px 24px #00f0ff18;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+h1{font-size:1.30rem;margin:0 0 4px;letter-spacing:0.02em}p{margin:4px 0}
+.sub{color:#76a9c4;font-size:.84rem;letter-spacing:0.03em}
 .pills{display:flex;gap:8px;align-items:center;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.74rem}
 .pill{background:#00f0ff14;border:1px solid #00f0ff55;padding:3px 9px;border-radius:4px;color:#00f0ff;text-transform:uppercase;letter-spacing:.05em}
 .pill-gold{background:#ffd74014;border-color:#ffd74055;color:#ffd740}
 .pill-green{background:#00e67614;border-color:#00e67655;color:#69f0ae}
-main{display:grid;grid-template-columns:minmax(250px,310px) 1fr;min-height:calc(100vh - 87px)}
-aside{padding:16px;background:#050e18f2;backdrop-filter:blur(14px);border-right:1px solid #00f0ff33;box-shadow:inset -1px 0 24px #00f0ff08;display:flex;flex-direction:column;gap:13px}
-label{font-weight:700;font-size:.85rem;letter-spacing:.05em;text-transform:uppercase;color:#80d8ff}
-select,button{font:inherit;color:inherit;border:1px solid #00b0ff55;border-radius:8px;background:linear-gradient(180deg,#0e2636,#0a1b26);padding:10px 12px;transition:all .15s ease}
+.pill-btn{cursor:pointer;transition:all .15s ease}.pill-btn:hover{background:#00f0ff33;border-color:#00f0ff}
+main{display:grid;grid-template-columns:minmax(270px,330px) 1fr;min-height:calc(100vh - 82px)}
+aside{padding:16px;background:#050e18f2;backdrop-filter:blur(14px);border-right:1px solid #00f0ff33;box-shadow:inset -1px 0 24px #00f0ff08;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+label{font-weight:700;font-size:.82rem;letter-spacing:.05em;text-transform:uppercase;color:#80d8ff}
+select,button{font:inherit;color:inherit;border:1px solid #00b0ff55;border-radius:8px;background:linear-gradient(180deg,#0e2636,#0a1b26);padding:9px 12px;transition:all .15s ease}
 button{cursor:pointer}button:hover,button:focus-visible{background:linear-gradient(180deg,#153850,#0f2b3c);border-color:#00f0ff;box-shadow:0 0 12px #00f0ff44}
-button:disabled{opacity:.32;cursor:default;box-shadow:none;border-color:#1c3746}
+button:disabled{opacity:.35;cursor:default;box-shadow:none;border-color:#1c3746}
 .stack{display:grid;gap:8px}
-.small{font-size:.85rem;color:#90b4cb}
+.small{font-size:.84rem;color:#90b4cb;line-height:1.45}
 #site-note,#mission,#status{line-height:1.45}
-#status{min-height:3em;font-weight:700;color:#00f0ff;text-shadow:0 0 10px #00f0ff77}
+#status{min-height:2.8em;font-weight:700;color:#00f0ff;text-shadow:0 0 10px #00f0ff77}
 .play{position:relative;min-width:0;background:#020509;overflow:hidden}
-canvas{display:block;width:100%;height:calc(100vh - 87px);min-height:450px}
+canvas{display:block;width:100%;height:calc(100vh - 82px);min-height:450px}
 .reticle{position:absolute;width:22px;height:22px;border-color:#00f0ffaa;border-style:solid;pointer-events:none;z-index:3}
 .top-left{top:12px;left:12px;border-width:2px 0 0 2px}
 .top-right{top:12px;right:12px;border-width:2px 2px 0 0}
 .bottom-left{bottom:72px;left:12px;border-width:0 0 2px 2px}
 .bottom-right{bottom:72px;right:12px;border-width:0 2px 2px 0}
-.overlay{position:absolute;top:16px;left:20px;background:#05121fe6;backdrop-filter:blur(10px);border:1px solid #00f0ff88;box-shadow:0 0 18px #00f0ff33;padding:8px 16px;border-radius:6px;font-weight:700;color:#00f0ff;letter-spacing:0.06em;text-transform:uppercase;z-index:4}
-.telemetry-badge{right:20px;left:auto;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.78rem;font-weight:400;color:#b2ebf2;border-color:#00f0ff44}
-.drivehud{position:absolute;bottom:14px;left:14px;right:14px;background:#05121ff0;backdrop-filter:blur(12px);border:1px solid #00f0ff55;box-shadow:0 0 22px #00f0ff28;border-radius:10px;padding:10px 18px;display:flex;gap:20px;justify-content:space-between;flex-wrap:wrap;color:#b2ebf2;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;z-index:4}
+.overlay{position:absolute;top:16px;left:20px;background:#05121fe6;backdrop-filter:blur(10px);border:1px solid #00f0ff88;box-shadow:0 0 18px #00f0ff33;padding:7px 14px;border-radius:6px;font-weight:700;color:#00f0ff;letter-spacing:0.06em;text-transform:uppercase;z-index:4}
+.telemetry-badge{right:20px;left:auto;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.76rem;font-weight:400;color:#b2ebf2;border-color:#00f0ff44}
+.drivehud{position:absolute;bottom:14px;left:14px;right:14px;background:#05121ff0;backdrop-filter:blur(12px);border:1px solid #00f0ff55;box-shadow:0 0 22px #00f0ff28;border-radius:10px;padding:9px 16px;display:flex;gap:18px;justify-content:space-between;flex-wrap:wrap;align-items:center;color:#b2ebf2;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;z-index:4}
 .meter{height:8px;background:#0b1e2c;border:1px solid #00e5ff33;border-radius:10px;overflow:hidden}
 .meter>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#00e5ff,#ffd740);box-shadow:0 0 8px #00e5ff88}
 .touch{display:flex;gap:8px}
 .touch button{min-width:55px;touch-action:none}
-@media(max-width:760px){main{display:block}aside{gap:9px}canvas{height:55vh;min-height:350px}.drivehud{font-size:.8rem}}
+@media(max-width:760px){main{display:block}aside{gap:8px}canvas{height:55vh;min-height:350px}.drivehud{font-size:.78rem}}
 .touch{flex-wrap:wrap}.choices{display:grid;gap:6px}
-@media(min-width:761px){main{height:calc(100vh - 84px);min-height:640px}aside{height:100%;overflow-y:auto}.play{height:100%;overflow:hidden}canvas{height:100%;min-height:0}}
-@media(max-width:760px){main{display:flex;flex-direction:column}.play{order:0}.play-touch{display:flex!important;position:absolute;left:10px;right:10px;bottom:60px;z-index:5;justify-content:center;flex-wrap:wrap}.play-touch button{background:#0e293de8;padding:8px;min-width:42px}aside{order:1}.touch:not(.play-touch){display:none}}
-.cam-ctrl{display:flex;gap:6px;align-items:center}
-.hud-card{background:#071c2dc0;padding:6px 10px;border-radius:6px;border:1px solid #00f0ff33;display:flex;flex-direction:column;gap:2px}
-.hud-val{color:#00f0ff;font-weight:700}
-.badge-alert{background:#ff3d0022;border:1px solid #ff3d00aa;color:#ff5252;padding:2px 8px;border-radius:4px;font-size:.74rem;display:none}
+.choice-btn{text-align:left;line-height:1.35;font-size:.82rem;padding:8px 10px}
+.choice-tradeoff{font-size:.74rem;color:#78909c;display:block;margin-top:2px}
+@media(min-width:761px){main{height:calc(100vh - 80px);min-height:640px}aside{height:100%;overflow-y:auto}.play{height:100%;overflow:hidden}canvas{height:100%;min-height:0}}
+@media(max-width:760px){main{display:flex;flex-direction:column}.play{order:0}.play-touch{display:flex!important;position:absolute;left:10px;right:10px;bottom:58px;z-index:5;justify-content:center;flex-wrap:wrap}.play-touch button{background:#0e293de8;padding:8px;min-width:40px}aside{order:1}.touch:not(.play-touch){display:none}}
+.badge-alert{background:#ff3d0022;border:1px solid #ff3d00aa;color:#ff5252;padding:2px 8px;border-radius:4px;font-size:.72rem;display:none}
+.modal-overlay{display:none;position:fixed;inset:0;background:#010408d0;backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center;padding:16px}
+.modal{background:#071624f4;border:1px solid #00f0ff88;box-shadow:0 0 32px #00f0ff33;border-radius:12px;max-width:580px;width:100%;max-height:85vh;overflow-y:auto;padding:22px}
+.modal h2{margin:0 0 12px;font-size:1.2rem;color:#00f0ff;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:transparent;border:none;color:#90b4cb;font-size:1.4rem;cursor:pointer;padding:2px 8px}
+.journal-entry{background:#091d30;border-left:3px solid #00e5ff;padding:8px 12px;margin:6px 0;border-radius:0 6px 6px 0;font-size:.84rem}
 </style></head><body>
-<header><div><h1>Talbingo Camping Drive</h1><p class="sub">Snowy Mountains alpine camping exploration & Kosciuszko wildlife survey · six campsite sectors</p></div><div class="pills"><span class="pill">CORE: ZERO-HEAP</span><span class="pill pill-gold">GEOLOGY: GSNSW WFS</span><span class="pill pill-green">GEODATA: WGS84 / OSM</span></div></header>
-<main><aside>
-<div class="stack" style="background:#071624c0;padding:10px 12px;border:1px solid #00f0ff33;border-radius:8px">
+<header>
+ <div>
+  <h1>Talbingo Camping Expedition</h1>
+  <p class="sub">Snowy Mountains alpine camping exploration & Kosciuszko wildlife survey · six campsite sectors</p>
+ </div>
+ <div class="pills">
+  <span class="pill">CORE: ZERO-HEAP</span>
+  <span class="pill pill-gold pill-btn" id="open-geology-btn" title="Inspect GSNSW Geology & WGS84 Datum">GEOLOGY: GSNSW WFS</span>
+  <span class="pill pill-green pill-btn" id="open-journal-btn" title="Open Expedition Journal">JOURNAL (J)</span>
+  <span class="pill pill-btn" id="open-settings-btn" title="Expedition Settings & Audio">SETTINGS (M)</span>
+ </div>
+</header>
+<main>
+<aside>
+ <div class="stack" style="background:#071624c0;padding:10px 12px;border:1px solid #00f0ff33;border-radius:8px">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <strong style="color:#00f0ff;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em">Geospatial & Geology Datum</strong>
-    <span style="font-size:.72rem;color:#ffd740;font-family:ui-monospace,monospace">WGS84 / GSNSW</span>
+   <strong style="color:#00f0ff;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em">Geospatial & Geology Datum</strong>
+   <span style="font-size:.70rem;color:#ffd740;font-family:ui-monospace,monospace">WGS84 / GSNSW [ILLUSTRATIVE]</span>
   </div>
   <div style="font-size:.78rem;color:#b0bec5;line-height:1.45;margin-top:4px">
-    <div><strong>Base Datum:</strong> Talbingo Town Hub (-35.58536° S, 148.32403° E)</div>
-    <div><strong>Elevation:</strong> <span id="site-elevation">390m</span> · <strong>B72 Distance:</strong> <span id="site-distance">0.0 km</span></div>
-    <div id="site-coords" style="font-family:ui-monospace,monospace;color:#80d8ff;margin-top:2px">GPS: -35.58536° S, 148.32403° E</div>
-    <div style="margin-top:4px;padding-top:4px;border-top:1px dashed #00f0ff28">
-      <div><strong style="color:#ffd740">GSNSW Seamless Geology:</strong></div>
-      <div id="site-geology-unit" style="color:#e0f7fa;font-weight:600">Talbingo Basalt</div>
-      <div id="site-geology-lith" style="font-size:.73rem;color:#90a4ae">Basalt · 393.3–419.2 Ma</div>
-    </div>
+   <div><strong>Base Datum:</strong> Talbingo Town Hub (-35.58536° S, 148.32403° E)</div>
+   <div><strong>Elevation:</strong> <span id="site-elevation">390m</span> · <strong>B72 Distance:</strong> <span id="site-distance">0.0 km</span></div>
+   <div id="site-coords" style="font-family:ui-monospace,monospace;color:#80d8ff;margin-top:2px">GPS: -35.58536° S, 148.32403° E</div>
+   <div style="margin-top:4px;padding-top:4px;border-top:1px dashed #00f0ff28">
+    <div><strong style="color:#ffd740">GSNSW Seamless Geology:</strong></div>
+    <div id="site-geology-unit" style="color:#e0f7fa;font-weight:600">Talbingo Basalt</div>
+    <div id="site-geology-lith" style="font-size:.73rem;color:#90a4ae">Basalt · 393.3–419.2 Ma</div>
+   </div>
   </div>
   <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
-    <a id="osm-link" href="https://www.openstreetmap.org/search?query=Talbingo+&zoom=4&minlon=-160.75195312500003&minlat=13.838079936422476&maxlon=-30.849609375000004&maxlat=56.218923189166624#map=14/-35.58536/148.32403" target="_blank" rel="noopener" style="flex:1;min-width:65px;text-align:center;font-size:.70rem;padding:4px 5px;background:#00f0ff14;border:1px solid #00f0ff55;border-radius:4px;color:#00f0ff;text-decoration:none">OSM</a>
-    <a id="gmaps-link" href="https://maps.app.goo.gl/okuS2WDUBS4m4tVCA" target="_blank" rel="noopener" style="flex:1;min-width:75px;text-align:center;font-size:.70rem;padding:4px 5px;background:#00e67614;border:1px solid #00e67655;border-radius:4px;color:#69f0ae;text-decoration:none">Google Maps</a>
-    <a href="https://www.resources.nsw.gov.au/geological-survey/products-and-data/gis-web-services" target="_blank" rel="noopener" style="flex:1;min-width:70px;text-align:center;font-size:.70rem;padding:4px 5px;background:#ffd74014;border:1px solid #ffd74055;border-radius:4px;color:#ffd740;text-decoration:none">GSNSW GIS</a>
+   <a id="osm-link" href="https://www.openstreetmap.org/search?query=Talbingo+&zoom=4&minlon=-160.75195312500003&minlat=13.838079936422476&maxlon=-30.849609375000004&maxlat=56.218923189166624#map=14/-35.58536/148.32403" target="_blank" rel="noopener" style="flex:1;min-width:65px;text-align:center;font-size:.70rem;padding:4px 5px;background:#00f0ff14;border:1px solid #00f0ff55;border-radius:4px;color:#00f0ff;text-decoration:none">OSM</a>
+   <a id="gmaps-link" href="https://maps.app.goo.gl/okuS2WDUBS4m4tVCA" target="_blank" rel="noopener" style="flex:1;min-width:75px;text-align:center;font-size:.70rem;padding:4px 5px;background:#00e67614;border:1px solid #00e67655;border-radius:4px;color:#69f0ae;text-decoration:none">Google Maps</a>
+   <a href="https://www.resources.nsw.gov.au/geological-survey/products-and-data/gis-web-services" target="_blank" rel="noopener" style="flex:1;min-width:70px;text-align:center;font-size:.70rem;padding:4px 5px;background:#ffd74014;border:1px solid #ffd74055;border-radius:4px;color:#ffd740;text-decoration:none">GSNSW GIS</a>
   </div>
+ </div>
+
+ <div class="stack">
+  <label for="site">Choose a campsite sector</label>
+  <select id="site"></select>
+ </div>
+ <p id="site-note" class="small"></p>
+
+ <div class="stack">
+  <button id="start">Drive to campsite</button>
+  <button id="return" disabled>Drive back to Talbingo</button>
+  <button id="restart">Reset this site</button>
+ </div>
+
+ <div>
+  <strong>Sector objective</strong>
+  <p id="mission"></p>
+  <p id="objective" class="small"></p>
+  <button id="inspect" disabled>Inspect landmark</button>
+  <div id="choices" class="choices"></div>
+  <p class="small" style="margin-top:6px">At camp: W A S D to walk. Mouse/touch drag to look around. Scroll or + / − to zoom.</p>
+ </div>
+
+ <div>
+  <strong>Drive telemetry controls</strong>
+  <p class="small">W / ↑ throttle · S / ↓ brake/reverse · A D steer · Space handbrake. Gamepad supported. Press C to cycle chase/drone camera.</p>
+  <div class="touch">
+   <button data-key="w">▲</button>
+   <button data-key="a">◀</button>
+   <button data-key="s">▼</button>
+   <button data-key="d">▶</button>
+   <button data-key=" ">Brake</button>
+   <button id="cam-toggle-btn">Cam</button>
+  </div>
+ </div>
+
+ <div>
+  <strong>Telemetry progress</strong>
+  <p id="status" role="status">Loading QualiaDB scene…</p>
+  <div class="meter"><span id="progress"></span></div>
+ </div>
+
+ <div>
+  <strong>Holosonic acoustic wavefield</strong>
+  <p class="small">Spatial wavefield synthesis: vector corridor propulsion hum, hydrodynamic fluid resonance, and landmark acoustic focal points.</p>
+  <button id="holosonic-toggle" style="display:flex;justify-content:space-between;align-items:center;width:100%">
+   <span>Holosonic wavefield</span>
+   <span id="holosonic-badge" style="color:#ffd740;font-weight:700">STANDBY</span>
+  </button>
+ </div>
+
+ <p class="small"><a href="game.html" style="color:#00e5ff">Main game</a> · Site shapes are illustrative authored play spaces grounded in GSNSW stratigraphic references.</p>
+</aside>
+
+<section class="play">
+ <canvas id="scene" width="1280" height="760" aria-label="Three dimensional campsite game scene"></canvas>
+ <div class="reticle top-left"></div>
+ <div class="reticle top-right"></div>
+ <div class="reticle bottom-left"></div>
+ <div class="reticle bottom-right"></div>
+ <div class="overlay" id="place-label">Talbingo</div>
+ <div class="overlay telemetry-badge" id="telemetry-coord">LAT: -35.58536° S | LON: 148.32403° E</div>
+
+ <div class="touch play-touch" style="display:none">
+  <button data-key="w" aria-label="Forward">▲</button>
+  <button data-key="a" aria-label="Left">◀</button>
+  <button data-key="s" aria-label="Back">▼</button>
+  <button data-key="d" aria-label="Right">▶</button>
+  <button data-key=" " aria-label="Brake">Brake</button>
+  <button data-zoom="in" aria-label="Zoom in">+</button>
+  <button data-zoom="out" aria-label="Zoom out">−</button>
+ </div>
+
+ <div class="drivehud">
+  <span id="leg">Select a campsite</span>
+  <span id="distance">0 game units</span>
+  <span id="speed">0 units/s</span>
+  <span id="hazard-pill" class="badge-alert">WILDLIFE ALERT</span>
+  <span id="cam-mode-pill" style="color:#80d8ff;cursor:pointer">CHASE CAM</span>
+ </div>
+</section>
+</main>
+
+<!-- Expedition Journal Modal -->
+<div id="journal-modal" class="modal-overlay">
+ <div class="modal">
+  <h2>Expedition Journal <button class="modal-close" id="close-journal-btn">&times;</button></h2>
+  <div id="journal-content">
+   <div class="journal-entry"><strong>Active Destination:</strong> <span id="j-site-name">Talbingo</span></div>
+   <div class="journal-entry"><strong>Elevation Profile:</strong> <span id="j-elev-profile">390m</span></div>
+   <div class="journal-entry"><strong>Stratigraphic Unit:</strong> <span id="j-geology">Talbingo Basalt</span></div>
+   <div class="journal-entry"><strong>Campsite Plan / Pitch:</strong> <span id="j-camp-choice">Not yet selected</span></div>
+   <div class="journal-entry"><strong>Observations & Landmarks:</strong> <span id="j-landmarks">Approaching sector</span></div>
+   <div class="journal-entry"><strong>Expedition Status:</strong> <span id="j-expedition-status">In progress</span></div>
+  </div>
+ </div>
 </div>
-<div class="stack"><label for="site">Choose a campsite sector</label><select id="site"></select></div>
-<p id="site-note" class="small"></p>
-<div class="stack"><button id="start">Drive to campsite</button><button id="return" disabled>Drive back to Talbingo</button><button id="restart">Reset this site</button></div>
-<div><strong>Sector objective</strong><p id="mission"></p><p id="objective" class="small"></p><button id="inspect" disabled>Inspect landmark</button><div id="choices" class="choices"></div><p class="small">At camp: W A S D to walk. Mouse/touch drag to look around. Scroll or + / − to zoom.</p></div>
-<div><strong>Drive telemetry controls</strong><p class="small">W / ↑ throttle · S / ↓ brake/reverse · A D steer · Space handbrake. Gamepad supported. Press C to cycle chase/drone camera.</p><div class="touch"><button data-key="w">▲</button><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button><button data-key=" ">Brake</button><button id="cam-toggle-btn">Cam</button></div></div>
-<div><strong>Telemetry progress</strong><p id="status" role="status">Loading QualiaDB scene…</p><div class="meter"><span id="progress"></span></div></div>
-<div><strong>Holosonic acoustic wavefield</strong><p class="small">Spatial wavefield synthesis: vector corridor propulsion hum, hydrodynamic fluid resonance, and landmark acoustic focal points.</p><button id="holosonic-toggle" style="display:flex;justify-content:space-between;align-items:center;width:100%"><span>Holosonic wavefield</span><span id="holosonic-badge" style="color:#ffd740;font-weight:700">STANDBY</span></button></div>
-<p class="small"><a href="game.html" style="color:#00e5ff">Main game</a> · Site shapes are original authored approximations. Check official park information before a real trip.</p>
-</aside><section class="play"><canvas id="scene" width="1280" height="760" aria-label="Three dimensional campsite game scene"></canvas><div class="reticle top-left"></div><div class="reticle top-right"></div><div class="reticle bottom-left"></div><div class="reticle bottom-right"></div><div class="overlay" id="place-label">Talbingo</div><div class="overlay telemetry-badge" id="telemetry-coord">LAT: -35.58536° S | LON: 148.32403° E</div><div class="touch play-touch" style="display:none"><button data-key="w" aria-label="Forward">▲</button><button data-key="a" aria-label="Left">◀</button><button data-key="s" aria-label="Back">▼</button><button data-key="d" aria-label="Right">▶</button><button data-key=" " aria-label="Brake">Brake</button><button data-zoom="in" aria-label="Zoom in">+</button><button data-zoom="out" aria-label="Zoom out">−</button></div><div class="drivehud"><span id="leg">Select a campsite</span><span id="distance">0 game units</span><span id="speed">0 units/s</span><span id="hazard-pill" class="badge-alert">WILDLIFE ALERT</span><span id="cam-mode-pill" style="color:#80d8ff;cursor:pointer">CHASE CAM</span></div></section></main>
+
+<!-- Settings & Accessibility Modal -->
+<div id="settings-modal" class="modal-overlay">
+ <div class="modal">
+  <h2>Settings & Accessibility <button class="modal-close" id="close-settings-btn">&times;</button></h2>
+  <div class="stack small">
+   <div><label for="vol-slider">Master Audio Volume</label><br/><input id="vol-slider" type="range" min="0" max="1" step="0.05" value="0.8" style="width:100%"/></div>
+   <div><label><input type="checkbox" id="mute-check"/> Mute All Audio Channels</label></div>
+   <div><label><input type="checkbox" id="reduced-motion-check"/> Reduced Motion Presentation</label></div>
+   <div style="margin-top:10px;padding-top:10px;border-top:1px solid #00f0ff33">
+    <strong>Keyboard Controls:</strong><br/>
+    W / ↑ : Throttle / Walk North<br/>
+    S / ↓ : Brake & Reverse / Walk South<br/>
+    A / ← : Steer Left / Walk West<br/>
+    D / → : Steer Right / Walk East<br/>
+    Space : Handbrake · E / Enter : Inspect Landmark / Confirm Choice<br/>
+    C : Camera Mode · J : Journal · M : Audio Mute · R : Reset
+   </div>
+  </div>
+ </div>
+</div>
+
 <script type="module">
 const TALBINGO_BASE = { lat: -35.58536, lon: 148.32403, elev: 390, geology: 'Talbingo Basalt & Young Granodiorite (393–425 Ma)' };
 const SITES=[
- {name:'The Pines',geology:{unit:'Blowering Formation - tuff',lith:'Pyroclastic rock (rhyolitic/dacitic tuff)',age:'425.6–427.4 Ma (Silurian)',code:'#9F78B3',notes:'Lakeside alluvial gravels and Silurian volcanic basement.'},detail:'Blowering Reservoir shore, ribbon gums, golden wattle, and Eastern grey kangaroos.',task:'Where will you set camp?',choices:['On the reservoir edge','In the picnic clearing'],correct:1,event:'Kangaroo roadside crossing',landmark:'reservoir and picnic clearing',point:[20,-3.5],coords:[-35.4328,148.2719],elev:385,distKm:22.4,osm:'https://www.openstreetmap.org/#map=15/-35.4328/148.2719',gmaps:'https://www.google.com/maps/place/The+Pines+Campground/@-35.4328,148.2719,16z'},
- {name:'Humes Crossing',geology:{unit:'Blowering Formation - siltstone',lith:'Siltstone and shale',age:'425.6–427.4 Ma (Silurian)',code:'#B586C4',notes:'Meander-plain alluvial facies over Silurian fine-grained strata.'},detail:'In inlet timber crossing, lakeside gums, wattle and swamp wallaby habitat.',task:'What should you inspect before crossing?',choices:['The timber deck','The campsite tents'],correct:0,event:'Wallaby lakeside crossing',landmark:'timber crossing',point:[14.7,-4],coords:[-35.4917,148.2783],elev:386,distKm:15.1,osm:'https://www.openstreetmap.org/#map=15/-35.4917/148.2783',gmaps:'https://www.google.com/maps/place/Humes+Crossing+Campground/@-35.4917,148.2783,16z'},
- {name:'Jounama Creek',geology:{unit:'Lower Jounama Creek Limestone',lith:'Limestone & Ravine Group skarn',age:'419.2–427.4 Ma (Late Silurian)',code:'#B276CC',notes:'Karst limestone with calc-silicate skarn contact metamorphism.'},detail:'Montane creek corridor, river bottlebrush, granite boulders and resident bare-nosed wombats.',task:'Pick a dry campsite.',choices:['On the creek gravel','Beyond the boulders'],correct:1,event:'Wombat trail crossing',landmark:'creek and boulders',point:[19,-3.5],coords:[-35.6078,148.3367],elev:420,distKm:4.2,osm:'https://www.openstreetmap.org/#map=15/-35.6078/148.3367',gmaps:'https://www.google.com/maps/place/Jounama+Creek+Campground/@-35.6078,148.3367,16z'},
- {name:'Yarrangobilly Village',geology:{unit:'Yarrangobilly Limestone',lith:'Massive karst limestone & thermal springs',age:'419.2–423.0 Ma (Silurian)',code:'#B683CC',notes:'Extensive karst limestone canyon system and mineral springs.'},detail:'River flats, river gums, bottlebrush, historic hut, laughing kookaburras and deer.',task:'Choose a river-safe camp location.',choices:['At the waterline','Near the hut clearing'],correct:1,event:'River road wildlife crossing',landmark:'riverbank hut',point:[20.3,-2.7],coords:[-35.6561,148.4719],elev:980,distKm:24.6,osm:'https://www.openstreetmap.org/#map=15/-35.6561/148.4719',gmaps:'https://www.google.com/maps/place/Yarrangobilly+Village+Campground/@-35.6561,148.4719,16z'},
- {name:"O'Hares",geology:{unit:'Talbingo Basalt & Young Granodiorite',lith:'Columnar basalt & S-type granite',age:'393.3–425.0 Ma (Devonian/Silurian)',code:'#957FBA',notes:'High alpine ash lookout ridge over the Jounama gorge.'},detail:'Steep alpine ash ridge, reservoir lookout platform and basking lace monitors.',task:'Find the safest lookout stop.',choices:['On the ridge platform','On the water edge'],correct:0,event:'Mountain-road wildlife encounter',landmark:'ridge lookout',point:[21.5,-5.1],coords:[-35.6889,148.4550],elev:1120,distKm:29.8,osm:'https://www.openstreetmap.org/#map=15/-35.6889/148.4550',gmaps:'https://www.google.com/maps/place/O\'Hares+Rest+Area/@-35.6889,148.4550,16z'},
- {name:'Three Mile Dam',geology:{unit:'Cabramurra Basalt & Bogong Granite',lith:'Subalpine plateau basalt & granite tors',age:'15.97–27.82 Ma (Cenozoic) / 427 Ma',code:'#E6C6A5',notes:'Tertiary basalt plateau cap over Paleozoic Lachlan granite.'},detail:'High alpine plain (1400m), gnarled snow gums, alpine tussock marsh and Kiandra brumbies.',task:'Where is the firmest ground?',choices:['On the marsh','On the grassy rise'],correct:1,event:'Alpine road brumby encounter',landmark:'dam and marsh',point:[19,-3.4],coords:[-35.8819,148.4867],elev:1410,distKm:48.5,osm:'https://www.openstreetmap.org/#map=15/-35.8819/148.4867',gmaps:'https://www.google.com/maps/place/Three+Mile+Dam+Campground/@-35.8819,148.4867,16z'}
+ {
+  name:'The Pines',
+  geology:{unit:'Blowering Formation - tuff',lith:'Pyroclastic rock (rhyolitic/dacitic tuff)',age:'425.6–427.4 Ma (Silurian)',code:'#9F78B3',notes:'Lakeside alluvial gravels and Silurian volcanic basement.'},
+  detail:'Blowering Reservoir shore, ribbon gums, golden wattle, and Eastern grey kangaroos.',
+  task:'Choose your campsite setup and pitch strategy.',
+  choices:[
+   {label:'Reservoir waterline sand edge',desc:'Low ground near wave zone · risks water rise, lake surge, and damp grass',correct:false},
+   {label:'Shared picnic clearing & lee terrace',desc:'Near ironbark table & fire circle · optimal sheltered social space with dry loam',correct:true}
+  ],
+  event:'Kangaroo roadside crossing',
+  landmark:'reservoir and picnic clearing',
+  point:[20,-3.5],
+  coords:[-35.4328,148.2719],
+  elev:385,
+  distKm:22.4,
+  osm:'https://www.openstreetmap.org/#map=15/-35.4328/148.2719',
+  gmaps:'https://www.google.com/maps/place/The+Pines+Campground/@-35.4328,148.2719,16z'
+ },
+ {
+  name:'Humes Crossing',
+  geology:{unit:'Blowering Formation - siltstone',lith:'Siltstone and shale',age:'425.6–427.4 Ma (Silurian)',code:'#B586C4',notes:'Meander-plain alluvial facies over Silurian fine-grained strata.'},
+  detail:'In inlet timber crossing, lakeside gums, wattle and swamp wallaby habitat.',
+  task:'Inspect the timber inlet crossing and select your approach.',
+  choices:[
+   {label:'Campsite tents right in the low water channel',desc:'Channel bed subject to inlet inflow surges, soft silt, and sudden flooding',correct:false},
+   {label:'Inspect timber deck & pitch on lakeside gum grove',desc:'Firm sandy bank above surge line · sheltered gum canopy with clear inlet views',correct:true}
+  ],
+  event:'Wallaby lakeside crossing',
+  landmark:'timber crossing',
+  point:[14.7,-4],
+  coords:[-35.4917,148.2783],
+  elev:386,
+  distKm:15.1,
+  osm:'https://www.openstreetmap.org/#map=15/-35.4917/148.2783',
+  gmaps:'https://www.google.com/maps/place/Humes+Crossing+Campground/@-35.4917,148.2783,16z'
+ },
+ {
+  name:'Jounama Creek',
+  geology:{unit:'Lower Jounama Creek Limestone',lith:'Limestone & Ravine Group skarn',age:'419.2–427.4 Ma (Late Silurian)',code:'#B276CC',notes:'Karst limestone with calc-silicate skarn contact metamorphism.'},
+  detail:'Montane creek corridor, river bottlebrush, granite boulders and resident bare-nosed wombats.',
+  task:'Survey the montane creek and pick a dry campsite approach.',
+  choices:[
+   {label:'Directly on the loose creek gravel bed',desc:'Active floodway hazard from mountain catchment rainfall and torrent surges',correct:false},
+   {label:'Granite boulder terrace & montane alcove',desc:'Elevated bedrock terrace above high-water mark · sheltered by river bottlebrush canopy',correct:true}
+  ],
+  event:'Wombat trail crossing',
+  landmark:'creek and boulders',
+  point:[19,-3.5],
+  coords:[-35.6078,148.3367],
+  elev:420,
+  distKm:4.2,
+  osm:'https://www.openstreetmap.org/#map=15/-35.6078/148.3367',
+  gmaps:'https://www.google.com/maps/place/Jounama+Creek+Campground/@-35.6078,148.3367,16z'
+ },
+ {
+  name:'Yarrangobilly Village',
+  geology:{unit:'Yarrangobilly Limestone',lith:'Massive karst limestone & thermal springs',age:'419.2–423.0 Ma (Silurian)',code:'#B683CC',notes:'Extensive karst limestone canyon system and mineral springs.'},
+  detail:'River flats, river gums, bottlebrush, historic hut, laughing kookaburras and deer.',
+  task:'Explore the historic valley and choose a river-safe camp location.',
+  choices:[
+   {label:'Directly at the muddy river waterline',desc:'Subject to alpine stream level fluctuations, silt saturation, and dense chill mist',correct:false},
+   {label:'Near the historic riverbank hut clearing & meadow',desc:'Firm sheltered ground with natural timber windbreak and gentle well-drained slope',correct:true}
+  ],
+  event:'River road wildlife crossing',
+  landmark:'riverbank hut',
+  point:[20.3,-2.7],
+  coords:[-35.6561,148.4719],
+  elev:980,
+  distKm:24.6,
+  osm:'https://www.openstreetmap.org/#map=15/-35.6561/148.4719',
+  gmaps:'https://www.google.com/maps/place/Yarrangobilly+Village+Campground/@-35.6561,148.4719,16z'
+ },
+ {
+  name:"O'Hares",
+  geology:{unit:'Talbingo Basalt & Young Granodiorite',lith:'Columnar basalt & S-type granite',age:'393.3–425.0 Ma (Devonian/Silurian)',code:'#957FBA',notes:'High alpine ash lookout ridge over the Jounama gorge.'},
+  detail:'Steep alpine ash ridge, reservoir lookout platform and basking lace monitors.',
+  task:'Survey the high alpine ridge and choose your vantage rest stop.',
+  choices:[
+   {label:'Over the steep rocky water edge drop-off',desc:'Unstable scree talus slope and hazardous steep drop-off zone',correct:false},
+   {label:'Ridge timber platform & sheltered ash grove',desc:'Panoramic gorge lookout · firm bedrock vantage with tall alpine ash wind protection',correct:true}
+  ],
+  event:'Mountain-road wildlife encounter',
+  landmark:'ridge lookout',
+  point:[21.5,-5.1],
+  coords:[-35.6889,148.4550],
+  elev:1120,
+  distKm:29.8,
+  osm:'https://www.openstreetmap.org/#map=15/-35.6889/148.4550',
+  gmaps:'https://www.google.com/maps/place/O\'Hares+Rest+Area/@-35.6889,148.4550,16z'
+ },
+ {
+  name:'Three Mile Dam',
+  geology:{unit:'Cabramurra Basalt & Bogong Granite',lith:'Subalpine plateau basalt & granite tors',age:'15.97–27.82 Ma (Cenozoic) / 427 Ma',code:'#E6C6A5',notes:'Tertiary basalt plateau cap over Paleozoic Lachlan granite.'},
+  detail:'High alpine plain (1400m), gnarled snow gums, alpine tussock marsh and Kiandra brumbies.',
+  task:'Select your subalpine plateau campsite approach.',
+  choices:[
+   {label:'Directly on the sphagnum marsh peat',desc:'Saturated peat bog · damages delicate subalpine wetland and sinks camp footings',correct:false},
+   {label:'Grassy snow gum rise near historic dam overlook',desc:'Dry granite bedrock base with snow gum wind protection and panoramic brumby plain views',correct:true}
+  ],
+  event:'Alpine road brumby encounter',
+  landmark:'dam and marsh',
+  point:[19,-3.4],
+  coords:[-35.8819,148.4867],
+  elev:1410,
+  distKm:48.5,
+  osm:'https://www.openstreetmap.org/#map=15/-35.8819/148.4867',
+  gmaps:'https://www.google.com/maps/place/Three+Mile+Dam+Campground/@-35.8819,148.4867,16z'
+ }
 ];
+
 const $=id=>document.getElementById(id), toObj=v=>v instanceof Map?Object.fromEntries([...v].map(([k,x])=>[k,toObj(x)])):Array.isArray(v)?v.map(toObj):v;
 const select=$('site');SITES.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s.name;select.append(o)});
 let m,portal,sim,scene,site=0,phase='loading',drive=null,walk={x:18,z:3.5},last=performance.now(),acted=false,inspected=false,eventCleared=false;
 const keys=new Set(), keyHeld={};
 let camMode='chase', gpPrevA=false, gpPrevX=false, gpPrevY=false;
+let masterVolume=0.8, isMuted=false, reducedMotion=false;
+let chosenTradeoff='';
 
 class HolosonicEngine{
- constructor(){this.ctx=null;this.active=false;this.vectorOsc=null;this.vectorSub=null;this.vectorGain=null;this.waterGain=null;this.floraGain=null;this.gravelGain=null;this.noise=null;}
+ constructor(){this.ctx=null;this.active=false;this.vectorOsc=null;this.vectorSub=null;this.vectorGain=null;this.waterGain=null;this.floraGain=null;this.gravelGain=null;this.masterGain=null;this.noise=null;}
  async init(){
   try{
    if(this.ctx){if(this.ctx.state==='suspended')await this.ctx.resume();this.active=!this.active;this.updateBadge();return;}
    const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return;
    this.ctx=new AudioCtx();if(this.ctx.state==='suspended')await this.ctx.resume();
+
+   this.masterGain=this.ctx.createGain();
+   this.masterGain.gain.setValueAtTime(masterVolume,this.ctx.currentTime);
+   this.masterGain.connect(this.ctx.destination);
+
    this.vectorOsc=this.ctx.createOscillator();this.vectorOsc.type='sawtooth';this.vectorOsc.frequency.setValueAtTime(75,this.ctx.currentTime);
    this.vectorSub=this.ctx.createOscillator();this.vectorSub.type='sine';this.vectorSub.frequency.setValueAtTime(37.5,this.ctx.currentTime);
    const vFilter=this.ctx.createBiquadFilter();vFilter.type='lowpass';vFilter.frequency.setValueAtTime(260,this.ctx.currentTime);
    this.vectorGain=this.ctx.createGain();this.vectorGain.gain.setValueAtTime(0,this.ctx.currentTime);
-   this.vectorOsc.connect(vFilter);this.vectorSub.connect(vFilter);vFilter.connect(this.vectorGain);this.vectorGain.connect(this.ctx.destination);
+   this.vectorOsc.connect(vFilter);this.vectorSub.connect(vFilter);vFilter.connect(this.vectorGain);this.vectorGain.connect(this.masterGain);
    this.vectorOsc.start();this.vectorSub.start();
+
    const len=this.ctx.sampleRate*2,buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate),d=buf.getChannelData(0);
    for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
    this.noise=this.ctx.createBufferSource();this.noise.buffer=buf;this.noise.loop=true;
+
    const wFilter=this.ctx.createBiquadFilter();wFilter.type='bandpass';wFilter.frequency.setValueAtTime(360,this.ctx.currentTime);wFilter.Q.setValueAtTime(2.5,this.ctx.currentTime);
    this.waterGain=this.ctx.createGain();this.waterGain.gain.setValueAtTime(0,this.ctx.currentTime);
+
    const fFilter=this.ctx.createBiquadFilter();fFilter.type='highpass';fFilter.frequency.setValueAtTime(1600,this.ctx.currentTime);
    this.floraGain=this.ctx.createGain();this.floraGain.gain.setValueAtTime(0.015,this.ctx.currentTime);
+
    const gFilter=this.ctx.createBiquadFilter();gFilter.type='bandpass';gFilter.frequency.setValueAtTime(2400,this.ctx.currentTime);gFilter.Q.setValueAtTime(3.2,this.ctx.currentTime);
    this.gravelGain=this.ctx.createGain();this.gravelGain.gain.setValueAtTime(0,this.ctx.currentTime);
+
    this.noise.connect(wFilter);this.noise.connect(fFilter);this.noise.connect(gFilter);
    wFilter.connect(this.waterGain);fFilter.connect(this.floraGain);gFilter.connect(this.gravelGain);
-   this.waterGain.connect(this.ctx.destination);this.floraGain.connect(this.ctx.destination);this.gravelGain.connect(this.ctx.destination);
+   this.waterGain.connect(this.masterGain);this.floraGain.connect(this.masterGain);this.gravelGain.connect(this.masterGain);
    this.noise.start();
+
    this.active=true;this.updateBadge();
   }catch(e){}
  }
  updateBadge(){
   try{
    const b=$('holosonic-badge');if(!b)return;
-   if(this.active){b.textContent='ONLINE';b.style.color='#00f0ff';b.style.textShadow='0 0 8px #00f0ff';}
-   else{b.textContent='MUTED';b.style.color='#ffd740';b.style.textShadow='none';if(this.vectorGain&&this.ctx)this.vectorGain.gain.setValueAtTime(0,this.ctx.currentTime);if(this.waterGain&&this.ctx)this.waterGain.gain.setValueAtTime(0,this.ctx.currentTime);if(this.gravelGain&&this.ctx)this.gravelGain.gain.setValueAtTime(0,this.ctx.currentTime);}
+   if(this.active&&!isMuted){
+    b.textContent='ONLINE';b.style.color='#00f0ff';b.style.textShadow='0 0 8px #00f0ff';
+    if(this.masterGain&&this.ctx)this.masterGain.gain.setValueAtTime(masterVolume,this.ctx.currentTime);
+   }else{
+    b.textContent='MUTED';b.style.color='#ffd740';b.style.textShadow='none';
+    if(this.masterGain&&this.ctx)this.masterGain.gain.setValueAtTime(0,this.ctx.currentTime);
+   }
   }catch(e){}
  }
  update(state){
   try{
-   if(!this.active||!this.ctx)return;const now=this.ctx.currentTime,sp=Math.abs(state.speed||0),driving=state.phase==='outbound'||state.phase==='inbound';
+   if(!this.active||!this.ctx||isMuted)return;
+   const now=this.ctx.currentTime,sp=Math.abs(state.speed||0),driving=state.phase==='outbound'||state.phase==='inbound';
    if(driving){
     const f=68+sp*24;this.vectorOsc.frequency.setTargetAtTime(f,now,.08);this.vectorSub.frequency.setTargetAtTime(f*.5,now,.08);
     this.vectorGain.gain.setTargetAtTime(Math.min(.14,.02+sp*.03),now,.08);
@@ -146,9 +394,11 @@ class HolosonicEngine{
  }
  chime(freq=528,dur=.8){
   try{
-   if(!this.active||!this.ctx)return;const osc=this.ctx.createOscillator(),g=this.ctx.createGain();
+   if(!this.active||!this.ctx||isMuted)return;
+   const osc=this.ctx.createOscillator(),g=this.ctx.createGain();
    osc.type='sine';osc.frequency.setValueAtTime(freq,this.ctx.currentTime);g.gain.setValueAtTime(.15,this.ctx.currentTime);
-   g.gain.exponentialRampToValueAtTime(.0001,this.ctx.currentTime+dur);osc.connect(g);g.connect(this.ctx.destination);
+   g.gain.exponentialRampToValueAtTime(.0001,this.ctx.currentTime+dur);
+   osc.connect(g);g.connect(this.masterGain||this.ctx.destination);
    osc.start();osc.stop(this.ctx.currentTime+dur);
   }catch(e){}
  }
@@ -160,8 +410,33 @@ $('holosonic-toggle').onclick=()=>holosonic.init();
 const unlockAudio=()=>{if(!holosonic.ctx)holosonic.init().catch(()=>{});window.removeEventListener('pointerdown',unlockAudio);window.removeEventListener('keydown',unlockAudio);};
 window.addEventListener('pointerdown',unlockAudio);window.addEventListener('keydown',unlockAudio);
 
+// Expedition checkpoint persistence:
+function saveCheckpoint(){
+ try{
+  const data={site,phase,acted,inspected,eventCleared,walk,drive:drive?{x:drive.x,z:drive.z,heading:drive.heading,speed:drive.speed,distance:drive.distance}:null,chosenTradeoff};
+  localStorage.setItem('talbingo_expedition_checkpoint_v1',JSON.stringify(data));
+ }catch(e){}
+}
+function loadCheckpoint(){
+ try{
+  const raw=localStorage.getItem('talbingo_expedition_checkpoint_v1');if(!raw)return null;
+  return JSON.parse(raw);
+ }catch(e){return null;}
+}
+
+function updateJournal(){
+ const s=SITES[site];
+ $('j-site-name').textContent=s.name+' (B72 '+s.distKm+'km)';
+ $('j-elev-profile').textContent=s.elev+'m (Base: 390m, Δ '+(s.elev-TALBINGO_BASE.elev>=0?'+':'')+(s.elev-TALBINGO_BASE.elev)+'m)';
+ $('j-geology').textContent=s.geology.unit+' ('+s.geology.age+')';
+ $('j-camp-choice').textContent=chosenTradeoff||(acted?'Campsite strategy confirmed':'Not yet selected');
+ $('j-landmarks').textContent=inspected?'Inspected '+s.landmark+' · '+s.detail:'Approaching landmark';
+ $('j-expedition-status').textContent=phase==='done'?'Round trip complete':phase==='camp'?'At campsite':(phase==='outbound'?'Outbound journey':'Planning');
+}
+
 function distanceToLandmark(){const p=SITES[site].point;return Math.hypot(walk.x-p[0],walk.z-p[1]);}
 function updateInspect(){const near=phase==='camp'&&distanceToLandmark()<2.2;$('inspect').disabled=!near;$('objective').textContent=phase==='camp'?(near?'Landmark reached · inspect it (or press E).':distanceToLandmark().toFixed(1)+' game units to '+SITES[site].landmark):'';}
+
 function display(){
  const s=SITES[site];$('site-note').textContent=s.detail;$('mission').textContent=s.task;$('place-label').textContent=s.name;
  $('site-elevation').textContent=s.elev+'m (Δ '+(s.elev-TALBINGO_BASE.elev>=0?'+':'')+(s.elev-TALBINGO_BASE.elev)+'m)';
@@ -172,13 +447,25 @@ function display(){
  $('return').disabled=phase!=='camp'||!acted;
  $('inspect').textContent='Inspect '+s.landmark;
  $('leg').textContent=phase==='outbound'?'Driving to '+s.name:phase==='inbound'?'Returning to Talbingo':phase==='camp'?'At '+s.name:phase==='done'?'Round trip complete':'Choose a campsite';
+ 
  const choices=$('choices');choices.replaceChildren();
- s.choices.forEach((choice,i)=>{
-  const b=document.createElement('button');b.textContent=choice;b.disabled=phase!=='camp'||!inspected||acted;b.dataset.correct=String(i===s.correct);
-  b.onclick=()=>{if(i===s.correct){acted=true;try{holosonic.chime(659.25,1.2)}catch(e){}message('Good choice. Drive back to Talbingo.');display()}else message('Try another spot. Read the scene landmarks.');};
+ s.choices.forEach((c,i)=>{
+  const b=document.createElement('button');b.className='choice-btn';
+  b.innerHTML=`<strong>${c.label}</strong><span class="choice-tradeoff">${c.desc}</span>`;
+  b.disabled=phase!=='camp'||!inspected||acted;
+  b.dataset.correct=String(c.correct);
+  b.onclick=()=>{
+   if(c.correct){
+    acted=true;chosenTradeoff=c.label+': '+c.desc;
+    try{holosonic.chime(659.25,1.2)}catch(e){}
+    message('Good choice. Drive back to Talbingo.');saveCheckpoint();updateJournal();display();
+   }else{
+    message('Try another spot. Low ground or flood zones risk water damage. Choose a firmer site.');
+   }
+  };
   choices.append(b);
  });
- updateInspect();
+ updateInspect();updateJournal();
 }
 function message(text){$('status').textContent=text;}
 
@@ -207,12 +494,19 @@ function attachCampCamera(canvas){
 }
 
 function reset(){
- const s=SITES[site];phase='ready';drive=null;walk={x:18,z:3.5};acted=false;inspected=false;eventCleared=false;keys.clear();
+ const s=SITES[site];phase='ready';drive=null;walk={x:18,z:3.5};acted=false;inspected=false;eventCleared=false;keys.clear();chosenTradeoff='';
  $('progress').style.width='0%';$('distance').textContent='0 game units';$('speed').textContent='0 units/s (0 km/h)';
  $('telemetry-coord').textContent='TALBINGO HUB ['+TALBINGO_BASE.lat+'°, '+TALBINGO_BASE.lon+'°] ➔ '+s.name.toUpperCase();
  const hz=$('hazard-pill');if(hz)hz.style.display='none';
- m.talbingo_vehicle_pose(portal,-5.45,m.talbingo_road_z(site,-5.45),-Math.PI/2);
- m.talbingo_walker_pose(portal,walk.x,walk.z);
+ 
+ const startRoadY=m&&m.talbingo_terrain_elevation?m.talbingo_terrain_elevation(site,-5.45,m.talbingo_road_z(site,-5.45)):0.0;
+ if(m&&m.talbingo_vehicle_pose_y)m.talbingo_vehicle_pose_y(portal,-5.45,startRoadY,m.talbingo_road_z(site,-5.45),-Math.PI/2);
+ else m.talbingo_vehicle_pose(portal,-5.45,m.talbingo_road_z(site,-5.45),-Math.PI/2);
+
+ const startWalkY=m&&m.talbingo_terrain_elevation?m.talbingo_terrain_elevation(site,walk.x,walk.z):0.0;
+ if(m&&m.talbingo_walker_pose_y)m.talbingo_walker_pose_y(portal,walk.x,startWalkY,walk.z);
+ else m.talbingo_walker_pose(portal,walk.x,walk.z);
+
  focus(8,0,true);message('Ready. Drive in, walk to the landmark, choose a campsite, then drive back.');display();
 }
 
@@ -226,10 +520,13 @@ function begin(outbound){
  const initial=toObj(sim.setup(0));if(initial.error)throw Error(initial.error);
  drive={...initial,z:m.talbingo_road_z(site,-5.45)};
  if(!outbound){drive.x=21.65;drive.z=m.talbingo_road_z(site,21.65);drive.heading=Math.PI/2;drive.trailer_heading=drive.heading;drive.speed=0;}
- eventCleared=false;m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);
+ eventCleared=false;
+ const roadY=m&&m.talbingo_terrain_elevation?m.talbingo_terrain_elevation(site,drive.x,drive.z):0.0;
+ if(m&&m.talbingo_vehicle_pose_y)m.talbingo_vehicle_pose_y(portal,drive.x,roadY,drive.z,drive.heading);
+ else m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);
  phase=outbound?'outbound':'inbound';
  message(outbound?'Drive toward the campsite gate. Watch for the roadside sign.':'Drive back toward Talbingo. Watch for the roadside sign.');
- display();if(innerWidth<=760)document.querySelector('.play').scrollIntoView({behavior:'smooth'});
+ display();saveCheckpoint();if(innerWidth<=760)document.querySelector('.play').scrollIntoView({behavior:'smooth'});
 }
 
 function pollGamepad(){
@@ -264,13 +561,15 @@ function step(dt){
   if(east||south){
    const next=toObj(sim.camp_step(JSON.stringify({dt,x:walk.x,z:walk.z,east,south,site_id:site})));
    if(next.error)throw Error(next.error);
-   walk={x:next.x,z:next.z};m.talbingo_walker_pose(portal,walk.x,walk.z);
+   walk={x:next.x,z:next.z};
+   const walkY=m&&m.talbingo_terrain_elevation?m.talbingo_terrain_elevation(site,walk.x,walk.z):0.0;
+   if(m&&m.talbingo_walker_pose_y)m.talbingo_walker_pose_y(portal,walk.x,walkY,walk.z);
+   else m.talbingo_walker_pose(portal,walk.x,walk.z);
    const curLat=s.coords[0]+(walk.z-s.point[1])*0.00004,curLon=s.coords[1]+(walk.x-s.point[0])*0.00004;
    $('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+s.elev+'m // CAMP EXPLORE';
    if(next.blocked)message('Water or marsh edge · choose another path.');
   }
-  // Smoothly follow explorer avatar
-  const lerp=Math.min(1.0,dt*8.0);
+  const lerp=Math.min(1.0,dt*(reducedMotion?4.0:8.0));
   camera.x+=(walk.x-camera.x)*lerp;camera.z+=(walk.z-camera.z)*lerp;
   applyCamera();updateInspect();
   return;
@@ -297,17 +596,18 @@ function step(dt){
  const card=['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];
  $('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+curElev+'m // HDG: '+deg+'° '+card;
 
- m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);
+ const roadY=m&&m.talbingo_terrain_elevation?m.talbingo_terrain_elevation(site,drive.x,drive.z):0.0;
+ if(m&&m.talbingo_vehicle_pose_y)m.talbingo_vehicle_pose_y(portal,drive.x,roadY,drive.z,drive.heading);
+ else m.talbingo_vehicle_pose(portal,drive.x,drive.z,drive.heading);
 
- // Dynamic Chase Camera Spring-Damper:
- const camLerp=Math.min(1.0,dt*6.5);
+ const camLerp=Math.min(1.0,dt*(reducedMotion?3.5:6.5));
  camera.x+=(drive.x-camera.x)*camLerp;
  camera.z+=(drive.z-camera.z)*camLerp;
  if(camMode==='chase'){
   const targetYaw=(phase==='outbound'?0.35:3.45)+(drive.heading+Math.PI/2)*0.45;
   let diff=(targetYaw-camera.yaw)%(Math.PI*2);
   if(diff>Math.PI)diff-=Math.PI*2;if(diff<-Math.PI)diff+=Math.PI*2;
-  camera.yaw+=diff*Math.min(1.0,dt*4.0);
+  camera.yaw+=diff*Math.min(1.0,dt*(reducedMotion?2.0:4.0));
   const spNorm=Math.min(1.0,Math.abs(drive.speed)/2.5);
   camera.pitch+=(0.70+spNorm*0.05-camera.pitch)*camLerp;
   const targetZoom=Math.max(0.48,0.62-spNorm*0.08);
@@ -332,13 +632,13 @@ function step(dt){
   phase='camp';drive.speed=0;keys.clear();
   $('speed').textContent='0 units/s (0 km/h)';
   focus(walk.x,walk.z);camera.zoom=.82;applyCamera();
-  message('Arrived. Walk to '+s.landmark+' with W A S D.');display();
+  message('Arrived. Walk to '+s.landmark+' with W A S D.');display();saveCheckpoint();
  }
  if(phase==='inbound'&&(drive.x<=-5.4||next.warning==='route-end')){
   phase='done';drive.speed=0;keys.clear();
   $('speed').textContent='0 units/s (0 km/h)';
   focus(8,0,true);
-  message('Round trip complete at '+s.name+'. Choose another campsite to play a different map.');display();
+  message('Round trip complete at '+s.name+'. Choose another campsite to play a different map.');display();saveCheckpoint();
  }
 }
 
@@ -350,8 +650,21 @@ $('inspect').onclick=()=>{
  if(phase!=='camp'||distanceToLandmark()>=2.2)return;
  const s=SITES[site];inspected=true;holosonic.chime(528,.9);
  focus(s.point[0],s.point[1]);
- message('Inspect '+s.landmark+'. Look around, then choose a site response.');display();
+ message('Inspect '+s.landmark+'. Look around, then choose a site response.');display();saveCheckpoint();
 };
+
+// Journal & Settings Modal bindings:
+$('open-journal-btn').onclick=()=>{updateJournal();$('journal-modal').style.display='flex';};
+$('close-journal-btn').onclick=()=>{$('journal-modal').style.display='none';};
+$('open-settings-btn').onclick=()=>{$('settings-modal').style.display='flex';};
+$('close-settings-btn').onclick=()=>{$('settings-modal').style.display='none';};
+$('open-geology-btn').onclick=()=>{updateJournal();$('journal-modal').style.display='flex';};
+$('journal-modal').onclick=e=>{if(e.target===$('journal-modal'))$('journal-modal').style.display='none';};
+$('settings-modal').onclick=e=>{if(e.target===$('settings-modal'))$('settings-modal').style.display='none';};
+
+$('vol-slider').oninput=e=>{masterVolume=Number(e.target.value);holosonic.updateBadge();};
+$('mute-check').onchange=e=>{isMuted=e.target.checked;holosonic.updateBadge();};
+$('reduced-motion-check').onchange=e=>{reducedMotion=e.target.checked;};
 
 window.addEventListener('keydown',e=>{
  const k=e.key.toLowerCase();
@@ -365,8 +678,10 @@ window.addEventListener('keydown',e=>{
   }
  }
  if(k==='c')cycleCamera();
- if(k==='m')holosonic.init().catch(()=>{});
+ if(k==='m'){$('mute-check').checked=!$('mute-check').checked;isMuted=$('mute-check').checked;holosonic.updateBadge();}
+ if(k==='j'){$('journal-modal').style.display=$('journal-modal').style.display==='flex'?'none':'flex';updateJournal();}
  if(k==='r')$('restart').click();
+ if(k==='escape'){$('journal-modal').style.display='none';$('settings-modal').style.display='none';}
 });
 window.addEventListener('keyup',e=>{const k=e.key.toLowerCase();keys.delete(k);keyHeld[k]=false;});
 window.addEventListener('blur',()=>keys.clear());
