@@ -237,6 +237,16 @@ pub enum ParametricRecipe {
         points: Vec<[f32; 3]>,
         width: f32,
     },
+    /// A continuous watertight terrain heightfield grid with draped elevations.
+    TerrainHeightfield {
+        min_x: f32,
+        max_x: f32,
+        min_z: f32,
+        max_z: f32,
+        cols: usize,
+        rows: usize,
+        heights: Vec<f32>,
+    },
 }
 
 /// One deterministic, oriented leaf or petal in a merged foliage mesh.
@@ -1405,6 +1415,58 @@ impl ParametricRecipe {
                     let d = a + 3;
                     triangles.push([a, c, b]);
                     triangles.push([b, c, d]);
+                }
+
+                let (min, max) = mesh_bounds(&positions);
+                (
+                    [0.0, 0.0, 0.0],
+                    Mesh {
+                        positions,
+                        triangles,
+                        min,
+                        max,
+                    },
+                )
+            }
+            Self::TerrainHeightfield {
+                min_x,
+                max_x,
+                min_z,
+                max_z,
+                cols,
+                rows,
+                heights,
+            } => {
+                let cols = (*cols).max(2);
+                let rows = (*rows).max(2);
+                let total = cols * rows;
+                if heights.len() < total {
+                    return Err("terrain heightfield requires heights for all grid vertices".into());
+                }
+                let mut positions = Vec::with_capacity(total);
+                let mut triangles = Vec::with_capacity((cols - 1) * (rows - 1) * 2);
+
+                let dx = (*max_x - *min_x) / (cols - 1) as f32;
+                let dz = (*max_z - *min_z) / (rows - 1) as f32;
+
+                for r in 0..rows {
+                    let z = *min_z + r as f32 * dz;
+                    for c in 0..cols {
+                        let x = *min_x + c as f32 * dx;
+                        let y = heights[r * cols + c];
+                        positions.push([x, y, z]);
+                    }
+                }
+
+                for r in 0..rows - 1 {
+                    for c in 0..cols - 1 {
+                        let a = (r * cols + c) as u32;
+                        let b = a + 1;
+                        let c_idx = ((r + 1) * cols + c) as u32;
+                        let d = c_idx + 1;
+                        triangles.push([a, c_idx, b]);
+                        triangles.push([b, c_idx, d]);
+                    }
                 }
 
                 let (min, max) = mesh_bounds(&positions);

@@ -28,7 +28,7 @@ fn plant(
     }
 }
 
-fn trunk(site: u8, index: usize, x: f32, z: f32, h: f32, lean: f32) -> AssetRecipe {
+fn trunk(site: u8, index: usize, x: f32, y: f32, z: f32, h: f32, lean: f32) -> AssetRecipe {
     let sides = 12;
     let profile = (0..sides)
         .map(|i| {
@@ -93,7 +93,7 @@ fn trunk(site: u8, index: usize, x: f32, z: f32, h: f32, lean: f32) -> AssetReci
         bark_color,
         WEATHERED_TIMBER,
         ParametricRecipe::SweepExtrusion {
-            center: [x, 0.0, z],
+            center: [x, y, z],
             axis,
             profile,
             stations: Some(vec![
@@ -152,9 +152,10 @@ fn crown(
 }
 
 fn gum(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32, h: f32) {
+    let y = crate::talbingo_terrain::elevation(site, x, z);
     let phase = i as f32 * 1.69 + site as f32 * 0.73;
     let lean = phase.sin() * (if site == 5 { 0.58 } else { 0.36 });
-    out.push(trunk(site, i, x, z, h, lean));
+    out.push(trunk(site, i, x, y, z, h, lean));
     let mut limbs = Vec::new();
     let mut leaves = Vec::new();
     let branch_count = if site == 5 { 16 } else { 13 };
@@ -194,7 +195,7 @@ fn gum(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32, h: f32) {
             leaves.push(EllipsoidInstance {
                 center: [
                     x + tip[0] + aa.cos() * rr,
-                    tip[1] + ((n * 3) % 5) as f32 * 0.085,
+                    y + tip[1] + ((n * 3) % 5) as f32 * 0.085,
                     z + tip[2] + aa.sin() * rr,
                 ],
                 radii: [0.045, 0.022, 0.13 + (n % 3) as f32 * 0.025],
@@ -213,7 +214,7 @@ fn gum(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32, h: f32) {
         },
         WEATHERED_TIMBER,
         ParametricRecipe::LimbCluster {
-            center: [x, 0.0, z],
+            center: [x, y, z],
             limbs,
             radial_segments: 10,
         },
@@ -247,7 +248,7 @@ fn gum(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32, h: f32) {
         let a = phase + layer as f32 * 2.15;
         let center = [
             x + lean + a.cos() * 0.63,
-            h * (0.79 + layer as f32 * 0.045),
+            y + h * (0.79 + layer as f32 * 0.045),
             z + a.sin() * 0.55,
         ];
         out.push(crown(
@@ -278,6 +279,7 @@ fn gum(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32, h: f32) {
 
 /// Golden wattle shrub (*Acacia pycnantha*): woody stems with radiant golden puff blossoms.
 fn wattle(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
+    let y = crate::talbingo_terrain::elevation(site, x, z);
     let mut limbs = Vec::new();
     let mut blossoms = Vec::new();
     for b in 0..6 {
@@ -294,7 +296,7 @@ fn wattle(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
             blossoms.push(EllipsoidInstance {
                 center: [
                     x + tip[0] + pa.cos() * 0.18,
-                    tip[1] + (p as f32) * 0.06,
+                    y + tip[1] + (p as f32) * 0.06,
                     z + tip[2] + pa.sin() * 0.18,
                 ],
                 radii: [0.075, 0.075, 0.075],
@@ -309,7 +311,7 @@ fn wattle(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
         [0.42, 0.32, 0.22, 1.0],
         WEATHERED_TIMBER,
         ParametricRecipe::LimbCluster {
-            center: [x, 0.0, z],
+            center: [x, y, z],
             limbs,
             radial_segments: 8,
         },
@@ -319,7 +321,7 @@ fn wattle(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
         [0.24, 0.38, 0.22, 0.95],
         LIVING_FOLIAGE,
         ParametricRecipe::BotanicalHull {
-            center: [x, 0.75, z],
+            center: [x, y + 0.75, z],
             radii: [0.72, 0.78, 0.70, 0.75],
             heights: [0.0, 0.04, -0.02, 0.03],
             bottom_elevation: -0.35,
@@ -344,6 +346,7 @@ fn wattle(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
 
 /// River bottlebrush (*Callistemon sieberi*): woody riparian shrub with crimson bottlebrush spikes.
 fn bottlebrush(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
+    let y = crate::talbingo_terrain::elevation(site, x, z);
     let mut limbs = Vec::new();
     let mut brushes = Vec::new();
     for b in 0..7 {
@@ -356,7 +359,7 @@ fn bottlebrush(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
             end_radius: 0.010,
         });
         brushes.push(EllipsoidInstance {
-            center: [x + tip[0], tip[1] + 0.10, z + tip[2]],
+            center: [x + tip[0], y + tip[1] + 0.10, z + tip[2]],
             radii: [0.065, 0.16, 0.065],
             pitch_deg: 24.0,
             yaw_deg: a.to_degrees(),
@@ -368,7 +371,7 @@ fn bottlebrush(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
         [0.40, 0.30, 0.20, 1.0],
         WEATHERED_TIMBER,
         ParametricRecipe::LimbCluster {
-            center: [x, 0.0, z],
+            center: [x, y, z],
             limbs,
             radial_segments: 8,
         },
@@ -378,7 +381,7 @@ fn bottlebrush(out: &mut Vec<AssetRecipe>, site: u8, i: usize, x: f32, z: f32) {
         [0.22, 0.36, 0.20, 0.95],
         LIVING_FOLIAGE,
         ParametricRecipe::BotanicalHull {
-            center: [x, 0.62, z],
+            center: [x, y + 0.62, z],
             radii: [0.65, 0.68, 0.62, 0.65],
             heights: [0.0, 0.03, -0.02, 0.02],
             bottom_elevation: -0.30,

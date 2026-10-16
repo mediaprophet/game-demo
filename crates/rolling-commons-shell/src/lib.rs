@@ -38,6 +38,7 @@ mod rig_workshop;
 mod semantic_slice;
 mod session_journal;
 mod talbingo_scenes;
+pub(crate) mod talbingo_terrain;
 mod talbingo_vegetation;
 mod taxon_bindings;
 mod terrain;

@@ -28,16 +28,10 @@ fn limbs(segments: &[([f32; 3], [f32; 3], f32, f32)]) -> Shape {
 }
 pub(crate) fn models(prefix: &str, origin: [f32; 3], wallaby: bool) -> Vec<AssetRecipe> {
     let scale = if wallaby { 0.79 } else { 1.0 };
-    let (coat, belly) = if prefix.starts_with("talbingo/") {
-        if wallaby {
-            ([0.98, 0.55, 0.20, 0.95], [1.0, 0.75, 0.35, 1.0])
-        } else {
-            ([1.0, 0.72, 0.18, 0.95], [1.0, 0.88, 0.40, 1.0])
-        }
-    } else if wallaby {
-        ([0.48, 0.37, 0.27, 1.0], [0.73, 0.62, 0.47, 1.0])
+    let (coat, belly) = if wallaby {
+        ([0.34, 0.28, 0.22, 1.0], [0.55, 0.42, 0.28, 1.0])
     } else {
-        ([0.53, 0.37, 0.25, 1.0], [0.78, 0.67, 0.52, 1.0])
+        ([0.42, 0.38, 0.33, 1.0], [0.68, 0.64, 0.58, 1.0])
     };
     let mut out = Vec::new();
     let mut add = |part: &str, color: [f32; 4], source: Shape| {

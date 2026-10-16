@@ -58,20 +58,16 @@ fn push_mesh(
 
 fn scene(site: u8) -> Vec<AssetRecipe> {
     let mut out = Vec::new();
-    // Natural subalpine grassy earth pedestal
-    push(
-        &mut out,
-        "talbingo-ground",
-        [0.24, 0.34, 0.18, 1.0],
-        vec![block([8.2, -0.16, 0.0], [31.0, 0.28, 17.0])],
-    );
+    // Continuous watertight topological terrain elevation with Hermite horizon skirt
+    out.push(crate::talbingo_terrain::build_terrain_asset(site));
 
-    // Continuous smooth highway roadway strip following the surveyed centerline
+    // Continuous smooth highway roadway strip draped over the surveyed terrain
     let mut road_pts = Vec::with_capacity(65);
     for i in 0..65 {
         let x = -5.8 + i as f32 * 0.44;
         let z = road_z(site, x);
-        road_pts.push([x, 0.02, z]);
+        let y = crate::talbingo_terrain::elevation(site, x, z) + 0.02;
+        road_pts.push([x, y, z]);
     }
     push_mesh(
         &mut out,
@@ -84,7 +80,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     );
     let mut verge_pts = Vec::with_capacity(65);
     for p in &road_pts {
-        verge_pts.push([p[0], 0.012, p[2]]);
+        verge_pts.push([p[0], p[1] - 0.008, p[2]]);
     }
     push_mesh(
         &mut out,
@@ -96,15 +92,16 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
         },
     );
 
-    // Highway guide posts and red/white delineators along outer curves
+    // Highway guide posts and red/white delineators draped along outer curves
     let mut road_posts = Vec::new();
     let mut road_reflectors = Vec::new();
     for i in (0..65).step_by(5) {
         let x = -5.8 + i as f32 * 0.44;
         let z = road_z(site, x);
+        let y = crate::talbingo_terrain::elevation(site, x, z);
         for side in [-0.95_f32, 0.95_f32] {
-            road_posts.push(block([x, 0.25, z + side], [0.05, 0.50, 0.05]));
-            road_reflectors.push(block([x, 0.44, z + side], [0.055, 0.08, 0.055]));
+            road_posts.push(block([x, y + 0.25, z + side], [0.05, 0.50, 0.05]));
+            road_reflectors.push(block([x, y + 0.44, z + side], [0.055, 0.08, 0.055]));
         }
     }
     push(
@@ -121,83 +118,88 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     );
 
     let event_z = road_z(site, 8.0);
+    let event_y = crate::talbingo_terrain::elevation(site, 8.0, event_z);
     push(
         &mut out,
         "talbingo-road-event-post",
         [0.48, 0.38, 0.28, 1.0],
-        vec![block([8.0, 0.55, event_z + 1.2], [0.08, 1.1, 0.08])],
+        vec![block([8.0, event_y + 0.55, event_z + 1.2], [0.08, 1.1, 0.08])],
     );
     push(
         &mut out,
         "talbingo-road-event-sign",
         [0.96, 0.78, 0.12, 1.0],
-        vec![block([8.0, 1.16, event_z + 1.2], [0.74, 0.62, 0.08])],
+        vec![block([8.0, event_y + 1.16, event_z + 1.2], [0.74, 0.62, 0.08])],
     );
 
-    // Roadside native wildlife encounter matching the site journey:
+    // Roadside native wildlife encounter draped on terrain:
     match site {
         0 => out.extend(crate::fauna::macropod(
             &format!("talbingo/{site}/roadside-kangaroo"),
-            [8.0, 0.0, event_z + 1.35],
+            [8.0, event_y, event_z + 1.35],
             false,
         )),
         1 => out.extend(crate::fauna::macropod(
             &format!("talbingo/{site}/roadside-wallaby"),
-            [8.0, 0.0, event_z + 1.35],
+            [8.0, event_y, event_z + 1.35],
             true,
         )),
         2 => out.extend(crate::fauna::wombat(
             &format!("talbingo/{site}/roadside-wombat"),
-            [8.0, 0.0, event_z + 1.25],
+            [8.0, event_y, event_z + 1.25],
         )),
         3 => out.extend(crate::fauna::macropod(
             &format!("talbingo/{site}/roadside-wallaby"),
-            [8.0, 0.0, event_z + 1.35],
+            [8.0, event_y, event_z + 1.35],
             true,
         )),
         4 => out.extend(crate::fauna::macropod(
             &format!("talbingo/{site}/roadside-wallaby"),
-            [8.0, 0.0, event_z + 1.35],
+            [8.0, event_y, event_z + 1.35],
             true,
         )),
         _ => out.extend(crate::fauna::horse(
             &format!("talbingo/{site}/roadside-brumby"),
-            [8.0, 0.0, event_z + 1.45],
+            [8.0, event_y, event_z + 1.45],
         )),
     }
 
     // A destination gate and camp spur make the arrival leg readable.
     let camp_shift = road_z(site, 18.7) - road_z(0, 18.7);
+    let spur_y1 = crate::talbingo_terrain::elevation(site, 18.7, 2.0 + camp_shift);
+    let spur_y2 = crate::talbingo_terrain::elevation(site, 19.8, 3.8 + camp_shift);
     push(
         &mut out,
         "talbingo-camp-spur",
         [0.40, 0.34, 0.26, 1.0],
         vec![
-            block([18.7, 0.015, 2.0 + camp_shift], [2.9, 0.04, 3.3]),
-            block([19.8, 0.02, 3.8 + camp_shift], [5.3, 0.05, 2.3]),
+            block([18.7, spur_y1 + 0.015, 2.0 + camp_shift], [2.9, 0.04, 3.3]),
+            block([19.8, spur_y2 + 0.02, 3.8 + camp_shift], [5.3, 0.05, 2.3]),
         ],
     );
+    let gate_y = crate::talbingo_terrain::elevation(site, 16.9, 3.25 + camp_shift);
     push(
         &mut out,
         "talbingo-arrival-gate",
         [0.46, 0.36, 0.26, 1.0],
         vec![
-            block([16.9, 0.8, 2.0 + camp_shift], [0.12, 1.6, 0.12]),
-            block([16.9, 0.8, 4.5 + camp_shift], [0.12, 1.6, 0.12]),
-            block([16.9, 1.56, 3.25 + camp_shift], [0.16, 0.14, 2.6]),
+            block([16.9, gate_y + 0.8, 2.0 + camp_shift], [0.12, 1.6, 0.12]),
+            block([16.9, gate_y + 0.8, 4.5 + camp_shift], [0.12, 1.6, 0.12]),
+            block([16.9, gate_y + 1.56, 3.25 + camp_shift], [0.16, 0.14, 2.6]),
         ],
     );
 
     // Fully rigged Australian touring vehicle with parametric coachwork, glazing, and wheels
     out.extend(crate::vehicles::rig_assets(0));
 
-    // Smooth parametric camper/explorer avatar
+    // Smooth parametric camper/explorer avatar draped on terrain
+    let walk_y = crate::talbingo_terrain::elevation(site, 18.0, 3.5);
     push_mesh(
         &mut out,
         "rc:asset/talbingo/walker-head",
         [0.85, 0.72, 0.55, 1.0],
         crate::asset_catalog::ParametricRecipe::Sphere {
-            center: [18.0, 1.32, 3.5],
+            center: [18.0, walk_y + 1.32, 3.5],
             radius: 0.13,
             latitude: 12,
             longitude: 16,
@@ -208,7 +210,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
         "rc:asset/talbingo/walker-coat",
         [0.18, 0.34, 0.22, 1.0],
         crate::asset_catalog::ParametricRecipe::Cylinder {
-            center: [18.0, 0.82, 3.5],
+            center: [18.0, walk_y + 0.82, 3.5],
             radius: 0.18,
             height: 0.62,
             segments: 14,
@@ -219,7 +221,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
         "rc:asset/talbingo/walker-legs",
         [0.44, 0.40, 0.34, 1.0],
         crate::asset_catalog::ParametricRecipe::Cylinder {
-            center: [18.0, 0.26, 3.5],
+            center: [18.0, walk_y + 0.26, 3.5],
             radius: 0.14,
             height: 0.52,
             segments: 12,
@@ -234,18 +236,19 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     let mut tent_poles = Vec::new();
     for (x, z) in [(18.0, 6.25), (21.2, 6.2), (23.3, 3.6)] {
         let z = z + camp_shift;
-        tent_floors.push(block([x, 0.085, z], [2.15, 0.13, 1.8]));
+        let ty = crate::talbingo_terrain::elevation(site, x, z);
+        tent_floors.push(block([x, ty + 0.085, z], [2.15, 0.13, 1.8]));
         tent_roofs.push(Primitive::Roof {
-            center: [x, 0.13, z],
+            center: [x, ty + 0.13, z],
             size: [2.05, 1.28, 1.72],
         });
         tent_doors.push(Primitive::Roof {
-            center: [x - 1.032, 0.14, z],
+            center: [x - 1.032, ty + 0.14, z],
             size: [0.025, 0.98, 1.1],
         });
         for side in [-1.0, 1.0] {
-            tent_poles.push(block([x + side * 1.08, 0.60, z], [0.025, 1.16, 0.025]));
-            tent_poles.push(block([x + side * 1.36, 0.035, z], [0.11, 0.07, 0.11]));
+            tent_poles.push(block([x + side * 1.08, ty + 0.60, z], [0.025, 1.16, 0.025]));
+            tent_poles.push(block([x + side * 1.36, ty + 0.035, z], [0.11, 0.07, 0.11]));
         }
     }
     push(
@@ -276,36 +279,41 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
     match site {
         // The Pines: broad reservoir shore, picnic lawn, long sight line and grazing kangaroos.
         0 => {
+            let t1_y = crate::talbingo_terrain::elevation(0, 20.0, -2.4);
+            let t2_y = crate::talbingo_terrain::elevation(0, 22.5, -2.8);
+            let k_y = crate::talbingo_terrain::elevation(0, 19.2, -1.8);
             push(
                 &mut out,
                 "pines-reservoir",
-                [0.14, 0.38, 0.52, 0.92],
-                vec![block([7.0, -0.015, -6.4], [26.0, 0.025, 3.7])],
+                [0.10, 0.32, 0.44, 0.95],
+                vec![block([7.0, -0.15, -6.4], [26.0, 0.08, 4.2])],
             );
             push(
                 &mut out,
                 "pines-picnic-tables",
                 [0.46, 0.35, 0.24, 1.0],
                 vec![
-                    block([20.0, 0.46, -2.4], [1.5, 0.1, 0.8]),
-                    block([22.5, 0.46, -2.8], [1.5, 0.1, 0.8]),
+                    block([20.0, t1_y + 0.46, -2.4], [1.5, 0.1, 0.8]),
+                    block([22.5, t2_y + 0.46, -2.8], [1.5, 0.1, 0.8]),
                 ],
             );
             out.extend(crate::fauna::macropod(
                 &format!("talbingo/{site}/camp-kangaroo"),
-                [19.2, 0.0, -1.8],
+                [19.2, k_y, -1.8],
                 false,
             ));
         }
         // Humes Crossing: narrow inlet, timber crossing and swamp wallaby habitat.
         1 => {
+            let c_deck_y = crate::talbingo_terrain::elevation(1, 14.7, -3.9);
+            let w_y = crate::talbingo_terrain::elevation(1, 13.2, -2.6);
             push(
                 &mut out,
                 "humes-inlet",
-                [0.15, 0.37, 0.50, 0.92],
+                [0.10, 0.30, 0.42, 0.95],
                 vec![
-                    block([10.8, -0.01, -5.9], [8.0, 0.03, 3.3]),
-                    block([14.7, -0.01, -4.0], [2.4, 0.03, 7.2]),
+                    block([10.8, -0.15, -5.9], [8.0, 0.08, 3.3]),
+                    block([14.7, -0.15, -4.0], [2.4, 0.08, 7.2]),
                 ],
             );
             push(
@@ -313,25 +321,29 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
                 "humes-crossing-deck",
                 [0.48, 0.38, 0.26, 1.0],
                 vec![
-                    block([14.7, 0.15, -3.9], [3.5, 0.13, 1.15]),
-                    block([14.7, 0.42, -4.55], [3.5, 0.1, 0.12]),
+                    block([14.7, c_deck_y + 0.15, -3.9], [3.5, 0.13, 1.15]),
+                    block([14.7, c_deck_y + 0.42, -4.55], [3.5, 0.1, 0.12]),
                 ],
             );
             out.extend(crate::fauna::macropod(
                 &format!("talbingo/{site}/camp-wallaby"),
-                [13.2, 0.0, -2.6],
+                [13.2, w_y, -2.6],
                 true,
             ));
         }
         // Jounama Creek: creek crossing, boulders, montane bottlebrush and resident bare-nosed wombats.
         2 => {
+            let b1_y = crate::talbingo_terrain::elevation(2, 18.1, -3.1);
+            let b2_y = crate::talbingo_terrain::elevation(2, 20.1, -3.8);
+            let b3_y = crate::talbingo_terrain::elevation(2, 23.4, -2.0);
+            let w_y = crate::talbingo_terrain::elevation(2, 21.5, -2.4);
             push(
                 &mut out,
                 "jounama-creek",
-                [0.16, 0.42, 0.55, 0.88],
+                [0.12, 0.35, 0.45, 0.92],
                 vec![
-                    block([15.5, -0.01, -5.6], [13.0, 0.025, 1.5]),
-                    block([22.0, -0.01, -3.8], [2.0, 0.025, 5.0]),
+                    block([15.5, -0.22, -5.6], [13.0, 0.12, 2.5]),
+                    block([22.0, -0.22, -3.8], [2.0, 0.12, 5.0]),
                 ],
             );
             push_mesh(
@@ -339,7 +351,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
                 "jounama-boulder-1",
                 [0.52, 0.50, 0.48, 1.0],
                 crate::asset_catalog::ParametricRecipe::Ellipsoid {
-                    center: [18.1, 0.35, -3.1],
+                    center: [18.1, b1_y + 0.35, -3.1],
                     radii: [0.55, 0.35, 0.50],
                     latitude: 10,
                     longitude: 14,
@@ -350,7 +362,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
                 "jounama-boulder-2",
                 [0.50, 0.48, 0.46, 1.0],
                 crate::asset_catalog::ParametricRecipe::Ellipsoid {
-                    center: [20.1, 0.24, -3.8],
+                    center: [20.1, b2_y + 0.24, -3.8],
                     radii: [0.40, 0.24, 0.45],
                     latitude: 10,
                     longitude: 14,
@@ -361,7 +373,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
                 "jounama-boulder-3",
                 [0.54, 0.52, 0.50, 1.0],
                 crate::asset_catalog::ParametricRecipe::Ellipsoid {
-                    center: [23.4, 0.31, -2.0],
+                    center: [23.4, b3_y + 0.31, -2.0],
                     radii: [0.45, 0.31, 0.50],
                     latitude: 10,
                     longitude: 14,
@@ -369,38 +381,41 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             );
             out.extend(crate::fauna::wombat(
                 &format!("talbingo/{site}/camp-wombat"),
-                [21.5, 0.0, -2.4],
+                [21.5, w_y, -2.4],
             ));
         }
         // Yarrangobilly Village: riverbank, historic hut, river bottlebrush, kookaburras and deer.
         3 => {
+            let hut_y = crate::talbingo_terrain::elevation(3, 20.3, -2.7);
+            let deer_y = crate::talbingo_terrain::elevation(3, 15.0, -4.5);
             push(
                 &mut out,
                 "yarrangobilly-river",
-                [0.15, 0.39, 0.50, 0.92],
-                vec![block([10.5, -0.01, -6.4], [25.0, 0.025, 2.7])],
+                [0.10, 0.32, 0.44, 0.95],
+                vec![block([10.5, -0.15, -6.4], [25.0, 0.08, 3.2])],
             );
             push(
                 &mut out,
                 "yarrangobilly-hut",
                 [0.44, 0.34, 0.24, 1.0],
                 vec![
-                    block([20.3, 0.85, -2.7], [2.5, 1.7, 2.0]),
-                    block([20.3, 1.83, -2.7], [2.9, 0.3, 2.4]),
+                    block([20.3, hut_y + 0.85, -2.7], [2.5, 1.7, 2.0]),
+                    block([20.3, hut_y + 1.83, -2.7], [2.9, 0.3, 2.4]),
                 ],
             );
             out.extend(crate::fauna::bird(
                 &format!("talbingo/{site}/camp-kookaburra"),
-                [20.3, 1.95, -1.6],
+                [20.3, hut_y + 1.95, -1.6],
                 true,
             ));
             out.extend(crate::fauna::deer(
                 &format!("talbingo/{site}/camp-deer"),
-                [15.0, 0.0, -4.5],
+                [15.0, deer_y, -4.5],
             ));
         }
         // O'Hares: steep alpine ash slopes, reservoir lookout and basking lace monitors.
         4 => {
+            let ridge_y = crate::talbingo_terrain::elevation(4, 21.5, -5.1);
             push(
                 &mut out,
                 "ohares-ridge",
@@ -413,27 +428,30 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             push(
                 &mut out,
                 "ohares-reservoir",
-                [0.14, 0.36, 0.50, 0.92],
-                vec![block([9.0, -0.01, 7.0], [25.0, 0.025, 2.4])],
+                [0.10, 0.32, 0.44, 0.95],
+                vec![block([9.0, -0.15, 7.0], [25.0, 0.08, 2.8])],
             );
             push(
                 &mut out,
                 "ohares-lookout",
                 [0.46, 0.36, 0.26, 1.0],
-                vec![block([21.5, 1.72, -5.1], [2.9, 0.1, 1.7])],
+                vec![block([21.5, ridge_y + 0.35, -5.1], [2.9, 0.1, 1.7])],
             );
             out.extend(crate::fauna::goanna(
                 &format!("talbingo/{site}/camp-goanna"),
-                [21.8, 1.74, -4.8],
+                [21.8, ridge_y + 0.42, -4.8],
             ));
         }
         // Three Mile Dam: open alpine grass, shallow dam, gnarled snow gums, sphagnum marsh and Kiandra brumbies.
         _ => {
+            let b1_y = crate::talbingo_terrain::elevation(5, 19.0, -2.6);
+            let b2_y = crate::talbingo_terrain::elevation(5, 23.0, -3.7);
+            let brumby_y = crate::talbingo_terrain::elevation(5, 20.5, -1.8);
             push(
                 &mut out,
                 "three-mile-dam",
-                [0.15, 0.36, 0.48, 0.90],
-                vec![block([7.5, -0.01, -6.5], [18.0, 0.025, 2.9])],
+                [0.10, 0.32, 0.44, 0.95],
+                vec![block([7.5, -0.15, -6.5], [18.0, 0.08, 3.4])],
             );
             push(
                 &mut out,
@@ -449,7 +467,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
                 "three-mile-boulder-1",
                 [0.54, 0.52, 0.50, 1.0],
                 crate::asset_catalog::ParametricRecipe::Ellipsoid {
-                    center: [19.0, 0.31, -2.6],
+                    center: [19.0, b1_y + 0.31, -2.6],
                     radii: [0.50, 0.31, 0.40],
                     latitude: 10,
                     longitude: 14,
@@ -460,7 +478,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
                 "three-mile-boulder-2",
                 [0.52, 0.50, 0.48, 1.0],
                 crate::asset_catalog::ParametricRecipe::Ellipsoid {
-                    center: [23.0, 0.38, -3.7],
+                    center: [23.0, b2_y + 0.38, -3.7],
                     radii: [0.55, 0.38, 0.45],
                     latitude: 10,
                     longitude: 14,
@@ -468,7 +486,7 @@ fn scene(site: u8) -> Vec<AssetRecipe> {
             );
             out.extend(crate::fauna::horse(
                 &format!("talbingo/{site}/camp-brumby"),
-                [20.5, 0.0, -1.8],
+                [20.5, brumby_y, -1.8],
             ));
         }
     }
