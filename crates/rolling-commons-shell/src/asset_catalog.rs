@@ -232,6 +232,11 @@ pub enum ParametricRecipe {
         closed_section: bool,
         cap_ends: bool,
     },
+    /// A continuous extruded ribbon following an arbitrary polyline in 3D space.
+    PolylineRibbon {
+        points: Vec<[f32; 3]>,
+        width: f32,
+    },
 }
 
 /// One deterministic, oriented leaf or petal in a merged foliage mesh.
@@ -1363,6 +1368,51 @@ impl ParametricRecipe {
                     Mesh {
                         positions,
                         triangles: out_t[..nt].to_vec(),
+                        min,
+                        max,
+                    },
+                )
+            }
+            Self::PolylineRibbon { points, width } => {
+                if points.len() < 2 {
+                    return Err("polyline ribbon requires at least 2 points".into());
+                }
+                let half_w = *width * 0.5;
+                let n = points.len();
+                let mut positions = Vec::with_capacity(n * 2);
+                let mut triangles = Vec::with_capacity((n - 1) * 2);
+
+                for i in 0..n {
+                    let (dx, dz) = if i == 0 {
+                        (points[1][0] - points[0][0], points[1][2] - points[0][2])
+                    } else if i == n - 1 {
+                        (points[n - 1][0] - points[n - 2][0], points[n - 1][2] - points[n - 2][2])
+                    } else {
+                        (points[i + 1][0] - points[i - 1][0], points[i + 1][2] - points[i - 1][2])
+                    };
+                    let len = (dx * dx + dz * dz).sqrt().max(1e-6);
+                    let nx = -dz / len;
+                    let nz = dx / len;
+                    let p = points[i];
+                    positions.push([p[0] - nx * half_w, p[1], p[2] - nz * half_w]);
+                    positions.push([p[0] + nx * half_w, p[1], p[2] + nz * half_w]);
+                }
+
+                for i in 0..n - 1 {
+                    let a = (i * 2) as u32;
+                    let b = a + 1;
+                    let c = a + 2;
+                    let d = a + 3;
+                    triangles.push([a, c, b]);
+                    triangles.push([b, c, d]);
+                }
+
+                let (min, max) = mesh_bounds(&positions);
+                (
+                    [0.0, 0.0, 0.0],
+                    Mesh {
+                        positions,
+                        triangles,
                         min,
                         max,
                     },

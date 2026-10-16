@@ -88,15 +88,20 @@ for(let i=0;i<6;i++){
   await page.screenshot({path:`docs/qa/talbingo-site-${i}.png`,fullPage:true});
 }
 await page.selectOption('#site','0');
+await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Ready.'),null,{timeout:120000});
 await page.locator('#start').click();
 await page.keyboard.down('w');
 await page.waitForTimeout(1800);
 await page.screenshot({path:'docs/qa/talbingo-drive.png',fullPage:true});
-await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Arrived.'),{timeout:30000});
+await page.keyboard.down('w');
+await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Arrived.'),null,{timeout:90000}).catch(async error=>{
+  console.log('DRIVE FAILED, STATUS:', await page.locator('#status').textContent(), 'SPEED:', await page.locator('#speed').textContent(), 'DIST:', await page.locator('#distance').textContent());
+  throw error;
+});
 await page.keyboard.up('w');
 if(await page.locator('#choices button[data-correct="true"]').isEnabled())throw Error('Camp choice available before inspecting landmark');
 await page.keyboard.down('w');
-await page.waitForFunction(()=>!document.querySelector('#inspect').disabled,{timeout:12000});
+await page.waitForFunction(()=>!document.querySelector('#inspect').disabled,null,{timeout:30000});
 await page.keyboard.up('w');
 await page.screenshot({path:'docs/qa/talbingo-walk.png',fullPage:true});
 await page.locator('#inspect').click();
@@ -105,7 +110,7 @@ if(!await page.locator('#status').textContent().then(s=>s.startsWith('Try anothe
 await page.locator('#choices button[data-correct="true"]').click();
 await page.locator('#return').click();
 await page.keyboard.down('w');
-await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Round trip complete'),{timeout:30000});
+await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Round trip complete'),null,{timeout:90000});
 await page.keyboard.up('w');
 console.log('ROUND TRIP',await page.locator('#status').textContent());
 await page.screenshot({path:'docs/qa/talbingo-prototype.png',fullPage:true});

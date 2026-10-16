@@ -39,7 +39,7 @@
   ],
   "wasm": {
     "file": "web/pkg/rolling_commons_shell_bg.wasm",
-    "sha256": "398c034e3532e4db7238ace5d3fbe604ebdedfb298c3f0f7b655f3ddc5cc57a1"
+    "sha256": "a18a693b2627e23128afe67a88c0a1b1dd87b4a560e90f3aad25c24fd14b4ee6"
   },
   "taxonConvention": {
     "canonicalId": "gbifKey",
