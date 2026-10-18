@@ -26,6 +26,7 @@ mod entity_sections;
 mod fauna;
 mod fauna_animation;
 mod flora;
+mod input_bridge;
 mod macropod_models;
 mod material_library;
 mod mature_gums;
@@ -55,6 +56,7 @@ mod workshop_structure;
 
 pub use campaign_simulation::CampaignSimulation;
 pub use character_simulation::CharacterSimulation;
+pub use input_bridge::GameInputBridge;
 pub use session_journal::GameSessionJournal;
 pub use variant_resolver::EntityFamilyManifestWrapper;
 
@@ -1607,7 +1609,7 @@ fn load_scene_assets(
 fn split_scene_assets(
     source: &js_sys::Array,
 ) -> Result<(js_sys::Array, Vec<[f32; 3]>, Vec<u32>, usize, [f32; 4]), JsValue> {
-    let mut opaque = js_sys::Array::new();
+    let opaque = js_sys::Array::new();
     let mut water_positions = Vec::new();
     let mut water_indices = Vec::new();
     let mut water_surfaces = 0usize;

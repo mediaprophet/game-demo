@@ -6,6 +6,8 @@ members = ["crates/rolling-commons-shell", "crates/pack-export"]
 # Full local QualiaDB engine. The verified checkout revision is recorded in
 # docs/planning/15-living-qualiadb-capability-ledger.md and docs/adr/0001.
 qualia-core-db = { path = "../qualiaDB/crates/qualia-core-db", default-features = false }
+qualia-geospatial = { path = "../qualiaDB/crates/qualia-geospatial" }
+qualia-sim = { path = "../qualiaDB/crates/qualia-sim" }
 
 # Versions must match the qualiaDB workspace pins (wasm-bindgen is ABI-exact).
 wasm-bindgen = "=0.2.125"

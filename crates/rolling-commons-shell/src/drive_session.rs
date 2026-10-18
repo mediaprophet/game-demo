@@ -344,8 +344,8 @@ impl GameSession {
             return Ok(0);
         }
         let state = &checkpoint.state;
-        let x = number(state, "x", -1e9, 1e9)?;
-        let z = number(state, "z", -1e9, 1e9)?;
+        let _x = number(state, "x", -1e9, 1e9)?;
+        let _z = number(state, "z", -1e9, 1e9)?;
         let heading = number(state, "heading", -1e12, 1e12)?.rem_euclid(std::f64::consts::TAU);
         let wheel = number(state, "wheel_angle", -1e15, 1e15)?;
         let trailer_wheel = number(state, "trailer_wheel_angle", -1e15, 1e15)?;
@@ -366,7 +366,7 @@ impl GameSession {
             [0.0; 3],
         );
         let orientation = yaw.mul(&slope).mul(&bank);
-        let y = number(state, "body_height", -1e8, 1e8)?;
+        let _y = number(state, "body_height", -1e8, 1e8)?;
         let root = crate::vehicle_camera::body_pose(state)?
             .mul(&Motor::from_translation(-2.35, 0.0, -4.65));
         let group = crate::vehicle_animation::root_id(rig);

@@ -2868,8 +2868,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "qualia-geospatial"
+version = "0.0.40"
+dependencies = [
+ "bytemuck",
+ "qualia-core-db",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "qualia-inference-kernel"
 version = "0.0.40"
+
+[[package]]
+name = "qualia-sim"
+version = "0.0.40"
+dependencies = [
+ "bytemuck",
+ "qualia-core-db",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "quick-xml"
@@ -3158,6 +3178,8 @@ version = "0.0.1"
 dependencies = [
  "js-sys",
  "qualia-core-db",
+ "qualia-geospatial",
+ "qualia-sim",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

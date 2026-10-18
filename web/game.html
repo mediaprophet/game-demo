@@ -174,17 +174,49 @@
       portal.set_shadows_enabled(tier >= 2);
       portal.set_screen_space_ao_enabled(true);
 
+      let inputBridge = null;
+      if (m.GameInputBridge) {
+        try { inputBridge = new m.GameInputBridge(); } catch(e) {}
+      }
+
       await loadScene(currentSite);
 
       // Key and Touch Listeners
-      window.addEventListener('keydown', e => keys.add(e.code));
-      window.addEventListener('keyup', e => keys.delete(e.code));
+      window.addEventListener('keydown', e => {
+        keys.add(e.code);
+        if (inputBridge) inputBridge.key_down(e.keyCode || 0);
+      });
+      window.addEventListener('keyup', e => {
+        keys.delete(e.code);
+        if (inputBridge) inputBridge.key_up(e.keyCode || 0);
+      });
 
       document.querySelectorAll('[data-key]').forEach(el => {
         const k = el.dataset.key;
-        el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); keys.add(k); });
+        el.addEventListener('pointerdown', e => {
+          el.setPointerCapture(e.pointerId);
+          keys.add(k);
+          if (inputBridge) {
+            if (k === 'KeyW') inputBridge.key_down(87);
+            if (k === 'KeyS') inputBridge.key_down(83);
+            if (k === 'KeyA') inputBridge.key_down(65);
+            if (k === 'KeyD') inputBridge.key_down(68);
+            if (k === 'Space') inputBridge.key_down(32);
+            if (k === 'KeyE') inputBridge.key_down(69);
+          }
+        });
         for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-          el.addEventListener(ev, () => keys.delete(k));
+          el.addEventListener(ev, () => {
+            keys.delete(k);
+            if (inputBridge) {
+              if (k === 'KeyW') inputBridge.key_up(87);
+              if (k === 'KeyS') inputBridge.key_up(83);
+              if (k === 'KeyA') inputBridge.key_up(65);
+              if (k === 'KeyD') inputBridge.key_up(68);
+              if (k === 'Space') inputBridge.key_up(32);
+              if (k === 'KeyE') inputBridge.key_up(69);
+            }
+          });
         }
       });
 
@@ -218,6 +250,7 @@
 
       try {
         portal.tick(canvas, Math.min(50, dt * 1000));
+        if (inputBridge) inputBridge.step_frame();
       } catch (e) {
         console.error('Portal tick error:', e);
       }

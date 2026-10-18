@@ -13,6 +13,8 @@ crate-type = ["cdylib", "rlib"]
 # geometry, graph/logic, storage, and optional inference capabilities.
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 qualia-core-db = { workspace = true, features = ["wasm-full"] }
+qualia-geospatial = { workspace = true }
+qualia-sim = { workspace = true }
 vibe-wasm = { path = "../../../qualiaDB/crates/vibe-wasm" }
 vibe = { path = "../../../qualiaDB/crates/vibe" }
 wasm-bindgen = { workspace = true }

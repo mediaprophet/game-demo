@@ -162,6 +162,7 @@ export class CompiledCell {
         wasm.__wbg_compiledcell_free(ptr, 0);
     }
     /**
+     * `code` size.
      * @returns {number}
      */
     get code_size() {
@@ -183,6 +184,7 @@ export class CompiledCell {
         return CompiledCell.__wrap(ret[0]);
     }
     /**
+     * Constants.
      * @returns {number}
      */
     get constants() {
@@ -221,6 +223,7 @@ export class CompiledCell {
         return CompiledCell.__wrap(ret[0]);
     }
     /**
+     * Functions.
      * @returns {number}
      */
     get functions() {
@@ -236,6 +239,7 @@ export class CompiledCell {
         return ret;
     }
     /**
+     * Top-level locals.
      * @returns {number}
      */
     get top_locals() {
@@ -453,6 +457,9 @@ export class FederatedNodeManager {
         const ret = wasm.federatednodemanager_discover_capabilities(this.__wbg_ptr);
         return ret !== 0;
     }
+    /**
+     * Creates the node manager.
+     */
     constructor() {
         const ret = wasm.federatednodemanager_new();
         this.__wbg_ptr = ret;
@@ -1583,6 +1590,7 @@ export class QualiaHud {
         }
     }
     /**
+     * Focused HUD action.
      * @returns {string}
      */
     focused_action() {
@@ -1616,6 +1624,7 @@ export class QualiaHud {
         }
     }
     /**
+     * Creates `QualiaHud` with the given state.
      * @param {HTMLCanvasElement} canvas
      */
     constructor(canvas) {
@@ -1634,6 +1643,7 @@ export class QualiaHud {
         wasm.qualiahud_paint(this.__wbg_ptr);
     }
     /**
+     * Sets `camera_near_plane`.
      * @param {number} near
      */
     set_camera_near_plane(near) {
@@ -1684,6 +1694,8 @@ export class QualiaPortal {
         wasm.__wbg_qualiaportal_free(ptr, 0);
     }
     /**
+     * Whether the U3 AcousticPlane is effectively on — user flag AND
+     * the operational-mode gate (off in Reserve).
      * @returns {boolean}
      */
     acoustic_enabled() {
@@ -1737,6 +1749,7 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Ambient light intensity.
      * @returns {number}
      */
     ambient_intensity() {
@@ -1759,6 +1772,7 @@ export class QualiaPortal {
         wasm.qualiaportal_animate_artefact(this.__wbg_ptr, ptr0, len0, ax, ay, az, rate);
     }
     /**
+     * Serializes current animation state to JSON.
      * @returns {string}
      */
     animation_snapshot_json() {
@@ -1835,6 +1849,7 @@ export class QualiaPortal {
         return ret !== 0;
     }
     /**
+     * Camera orbit pitch (radians).
      * @returns {number}
      */
     camera_pitch() {
@@ -1842,6 +1857,7 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * X of the camera look-at target.
      * @returns {number}
      */
     camera_target_x() {
@@ -1849,6 +1865,7 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * Y of the camera look-at target.
      * @returns {number}
      */
     camera_target_y() {
@@ -1856,6 +1873,7 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * Z of the camera look-at target.
      * @returns {number}
      */
     camera_target_z() {
@@ -1863,6 +1881,7 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * Camera orbit yaw (radians).
      * @returns {number}
      */
     camera_yaw() {
@@ -1870,6 +1889,7 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * Camera zoom (eye distance in world units).
      * @returns {number}
      */
     camera_zoom() {
@@ -1877,6 +1897,7 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * Clears scene activities idle since `idle`.
      * @param {bigint} idle
      */
     clear_scene_activities(idle) {
@@ -2003,6 +2024,8 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Spatially encode a JSON scene, upload the resulting tensor
+     * buffer, and return the parsed scene record.
      * @param {string} json
      * @returns {any}
      */
@@ -2016,6 +2039,7 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Standpoint epistemic-quality scalar ∈ [0, 1].
      * @returns {number}
      */
     epistemic_q() {
@@ -2080,10 +2104,15 @@ export class QualiaPortal {
         const ret = wasm.qualiaportal_hdr_scene_available(this.__wbg_ptr);
         return ret !== 0;
     }
+    /**
+     * Drop accumulated temporal history (e.g. after a camera cut or
+     * scene swap) so the next frame isn't ghosted.
+     */
     invalidate_temporal_history() {
         wasm.qualiaportal_invalidate_temporal_history(this.__wbg_ptr);
     }
     /**
+     * The most recently parsed scene payload, if any.
      * @returns {any | undefined}
      */
     last_parsed() {
@@ -2245,6 +2274,8 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Parse a JSON scene payload, stash it as `last_parsed`, and
+     * return the parsed record.
      * @param {string} json
      * @returns {any}
      */
@@ -2258,6 +2289,8 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Parse a `.q42` (CBOR-LD) payload, stash it as `last_parsed`,
+     * and return the parsed record.
      * @param {Uint8Array} bytes
      * @returns {any}
      */
@@ -2324,6 +2357,9 @@ export class QualiaPortal {
         return ret >>> 0;
     }
     /**
+     * Mount a minimal qapp document into the DOM element `root_id`:
+     * clears it, emits a header with the description line, and appends
+     * the parsed scene (or a "load a scene first" hint).
      * @param {string} root_id
      */
     mount_qapp(root_id) {
@@ -2345,6 +2381,9 @@ export class QualiaPortal {
         }
     }
     /**
+     * Construct the portal on `canvas`: detect the device tier, mint a
+     * session nonce + spectator standpoint, sample ambient telemetry,
+     * and paint the first frame.
      * @param {HTMLCanvasElement} canvas
      */
     constructor(canvas) {
@@ -2372,6 +2411,8 @@ export class QualiaPortal {
         return ret[0];
     }
     /**
+     * VRAM-ledger operational mode as its `u8` code
+     * (0 = Full, 1 = Eco, 2 = Reserve).
      * @returns {number}
      */
     operational_mode() {
@@ -2476,6 +2517,8 @@ export class QualiaPortal {
         return ret !== 0;
     }
     /**
+     * Push a raw `u64` sonic token onto the acoustic ring; `false`
+     * when the ring is full.
      * @param {bigint} raw
      * @returns {boolean}
      */
@@ -2484,6 +2527,8 @@ export class QualiaPortal {
         return ret !== 0;
     }
     /**
+     * Resize the canvas backing store (and the GPU surface when
+     * active), then repaint.
      * @param {HTMLCanvasElement} canvas
      * @param {number} width
      * @param {number} height
@@ -2495,6 +2540,7 @@ export class QualiaPortal {
         }
     }
     /**
+     * Restores animation state from `json`.
      * @param {string} json
      */
     restore_animation_snapshot_json(json) {
@@ -2506,6 +2552,7 @@ export class QualiaPortal {
         }
     }
     /**
+     * Sample browser ambient telemetry (perf/memory probes) as JS.
      * @returns {any}
      */
     sample_telemetry() {
@@ -2516,6 +2563,7 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Returns an attestation receipt of current animation state.
      * @returns {any}
      */
     scene_animation_receipt() {
@@ -2537,6 +2585,7 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Whether the backend supports the SSAO pass at all.
      * @returns {boolean}
      */
     screen_space_ao_available() {
@@ -2544,6 +2593,8 @@ export class QualiaPortal {
         return ret !== 0;
     }
     /**
+     * Whether SSAO is currently enabled on the GPU backend
+     * (`false` without an active GPU).
      * @returns {boolean}
      */
     screen_space_ao_enabled() {
@@ -2551,6 +2602,7 @@ export class QualiaPortal {
         return ret !== 0;
     }
     /**
+     * SSAO target height (0 without an active GPU pass).
      * @returns {number}
      */
     screen_space_ao_height() {
@@ -2558,6 +2610,7 @@ export class QualiaPortal {
         return ret >>> 0;
     }
     /**
+     * SSAO target width (0 without an active GPU pass).
      * @returns {number}
      */
     screen_space_ao_width() {
@@ -2565,6 +2618,7 @@ export class QualiaPortal {
         return ret >>> 0;
     }
     /**
+     * Seeks scene animation to `time`.
      * @param {number} time
      */
     seek_scene_animation(time) {
@@ -2601,6 +2655,7 @@ export class QualiaPortal {
         return ret[0] >>> 0;
     }
     /**
+     * Selected tensor-node index, or `-1` while none/pick pending.
      * @returns {number}
      */
     selected_node_index() {
@@ -2641,12 +2696,15 @@ export class QualiaPortal {
         wasm.qualiaportal_set_ambient_enabled(this.__wbg_ptr, on);
     }
     /**
+     * Sets reduced-motion accessibility flag.
      * @param {boolean} reduced
      */
     set_animation_reduced_motion(reduced) {
         wasm.qualiaportal_set_animation_reduced_motion(this.__wbg_ptr, reduced);
     }
     /**
+     * Toggle auto temporal smoothing; a change invalidates the
+     * temporal history so the first frame isn't blended from stale data.
      * @param {boolean} enabled
      */
     set_auto_temporal_enabled(enabled) {
@@ -2722,6 +2780,8 @@ export class QualiaPortal {
         wasm.qualiaportal_set_clear_color(this.__wbg_ptr, r, g, b, a);
     }
     /**
+     * Set the display mode by name (`DisplayMode::from_str`;
+     * unrecognised names fall back to its default).
      * @param {string} mode
      */
     set_display_mode(mode) {
@@ -2733,6 +2793,8 @@ export class QualiaPortal {
         }
     }
     /**
+     * Upload packed IBL probe coefficients plus a fallback radiance
+     * colour; `false`/error when the GPU backend can't take them.
      * @param {Float32Array} packed_probes
      * @param {Float32Array} fallback_radiance
      * @returns {boolean}
@@ -2811,6 +2873,8 @@ export class QualiaPortal {
         wasm.qualiaportal_set_preserve_authored_frame(this.__wbg_ptr, on);
     }
     /**
+     * Tune SSAO kernel parameters (world-space radius, strength,
+     * depth bias); forwarded to the GPU when active.
      * @param {number} radius
      * @param {number} strength
      * @param {number} bias
@@ -2826,18 +2890,22 @@ export class QualiaPortal {
         wasm.qualiaportal_set_screen_space_ao_enabled(this.__wbg_ptr, enabled);
     }
     /**
+     * Set the SSAO per-pixel sample count.
      * @param {number} samples
      */
     set_screen_space_ao_sample_count(samples) {
         wasm.qualiaportal_set_screen_space_ao_sample_count(this.__wbg_ptr, samples);
     }
     /**
+     * Toggle the shadow pass on the GPU renderer when present.
      * @param {boolean} enabled
      */
     set_shadows_enabled(enabled) {
         wasm.qualiaportal_set_shadows_enabled(this.__wbg_ptr, enabled);
     }
     /**
+     * Select an authored sky preset index
+     * (0 = deep void, 1 = daylight, 2 = sunset, 3 = moonlight).
      * @param {number} preset
      */
     set_sky_preset(preset) {
@@ -2864,6 +2932,7 @@ export class QualiaPortal {
         }
     }
     /**
+     * Apply a flat `f32` telemetry sample block to the HUD model.
      * @param {Float32Array} floats
      */
     set_telemetry(floats) {
@@ -2875,6 +2944,8 @@ export class QualiaPortal {
         }
     }
     /**
+     * Replace the standpoint temporal slice/window and push it to the
+     * GPU when active.
      * @param {number} t_slice
      * @param {number} t_window
      */
@@ -2906,6 +2977,8 @@ export class QualiaPortal {
         return ret[0] !== 0;
     }
     /**
+     * Set water-surface appearance — RGBA colour, wave amplitude and
+     * frequency, and mesh `quality` tier.
      * @param {number} r
      * @param {number} g
      * @param {number} b
@@ -2930,6 +3003,7 @@ export class QualiaPortal {
         return ret !== 0;
     }
     /**
+     * Whether the active backend supports the shadow pass.
      * @returns {boolean}
      */
     shadows_available() {
@@ -2937,6 +3011,7 @@ export class QualiaPortal {
         return ret !== 0;
     }
     /**
+     * Number of sonic tokens currently queued in the SPSC ring.
      * @returns {number}
      */
     sonic_token_pending() {
@@ -2944,6 +3019,8 @@ export class QualiaPortal {
         return ret >>> 0;
     }
     /**
+     * Spatially encode a JSON scene without uploading —
+     * [`spatial_encode_wasm`] passthrough.
      * @param {string} json
      * @returns {any}
      */
@@ -2957,6 +3034,7 @@ export class QualiaPortal {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Current standpoint class (observer role code).
      * @returns {number}
      */
     standpoint_class() {
@@ -2970,6 +3048,7 @@ export class QualiaPortal {
         wasm.qualiaportal_stop_artefact_animation(this.__wbg_ptr);
     }
     /**
+     * Directional (sun) light intensity.
      * @returns {number}
      */
     sun_intensity() {
@@ -2977,6 +3056,7 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * Standpoint temporal-slice position ∈ [0, 1].
      * @returns {number}
      */
     t_slice() {
@@ -2984,6 +3064,7 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * Standpoint temporal-window width ∈ (0, 1].
      * @returns {number}
      */
     t_window() {
@@ -2991,6 +3072,7 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * Temporal-graphics execution receipt for honesty reporting.
      * @returns {any}
      */
     temporal_graphics_receipt() {
@@ -2998,6 +3080,9 @@ export class QualiaPortal {
         return ret;
     }
     /**
+     * Per-frame advance: device-loss check, scene animation, ICP
+     * control drain (≤16), time/telemetry/acoustic updates, camera-fly
+     * interpolation, then paint.
      * @param {HTMLCanvasElement} canvas
      * @param {number} dt_ms
      */
@@ -3008,6 +3093,8 @@ export class QualiaPortal {
         }
     }
     /**
+     * Device tier — 0 = Canvas2D, 1 = WebGPU-capable, 2 = phenomenal
+     * viewport (tensor upload confirmed).
      * @returns {number}
      */
     tier() {
@@ -3036,6 +3123,9 @@ export class QualiaPortal {
         return ret[0] >>> 0;
     }
     /**
+     * Upload a packed tensor buffer: stores it, feeds the resident
+     * substrate and VRAM ledger, forwards to the GPU (promoting the
+     * tier to 2 on success), and updates the description line.
      * @param {Uint8Array} bytes
      */
     upload_tensor_buffer(bytes) {
@@ -3229,6 +3319,7 @@ export class WasmOffloadIntent {
         wasm.__wbg_set_wasmoffloadintent_priority(this.__wbg_ptr, arg0);
     }
     /**
+     * Creates `WasmOffloadIntent` with the given state.
      * @param {number} opcode
      * @param {number} priority
      * @param {number} payload_size
@@ -3240,6 +3331,7 @@ export class WasmOffloadIntent {
         return this;
     }
     /**
+     * Builder: `string-payload`.
      * @param {number} opcode
      * @param {number} priority
      * @param {string} payload
@@ -3272,6 +3364,7 @@ export class WasmQ42Session {
         wasm.__wbg_wasmq42session_free(ptr, 0);
     }
     /**
+     * Number of quins in the session's active state.
      * @returns {number}
      */
     active_quin_count() {
@@ -3279,12 +3372,15 @@ export class WasmQ42Session {
         return ret >>> 0;
     }
     /**
+     * Advances the session clock to `tick` (Lamport-style; must be monotone).
      * @param {bigint} tick
      */
     advance_tick(tick) {
         wasm.wasmq42session_advance_tick(this.__wbg_ptr, tick);
     }
     /**
+     * Commits staged mutations to the journal under `command_hash`/`actor_did`
+     * provenance; returns the committed tick/sequence.
      * @param {bigint} command_hash
      * @param {bigint} actor_did
      * @returns {number}
@@ -3297,6 +3393,7 @@ export class WasmQ42Session {
         return ret[0] >>> 0;
     }
     /**
+     * The session's current logical tick.
      * @returns {bigint}
      */
     current_tick() {
@@ -3314,6 +3411,7 @@ export class WasmQ42Session {
         return v1;
     }
     /**
+     * Exports the underlying journal's raw bytes (durable serialization).
      * @returns {Uint8Array}
      */
     export_journal_bytes() {
@@ -3340,6 +3438,9 @@ export class WasmQ42Session {
         return WasmQ42Session.__wrap(ret[0]);
     }
     /**
+     * Creates a new durable Q42 session for `world_did_hash` over an
+     * in-memory journal; `base_digest_bytes` supplies the 32-byte base digest
+     * (shorter inputs error).
      * @param {bigint} world_did_hash
      * @param {Uint8Array} base_digest_bytes
      */
@@ -3388,10 +3489,15 @@ export class WasmQ42Session {
             throw takeFromExternrefTable0(ret[0]);
         }
     }
+    /**
+     * Discards all staged adds/removes in the open transaction.
+     */
     rollback_staged() {
         wasm.wasmq42session_rollback_staged(this.__wbg_ptr);
     }
     /**
+     * Stages an add of the quin built from `(s,p,o,c,m)` — parity is computed
+     * as the XOR fold — into the current transaction.
      * @param {bigint} s
      * @param {bigint} p
      * @param {bigint} o
@@ -3402,6 +3508,8 @@ export class WasmQ42Session {
         wasm.wasmq42session_stage_add_quin(this.__wbg_ptr, s, p, o, c, m);
     }
     /**
+     * Stages a remove of the quin built from `(s,p,o,c,m)` (XOR-fold parity
+     * computed) in the current transaction.
      * @param {bigint} s
      * @param {bigint} p
      * @param {bigint} o
@@ -3445,6 +3553,7 @@ export class WasmSimulationWorld {
         return v2;
     }
     /**
+     * Deterministic hash of the world state (for replay verification).
      * @returns {bigint}
      */
     compute_state_hash() {
@@ -3452,6 +3561,7 @@ export class WasmSimulationWorld {
         return BigInt.asUintN(64, ret);
     }
     /**
+     * The current simulation tick.
      * @returns {bigint}
      */
     current_tick() {
@@ -3479,6 +3589,7 @@ export class WasmSimulationWorld {
         return v2;
     }
     /**
+     * X position of `entity_id` in millimetres, or `None` if unregistered.
      * @param {bigint} entity_id
      * @returns {bigint | undefined}
      */
@@ -3487,6 +3598,7 @@ export class WasmSimulationWorld {
         return ret[0] === 0 ? undefined : ret[1];
     }
     /**
+     * Y position of `entity_id` in millimetres, or `None` if unregistered.
      * @param {bigint} entity_id
      * @returns {bigint | undefined}
      */
@@ -3495,6 +3607,7 @@ export class WasmSimulationWorld {
         return ret[0] === 0 ? undefined : ret[1];
     }
     /**
+     * Creates a deterministic fixed-tick simulation world with RNG `seed`.
      * @param {bigint} seed
      */
     constructor(seed) {
@@ -3518,6 +3631,8 @@ export class WasmSimulationWorld {
         return v1;
     }
     /**
+     * Registers `entity_id` at position `(x_mm, y_mm)`; `false` if the entity
+     * table is full.
      * @param {bigint} entity_id
      * @param {bigint} x_mm
      * @param {bigint} y_mm
@@ -3528,6 +3643,8 @@ export class WasmSimulationWorld {
         return ret !== 0;
     }
     /**
+     * Advances the simulation one tick, draining the command queue; returns
+     * the number of receipts produced.
      * @returns {number}
      */
     step_tick() {
@@ -3535,6 +3652,8 @@ export class WasmSimulationWorld {
         return ret >>> 0;
     }
     /**
+     * Queues a `SimulationCommand` for `target_tick`; rejected commands
+     * return a JS error describing the rejection reason.
      * @param {bigint} target_tick
      * @param {number} sequence
      * @param {bigint} actor_did
@@ -3567,6 +3686,7 @@ export class WebEngine {
         wasm.__wbg_webengine_free(ptr, 0);
     }
     /**
+     * Last parsed document handle.
      * @returns {any | undefined}
      */
     last_parsed() {
@@ -3574,6 +3694,7 @@ export class WebEngine {
         return ret;
     }
     /**
+     * Loads a JSON scene document.
      * @param {string} json
      * @returns {any}
      */
@@ -3587,6 +3708,7 @@ export class WebEngine {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Loads a `.q42` volume from bytes.
      * @param {Uint8Array} bytes
      * @returns {any}
      */
@@ -3600,6 +3722,7 @@ export class WebEngine {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Mounts a QApp under DOM `root_id`.
      * @param {string} root_id
      */
     mount_qapp(root_id) {
@@ -3610,6 +3733,9 @@ export class WebEngine {
             throw takeFromExternrefTable0(ret[0]);
         }
     }
+    /**
+     * Creates `WebEngine` with the given state.
+     */
     constructor() {
         const ret = wasm.webengine_new();
         if (ret[2]) {
@@ -3619,6 +3745,9 @@ export class WebEngine {
         WebEngineFinalization.register(this, this.__wbg_ptr, this);
         return this;
     }
+    /**
+     * Renders the loaded scene to the bound canvas.
+     */
     render_to_canvas() {
         const ret = wasm.webengine_render_to_canvas(this.__wbg_ptr);
         if (ret[1]) {
@@ -3649,6 +3778,7 @@ export function action_validate_shacl(data_n3, shapes_json) {
 }
 
 /**
+ * WASM bridge: align-sequences.
  * @param {any} val
  * @returns {any}
  */
@@ -3970,6 +4100,7 @@ export function check_cell_src(src) {
 }
 
 /**
+ * WASM bridge: check-drug-interactions.
  * @param {any} val
  * @returns {any}
  */
@@ -4007,6 +4138,7 @@ export function check_subsumption_wasm(val) {
 }
 
 /**
+ * WASM playground: clinical risk.
  * @param {string} input_json
  * @returns {string}
  */
@@ -4182,6 +4314,7 @@ export function compile_shacl_turtle_wasm(turtle) {
 }
 
 /**
+ * WASM bridge: compute-framingham-risk.
  * @param {any} val
  * @returns {any}
  */
@@ -4194,6 +4327,7 @@ export function compute_framingham_risk_wasm(val) {
 }
 
 /**
+ * WASM bridge: compute-molecular-descriptors.
  * @param {any} val
  * @returns {any}
  */
@@ -4233,6 +4367,7 @@ export function compute_pid_step_wasm(val) {
 }
 
 /**
+ * WASM bridge: compute-reaction-metrics.
  * @param {any} val
  * @returns {any}
  */
@@ -4245,6 +4380,7 @@ export function compute_reaction_metrics_wasm(val) {
 }
 
 /**
+ * WASM bridge: compute-thermochemistry.
  * @param {any} val
  * @returns {any}
  */
@@ -4257,6 +4393,7 @@ export function compute_thermochemistry_wasm(val) {
 }
 
 /**
+ * Creates `canvas`.
  * @param {number} width
  * @param {number} height
  * @returns {HTMLCanvasElement}
@@ -4412,6 +4549,7 @@ export function design_dummies_wasm(val) {
 }
 
 /**
+ * WASM: encodes a design.
  * @param {string} json
  * @returns {any}
  */
@@ -4426,6 +4564,7 @@ export function design_encode_wasm(json) {
 }
 
 /**
+ * WASM bridge: detect-functional-groups.
  * @param {any} val
  * @returns {any}
  */
@@ -4438,6 +4577,7 @@ export function detect_functional_groups_wasm(val) {
 }
 
 /**
+ * WASM bridge: device-storage-policy.
  * @returns {any}
  */
 export function device_storage_policy_wasm() {
@@ -4548,6 +4688,8 @@ export function entity_verify_10d(bytes) {
 }
 
 /**
+ * Runs ontological entity verification over a `.10d` container and returns
+ * the report as a JS value (`NULL` on serialization failure).
  * @param {Uint8Array} bytes
  * @returns {any}
  */
@@ -4574,6 +4716,8 @@ export function entity_verify_bundle(bytes) {
 }
 
 /**
+ * Runs ontological entity verification over an `.hmc` bundle and returns
+ * the report as a JS value (`NULL` on serialization failure).
  * @param {Uint8Array} bytes
  * @returns {any}
  */
@@ -4689,6 +4833,7 @@ export function evaluate_epistemic_wasm(val) {
 }
 
 /**
+ * WASM bridge: evaluate-inference-guard.
  * @param {any} value
  * @returns {any}
  */
@@ -4701,6 +4846,7 @@ export function evaluate_inference_guard_wasm(value) {
 }
 
 /**
+ * WASM bridge: evaluate-lipinski.
  * @param {any} val
  * @returns {any}
  */
@@ -4844,6 +4990,7 @@ export function exact_rational_mul(val) {
 }
 
 /**
+ * Executes `ntriples-query`.
  * @param {string} query
  * @param {Uint8Array} db_bytes
  * @param {number} max_results
@@ -4867,6 +5014,7 @@ export function execute_ntriples_query(query, db_bytes, max_results) {
 }
 
 /**
+ * WASM: exports a tensor buffer.
  * @param {string} json
  * @returns {any}
  */
@@ -4881,6 +5029,7 @@ export function export_tensor_buffer_wasm(json) {
 }
 
 /**
+ * WASM: exports a tensor slice.
  * @param {number} max_nodes
  * @returns {any}
  */
@@ -4938,6 +5087,7 @@ export function gbnf_grammar() {
 }
 
 /**
+ * WASM playground: geometric-algebra op.
  * @param {string} input_json
  * @returns {string}
  */
@@ -5096,6 +5246,7 @@ export function geometry_voronoi_2(val) {
 }
 
 /**
+ * WASM: runs a GeoSPARQL op.
  * @param {string} json
  * @returns {any}
  */
@@ -5496,6 +5647,9 @@ export function init_offscreen_renderer(width, height, particle_cap) {
     return ret;
 }
 
+/**
+ * Initializes `panic-hook`.
+ */
 export function init_panic_hook() {
     wasm.init_panic_hook();
 }
@@ -5606,6 +5760,7 @@ export function intercept_computational_opcode(opcode, payload_size) {
 }
 
 /**
+ * `WasmOffloadIntent::intercept_pharmacogenomics_intent`.
  * @param {string} smiles
  * @returns {WasmOffloadIntent}
  */
@@ -5816,6 +5971,8 @@ export function list_capabilities_wasm() {
 }
 
 /**
+ * Lists the entries (key, kind, offset, length) of an HMC bundle as a JS
+ * array; errors when the bundle fails to parse.
  * @param {Uint8Array} bundle_bytes
  * @returns {any}
  */
@@ -6211,6 +6368,7 @@ export function num_zeta_wasm(val) {
 }
 
 /**
+ * WASM playground: ODE solver.
  * @param {string} input_json
  * @returns {string}
  */
@@ -6250,6 +6408,7 @@ export function ols_multiple_wasm(val) {
 }
 
 /**
+ * WASM playground: organic chemistry.
  * @param {string} input_json
  * @returns {string}
  */
@@ -6347,6 +6506,7 @@ export function package_exposure_manifest_wasm(shapes_json, vibe_program_cbor) {
 }
 
 /**
+ * WASM bridge: parse-cbor-ld.
  * @param {Uint8Array} payload
  * @returns {any}
  */
@@ -6371,6 +6531,8 @@ export function parse_cell_src(src) {
 }
 
 /**
+ * Parses CSV text per `CsvParseParams` field mappings into Quins via
+ * `csv_parser::parse_csv_to_quins`, returning them as a JS value.
  * @param {any} val
  * @returns {any}
  */
@@ -6383,6 +6545,8 @@ export function parse_csv_wasm(val) {
 }
 
 /**
+ * Parses JSON records per a mapping profile (JSONPath-ish field → predicate)
+ * into Quins, returned as a JS value.
  * @param {any} val
  * @returns {any}
  */
@@ -6395,6 +6559,9 @@ export function parse_json_mapping_wasm(val) {
 }
 
 /**
+ * Parses a JSON array of flat `{s,p,o}` triples and returns them as a JS
+ * array of `{subject,predicate,object}` objects; `JsValue::NULL` on parse
+ * failure.
  * @param {string} payload
  * @returns {any}
  */
@@ -6424,6 +6591,7 @@ export function parse_jsonld_wasm(payload) {
 }
 
 /**
+ * WASM bridge: parse-n3logic.
  * @param {string} payload
  * @returns {any}
  */
@@ -6465,6 +6633,7 @@ export function parse_rdf_document_wasm(content_type, payload) {
 }
 
 /**
+ * WASM bridge: parse-turtle.
  * @param {string} payload
  * @returns {any}
  */
@@ -6509,6 +6678,7 @@ export function pinned_qualiadb_revision() {
 }
 
 /**
+ * WASM bridge: plan-device-storage.
  * @param {any} val
  * @returns {any}
  */
@@ -6569,6 +6739,7 @@ export function portal_webgpu_canvas_claimed() {
 }
 
 /**
+ * WASM bridge: predict-receptor-binding.
  * @returns {number}
  */
 export function predict_receptor_binding_wasm() {
@@ -6641,6 +6812,9 @@ export function rdfc10_graph_hash_wasm(val) {
 }
 
 /**
+ * Reads entry `key` from an HMC bundle, verifying its checksum before
+ * returning the raw bytes; errors on parse failure, missing key, or checksum
+ * mismatch.
  * @param {Uint8Array} bundle_bytes
  * @param {string} key
  * @returns {Uint8Array}
@@ -6774,6 +6948,7 @@ export function run_program_bytecode(src, fn_name, args) {
 }
 
 /**
+ * Runs `semantic-simulation`.
  * @param {any} val
  * @returns {any}
  */
@@ -6786,6 +6961,7 @@ export function run_semantic_simulation(val) {
 }
 
 /**
+ * WASM: samples browser telemetry.
  * @returns {any}
  */
 export function sample_browser_telemetry_wasm() {
@@ -6876,6 +7052,7 @@ export function scene_quality_state(upgrades, parts, online, _approved, water_on
 }
 
 /**
+ * WASM playground: sequence alignment.
  * @param {string} input_json
  * @returns {string}
  */
@@ -6901,6 +7078,8 @@ export function sequence_alignment(input_json) {
 }
 
 /**
+ * Serializes the given Quins to CSV text following the provided column
+ * profile, returned as a JS string.
  * @param {any} val
  * @returns {any}
  */
@@ -6937,6 +7116,8 @@ export function serialize_float_array(data) {
 }
 
 /**
+ * Serializes the given Quins to a JSON payload following the provided
+ * mapping profile, returned as a JS value.
  * @param {any} val
  * @returns {any}
  */
@@ -7086,6 +7267,7 @@ export function solve_sat_wasm(val) {
 }
 
 /**
+ * WASM: encodes a spatial payload.
  * @param {string} json
  * @returns {any}
  */
@@ -7752,6 +7934,7 @@ export function terrain_height_world(x, z) {
 }
 
 /**
+ * WASM playground: thermodynamics MCMC.
  * @param {string} input_json
  * @returns {string}
  */
@@ -7872,6 +8055,7 @@ export function units_quantity_op(val) {
 }
 
 /**
+ * WASM bridge: validate-fasta.
  * @param {any} val
  * @returns {any}
  */
@@ -7884,6 +8068,7 @@ export function validate_fasta_wasm(val) {
 }
 
 /**
+ * WASM bridge: validate-fhir-observation.
  * @param {any} val
  * @returns {any}
  */
@@ -7911,6 +8096,7 @@ export function validate_game_hmc(bytes) {
 }
 
 /**
+ * WASM bridge: validate-shacl-constraint.
  * @param {any} val
  * @returns {any}
  */
@@ -8013,6 +8199,7 @@ export function verifyFirstLayerQuant() {
 }
 
 /**
+ * WASM bridge: verify-backup-manifest.
  * @param {any} manifest
  * @param {string} payload_sha256_hex
  * @returns {any}
@@ -8137,6 +8324,7 @@ export function vibe_invoke(id, args_json) {
 }
 
 /**
+ * WASM bridge: convex-hull-2d.
  * @param {Float64Array} points_flat
  * @returns {Uint32Array}
  */
@@ -8151,6 +8339,7 @@ export function wasm_convex_hull_2d(points_flat) {
 }
 
 /**
+ * WASM bridge: delaunay-triangulation-2d.
  * @param {Float64Array} points_flat
  * @returns {Uint32Array}
  */
@@ -10266,32 +10455,32 @@ function __wbg_get_imports() {
             return ret;
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2720, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 2734, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1979, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDevice")], shim_idx: 1993, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1980, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUDeviceLostInfo")], shim_idx: 1994, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuDeviceLostInfo__GpuDeviceLostInfo______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000004: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1979, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("any")], shim_idx: 1993, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__3);
             return ret;
         },
         __wbindgen_cast_0000000000000005: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1979, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("undefined")], shim_idx: 1993, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke___wasm_bindgen_2b06ec36d7f4b29___sys__JsOption_wgpu_2a6ad63bf4a73e2e___backend__webgpu__webgpu_sys__gen_GpuError__GpuError___core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_2b06ec36d7f4b29___JsError___true__4);
             return ret;
         },
         __wbindgen_cast_0000000000000006: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 1192, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 1207, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_2b06ec36d7f4b29___convert__closures_____invoke_______true_);
             return ret;
         },
