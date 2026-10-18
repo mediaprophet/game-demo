@@ -21,7 +21,10 @@ The previous iteration of `game-demo` featured severe architectural dishonesty:
 ### 1.2 The Remediation Contract
 - **Backup Verification:** The complete legacy JavaScript site is archived on git branch `archive/legacy-js-site`.
 - **Pure Rust Delivery:** All simulation state, input handling, physics, camera mechanics, and HUD rendering are authored in Rust inside `crates/rolling-commons-shell` and delivered as a unified WebAssembly module.
-- **Minimal Web Host:** The browser layer is reduced to `< 120 lines` of JavaScript/HTML whose sole responsibility is providing the `<canvas id="qualia-viewport">` and streaming raw DOM inputs directly across the WASM boundary.
+- **Dual-Target Desktop & Browser Architecture:** Mirroring QualiaDB's LLM engine:
+  - When running natively on desktop (`webizen-desktop`), it gains full access to multi-threaded CPU workers, native GPU backends (Vulkan, Metal, DX12, DirectML, CUDA), larger VRAM reservations (Tier 2/3: 1–4GB), and concurrent local LLM inference.
+  - When running in browser (`wasm32-unknown-unknown`), it runs sandboxed within WASM linear memory, using WebGPU/WebGL2 on the canvas, bounded to Tier 0/1 memory budgets (16–32MB) or Tier 2 (256MB).
+- **Minimal Web Host:** In the browser, the page is reduced to `< 120 lines` of JavaScript/HTML whose sole responsibility is providing the `<canvas id="qualia-viewport">` and streaming raw DOM inputs directly across the WASM boundary.
 - **In-Viewport HUD:** All telemetry, meters, dialogs, buttons, and touch controls are drawn in-engine using QualiaDB's viewport renderer (`render/hud/`).
 
 ---
