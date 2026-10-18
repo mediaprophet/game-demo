@@ -95,7 +95,16 @@ pub enum GamePhase {
 ### 3.3 Vehicle Dynamics & Steering Physics
 - **Speed-Sensitive Steering:** $S_{\text{eff}} = S_0 / (1.0 + 0.04 v)$ to prevent highway twitchiness while allowing sharp low-speed maneuvering.
 - **Auto-Centering Spring Torque:** Exponential relaxation to neutral ($\tau = 0.12\text{s}$).
-- **Shoulder Grip & Terrain Response:** Query continuous terrain surface from `ecopunk-terrain`; off-road transitions incur a $32\%$ friction drop with acoustic gravel synthesis.
+- **Shoulder Grip & Terrain Response:** Query continuous terrain surface from `qualia-geospatial`; off-road transitions incur a $32\%$ friction drop with acoustic gravel synthesis.
+
+### 3.4 Dual-Ring Memory & Tier 0–3 Hardware Scalability (from Holo Specification)
+The client adheres to QualiaDB's verified hardware tiers:
+- **CPU Logic Ring:** 42 MiB `SlgArena` (zero-heap hot path).
+- **GPU Terrain Ring (`GpuRing`):**
+  - **Tier 0 (Sensory Edge / Low-End Mobile):** $< 16\text{ MB}$ VRAM cap, 2.5D analytical heightfield.
+  - **Tier 1 (Standard Web / WebGL2 Fallback):** $< 32\text{ MB}$ VRAM cap, 48×36 mesh grid with Hermite skirts.
+  - **Tier 2 (WebGPU High / Desktop & Laptop):** $< 256\text{ MB}$ VRAM cap, chunked CDLOD quadtree mesh, PBR Cook-Torrance raymarching.
+  - **Tier 3 (Ultra / Workstations):** $1024\text{–}2048\text{ MB}$ VRAM cap, full volumetric SVDAG stratigraphy.
 
 ---
 
