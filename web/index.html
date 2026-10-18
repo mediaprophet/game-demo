@@ -2,11 +2,233 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=game.html">
-  <title>Maslows Challenge, an SDGs game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Maslows Challenge — QualiaDB WASM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #080d12; color: #e2e8f0; font-family: 'Outfit', sans-serif; }
+    #scene { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
+    
+    /* Minimalist Glassmorphic Telemetry HUD */
+    .hud-overlay {
+      position: absolute; top: env(safe-area-inset-top, 16px); left: env(safe-area-inset-left, 16px);
+      display: flex; gap: 10px; align-items: center; z-index: 10;
+      background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 13px; font-weight: 600; letter-spacing: 0.02em; pointer-events: none;
+    }
+    .hud-title { color: #38bdf8; font-family: 'Space Grotesk', sans-serif; }
+    .badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; text-transform: uppercase; font-weight: 700; }
+    .badge-webgpu { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .badge-webgl2 { background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+    .badge-cpu { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Scene / Camera Controls */
+    .hud-controls {
+      position: absolute; top: env(safe-area-inset-top, 16px); right: env(safe-area-inset-right, 16px);
+      display: flex; gap: 8px; z-index: 10;
+    }
+    .hud-btn {
+      background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12); color: #f1f5f9; padding: 8px 14px; border-radius: 8px;
+      font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+    }
+    .hud-btn:hover { background: rgba(30, 41, 59, 0.85); border-color: rgba(56, 189, 248, 0.4); }
+    .hud-btn:active { transform: scale(0.96); }
+
+    /* Touch Controls (Virtual D-Pad & Actions) */
+    .touch-controls {
+      display: none; position: absolute; bottom: env(safe-area-inset-bottom, 24px); left: 0; right: 0;
+      padding: 0 24px; pointer-events: none; justify-content: space-between; align-items: flex-end; z-index: 10;
+    }
+    @media (pointer: coarse) { .touch-controls { display: flex; } }
+    
+    .touch-dpad {
+      display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 52px);
+      gap: 6px; pointer-events: auto;
+    }
+    .touch-btn {
+      background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px; color: #94a3b8;
+      touch-action: none;
+    }
+    .touch-btn:active { background: rgba(56, 189, 248, 0.35); color: #ffffff; border-color: #38bdf8; }
+
+    .touch-actions { display: flex; gap: 12px; pointer-events: auto; margin-bottom: 8px; }
+    .touch-action-btn {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.18); display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: #e2e8f0; touch-action: none;
+    }
+    .touch-action-btn:active { background: rgba(56, 189, 248, 0.4); color: #fff; transform: scale(0.95); }
+
+    /* Loading Overlay */
+    #loading {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #080d12; z-index: 100; transition: opacity 0.4s ease;
+    }
+    #loading.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 48px; height: 48px; border: 3px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
-  <p><a href="game.html">Play Maslows Challenge, an SDGs game</a></p>
+  <canvas id="scene"></canvas>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div style="font-family:'Space Grotesk',sans-serif; font-size:16px; letter-spacing:0.05em; color:#94a3b8;">
+      QUALIA DETERMINISTIC WASM
+    </div>
+  </div>
+
+  <div class="hud-overlay">
+    <span class="hud-title">MASLOWS CHALLENGE</span>
+    <span id="tier-badge" class="badge badge-cpu">PROBING</span>
+    <span id="fps-counter" style="color:#64748b; font-size:11px;">60 FPS</span>
+  </div>
+
+  <div class="hud-controls">
+    <button class="hud-btn" id="btn-campsite">Camp</button>
+    <button class="hud-btn" id="btn-drive">Drive</button>
+    <button class="hud-btn" id="btn-sky">Sky</button>
+  </div>
+
+  <div class="touch-controls">
+    <div class="touch-dpad">
+      <div></div>
+      <div class="touch-btn" data-key="KeyW">▲</div>
+      <div></div>
+      <div class="touch-btn" data-key="KeyA">◀</div>
+      <div class="touch-btn" data-key="KeyS">▼</div>
+      <div class="touch-btn" data-key="KeyD">▶</div>
+    </div>
+    <div class="touch-actions">
+      <div class="touch-action-btn" data-key="Space">BRAKE</div>
+      <div class="touch-action-btn" data-key="KeyE">ACT</div>
+    </div>
+  </div>
+
+  <script type="module">
+    let m, portal, sim, lastTime = performance.now(), frameCount = 0, lastFpsTime = performance.now();
+    let currentSite = 1, currentSky = 1;
+    const canvas = document.getElementById('scene');
+    const tierBadge = document.getElementById('tier-badge');
+    const fpsCounter = document.getElementById('fps-counter');
+    const loading = document.getElementById('loading');
+    const keys = new Set();
+
+    function resize() {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.round(canvas.clientWidth * dpr);
+      canvas.height = Math.round(canvas.clientHeight * dpr);
+    }
+
+    async function init() {
+      resize();
+      window.addEventListener('resize', resize);
+
+      m = await import('./pkg/rolling_commons_shell.js');
+      await m.default({ module_or_path: new URL('./pkg/rolling_commons_shell_bg.wasm', import.meta.url) });
+
+      let webgpuArmed = false;
+      if (navigator.gpu && m.init_webgpu) {
+        try { webgpuArmed = (await m.init_webgpu(canvas)) === true; } catch (e) {}
+      }
+
+      if (!webgpuArmed) {
+        const fresh = document.createElement('canvas');
+        fresh.id = canvas.id;
+        fresh.style.cssText = canvas.style.cssText;
+        canvas.replaceWith(fresh);
+        resize();
+        if (m.init_webgl2) { try { m.init_webgl2(fresh); } catch (e) {} }
+        portal = new m.GamePortal(fresh);
+      } else {
+        portal = new m.GamePortal(canvas);
+      }
+
+      const tier = portal.tier();
+      if (tier >= 2) {
+        tierBadge.textContent = 'WEBGPU';
+        tierBadge.className = 'badge badge-webgpu';
+      } else if (tier === 1) {
+        tierBadge.textContent = 'WEBGL2';
+        tierBadge.className = 'badge badge-webgl2';
+      } else {
+        tierBadge.textContent = 'CPU';
+        tierBadge.className = 'badge badge-cpu';
+      }
+
+      portal.set_sky_preset(currentSky);
+      portal.set_lighting(0.45, 0.85, 0.35, 1.25, 0.38);
+      portal.set_exposure_compensation(0.25);
+      portal.set_shadows_enabled(tier >= 2);
+      portal.set_screen_space_ao_enabled(true);
+
+      await loadScene(currentSite);
+
+      // Key and Touch Listeners
+      window.addEventListener('keydown', e => keys.add(e.code));
+      window.addEventListener('keyup', e => keys.delete(e.code));
+
+      document.querySelectorAll('[data-key]').forEach(el => {
+        const k = el.dataset.key;
+        el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); keys.add(k); });
+        for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+          el.addEventListener(ev, () => keys.delete(k));
+        }
+      });
+
+      document.getElementById('btn-campsite').onclick = () => { currentSite = (currentSite % 6) + 1; loadScene(currentSite); };
+      document.getElementById('btn-sky').onclick = () => { currentSky = (currentSky % 3) + 1; portal.set_sky_preset(currentSky); };
+
+      loading.classList.add('hidden');
+      requestAnimationFrame(renderLoop);
+    }
+
+    async function loadScene(siteId) {
+      try {
+        const scene = m.talbingo_scene(siteId);
+        if (scene) { portal.load_scene(scene); }
+      } catch (e) {
+        console.warn('Scene load fallback:', e);
+      }
+    }
+
+    function renderLoop(now) {
+      const dt = Math.min(0.1, (now - lastTime) / 1000.0);
+      lastTime = now;
+      frameCount++;
+
+      if (now - lastFpsTime >= 500) {
+        const fps = Math.round((frameCount * 1000) / (now - lastFpsTime));
+        fpsCounter.textContent = `${fps} FPS`;
+        frameCount = 0;
+        lastFpsTime = now;
+      }
+
+      try {
+        portal.tick(canvas, Math.min(50, dt * 1000));
+      } catch (e) {
+        console.error('Portal tick error:', e);
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    init().catch(err => {
+      console.error('Game initialization failed:', err);
+      loading.innerHTML = `<div style="color:#ef4444; font-weight:600;">Engine initialization failed: ${err.message || err}</div>`;
+    });
+  </script>
 </body>
 </html>
