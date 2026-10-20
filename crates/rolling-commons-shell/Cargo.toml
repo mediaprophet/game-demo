@@ -22,7 +22,7 @@ serde = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 serde_json = { workspace = true }
 js-sys = { workspace = true }
-wasm-bindgen-futures = "0.4.75"
+wasm-bindgen-futures = "0.4.79"
 web-sys = { workspace = true, features = [
     "console", "Window", "Navigator", "Performance", "HtmlCanvasElement",
 ] }

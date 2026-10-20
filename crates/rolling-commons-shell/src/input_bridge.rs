@@ -27,7 +27,7 @@ impl GameInputBridge {
     pub fn new() -> Self {
         Self {
             buttons: ZeroHeapButtonInput::new(),
-            touch_stick: VirtualTouchStick::new(60.0, 12.0),
+            touch_stick: VirtualTouchStick::new([100.0, 100.0], 60.0),
             touch_active: false,
         }
     }
@@ -54,25 +54,26 @@ impl GameInputBridge {
 
     /// Clears single-frame edge transitions (call once per render frame).
     pub fn step_frame(&mut self) {
-        self.buttons.clear_edges();
+        self.buttons.advance_frame();
     }
 
     /// Touch gesture started at canvas screen coordinates (x, y).
     pub fn touch_start(&mut self, x: f32, y: f32) {
-        self.touch_stick.anchor_at(x, y);
+        self.touch_stick.center_px = [x, y];
+        self.touch_stick.on_touch_start(0, x, y);
         self.touch_active = true;
     }
 
     /// Touch pointer moved to canvas screen coordinates (x, y).
     pub fn touch_move(&mut self, x: f32, y: f32) {
         if self.touch_active {
-            self.touch_stick.update_pointer(x, y);
+            self.touch_stick.on_touch_move(0, x, y);
         }
     }
 
     /// Touch gesture ended / cancelled.
     pub fn touch_end(&mut self) {
-        self.touch_stick.release();
+        self.touch_stick.on_touch_end(0);
         self.touch_active = false;
     }
 
@@ -87,7 +88,7 @@ impl GameInputBridge {
         }
 
         if self.touch_active {
-            let (_tx, ty) = self.touch_stick.axis_vector();
+            let [_tx, ty] = self.touch_stick.axis;
             // Upwards on screen is negative Y in standard canvas space
             let touch_val = -ty;
             if touch_val.abs() > keyboard.abs() {
@@ -109,7 +110,7 @@ impl GameInputBridge {
         }
 
         if self.touch_active {
-            let (tx, _ty) = self.touch_stick.axis_vector();
+            let [tx, _ty] = self.touch_stick.axis;
             if tx.abs() > keyboard.abs() {
                 return tx;
             }

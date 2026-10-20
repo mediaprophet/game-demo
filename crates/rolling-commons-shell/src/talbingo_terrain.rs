@@ -49,15 +49,16 @@ pub fn elevation(site: u8, x: f32, z: f32) -> f32 {
         }
     };
 
-    // Hermite radial skirt: smooth transition from campsite bounds (R <= 16m)
-    // into surrounding Kosciuszko alpine ridgelines (R 16m to 60m).
+    // Hermite transition from campsite center (R <= 16m)
+    // into continuous surrounding Kosciuszko alpine ridgelines without edge void or clamping.
     let r = ((x - 8.2).powi(2) + z.powi(2)).sqrt();
     if r <= 16.0 {
         local
     } else {
         let t = ((r - 16.0) / 40.0).clamp(0.0, 1.0);
         let hermite = t * t * (3.0 - 2.0 * t);
-        let ridge = 0.65 + 0.045 * r + 0.85 * (0.12 * x).sin() * (0.12 * z).cos();
+        let ridge = 0.65 + 0.045 * r + 0.85 * (0.12 * x).sin() * (0.12 * z).cos()
+            + 0.35 * (0.045 * x).sin() * (0.045 * z).sin();
         (1.0 - hermite) * local + hermite * ridge
     }
 }

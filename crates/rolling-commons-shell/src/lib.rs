@@ -19,6 +19,7 @@ mod camera_presentation;
 mod camp_home;
 mod campaign_simulation;
 mod character_simulation;
+pub mod continuum_bridge;
 mod drive_contact_integration;
 mod drive_contacts;
 mod drive_session;
@@ -91,11 +92,10 @@ pub fn talbingo_vehicle_pose_y(
         || !y.is_finite()
         || !z.is_finite()
         || !heading.is_finite()
-        || x < -6.0
-        || x > 23.0
-        || z.abs() > 8.5
+        || !(-25_000.0..=25_000.0).contains(&x)
+        || !(-25_000.0..=25_000.0).contains(&z)
     {
-        return Err(JsValue::from_str("Talbingo vehicle pose outside scene"));
+        return Err(JsValue::from_str("Talbingo vehicle pose outside continuum bounds"));
     }
     let yaw = heading * 0.5;
     let root = Motor::from_translation(x, y, z)
@@ -121,6 +121,161 @@ pub fn talbingo_terrain_elevation(site: u8, x: f32, z: f32) -> f32 {
 }
 
 #[wasm_bindgen]
+pub fn talbingo_continuous_corridor_elevation(site: u8, wx: f64, wz: f64) -> f64 {
+    continuum_bridge::continuous_corridor_elevation(site, wx, wz)
+}
+
+#[wasm_bindgen]
+pub fn talbingo_specimen_dissection_json(site: u8, scale: u8) -> Result<String, JsValue> {
+    let spec = continuum_bridge::get_botanical_dissection_spec(site, scale);
+    serde_json::to_string_pretty(&spec)
+        .map_err(|e| JsValue::from_str(&format!("Serialization error: {e}")))
+}
+
+#[derive(serde::Deserialize)]
+struct ContinuumStepInput {
+    #[serde(default)]
+    mode: Option<String>,
+    #[serde(default)]
+    site_id: Option<u8>,
+    #[serde(default)]
+    dt: Option<f32>,
+    #[serde(default)]
+    throttle: Option<f32>,
+    #[serde(default)]
+    steer: Option<f32>,
+    #[serde(default)]
+    brake: Option<f32>,
+    #[serde(default)]
+    wish_dir: Option<[f32; 2]>,
+    #[serde(default)]
+    sprint: Option<bool>,
+    #[serde(default)]
+    jump: Option<bool>,
+    #[serde(default)]
+    crouch: Option<bool>,
+    #[serde(default)]
+    pos_x: Option<f64>,
+    #[serde(default)]
+    pos_z: Option<f64>,
+}
+
+#[derive(serde::Serialize)]
+struct ContinuumStepOutput {
+    mode: String,
+    active_site: u8,
+    site_name: String,
+    elevation_ahd: f64,
+    odometer_m: f64,
+    vehicle: VehicleOutput,
+    walker: WalkerOutput,
+}
+
+#[derive(serde::Serialize)]
+struct VehicleOutput {
+    x: f32,
+    y: f32,
+    z: f32,
+    heading: f32,
+    speed_kmh: f32,
+}
+
+#[derive(serde::Serialize)]
+struct WalkerOutput {
+    x: f32,
+    y: f32,
+    z: f32,
+    yaw: f32,
+    is_grounded: bool,
+}
+
+thread_local! {
+    static TALBINGO_CONTINUUM: RefCell<continuum_bridge::TalbingoRegionalContinuum> = RefCell::new(continuum_bridge::TalbingoRegionalContinuum::new());
+}
+
+#[wasm_bindgen]
+pub fn talbingo_continuum_step_drive_and_walk(input_json: &str) -> Result<JsValue, JsValue> {
+    let input: ContinuumStepInput = serde_json::from_str(input_json)
+        .map_err(|e| JsValue::from_str(&format!("Invalid continuum step input JSON: {e}")))?;
+
+    TALBINGO_CONTINUUM.with(|continuum_cell| {
+        let mut continuum = continuum_cell.borrow_mut();
+
+        if let Some(s) = input.site_id {
+            if s != continuum.active_site && input.mode.as_deref() == Some("reset") {
+                continuum.set_site(s);
+            }
+        }
+
+        let dt = input.dt.unwrap_or(1.0 / 64.0);
+
+        if input.mode.as_deref() == Some("toggle_dismount") {
+            continuum.toggle_dismount();
+        } else if input.mode.as_deref() == Some("walk") || (!continuum.is_rover_active && input.mode.is_none()) {
+            if let (Some(px), Some(pz)) = (input.pos_x, input.pos_z) {
+                continuum.walker.state.position[0] = px as f32;
+                continuum.walker.state.position[2] = pz as f32;
+            }
+            let char_input = continuum_bridge::CharacterInput {
+                wish_dir: input.wish_dir.unwrap_or([0.0, 0.0]),
+                sprint: input.sprint.unwrap_or(false),
+                jump: input.jump.unwrap_or(false),
+                crouch: input.crouch.unwrap_or(false),
+                dt,
+            };
+            continuum.step_walker(char_input);
+        } else {
+            if let (Some(px), Some(pz)) = (input.pos_x, input.pos_z) {
+                continuum.rover.state.position[0] = px as f32;
+                continuum.rover.state.position[2] = pz as f32;
+            }
+            let rov_input = continuum_bridge::RoverInput {
+                throttle: input.throttle.unwrap_or(0.0),
+                steer: input.steer.unwrap_or(0.0),
+                brake: input.brake.unwrap_or(0.0),
+                dt,
+            };
+            continuum.step_rover(rov_input);
+        }
+
+        let current_pos = if continuum.is_rover_active {
+            [continuum.rover.state.position[0] as f64, continuum.rover.state.position[2] as f64]
+        } else {
+            [continuum.walker.state.position[0] as f64, continuum.walker.state.position[2] as f64]
+        };
+
+        let elev = continuum.evaluate_elevation(current_pos[0], current_pos[1]);
+        let active_site = continuum.active_site;
+        let site_name = continuum.sites[active_site as usize].name.clone();
+
+        let out = ContinuumStepOutput {
+            mode: if continuum.is_rover_active { "drive".to_string() } else { "walk".to_string() },
+            active_site,
+            site_name,
+            elevation_ahd: elev,
+            odometer_m: continuum.odometer_meters,
+            vehicle: VehicleOutput {
+                x: continuum.rover.state.position[0],
+                y: continuum.rover.state.position[1],
+                z: continuum.rover.state.position[2],
+                heading: continuum.rover.state.heading,
+                speed_kmh: continuum.rover.speed_kmh(),
+            },
+            walker: WalkerOutput {
+                x: continuum.walker.state.position[0],
+                y: continuum.walker.state.position[1],
+                z: continuum.walker.state.position[2],
+                yaw: continuum.walker.state.yaw,
+                is_grounded: continuum.walker.state.is_grounded,
+            },
+        };
+
+        serde_wasm_bindgen::to_value(&out)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {e}")))
+    })
+}
+
+#[wasm_bindgen]
 pub fn talbingo_walker_pose(portal: &mut GamePortal, x: f64, z: f64) -> Result<u32, JsValue> {
     talbingo_walker_pose_y(portal, x, 0.0, z)
 }
@@ -136,10 +291,10 @@ pub fn talbingo_walker_pose_y(
     if !x.is_finite()
         || !y.is_finite()
         || !z.is_finite()
-        || !(13.0..=24.0).contains(&x)
-        || !(-7.0..=7.0).contains(&z)
+        || !(-25_000.0..=25_000.0).contains(&x)
+        || !(-25_000.0..=25_000.0).contains(&z)
     {
-        return Err(JsValue::from_str("Talbingo walker pose outside site"));
+        return Err(JsValue::from_str("Talbingo walker pose outside continuum bounds"));
     }
     let root = Motor::from_translation(x, y, z).mul(&Motor::from_translation(-18.0, 0.0, -3.5));
     portal
@@ -3127,5 +3282,42 @@ mod vibe_scene_expansion_tests {
         // Verify CampaignSimulation loads and evaluates campaign-rules.vibe
         let camp_src = include_str!("../../../web/fixtures/campaign-rules.vibe");
         let _camp_sim = CampaignSimulation::new(camp_src).expect("campaign simulation loads");
+    }
+
+    #[test]
+    fn test_talbingo_continuum_and_dissection_bridge() {
+        // Test 5-scale specimen dissection JSON export
+        for scale in 1..=5 {
+            let json = talbingo_specimen_dissection_json(0, scale)
+                .expect("dissection spec must serialize to JSON");
+            assert!(json.contains("PO:") || json.contains("UBERON:"));
+            assert!(json.contains("biophysical_equations"));
+        }
+
+        // Test continuous corridor elevation across multi-kilometer span
+        let elev_pines = talbingo_continuous_corridor_elevation(0, 0.0, 0.0);
+        let elev_three_mile = talbingo_continuous_corridor_elevation(5, 17500.0, 940.0);
+        assert!(elev_pines >= 350.0 && elev_pines <= 450.0);
+        assert!(elev_three_mile >= 1350.0 && elev_three_mile <= 1500.0);
+
+        // Test drive step
+        let drive_input = r#"{
+            "mode": "drive",
+            "dt": 0.05,
+            "throttle": 1.0,
+            "steer": 0.0,
+            "brake": 0.0
+        }"#;
+        let out_val = talbingo_continuum_step_drive_and_walk(drive_input)
+            .expect("continuum drive step should succeed");
+        assert!(!out_val.is_null());
+
+        // Test toggle dismount to walk
+        let dismount_input = r#"{
+            "mode": "toggle_dismount"
+        }"#;
+        let out_val = talbingo_continuum_step_drive_and_walk(dismount_input)
+            .expect("dismount step should succeed");
+        assert!(!out_val.is_null());
     }
 }

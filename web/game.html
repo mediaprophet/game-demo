@@ -99,6 +99,7 @@
   <div class="hud-controls">
     <button class="hud-btn" id="btn-campsite">Camp</button>
     <button class="hud-btn" id="btn-drive">Drive</button>
+    <button class="hud-btn" id="btn-inspect">Inspect</button>
     <button class="hud-btn" id="btn-sky">Sky</button>
   </div>
 
@@ -220,8 +221,26 @@
         }
       });
 
+      let isDriving = false;
+      let driveX = 0.0, driveZ = 0.0, driveHdg = 0.0;
+
       document.getElementById('btn-campsite').onclick = () => { currentSite = (currentSite % 6) + 1; loadScene(currentSite); };
       document.getElementById('btn-sky').onclick = () => { currentSky = (currentSky % 3) + 1; portal.set_sky_preset(currentSky); };
+      document.getElementById('btn-drive').onclick = () => {
+        isDriving = !isDriving;
+        document.getElementById('btn-drive').textContent = isDriving ? 'Drive [ON]' : 'Drive';
+        document.getElementById('btn-drive').style.color = isDriving ? '#38bdf8' : '#f1f5f9';
+      };
+      document.getElementById('btn-inspect').onclick = () => {
+        if (m && m.talbingo_specimen_dissection_json) {
+          try {
+            const spec = JSON.parse(m.talbingo_specimen_dissection_json(currentSite - 1, 1));
+            alert(`${spec.title}\nDomain: ${spec.spatial_domain} · Taxon: ${spec.primary_taxon}\nLayers:\n${spec.layers_or_organs.map(l => '• ' + l.name + ' [' + l.ontology_iri + ']').join('\n')}\n\nEquations:\n${spec.biophysical_equations.join('\n')}`);
+          } catch (e) {
+            console.warn('Inspect error:', e);
+          }
+        }
+      };
 
       loading.classList.add('hidden');
       requestAnimationFrame(renderLoop);
@@ -249,6 +268,27 @@
       }
 
       try {
+        if (isDriving && m && portal) {
+          const throttle = (keys.has('KeyW') || keys.has('ArrowUp') ? 1.0 : 0.0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1.0 : 0.0);
+          const steer = (keys.has('KeyD') || keys.has('ArrowRight') ? 1.0 : 0.0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1.0 : 0.0);
+          const brake = keys.has('Space') ? 1.0 : 0.0;
+          if (m.talbingo_continuum_step_drive_and_walk) {
+            try {
+              const res = m.talbingo_continuum_step_drive_and_walk(JSON.stringify({
+                mode: 'drive', dt, throttle, steer, brake, site_id: currentSite - 1
+              }));
+              if (res && res.vehicle) {
+                driveX = res.vehicle.x;
+                driveZ = res.vehicle.z;
+                driveHdg = res.vehicle.heading;
+                const y = m.talbingo_continuous_corridor_elevation ? m.talbingo_continuous_corridor_elevation(currentSite - 1, driveX, driveZ) : res.vehicle.y;
+                if (m.talbingo_vehicle_pose_y) {
+                  m.talbingo_vehicle_pose_y(portal, driveX, y, driveZ, driveHdg);
+                }
+              }
+            } catch(e) {}
+          }
+        }
         portal.tick(canvas, Math.min(50, dt * 1000));
         if (inputBridge) inputBridge.step_frame();
       } catch (e) {

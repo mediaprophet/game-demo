@@ -56,6 +56,7 @@ canvas{display:block;width:100%;height:calc(100vh - 82px);min-height:450px}
  </div>
  <div class="pills">
   <span class="pill">CORE: ZERO-HEAP</span>
+  <span class="pill pill-gold pill-btn" id="open-inspector-btn" title="Inspect 5-Scale Botanical & Zoological Digital Twin">INSPECTOR: 5-SCALE DIGITAL TWIN</span>
   <span class="pill pill-gold pill-btn" id="open-geology-btn" title="Inspect GSNSW Geology & WGS84 Datum">GEOLOGY: GSNSW WFS</span>
   <span class="pill pill-green pill-btn" id="open-journal-btn" title="Open Expedition Journal">JOURNAL (J)</span>
   <span class="pill pill-btn" id="open-settings-btn" title="Expedition Settings & Audio">SETTINGS (M)</span>
@@ -165,6 +166,24 @@ canvas{display:block;width:100%;height:calc(100vh - 82px);min-height:450px}
  </div>
 </section>
 </main>
+
+<!-- 5-Scale Botanical & Zoological Education Inspector Modal -->
+<div id="inspector-modal" class="modal-overlay">
+ <div class="modal" style="max-width: 680px; width: 95%;">
+  <h2>
+   <span style="display:flex;align-items:center;gap:8px;">🔬 5-Scale Digital Twin Inspector</span>
+   <button class="modal-close" id="close-inspector-btn">&times;</button>
+  </h2>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px;" id="scale-tabs">
+   <button class="pill pill-gold pill-btn scale-tab" data-scale="1" style="cursor:pointer">Scale 1: Tree & Roots</button>
+   <button class="pill pill-gold pill-btn scale-tab" data-scale="2" style="cursor:pointer">Scale 2: Bark Wedge</button>
+   <button class="pill pill-gold pill-btn scale-tab" data-scale="3" style="cursor:pointer">Scale 3: Floral/Gumnut</button>
+   <button class="pill pill-gold pill-btn scale-tab" data-scale="4" style="cursor:pointer">Scale 4: Leaf Histology</button>
+   <button class="pill pill-gold pill-btn scale-tab" data-scale="5" style="cursor:pointer">Scale 5: Vertebrate Anatomy</button>
+  </div>
+  <div id="inspector-body" style="font-size:0.88rem;line-height:1.5;"></div>
+ </div>
+</div>
 
 <!-- Expedition Journal Modal -->
 <div id="journal-modal" class="modal-overlay">
@@ -435,7 +454,7 @@ function updateJournal(){
 }
 
 function distanceToLandmark(){const p=SITES[site].point;return Math.hypot(walk.x-p[0],walk.z-p[1]);}
-function updateInspect(){const near=phase==='camp'&&distanceToLandmark()<2.2;$('inspect').disabled=!near;$('objective').textContent=phase==='camp'?(near?'Landmark reached · inspect it (or press E).':distanceToLandmark().toFixed(1)+' game units to '+SITES[site].landmark):'';}
+function updateInspect(){const near=phase==='camp'&&distanceToLandmark()<3.5;$('inspect').disabled=!near;$('objective').textContent=phase==='camp'?(near?'Landmark reached · inspect 5-scale digital twin (or press E).':distanceToLandmark().toFixed(1)+' game units to '+SITES[site].landmark):'';}
 
 function display(){
  const s=SITES[site];$('site-note').textContent=s.detail;$('mission').textContent=s.task;$('place-label').textContent=s.name;
@@ -559,15 +578,20 @@ function step(dt){
   const east=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));
   const south=Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));
   if(east||south){
-   const next=toObj(sim.camp_step(JSON.stringify({dt,x:walk.x,z:walk.z,east,south,site_id:site})));
-   if(next.error)throw Error(next.error);
-   walk={x:next.x,z:next.z};
+   walk.x += east * dt * 3.6;
+   walk.z += south * dt * 3.6;
+   if(m&&m.talbingo_continuum_step_drive_and_walk){
+    try {
+     m.talbingo_continuum_step_drive_and_walk(JSON.stringify({
+      mode:'walk', dt, wish_dir:[east,-south], sprint:keys.has('shift'), pos_x:walk.x, pos_z:walk.z, site_id:site
+     }));
+    } catch(e) {}
+   }
    const walkY=m&&m.talbingo_terrain_elevation?m.talbingo_terrain_elevation(site,walk.x,walk.z):0.0;
    if(m&&m.talbingo_walker_pose_y)m.talbingo_walker_pose_y(portal,walk.x,walkY,walk.z);
    else m.talbingo_walker_pose(portal,walk.x,walk.z);
    const curLat=s.coords[0]+(walk.z-s.point[1])*0.00004,curLon=s.coords[1]+(walk.x-s.point[0])*0.00004;
-   $('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+s.elev+'m // CAMP EXPLORE';
-   if(next.blocked)message('Water or marsh edge · choose another path.');
+   $('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+s.elev+'m // ON FOOT [Press E near rover to board]';
   }
   const lerp=Math.min(1.0,dt*(reducedMotion?4.0:8.0));
   camera.x+=(walk.x-camera.x)*lerp;camera.z+=(walk.z-camera.z)*lerp;
@@ -594,7 +618,7 @@ function step(dt){
  const curLat=TALBINGO_BASE.lat+(s.coords[0]-TALBINGO_BASE.lat)*t,curLon=TALBINGO_BASE.lon+(s.coords[1]-TALBINGO_BASE.lon)*t,curElev=Math.round(TALBINGO_BASE.elev+(s.elev-TALBINGO_BASE.elev)*t);
  const deg=Math.round(((drive.heading*180/Math.PI)%360+360)%360);
  const card=['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];
- $('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+curElev+'m // HDG: '+deg+'° '+card;
+ $('telemetry-coord').textContent='GPS ['+curLat.toFixed(5)+'°, '+curLon.toFixed(5)+'°] // '+curElev+'m // HDG: '+deg+'° '+card+' [E to dismount]';
 
  const roadY=m&&m.talbingo_terrain_elevation?m.talbingo_terrain_elevation(site,drive.x,drive.z):0.0;
  if(m&&m.talbingo_vehicle_pose_y)m.talbingo_vehicle_pose_y(portal,drive.x,roadY,drive.z,drive.heading);
@@ -628,18 +652,101 @@ function step(dt){
   hzEl.style.display='none';
  }
 
- if(phase==='outbound'&&drive.x>=16.9){
-  phase='camp';drive.speed=0;keys.clear();
-  $('speed').textContent='0 units/s (0 km/h)';
-  focus(walk.x,walk.z);camera.zoom=.82;applyCamera();
-  message('Arrived. Walk to '+s.landmark+' with W A S D.');display();saveCheckpoint();
+ // Seamless multi-kilometer continuum highway transition
+ if(phase==='outbound'&&drive.x>=22.5){
+  if(site < 5){
+   site = site + 1;
+   drive.x = -5.0;
+   select.value = site;
+   message('Traversed along Snowy Mountains Hwy to ' + SITES[site].name + ' (' + SITES[site].distKm + ' km marker). Press [E] anytime to dismount!');
+   loadSite();
+   display();saveCheckpoint();
+  } else {
+   phase='camp';drive.speed=0;keys.clear();
+   $('speed').textContent='0 units/s (0 km/h)';
+   focus(walk.x,walk.z);camera.zoom=.82;applyCamera();
+   message('Arrived at final subalpine terminal: Three Mile Dam. Explore with W A S D or press [E] to dismount.');
+   display();saveCheckpoint();
+  }
  }
  if(phase==='inbound'&&(drive.x<=-5.4||next.warning==='route-end')){
-  phase='done';drive.speed=0;keys.clear();
-  $('speed').textContent='0 units/s (0 km/h)';
-  focus(8,0,true);
-  message('Round trip complete at '+s.name+'. Choose another campsite to play a different map.');display();saveCheckpoint();
+  if(site > 0){
+   site = site - 1;
+   drive.x = 21.5;
+   select.value = site;
+   message('Traversed north along Snowy Mountains Hwy to ' + SITES[site].name + '. Press [E] anytime to dismount.');
+   loadSite();
+   display();saveCheckpoint();
+  } else {
+   phase='done';drive.speed=0;keys.clear();
+   $('speed').textContent='0 units/s (0 km/h)';
+   focus(8,0,true);
+   message('Round trip complete along Talbingo continuum at '+s.name+'. Choose another campsite to explore.');
+   display();saveCheckpoint();
+  }
  }
+}
+
+function openInspector(scaleId = 1) {
+ let spec = null;
+ if (m && m.talbingo_specimen_dissection_json) {
+  try {
+   spec = JSON.parse(m.talbingo_specimen_dissection_json(site, scaleId));
+  } catch (e) {
+   console.warn('Dissection json error:', e);
+  }
+ }
+ if (!spec) return;
+
+ document.querySelectorAll('.scale-tab').forEach(t => {
+  const active = Number(t.dataset.scale) === scaleId;
+  t.style.background = active ? '#00f0ff' : 'rgba(15,23,42,0.8)';
+  t.style.color = active ? '#080d12' : '#f1f5f9';
+ });
+
+ let html = `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(0,240,255,0.08);border-left:3px solid #00f0ff;border-radius:6px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+   <h3 style="color:#00f0ff;margin:0;font-size:1.1rem;">${spec.title}</h3>
+   <span class="pill pill-gold" style="font-size:10px;">${spec.spatial_domain}</span>
+  </div>
+  <div style="color:#90b4cb;font-size:0.82rem;margin-top:2px;">Primary Taxon: <strong style="color:#38bdf8">${spec.primary_taxon}</strong></div>
+  <div style="color:#cbd5e1;font-size:0.86rem;margin-top:4px;">${spec.biological_system}</div>
+ </div>`;
+
+ html += `<h4 style="color:#38bdf8;margin:12px 0 8px;font-size:0.95rem;">Anatomical Layers & Ontological Tokens</h4>`;
+ html += `<div style="display:grid;gap:8px;max-height:36vh;overflow-y:auto;padding-right:4px;">`;
+ for (const layer of spec.layers_or_organs) {
+  html += `<div style="background:rgba(15,23,42,0.7);padding:8px 12px;border-radius:6px;border:1px solid rgba(0,240,255,0.15);">
+   <div style="display:flex;justify-content:space-between;align-items:center;">
+    <strong style="color:#e2e8f0;font-size:0.9rem;">${layer.name}</strong>
+    <span class="pill pill-green" style="font-size:10px;padding:2px 8px;">${layer.ontology_iri} (${layer.ontology_label})</span>
+   </div>
+   <div style="color:#94a3b8;font-size:0.82rem;margin-top:2px;">Role: ${layer.anatomical_role}</div>
+   <div style="color:#cbd5e1;font-size:0.8rem;margin-top:3px;font-style:italic;">${layer.histological_description}</div>
+  </div>`;
+ }
+ html += `</div>`;
+
+ if (spec.biophysical_equations && spec.biophysical_equations.length > 0) {
+  html += `<h4 style="color:#38bdf8;margin:12px 0 6px;font-size:0.95rem;">Biophysical & Morphometric Equations</h4>`;
+  html += `<div style="background:rgba(2,6,23,0.8);padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);font-family:monospace;font-size:0.82rem;color:#7dd3fc;">`;
+  for (const eq of spec.biophysical_equations) {
+   html += `<div style="margin-bottom:3px;">• ${eq}</div>`;
+  }
+  html += `</div>`;
+ }
+
+ if (spec.educational_takeaways && spec.educational_takeaways.length > 0) {
+  html += `<h4 style="color:#38bdf8;margin:12px 0 6px;font-size:0.95rem;">Key Ecological & Evolutionary Insights</h4>`;
+  html += `<ul style="margin:0;padding-left:18px;color:#94a3b8;font-size:0.82rem;line-height:1.4;">`;
+  for (const note of spec.educational_takeaways) {
+   html += `<li style="margin-bottom:4px;">${note}</li>`;
+  }
+  html += `</ul>`;
+ }
+
+ $('inspector-body').innerHTML = html;
+ $('inspector-modal').style.display = 'flex';
 }
 
 select.addEventListener('change',()=>{if(m&&portal)loadSite().catch(e=>message('Scene load failed: '+String(e)))});
@@ -647,13 +754,21 @@ $('start').onclick=()=>{try{begin(true)}catch(e){message(String(e))}};
 $('return').onclick=()=>{try{begin(false)}catch(e){message(String(e))}};
 $('restart').onclick=()=>{if(m&&portal)reset()};
 $('inspect').onclick=()=>{
- if(phase!=='camp'||distanceToLandmark()>=2.2)return;
  const s=SITES[site];inspected=true;holosonic.chime(528,.9);
  focus(s.point[0],s.point[1]);
- message('Inspect '+s.landmark+'. Look around, then choose a site response.');display();saveCheckpoint();
+ message('Inspecting 5-Scale Botanical & Zoological Twin at '+s.landmark+'.');
+ openInspector(1);
+ display();saveCheckpoint();
 };
 
-// Journal & Settings Modal bindings:
+// Journal, Settings & Inspector Modal bindings:
+$('open-inspector-btn').onclick=()=>{ openInspector(1); };
+$('close-inspector-btn').onclick=()=>{ $('inspector-modal').style.display='none'; };
+document.querySelectorAll('.scale-tab').forEach(b => {
+ b.onclick = () => openInspector(Number(b.dataset.scale));
+});
+$('inspector-modal').onclick=e=>{ if(e.target===$('inspector-modal')) $('inspector-modal').style.display='none'; };
+
 $('open-journal-btn').onclick=()=>{updateJournal();$('journal-modal').style.display='flex';};
 $('close-journal-btn').onclick=()=>{$('journal-modal').style.display='none';};
 $('open-settings-btn').onclick=()=>{$('settings-modal').style.display='flex';};
@@ -672,16 +787,39 @@ window.addEventListener('keydown',e=>{
   keys.add(k);keyHeld[k]=true;e.preventDefault();
  }
  if(k==='e'||k==='enter'){
-  if(phase==='camp'&&distanceToLandmark()<2.2&&!inspected)$('inspect').click();
-  else if(phase==='camp'&&inspected&&!acted){
-   const b=document.querySelector('#choices button[data-correct="true"]');if(b&&!b.disabled)b.click();
+  if(phase==='outbound'||phase==='inbound'){
+   // Dismount from rover anywhere!
+   phase='camp';
+   drive.speed=0;
+   walk.x=drive.x-1.5;
+   walk.z=drive.z;
+   $('speed').textContent='0 units/s (0 km/h)';
+   focus(walk.x,walk.z);camera.zoom=.82;applyCamera();
+   message('Dismounted from field rover! Walk with W A S D. Press [E] near rover to remount, or approach landmark to inspect.');
+   display();
+   return;
+  }
+  if(phase==='camp'){
+   const distToRover = Math.hypot(walk.x - drive.x, walk.z - drive.z);
+   if(distToRover < 4.0 && (!inspected || distanceToLandmark() >= 3.5)){
+    phase='outbound';
+    message('Remounted field rover! Driving along the regional continuum. Press [E] anytime to dismount.');
+    display();
+    return;
+   }
+   if(distanceToLandmark()<3.5){
+    openInspector(1);
+    if($('inspect')&&!$('inspect').disabled)$('inspect').click();
+   } else if(inspected&&!acted){
+    const b=document.querySelector('#choices button[data-correct="true"]');if(b&&!b.disabled)b.click();
+   }
   }
  }
  if(k==='c')cycleCamera();
  if(k==='m'){$('mute-check').checked=!$('mute-check').checked;isMuted=$('mute-check').checked;holosonic.updateBadge();}
  if(k==='j'){$('journal-modal').style.display=$('journal-modal').style.display==='flex'?'none':'flex';updateJournal();}
  if(k==='r')$('restart').click();
- if(k==='escape'){$('journal-modal').style.display='none';$('settings-modal').style.display='none';}
+ if(k==='escape'){$('journal-modal').style.display='none';$('settings-modal').style.display='none';$('inspector-modal').style.display='none';}
 });
 window.addEventListener('keyup',e=>{const k=e.key.toLowerCase();keys.delete(k);keyHeld[k]=false;});
 window.addEventListener('blur',()=>keys.clear());

@@ -14,17 +14,20 @@ pub(crate) fn road_z(site: u8, x: f32) -> f32 {
         0.48
     } else if x < 9.6 {
         0.48 + (x - 9.0) * 0.12
+    } else if x <= 22.3 {
+        0.54 - 0.29 * (((x - 9.6) / 12.7) * std::f32::consts::TAU).sin()
     } else {
-        0.54 - 0.29 * (((x - 9.6) / 12.7).clamp(0.0, 1.0) * std::f32::consts::TAU).sin()
+        // Continuous regional highway curve continuation across multi-kilometer continuum
+        0.54 + 0.45 * (((x - 22.3) / 18.0) * std::f32::consts::TAU).sin()
     };
-    let t = ((x + 5.45) / 27.1).clamp(0.0, 1.0);
+    let t = (x + 5.45) / 27.1;
     let bend = match site {
         1 => 0.55 * (t * std::f32::consts::TAU).sin(),
         2 => -0.72 * (t * std::f32::consts::PI).sin(),
         3 => 0.80 * (t * std::f32::consts::PI).sin(),
         4 => 1.03 * (t * std::f32::consts::TAU).sin(),
         5 => -0.63 * (t * std::f32::consts::TAU * 2.0).sin(),
-        _ => 0.0,
+        _ => 0.25 * (t * 0.5 * std::f32::consts::PI).sin(),
     };
     base + bend
 }
