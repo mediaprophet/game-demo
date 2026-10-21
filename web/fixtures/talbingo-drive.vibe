@@ -1,6 +1,16 @@
 module <https://civics.au/game/modules/talbingo_drive>;
 import "vibe:0.1/math" as m;
-requires [ capability("capability.invoke"), capability("PhysicsWorkbench.compute") ];
+requires [
+    capability("capability.invoke"),
+    capability("PhysicsWorkbench.compute"),
+    capability("BotanicalAnatomy.synthesize_organ_10d"),
+    capability("BotanicalAnatomy.dissect_tissue_layer"),
+    capability("BotanicalAnatomy.evaluate_anthesis"),
+    capability("ZoologicalAnatomy.synthesize_vertebrate_10d"),
+    capability("ZoologicalAnatomy.evaluate_tendon_strain"),
+    capability("BiologicalOntology.query_callout_pin"),
+    capability("WorldContinuum.locate_study_site")
+];
 
 pure fn choose_float(condition: bool, when_true: f64, when_false: f64) -> f64 {
     if condition { return when_true; }
@@ -345,5 +355,34 @@ effect fn drive_step(input: Record) budget(steps: 10000) -> Record {
         trailer_heading: trailer_heading,
         trailer_wheel_angle: input.trailer_wheel_angle - signed_distance * m.cos(articulation) / 0.31,
         trailer_articulation: articulation, trailer_warning: trailer_warning
+    };
+}
+
+effect fn talbingo_dissect_specimen(scale: i64, explode_01: f64, cutaway_01: f64, anthesis_01: f64, pin_index: i64) budget(steps: 5000) -> Record {
+    let organ = capability.invoke("BotanicalAnatomy.synthesize_organ_10d", {
+        species_id: "corymbia_aparrerinja",
+        scale: scale,
+        explode_01: explode_01,
+        cutaway_01: cutaway_01,
+        anthesis_01: anthesis_01
+    });
+    let tissue = capability.invoke("BotanicalAnatomy.dissect_tissue_layer", {
+        scale: scale,
+        explode_01: explode_01,
+        cutaway_01: cutaway_01,
+        layer_index: pin_index
+    });
+    let anthesis = capability.invoke("BotanicalAnatomy.evaluate_anthesis", {
+        anthesis_01: anthesis_01
+    });
+    let pin = capability.invoke("BiologicalOntology.query_callout_pin", {
+        scale: scale,
+        pin_index: pin_index
+    });
+    return {
+        organ: organ,
+        tissue: tissue,
+        anthesis: anthesis,
+        callout_pin: pin
     };
 }
