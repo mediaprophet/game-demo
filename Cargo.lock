@@ -1115,6 +1115,7 @@ dependencies = [
 [[package]]
 name = "etalon"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "arrayvec",
  "bitflags 2.13.2",
@@ -1142,6 +1143,7 @@ dependencies = [
 [[package]]
 name = "etalon-agent"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "bytemuck",
  "etalon",
@@ -1153,6 +1155,7 @@ dependencies = [
 [[package]]
 name = "etalon-core"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -1188,6 +1191,7 @@ dependencies = [
 [[package]]
 name = "etalon-core-deps-apple"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "etalon-hal",
 ]
@@ -1195,6 +1199,7 @@ dependencies = [
 [[package]]
 name = "etalon-core-deps-emscripten"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "etalon-hal",
 ]
@@ -1202,6 +1207,7 @@ dependencies = [
 [[package]]
 name = "etalon-core-deps-linux-android-bsd"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "etalon-hal",
 ]
@@ -1209,6 +1215,7 @@ dependencies = [
 [[package]]
 name = "etalon-core-deps-windows"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "etalon-hal",
 ]
@@ -1216,6 +1223,7 @@ dependencies = [
 [[package]]
 name = "etalon-hal"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -1267,6 +1275,7 @@ dependencies = [
 [[package]]
 name = "etalon-naga-bridge"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "etalon-types",
  "naga",
@@ -1275,6 +1284,7 @@ dependencies = [
 [[package]]
 name = "etalon-nquin"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "bytemuck",
  "etalon",
@@ -1285,6 +1295,7 @@ dependencies = [
 [[package]]
 name = "etalon-render"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "bytemuck",
  "etalon",
@@ -1296,6 +1307,7 @@ dependencies = [
 [[package]]
 name = "etalon-sync"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "cfg-if",
  "lock_api",
@@ -1308,6 +1320,7 @@ dependencies = [
 [[package]]
 name = "etalon-tensor"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "bytemuck",
  "etalon",
@@ -1319,6 +1332,7 @@ dependencies = [
 [[package]]
 name = "etalon-types"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "bitflags 2.13.2",
  "bytemuck",
@@ -1335,6 +1349,7 @@ dependencies = [
 [[package]]
 name = "etalon-wasm"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "bytemuck",
  "etalon-types",
@@ -1345,6 +1360,7 @@ dependencies = [
 [[package]]
 name = "etalon-wgsl-forge"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "blake3",
  "bytemuck",
@@ -2468,6 +2484,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -2493,6 +2510,7 @@ dependencies = [
 [[package]]
 name = "naga-types"
 version = "0.0.1"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "bytemuck",
  "hashbrown 0.17.1",
@@ -3031,6 +3049,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d595e54a326bc53c1c197b32d295e14b169e3cfeaa8dc82b529f947fba6bcf5"
 
 [[package]]
+name = "qualia-app-contract"
+version = "0.0.40"
+dependencies = [
+ "ciborium",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "qualia-audio"
 version = "0.0.40"
 
@@ -3040,6 +3068,7 @@ version = "0.0.40"
 dependencies = [
  "chrono",
  "hex",
+ "qualia-app-contract",
  "serde",
  "serde_json",
  "sha2 0.11.1",
@@ -3100,6 +3129,7 @@ dependencies = [
  "jpeg-decoder",
  "js-sys",
  "keyring",
+ "keyring-core",
  "libc",
  "log",
  "lz4_flex",
@@ -3149,6 +3179,7 @@ dependencies = [
  "web-sys",
  "wgpu",
  "windows",
+ "windows-native-keyring-store",
  "x25519-dalek 3.0.0",
  "zeroize",
  "zstd",
@@ -3469,6 +3500,7 @@ dependencies = [
 name = "rolling-commons-shell"
 version = "0.0.1"
 dependencies = [
+ "bytemuck",
  "js-sys",
  "qualia-core-db",
  "qualia-geospatial",
@@ -3476,6 +3508,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
+ "sha2 0.10.9",
  "vibe",
  "vibe-wasm",
  "wasm-bindgen",
@@ -4637,6 +4670,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "30.0.0"
+source = "git+https://github.com/mediaprophet/etalon.git?branch=qualia-main#4e77ca3f71b74c10c635b7a1f0ddd923590fdc61"
 dependencies = [
  "etalon",
 ]
@@ -5233,3 +5267,11 @@ dependencies = [
  "syn 3.0.6",
  "winnow",
 ]
+
+[[patch.unused]]
+name = "naga"
+version = "0.0.1"
+
+[[patch.unused]]
+name = "wgpu"
+version = "30.0.0"

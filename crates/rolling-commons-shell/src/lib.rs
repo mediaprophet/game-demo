@@ -15,11 +15,22 @@ mod animation_bridge;
 mod ants;
 mod asset_catalog;
 mod asset_compile;
+pub mod asset_forge_workbench;
 mod camera_presentation;
+mod candidate_import;
+pub use candidate_import::inspect_candidate_import;
 mod camp_home;
 mod campaign_simulation;
 mod character_simulation;
+pub mod civics_app;
 pub mod continuum_bridge;
+pub mod ecopunk_bridge;
+#[path = "../../../../ecopunk/crates/ecopunk-terrain/src/botanical_anatomy.rs"]
+pub mod botanical_anatomy;
+#[path = "../../../../ecopunk/crates/ecopunk-terrain/src/fauna_animation_rig.rs"]
+pub mod fauna_animation_rig;
+#[path = "../../../../ecopunk/crates/ecopunk-terrain/src/zoological_anatomy.rs"]
+pub mod zoological_anatomy;
 mod drive_contact_integration;
 mod drive_contacts;
 mod drive_session;
@@ -57,6 +68,8 @@ mod workshop_structure;
 
 pub use campaign_simulation::CampaignSimulation;
 pub use character_simulation::CharacterSimulation;
+pub use civics_app::CivicsExperienceApp;
+pub use ecopunk_bridge::{talbingo_dissection_10d, talbingo_high_grade_sector_10d};
 pub use input_bridge::GameInputBridge;
 pub use session_journal::GameSessionJournal;
 pub use variant_resolver::EntityFamilyManifestWrapper;
@@ -65,6 +78,31 @@ pub use variant_resolver::EntityFamilyManifestWrapper;
 #[wasm_bindgen]
 pub fn talbingo_scene(site: u8) -> Result<JsValue, JsValue> {
     talbingo_scenes::build(site)
+}
+
+/// Build the interactive 3D Rig & Solar Workshop service-bay assembly scene
+/// for the specified touring rig (`0..=3`) and component state.
+#[wasm_bindgen]
+pub fn workshop_scene(
+    rig: u8,
+    hood: bool,
+    hose: bool,
+    radiator: i8,
+    filled: bool,
+    controller: bool,
+    fuse: bool,
+    panel: bool,
+) -> Result<JsValue, JsValue> {
+    workshop_assembly::scene(workshop_assembly::VisualState {
+        rig: rig.min(3),
+        hood,
+        hose,
+        radiator: radiator.clamp(-1, 2),
+        filled,
+        controller,
+        fuse,
+        panel,
+    })
 }
 
 /// Present a VibeScript accepted Talbingo vehicle pose through Qualia's
@@ -1825,7 +1863,106 @@ impl GamePortal {
     pub fn new(canvas: HtmlCanvasElement) -> Result<GamePortal, JsValue> {
         let mut inner = qualia_core_db::QualiaPortal::new(canvas)?;
         inner.set_preserve_authored_frame(false);
+        crate::ecopunk_bridge::apply_sector_environment_to_portal(&mut inner, "kestrel_flats");
         Ok(GamePortal { inner })
+    }
+
+    /// Apply physically energy-conserving Australian IBL environment probes, directional sun shadows,
+    /// and SSAO for a named sector (`"kestrel_flats"`, `"saltwind_reach"`, `"northern_highlands"`,
+    /// `"talbingo"`, `"jounama_karst"`, `"yarrangobilly"`, `"three_mile_dam"`, `"dissection_lab"`, `"workshop"`).
+    pub fn set_environment_sector(&mut self, sector_id: &str) -> Result<bool, JsValue> {
+        let (packed_probes, fallback_radiance) =
+            crate::ecopunk_bridge::pack_sector_environment_probes(sector_id);
+        self.inner.set_shadows_enabled(true);
+        self.inner.set_screen_space_ao_enabled(true);
+        self.inner.set_screen_space_ao(0.45, 0.85, 0.02);
+        self.inner
+            .set_environment_probe_data(&packed_probes, &fallback_radiance)
+    }
+
+    /// Build and load a 3D `.10d` Living Container for any of the 5 educational dissection scales (`1..=5`)
+    /// directly into the `GamePortal` 3D viewport, returning the dissection metadata receipt.
+    pub fn load_dissection_scale(
+        &mut self,
+        scale: u8,
+        explode_01: f32,
+        cutaway_01: f32,
+        anthesis_01: f32,
+        peel_01: f32,
+        archetype_idx: u8,
+    ) -> Result<JsValue, JsValue> {
+        let (bytes, meta) = crate::ecopunk_bridge::build_dissection_scale_10d(
+            scale,
+            explode_01,
+            cutaway_01,
+            anthesis_01,
+            peel_01,
+            archetype_idx,
+        )
+        .map_err(|e| JsValue::from_str(&e))?;
+        crate::ecopunk_bridge::apply_sector_environment_to_portal(
+            &mut self.inner,
+            "dissection_lab",
+        );
+        self.inner.set_preserve_authored_frame(false);
+        self.inner.set_water_geometry(&[], &[])?;
+        let assets = js_sys::Array::new();
+        let item = js_sys::Object::new();
+        js_sys::Reflect::set(&item, &"id".into(), &"rc:asset/dissection".into())?;
+        js_sys::Reflect::set(
+            &item,
+            &"bytes".into(),
+            &js_sys::Uint8Array::from(bytes.as_slice()),
+        )?;
+        js_sys::Reflect::set(&item, &"r".into(), &JsValue::from_f64(1.0))?;
+        js_sys::Reflect::set(&item, &"g".into(), &JsValue::from_f64(1.0))?;
+        js_sys::Reflect::set(&item, &"b".into(), &JsValue::from_f64(1.0))?;
+        js_sys::Reflect::set(&item, &"a".into(), &JsValue::from_f64(1.0))?;
+        assets.push(&item);
+        let load_receipt = self.inner.load_assets_colored(&assets)?;
+        let out = js_sys::Object::new();
+        let meta_js = serde::Serialize::serialize(
+            &meta,
+            &serde_wasm_bindgen::Serializer::json_compatible(),
+        )
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+        js_sys::Reflect::set(&out, &"meta".into(), &meta_js)?;
+        js_sys::Reflect::set(&out, &"loadReceipt".into(), &load_receipt)?;
+        Ok(out.into())
+    }
+
+    /// Build and load the high-grade Ecopunk `.10d` Living Container scene (with 96×72 geomorphological
+    /// Talbingo DEM, 256×256 procedural PBR textures, Australian IBL `EnvironmentProbeSet`,
+    /// species-authentic flora/fauna, CAD 4WD Rover, and articulated 3D walker) for a Talbingo / Kosciuszko study site (`0..=5`).
+    pub fn load_talbingo_high_grade_sector(&mut self, site_index: u8) -> Result<JsValue, JsValue> {
+        let (sector_key, sector_title) =
+            crate::ecopunk_bridge::sector_key_for_study_site(site_index);
+        let scene = crate::talbingo_scenes::build(site_index.min(5))?;
+        crate::ecopunk_bridge::apply_sector_environment_to_portal(&mut self.inner, sector_key);
+        let assets = js_sys::Reflect::get(&scene, &"assets".into())?
+            .dyn_into::<js_sys::Array>()
+            .map_err(|_| JsValue::from_str("talbingo scene assets must be an Array"))?;
+        let textures = js_sys::Reflect::get(&scene, &"textures".into())?
+            .dyn_into::<js_sys::Array>()
+            .map_err(|_| JsValue::from_str("talbingo scene textures must be an Array"))?;
+        let load_receipt = self.load_scene_textured(&assets, &textures)?;
+        if let Ok(tensor_val) = js_sys::Reflect::get(&scene, &"tensor".into()) {
+            if let Ok(tensor_arr) = tensor_val.dyn_into::<js_sys::Uint8Array>() {
+                let bytes = tensor_arr.to_vec();
+                if !bytes.is_empty() {
+                    self.upload_tensor(&bytes)?;
+                }
+            }
+        }
+        let out = js_sys::Object::new();
+        js_sys::Reflect::set(&out, &"sectorKey".into(), &JsValue::from_str(sector_key))?;
+        js_sys::Reflect::set(
+            &out,
+            &"sectorTitle".into(),
+            &JsValue::from_str(sector_title),
+        )?;
+        js_sys::Reflect::set(&out, &"loadReceipt".into(), &load_receipt)?;
+        Ok(out.into())
     }
 
     /// Load a sealed `.10d` container into the scene (CRC + provenance

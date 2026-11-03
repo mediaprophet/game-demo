@@ -22,6 +22,8 @@ serde = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 serde_json = { workspace = true }
 js-sys = { workspace = true }
+bytemuck = { version = "1", features = ["derive"] }
+sha2 = "0.10"
 wasm-bindgen-futures = "0.4.79"
 web-sys = { workspace = true, features = [
     "console", "Window", "Navigator", "Performance", "HtmlCanvasElement",

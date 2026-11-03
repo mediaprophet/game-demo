@@ -3,305 +3,152 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <title>Maslows Challenge — QualiaDB WASM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <title>dev.civics.au — Community Grounds &amp; Regional Corridor (QualiaDB + VibeScript + Ecopunk .10d)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #080d12; color: #e2e8f0; font-family: 'Outfit', sans-serif; }
-    #scene { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
-    
-    /* Minimalist Glassmorphic Telemetry HUD */
-    .hud-overlay {
-      position: absolute; top: env(safe-area-inset-top, 16px); left: env(safe-area-inset-left, 16px);
-      display: flex; gap: 10px; align-items: center; z-index: 10;
-      background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 13px; font-weight: 600; letter-spacing: 0.02em; pointer-events: none;
-    }
-    .hud-title { color: #38bdf8; font-family: 'Space Grotesk', sans-serif; }
-    .badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; text-transform: uppercase; font-weight: 700; }
-    .badge-webgpu { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
-    .badge-webgl2 { background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
-    .badge-cpu { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-    /* Scene / Camera Controls */
-    .hud-controls {
-      position: absolute; top: env(safe-area-inset-top, 16px); right: env(safe-area-inset-right, 16px);
-      display: flex; gap: 8px; z-index: 10;
-    }
-    .hud-btn {
-      background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.12); color: #f1f5f9; padding: 8px 14px; border-radius: 8px;
-      font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
-    }
-    .hud-btn:hover { background: rgba(30, 41, 59, 0.85); border-color: rgba(56, 189, 248, 0.4); }
-    .hud-btn:active { transform: scale(0.96); }
-
-    /* Touch Controls (Virtual D-Pad & Actions) */
-    .touch-controls {
-      display: none; position: absolute; bottom: env(safe-area-inset-bottom, 24px); left: 0; right: 0;
-      padding: 0 24px; pointer-events: none; justify-content: space-between; align-items: flex-end; z-index: 10;
-    }
-    @media (pointer: coarse) { .touch-controls { display: flex; } }
-    
-    .touch-dpad {
-      display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 52px);
-      gap: 6px; pointer-events: auto;
-    }
-    .touch-btn {
-      background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px;
-      display: flex; align-items: center; justify-content: center; font-size: 18px; color: #94a3b8;
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0c1317; }
+    #scene, #hud {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
       touch-action: none;
     }
-    .touch-btn:active { background: rgba(56, 189, 248, 0.35); color: #ffffff; border-color: #38bdf8; }
-
-    .touch-actions { display: flex; gap: 12px; pointer-events: auto; margin-bottom: 8px; }
-    .touch-action-btn {
-      width: 64px; height: 64px; border-radius: 50%;
-      background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.18); display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 14px; color: #e2e8f0; touch-action: none;
-    }
-    .touch-action-btn:active { background: rgba(56, 189, 248, 0.4); color: #fff; transform: scale(0.95); }
-
-    /* Loading Overlay */
-    #loading {
-      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: #080d12; z-index: 100; transition: opacity 0.4s ease;
-    }
-    #loading.hidden { opacity: 0; pointer-events: none; }
-    .spinner {
-      width: 48px; height: 48px; border: 3px solid rgba(56, 189, 248, 0.2);
-      border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    #scene { z-index: 1; }
+    #hud { z-index: 2; cursor: pointer; }
   </style>
 </head>
 <body>
   <canvas id="scene"></canvas>
-
-  <div id="loading">
-    <div class="spinner"></div>
-    <div style="font-family:'Space Grotesk',sans-serif; font-size:16px; letter-spacing:0.05em; color:#94a3b8;">
-      QUALIA DETERMINISTIC WASM
-    </div>
-  </div>
-
-  <div class="hud-overlay">
-    <span class="hud-title">MASLOWS CHALLENGE</span>
-    <span id="tier-badge" class="badge badge-cpu">PROBING</span>
-    <span id="fps-counter" style="color:#64748b; font-size:11px;">60 FPS</span>
-  </div>
-
-  <div class="hud-controls">
-    <button class="hud-btn" id="btn-campsite">Camp</button>
-    <button class="hud-btn" id="btn-drive">Drive</button>
-    <button class="hud-btn" id="btn-inspect">Inspect</button>
-    <button class="hud-btn" id="btn-sky">Sky</button>
-  </div>
-
-  <div class="touch-controls">
-    <div class="touch-dpad">
-      <div></div>
-      <div class="touch-btn" data-key="KeyW">▲</div>
-      <div></div>
-      <div class="touch-btn" data-key="KeyA">◀</div>
-      <div class="touch-btn" data-key="KeyS">▼</div>
-      <div class="touch-btn" data-key="KeyD">▶</div>
-    </div>
-    <div class="touch-actions">
-      <div class="touch-action-btn" data-key="Space">BRAKE</div>
-      <div class="touch-action-btn" data-key="KeyE">ACT</div>
-    </div>
-  </div>
+  <canvas id="hud"></canvas>
 
   <script type="module">
-    let m, portal, sim, lastTime = performance.now(), frameCount = 0, lastFpsTime = performance.now();
-    let currentSite = 1, currentSky = 1;
-    const canvas = document.getElementById('scene');
-    const tierBadge = document.getElementById('tier-badge');
-    const fpsCounter = document.getElementById('fps-counter');
-    const loading = document.getElementById('loading');
-    const keys = new Set();
+    const WASM_BUILD = 'ecopunk_v5_native_forge';
+    const PRIMARY_ASSETS = [
+      'sites/00-talbingo-scene.10d',
+      'sites/00-talbingo-water.10d',
+      'models/growing-station.10d',
+      'models/swamp-wallaby-r1.10d',
+      'models/eucalypt-spray.10d',
+      'models/corymbia-whole-organism.10d',
+      'lab/scale-1-archetype-0-state-0.10d',
+      'lab/scale-2-archetype-0-state-1.10d',
+      'lab/scale-3-archetype-0-state-1.10d',
+      'lab/scale-4-archetype-0-state-1.10d',
+      'lab/scale-5-archetype-0-state-1.10d',
+    ];
+    const SECONDARY_ASSETS = [
+      'sites/02-jounama_karst-scene.10d',
+      'sites/02-jounama_karst-water.10d',
+      'sites/03-yarrangobilly-scene.10d',
+      'sites/03-yarrangobilly-water.10d',
+      'sites/05-three_mile_dam-scene.10d',
+      'sites/05-three_mile_dam-water.10d',
+      'sites/06-sydney_sandstone-scene.10d',
+      'sites/06-sydney_sandstone-water.10d',
+      'sites/07-noosa_headland-scene.10d',
+      'sites/07-noosa_headland-water.10d',
+      'lab/scale-5-archetype-1-state-1.10d',
+      'lab/scale-5-archetype-2-state-1.10d',
+      'lab/scale-5-archetype-3-state-1.10d',
+      'lab/scale-5-archetype-4-state-1.10d',
+    ];
 
-    function resize() {
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      canvas.width = Math.round(canvas.clientWidth * dpr);
-      canvas.height = Math.round(canvas.clientHeight * dpr);
+    async function fetchAsset(key) {
+      const res = await fetch(`./assets/ecopunk/${key}`);
+      if (!res.ok) return null;
+      return [key, new Uint8Array(await res.arrayBuffer())];
     }
 
-    async function init() {
-      resize();
-      window.addEventListener('resize', resize);
+    const primaryPromise = Promise.all(PRIMARY_ASSETS.map(fetchAsset));
+    const mod = await import(`./pkg/rolling_commons_shell.js?v=${WASM_BUILD}`);
+    await mod.default({ module_or_path: new URL(`./pkg/rolling_commons_shell_bg.wasm?v=${WASM_BUILD}`, import.meta.url) });
+    mod.init_panic_hook_shell();
 
-      m = await import('./pkg/rolling_commons_shell.js');
-      await m.default({ module_or_path: new URL('./pkg/rolling_commons_shell_bg.wasm', import.meta.url) });
+    const sceneCanvas = document.getElementById('scene');
+    const hudCanvas = document.getElementById('hud');
 
-      let webgpuArmed = false;
-      if (navigator.gpu && m.init_webgpu) {
-        try { webgpuArmed = (await m.init_webgpu(canvas)) === true; } catch (e) {}
+    function syncSize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.max(320, Math.floor(window.innerWidth * dpr));
+      const h = Math.max(240, Math.floor(window.innerHeight * dpr));
+      if (sceneCanvas.width !== w || sceneCanvas.height !== h) {
+        sceneCanvas.width = w;
+        sceneCanvas.height = h;
       }
-
-      if (!webgpuArmed) {
-        const fresh = document.createElement('canvas');
-        fresh.id = canvas.id;
-        fresh.style.cssText = canvas.style.cssText;
-        canvas.replaceWith(fresh);
-        resize();
-        if (m.init_webgl2) { try { m.init_webgl2(fresh); } catch (e) {} }
-        portal = new m.GamePortal(fresh);
-      } else {
-        portal = new m.GamePortal(canvas);
-      }
-
-      const tier = portal.tier();
-      if (tier >= 2) {
-        tierBadge.textContent = 'WEBGPU';
-        tierBadge.className = 'badge badge-webgpu';
-      } else if (tier === 1) {
-        tierBadge.textContent = 'WEBGL2';
-        tierBadge.className = 'badge badge-webgl2';
-      } else {
-        tierBadge.textContent = 'CPU';
-        tierBadge.className = 'badge badge-cpu';
-      }
-
-      portal.set_sky_preset(currentSky);
-      portal.set_lighting(0.45, 0.85, 0.35, 1.25, 0.38);
-      portal.set_exposure_compensation(0.25);
-      portal.set_shadows_enabled(tier >= 2);
-      portal.set_screen_space_ao_enabled(true);
-
-      let inputBridge = null;
-      if (m.GameInputBridge) {
-        try { inputBridge = new m.GameInputBridge(); } catch(e) {}
-      }
-
-      await loadScene(currentSite);
-
-      // Key and Touch Listeners
-      window.addEventListener('keydown', e => {
-        keys.add(e.code);
-        if (inputBridge) inputBridge.key_down(e.keyCode || 0);
-      });
-      window.addEventListener('keyup', e => {
-        keys.delete(e.code);
-        if (inputBridge) inputBridge.key_up(e.keyCode || 0);
-      });
-
-      document.querySelectorAll('[data-key]').forEach(el => {
-        const k = el.dataset.key;
-        el.addEventListener('pointerdown', e => {
-          el.setPointerCapture(e.pointerId);
-          keys.add(k);
-          if (inputBridge) {
-            if (k === 'KeyW') inputBridge.key_down(87);
-            if (k === 'KeyS') inputBridge.key_down(83);
-            if (k === 'KeyA') inputBridge.key_down(65);
-            if (k === 'KeyD') inputBridge.key_down(68);
-            if (k === 'Space') inputBridge.key_down(32);
-            if (k === 'KeyE') inputBridge.key_down(69);
-          }
-        });
-        for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-          el.addEventListener(ev, () => {
-            keys.delete(k);
-            if (inputBridge) {
-              if (k === 'KeyW') inputBridge.key_up(87);
-              if (k === 'KeyS') inputBridge.key_up(83);
-              if (k === 'KeyA') inputBridge.key_up(65);
-              if (k === 'KeyD') inputBridge.key_up(68);
-              if (k === 'Space') inputBridge.key_up(32);
-              if (k === 'KeyE') inputBridge.key_up(69);
-            }
-          });
-        }
-      });
-
-      let isDriving = false;
-      let driveX = 0.0, driveZ = 0.0, driveHdg = 0.0;
-
-      document.getElementById('btn-campsite').onclick = () => { currentSite = (currentSite % 6) + 1; loadScene(currentSite); };
-      document.getElementById('btn-sky').onclick = () => { currentSky = (currentSky % 3) + 1; portal.set_sky_preset(currentSky); };
-      document.getElementById('btn-drive').onclick = () => {
-        isDriving = !isDriving;
-        document.getElementById('btn-drive').textContent = isDriving ? 'Drive [ON]' : 'Drive';
-        document.getElementById('btn-drive').style.color = isDriving ? '#38bdf8' : '#f1f5f9';
-      };
-      document.getElementById('btn-inspect').onclick = () => {
-        if (m && m.talbingo_specimen_dissection_json) {
-          try {
-            const spec = JSON.parse(m.talbingo_specimen_dissection_json(currentSite - 1, 1));
-            alert(`${spec.title}\nDomain: ${spec.spatial_domain} · Taxon: ${spec.primary_taxon}\nLayers:\n${spec.layers_or_organs.map(l => '• ' + l.name + ' [' + l.ontology_iri + ']').join('\n')}\n\nEquations:\n${spec.biophysical_equations.join('\n')}`);
-          } catch (e) {
-            console.warn('Inspect error:', e);
-          }
-        }
-      };
-
-      loading.classList.add('hidden');
-      requestAnimationFrame(renderLoop);
-    }
-
-    async function loadScene(siteId) {
-      try {
-        const scene = m.talbingo_scene(siteId);
-        if (scene) { portal.load_scene(scene); }
-      } catch (e) {
-        console.warn('Scene load fallback:', e);
+      if (hudCanvas.width !== window.innerWidth || hudCanvas.height !== window.innerHeight) {
+        hudCanvas.width = Math.max(320, window.innerWidth);
+        hudCanvas.height = Math.max(240, window.innerHeight);
       }
     }
+    syncSize();
+    window.addEventListener('resize', syncSize);
 
-    function renderLoop(now) {
-      const dt = Math.min(0.1, (now - lastTime) / 1000.0);
-      lastTime = now;
-      frameCount++;
-
-      if (now - lastFpsTime >= 500) {
-        const fps = Math.round((frameCount * 1000) / (now - lastFpsTime));
-        fpsCounter.textContent = `${fps} FPS`;
-        frameCount = 0;
-        lastFpsTime = now;
-      }
-
-      try {
-        if (isDriving && m && portal) {
-          const throttle = (keys.has('KeyW') || keys.has('ArrowUp') ? 1.0 : 0.0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1.0 : 0.0);
-          const steer = (keys.has('KeyD') || keys.has('ArrowRight') ? 1.0 : 0.0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1.0 : 0.0);
-          const brake = keys.has('Space') ? 1.0 : 0.0;
-          if (m.talbingo_continuum_step_drive_and_walk) {
-            try {
-              const res = m.talbingo_continuum_step_drive_and_walk(JSON.stringify({
-                mode: 'drive', dt, throttle, steer, brake, site_id: currentSite - 1
-              }));
-              if (res && res.vehicle) {
-                driveX = res.vehicle.x;
-                driveZ = res.vehicle.z;
-                driveHdg = res.vehicle.heading;
-                const y = m.talbingo_continuous_corridor_elevation ? m.talbingo_continuous_corridor_elevation(currentSite - 1, driveX, driveZ) : res.vehicle.y;
-                if (m.talbingo_vehicle_pose_y) {
-                  m.talbingo_vehicle_pose_y(portal, driveX, y, driveZ, driveHdg);
-                }
-              }
-            } catch(e) {}
-          }
-        }
-        portal.tick(canvas, Math.min(50, dt * 1000));
-        if (inputBridge) inputBridge.step_frame();
-      } catch (e) {
-        console.error('Portal tick error:', e);
-      }
-
-      requestAnimationFrame(renderLoop);
+    try { await mod.init_webgpu(sceneCanvas); } catch (_) {
+      try { mod.init_webgl2(sceneCanvas); } catch (_) {}
     }
 
-    init().catch(err => {
-      console.error('Game initialization failed:', err);
-      loading.innerHTML = `<div style="color:#ef4444; font-weight:600;">Engine initialization failed: ${err.message || err}</div>`;
+    const app = new mod.CivicsExperienceApp(sceneCanvas, hudCanvas);
+    for (const pair of await primaryPromise) {
+      if (pair) app.admit_prebuilt_asset(pair[0], pair[1]);
+    }
+    app.activate_initial_scene();
+    window.__civicsApp = app;
+
+    Promise.all(SECONDARY_ASSETS.map(fetchAsset)).then(list => {
+      for (const pair of list) {
+        if (pair) app.admit_prebuilt_asset(pair[0], pair[1]);
+      }
     });
+
+    let dragging = false, moved = false, lastX = 0, lastY = 0;
+    hudCanvas.addEventListener('pointerdown', e => {
+      dragging = true;
+      moved = false;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      hudCanvas.setPointerCapture(e.pointerId);
+    });
+    hudCanvas.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      if (Math.hypot(dx, dy) > 4) moved = true;
+      if (moved) {
+        app.on_orbit(dx, dy);
+        lastX = e.clientX;
+        lastY = e.clientY;
+      }
+    });
+    hudCanvas.addEventListener('pointerup', e => {
+      if (!dragging) return;
+      dragging = false;
+      if (!moved) {
+        const rect = hudCanvas.getBoundingClientRect();
+        app.on_pointer_click(e.clientX - rect.left, e.clientY - rect.top, hudCanvas.width, hudCanvas.height);
+      }
+    });
+    hudCanvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      app.on_zoom(e.deltaY);
+    }, { passive: false });
+
+    window.addEventListener('keydown', e => {
+      if (e.keyCode === 9) e.preventDefault();
+      app.on_key_down(e.keyCode || 0);
+    });
+    window.addEventListener('keyup', e => app.on_key_up(e.keyCode || 0));
+
+    let lastTime = performance.now();
+    function frame(now) {
+      syncSize();
+      const dt = Math.min(50, Math.max(1, now - lastTime));
+      lastTime = now;
+      app.tick(sceneCanvas, dt, hudCanvas.width, hudCanvas.height);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   </script>
 </body>
 </html>

@@ -2,10 +2,15 @@ $ErrorActionPreference = 'Stop'
 $repo = Resolve-Path (Join-Path $PSScriptRoot '..')
 $crate = Join-Path $repo 'crates\rolling-commons-shell'
 $qualia = Join-Path $repo '..\qualiaDB'
-$wasmBindgenVersion = '0.2.125'
+$wasmBindgenVersion = '0.2.129'
 $wasmBindgenRoot = Join-Path $repo 'target\wasm-bindgen-cli'
 $wasmBindgenBin = Join-Path $wasmBindgenRoot 'bin'
 $wasmBindgenExe = Join-Path $wasmBindgenBin 'wasm-bindgen.exe'
+$cachedWasmPackBindgen = 'C:\Users\tim_h\AppData\Local\.wasm-pack\wasm-bindgen-ba0b07921e305a69\wasm-bindgen.exe'
+if (Test-Path -LiteralPath $cachedWasmPackBindgen) {
+    $wasmBindgenExe = $cachedWasmPackBindgen
+    $wasmBindgenBin = Split-Path -Parent $cachedWasmPackBindgen
+}
 $expected = (Get-Content -LiteralPath (Join-Path $repo 'qualia.ref') -Raw).Trim()
 $actual = (git -c safe.directory=C:/github/qualiaDB -C $qualia rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0 -or $actual -ne $expected) {
@@ -31,17 +36,17 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
 }
 Push-Location $repo
 try {
-    # Use an absolute crate path: wasm-pack compares Cargo metadata paths, and
-    # this checkout cannot canonicalize sandboxed Windows roots reliably.
-    wasm-pack build $crate --target web --out-dir ../../web/pkg --release --mode no-install
-    if ($LASTEXITCODE -ne 0) { throw 'wasm-pack failed' }
+    cargo build --offline -p rolling-commons-shell --target wasm32-unknown-unknown --release
+    if ($LASTEXITCODE -ne 0) { throw 'cargo build rolling-commons-shell failed' }
+    & $wasmBindgenExe --target web --typescript --out-dir web/pkg --out-name rolling_commons_shell target/wasm32-unknown-unknown/release/rolling_commons_shell.wasm
+    if ($LASTEXITCODE -ne 0) { throw 'wasm-bindgen failed' }
     $pkgIgnore = Join-Path $repo 'web/pkg/.gitignore'
     if (Test-Path -LiteralPath $pkgIgnore) { Remove-Item -LiteralPath $pkgIgnore }
     node scripts/export-game-assets.mjs
     if ($LASTEXITCODE -ne 0) { throw 'asset export failed' }
     # Semantic section is authored by taxon-bindings.vibe; pack-export
     # evaluates it natively, embeds sem/taxonomy.q42, and repacks the HMCs.
-    cargo run --locked -p pack-export --bin pack-export -- --all
+    cargo run --offline --locked -p pack-export --bin pack-export -- --all
     if ($LASTEXITCODE -ne 0) { throw 'pack-export failed' }
 } finally {
     Pop-Location

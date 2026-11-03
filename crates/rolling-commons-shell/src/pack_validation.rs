@@ -150,7 +150,7 @@ pub fn verify_game_pack(bytes: &[u8]) -> Result<u32, String> {
     Ok(reader.entries().len() as u32)
 }
 
-fn verify_10d_asset(bytes: &[u8]) -> Result<Vec<MaterialRecord>, String> {
+pub(crate) fn verify_10d_asset(bytes: &[u8]) -> Result<Vec<MaterialRecord>, String> {
     let header = Container10dHeader::parse(bytes).map_err(|error| format!("header: {error:?}"))?;
     let actual_crc = compute_whole_file_crc32c(bytes);
     if actual_crc != header.header_crc32c {

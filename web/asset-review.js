@@ -25,7 +25,9 @@ let lastAuditReceipt = null;
 let localModelSet = null, localModelFiles = null;
 let lastLocalReceipt = null;
 let localAnimationPlaying = false;
+let localAnimationGeneration = 0;
 let localModelRemoteBase = null;
+let candidateFile = null, candidateBytes = null, candidateInspection = null, candidateReceipt = null;
 
 const run = (name, input) => invokeVibe(module, program, name, input);
 const report = error => text('status', error.message || String(error));
@@ -93,11 +95,14 @@ async function playLocalAnimation() {
   const sequence = localModelSet?.animations?.find(row => row.id === $('local-animation').value);
   if (!sequence || localAnimationPlaying) return;
   localAnimationPlaying = true;
+  const animationGeneration = ++localAnimationGeneration;
   $('local-animation-play').disabled = true;
   try {
     for (const frame of sequence.frames) {
+      if (animationGeneration !== localAnimationGeneration) return;
       $('local-model').value = frame.model;
       await loadLocalModel();
+      if (animationGeneration !== localAnimationGeneration) return;
       const status = $('local-model-status').textContent;
       if (!status.includes('verified and rendered.')) throw new Error(status);
       text('local-animation-status', `${sequence.label}: ${frame.model} · ${sequence.evidence}`);
@@ -106,8 +111,10 @@ async function playLocalAnimation() {
   } catch (error) {
     text('local-animation-status', error.message || String(error));
   } finally {
-    localAnimationPlaying = false;
-    $('local-animation-play').disabled = !localModelSet?.animations?.length;
+    if (animationGeneration === localAnimationGeneration) {
+      localAnimationPlaying = false;
+      $('local-animation-play').disabled = !localModelSet?.animations?.length;
+    }
   }
 }
 
@@ -269,8 +276,99 @@ async function loadLocalModel() {
 const begin = () => {
   controller?.abort();
   controller = new AbortController();
+  candidateReceipt = null;
+  $('candidate-download').disabled = true;
   return { generation: ++generation, signal: controller.signal };
 };
+
+async function openCandidateFile() {
+  ++localAnimationGeneration; localAnimationPlaying = false;
+  $('local-animation-play').disabled = !localModelSet?.animations?.length;
+  const job = begin();
+  const file = $('candidate-file').files[0];
+  candidateFile = null; candidateBytes = null; candidateInspection = null;
+  $('candidate-asset').replaceChildren(); $('candidate-asset').disabled = true;
+  $('candidate-load').disabled = true;
+  text('candidate-receipt', 'No verified candidate loaded.');
+  if (!file) { text('candidate-status', 'Choose a candidate file.'); return; }
+  try {
+    if (!/\.(hmc|10d)$/i.test(file.name) || file.size === 0 || file.size > 32 * 1024 * 1024) {
+      throw new Error('Choose a .hmc or .10d file of at most 32 MiB.');
+    }
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if (job.generation !== generation) return;
+    const isBundle = /\.hmc$/i.test(file.name);
+    const inspected = module.inspect_candidate_import(bytes, isBundle, '');
+    const digest = await sha256(bytes);
+    if (job.generation !== generation) return;
+    if (inspected.receipt.input_sha256 !== digest) throw new Error('Candidate input digest changed.');
+    candidateFile = file; candidateBytes = bytes; candidateInspection = inspected.receipt;
+    options('candidate-asset', [{value:'',label:'Choose a .10d resource'},
+      ...candidateInspection.assets.map(row => ({value:row.key,label:`${row.key} (${row.bytes} bytes)`}))]);
+    $('candidate-asset').disabled = false;
+    text('candidate-receipt', candidateInspection);
+    text('candidate-status', 'Container and resource digests checked. Select an explicit .10d to inspect; mesh compatibility is checked at load.');
+  } catch (error) {
+    if (job.generation === generation) text('candidate-status', error.message || String(error));
+  }
+}
+
+async function loadCandidateAsset() {
+  const bytes = candidateBytes, file = candidateFile, key = $('candidate-asset').value;
+  if (!bytes || !file || !key) return;
+  ++localAnimationGeneration; localAnimationPlaying = false;
+  $('local-animation-play').disabled = !localModelSet?.animations?.length;
+  const job = begin(); $('candidate-load').disabled = true;
+  try {
+    const result = module.inspect_candidate_import(bytes, /\.hmc$/i.test(file.name), key);
+    const selectedEntry = result.receipt.assets.find(row => row.key === key);
+    const digest = await sha256(result.bytes);
+    if (job.generation !== generation) return;
+    if (!selectedEntry || selectedEntry.sha256 !== digest) throw new Error('Selected candidate resource digest changed.');
+    // The renderer can replace its scene before returning/refusing. Retire all
+    // old evidence before that mutation, including if the load later fails.
+    if (Array.isArray(selected?.panels)) {
+      panels(selected.panels.map(row => ({...row,value:'Not assessed for this imported candidate.'})));
+    }
+    for (const id of ['ontology-kv','ontology-realm-badge','callout-realm-pill','callout-realm-desc',
+      'geometry-tiers-kv','spectral-kv','audio-status','rdf-kv','local-graph-status']) {
+      text(id, 'Not assessed for this imported candidate.');
+    }
+    for (const band of ['blue','green','red','nir']) {
+      text(`spec-${band}-val`, 'unassessed'); $(`spec-${band}-bar`).style.width = '0%';
+    }
+    $('rdf-statements').querySelector('tbody').replaceChildren();
+    $('local-graph-claims').replaceChildren(); $('local-graph-gaps').replaceChildren();
+    $('render-key').value = ''; $('render-key').disabled = true;
+    selected = null; evidence = null; rdf = null; loadedFile = '';
+    resetAuditState(); invalidateLocalReceipt(); $('download').disabled = true;
+    text('audit-status-badge', 'audit: candidate checks only');
+    for (const id of ['load-receipt','renderer-kv','engine-report','entity-report','verify-claims']) text(id, 'No current candidate viewport evidence.');
+    for (let i = 1; i <= 5; i++) {
+      $(`gate-card-${i}`)?.classList.remove('passed','failed'); text(`gate-${i}-pill`, 'NOT RUN');
+    }
+    text('candidate-receipt', 'No verified viewport receipt: candidate load pending.');
+    text('scene-label', 'Candidate viewport update pending');
+    portal.set_preserve_authored_frame(false);
+    const load = plain(portal.load_assets_colored([{bytes:result.bytes,id:1,r:1,g:1,b:1,a:1}]));
+    if (load?.assets_loaded !== 1 || load?.assets_refused !== 0) {
+      throw new Error('Viewport did not admit exactly the selected candidate; no successful load receipt recorded.');
+    }
+    portal.tick($('scene'), 0);
+    loadedFile = `candidate: ${file.name} / ${key}`;
+    candidateReceipt = {...result.receipt, selected_sha256:digest, input_filename:file.name,
+      wasm:wasmEvidence, load, renderer:plain(portal.scene_render_receipt()),
+      acceptance:'unreviewed candidate; no source/master or game-release acceptance'};
+    text('candidate-receipt', candidateReceipt); text('scene-label', loadedFile);
+    text('candidate-status', 'Exact selected candidate passed the bounded game mesh checks and was submitted to the viewport. Visual and game-use acceptance remain open.');
+    $('candidate-download').disabled = false;
+    if (!rendering) { rendering = true; requestAnimationFrame(tick); }
+  } catch (error) {
+    if (job.generation === generation) text('candidate-status', error.message || String(error));
+  } finally {
+    if (job.generation === generation) $('candidate-load').disabled = !candidateBytes || !$('candidate-asset').value;
+  }
+}
 
 function options(id, rows) {
   const el = $(id);
@@ -807,6 +905,22 @@ async function start() {
   }
   portal = new module.QualiaPortal($('scene'));
   text('renderer-badge', `Tier ${portal.tier()}`);
+  if (typeof module.inspect_candidate_import === 'function') {
+    $('candidate-file').disabled = false;
+    $('candidate-file').onchange = openCandidateFile;
+    $('candidate-asset').onchange = () => {
+      begin();
+      $('candidate-load').disabled = !candidateBytes || !$('candidate-asset').value;
+      text('candidate-receipt', candidateInspection || 'No candidate selected.');
+    };
+    $('candidate-load').onclick = loadCandidateAsset;
+    $('candidate-download').onclick = () => {
+      if (candidateReceipt) downloadJsonNamed(candidateReceipt, 'candidate-import-receipt.json');
+    };
+    text('candidate-status', 'Choose a local .hmc or .10d candidate.');
+  } else {
+    text('candidate-status', 'Candidate import requires the matching updated WASM build; the current catalogue remains available.');
+  }
 
   portal.set_ambient_enabled(false);
   portal.set_tensor_projection_enabled(false);

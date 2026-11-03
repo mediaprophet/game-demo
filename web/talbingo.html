@@ -689,11 +689,20 @@ function step(dt){
 
 function openInspector(scaleId = 1) {
  let spec = null;
+ let meta3d = null;
  if (m && m.talbingo_specimen_dissection_json) {
   try {
    spec = JSON.parse(m.talbingo_specimen_dissection_json(site, scaleId));
   } catch (e) {
    console.warn('Dissection json error:', e);
+  }
+ }
+ if (portal && portal.load_dissection_scale) {
+  try {
+   const res3d = toObj(portal.load_dissection_scale(scaleId, 0.25, 0.50, 0.75, 0.35, site % 5));
+   meta3d = res3d && res3d.meta ? toObj(res3d.meta) : null;
+  } catch (e) {
+   console.warn('3D dissection load notice:', e);
   }
  }
  if (!spec) return;
@@ -704,10 +713,13 @@ function openInspector(scaleId = 1) {
   t.style.color = active ? '#080d12' : '#f1f5f9';
  });
 
+ const meshBadge = meta3d
+  ? `<span class="pill pill-green" style="font-size:10px;margin-left:6px;">3D .10d Twin: ${Number(meta3d.vertex_count || 0).toLocaleString()} verts · ${Number(meta3d.triangle_count || 0).toLocaleString()} tris</span>`
+  : '';
  let html = `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(0,240,255,0.08);border-left:3px solid #00f0ff;border-radius:6px;">
-  <div style="display:flex;justify-content:space-between;align-items:center;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
    <h3 style="color:#00f0ff;margin:0;font-size:1.1rem;">${spec.title}</h3>
-   <span class="pill pill-gold" style="font-size:10px;">${spec.spatial_domain}</span>
+   <div><span class="pill pill-gold" style="font-size:10px;">${spec.spatial_domain}</span>${meshBadge}</div>
   </div>
   <div style="color:#90b4cb;font-size:0.82rem;margin-top:2px;">Primary Taxon: <strong style="color:#38bdf8">${spec.primary_taxon}</strong></div>
   <div style="color:#cbd5e1;font-size:0.86rem;margin-top:4px;">${spec.biological_system}</div>
@@ -762,12 +774,18 @@ $('inspect').onclick=()=>{
 };
 
 // Journal, Settings & Inspector Modal bindings:
+function closeInspectorModal(){
+ $('inspector-modal').style.display='none';
+ if(portal && scene && scene.assets && scene.textures){
+  try { portal.load_scene_textured(scene.assets, scene.textures); applyCamera(); } catch(e){}
+ }
+}
 $('open-inspector-btn').onclick=()=>{ openInspector(1); };
-$('close-inspector-btn').onclick=()=>{ $('inspector-modal').style.display='none'; };
+$('close-inspector-btn').onclick=closeInspectorModal;
 document.querySelectorAll('.scale-tab').forEach(b => {
  b.onclick = () => openInspector(Number(b.dataset.scale));
 });
-$('inspector-modal').onclick=e=>{ if(e.target===$('inspector-modal')) $('inspector-modal').style.display='none'; };
+$('inspector-modal').onclick=e=>{ if(e.target===$('inspector-modal')) closeInspectorModal(); };
 
 $('open-journal-btn').onclick=()=>{updateJournal();$('journal-modal').style.display='flex';};
 $('close-journal-btn').onclick=()=>{$('journal-modal').style.display='none';};

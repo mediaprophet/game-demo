@@ -51,22 +51,24 @@ pub fn elevation(site: u8, x: f32, z: f32) -> f32 {
 
     // Hermite transition from campsite center (R <= 16m)
     // into continuous surrounding Kosciuszko alpine ridgelines without edge void or clamping.
+    let micro = 0.028 * (0.92 * x + 0.64 * z).sin() * (1.12 * z - 0.48 * x).cos();
     let r = ((x - 8.2).powi(2) + z.powi(2)).sqrt();
     if r <= 16.0 {
-        local
+        local + micro * (r / 16.0).clamp(0.15, 1.0)
     } else {
         let t = ((r - 16.0) / 40.0).clamp(0.0, 1.0);
         let hermite = t * t * (3.0 - 2.0 * t);
         let ridge = 0.65 + 0.045 * r + 0.85 * (0.12 * x).sin() * (0.12 * z).cos()
-            + 0.35 * (0.045 * x).sin() * (0.045 * z).sin();
+            + 0.35 * (0.045 * x).sin() * (0.045 * z).sin()
+            + micro * 1.4;
         (1.0 - hermite) * local + hermite * ridge
     }
 }
 
 /// Builds the continuous watertight terrain heightfield asset recipe for a sector.
 pub fn build_terrain_asset(site: u8) -> AssetRecipe {
-    let cols = 48;
-    let rows = 36;
+    let cols = 96;
+    let rows = 72;
     let min_x = -24.0;
     let max_x = 40.0;
     let min_z = -22.0;

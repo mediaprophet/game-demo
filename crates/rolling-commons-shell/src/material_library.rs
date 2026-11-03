@@ -13,7 +13,7 @@ use std::cell::RefCell;
 use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
 
-const SIDE: u32 = 128;
+const SIDE: u32 = 256;
 struct SurfaceSet {
     digests: [[u8; 32]; 3],
 }
@@ -31,15 +31,16 @@ thread_local! { static LIBRARY: RefCell<Library> = RefCell::new(Library::default
 
 fn parameters(family: &str) -> SurfaceRecipe {
     let (contrast, relief, bands, strength) = match family {
-        "weathered-timber" => (0.22, 0.003, [18, 1], 0.72),
-        "soil-and-gravel" => (0.20, 0.004, [0, 0], 0.0),
-        "weathered-concrete" => (0.10, 0.0015, [0, 0], 0.0),
-        "cloth-and-skin" | "shade-canvas" => (0.06, 0.0005, [32, 32], 0.42),
-        "living-foliage" => (0.09, 0.0003, [0, 12], 0.28),
-        "rubber" => (0.06, 0.001, [24, 2], 0.30),
-        "terracotta" | "lime-render" => (0.10, 0.001, [0, 0], 0.0),
-        "fur-and-hide" => (0.08, 0.0005, [0, 20], 0.30),
-        _ => (0.035, 0.00015, [0, 0], 0.0),
+        "weathered-timber" => (0.24, 0.0038, [22, 2], 0.76),
+        "soil-and-gravel" => (0.23, 0.0045, [4, 3], 0.18),
+        "weathered-concrete" => (0.13, 0.0020, [2, 2], 0.10),
+        "cloth-and-skin" | "shade-canvas" => (0.08, 0.0008, [36, 36], 0.46),
+        "living-foliage" => (0.12, 0.0006, [3, 16], 0.34),
+        "rubber" => (0.08, 0.0014, [28, 3], 0.36),
+        "terracotta" | "lime-render" => (0.14, 0.0016, [2, 4], 0.14),
+        "fur-and-hide" => (0.11, 0.0009, [2, 24], 0.36),
+        "solar-silicon" => (0.07, 0.0005, [16, 16], 0.48),
+        _ => (0.05, 0.0003, [0, 0], 0.0),
     };
     SurfaceRecipe {
         seed: qualia_core_db::q_hash(family) as u32,
