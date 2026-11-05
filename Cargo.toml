@@ -5,9 +5,9 @@ members = ["crates/rolling-commons-shell", "crates/pack-export"]
 [workspace.dependencies]
 # Full local QualiaDB engine. The verified checkout revision is recorded in
 # docs/planning/15-living-qualiadb-capability-ledger.md and docs/adr/0001.
-qualia-core-db = { path = "../qualiaDB/crates/qualia-core-db", default-features = false }
-qualia-geospatial = { path = "../qualiaDB/crates/qualia-geospatial" }
-qualia-sim = { path = "../qualiaDB/crates/qualia-sim" }
+qualia-core-db = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration", default-features = false }
+qualia-geospatial = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration" }
+qualia-sim = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration" }
 
 # Versions must match the qualiaDB workspace pins (wasm-bindgen is ABI-exact).
 wasm-bindgen = "=0.2.129"
@@ -22,5 +22,5 @@ opt-level = "s"
 lto = true
 
 [patch.crates-io]
-wgpu = { path = "../etalon/compat/wgpu" }
-naga = { path = "../etalon/naga" }
+wgpu = { git = "https://github.com/mediaprophet/etalon.git", branch = "qualiadb-migration" }
+naga = { git = "https://github.com/mediaprophet/etalon.git", branch = "qualiadb-migration" }
